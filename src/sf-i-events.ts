@@ -32,6 +32,13 @@ DB: partitionKey, rangeKey, values
  */
 @customElement('sf-i-events')
 export class SfIEvents extends LitElement {
+
+  TAB_YEAR = "year";
+  TAB_STREAM = "stream";
+  TAB_UPCOMING = "upcoming";
+  TAB_THIS = "this";
+  TAB_PAST = "past";
+  TAB_CUSTOM = "custom";
   
   @property()
   apiIdList!: string;
@@ -148,6 +155,26 @@ export class SfIEvents extends LitElement {
       width: 90%;
     }
 
+    #stream-container {
+      padding: 2%;
+    }
+
+    #custom-container {
+      padding: 2%;
+    }
+
+    #upcoming-container {
+      padding: 2%;
+    }
+
+    #this-container {
+      padding: 2%;
+    }
+
+    #past-container {
+      padding: 2%;
+    }
+
     .stream-event-list {
       margin-left: 10px;
       padding: 10px;
@@ -170,6 +197,16 @@ export class SfIEvents extends LitElement {
       padding-top: 5px;
       padding-bottom: 5px;
       color: #aaa;
+      font-size: 80%;
+    }
+
+    .stream-event-not-selected-hidden {
+      padding-left: 20px;
+      padding-right: 10px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      color: #aaa;
+      line-height: 0.05;
     }
 
     .stream-month-selected {
@@ -217,6 +254,11 @@ export class SfIEvents extends LitElement {
       margin-bottom: 20px;
     }
 
+    .title-item-date {
+      padding-right: 5px;
+      margin-bottom: 20px;
+    }
+
     .calendar-item {
       width: 90%;
       margin-bottom: 20px;
@@ -224,6 +266,15 @@ export class SfIEvents extends LitElement {
 
     .td-head {
       text-transform: capitalize;
+    }
+
+    .tab-button {
+      padding: 10px;
+      padding-left: 15px;
+      padding-right: 15px;
+      font-size: 105%;
+      margin-left: 5px;
+      margin-right: 5px;
     }
 
     .td-body {
@@ -418,15 +469,14 @@ export class SfIEvents extends LitElement {
 
       .calendar-item {
         width: 20%;
-        margin: 1%;
-        padding: 1.5%;
+        margin: 2%;
+        padding: 1%;
       }
 
     }
 
   `;
   
-
   @query('.div-row-error')
   _SfRowError: any;
 
@@ -447,6 +497,24 @@ export class SfIEvents extends LitElement {
 
   @query('#stream-container')
   _SfStreamContainer: any;
+
+  @query('#upcoming-container')
+  _SfUpcomingContainer: any;
+
+  @query('#this-container')
+  _SfThisContainer: any;
+
+  @query('#past-container')
+  _SfPastContainer: any;
+
+  @query('#custom-container')
+  _SfCustomContainer: any;
+
+  @query('#stream-event-status')
+  _SfStreamEventStatus: any;
+
+  @query('#tab-container')
+  _SfTabContainer: any;
 
   getEventField = (field: string) => {
 
@@ -530,16 +598,58 @@ export class SfIEvents extends LitElement {
     return "";
   }
 
-  enableStream(value: boolean) {
+  enableCalendar = () => {
+    (this._SfCalendarContainer as HTMLDivElement).style.display = 'flex';
+    (this._SfStreamContainer as HTMLDivElement).style.display = 'none';
+    (this._SfUpcomingContainer as HTMLDivElement).style.display = 'none';
+    (this._SfThisContainer as HTMLDivElement).style.display = 'none';
+    (this._SfPastContainer as HTMLDivElement).style.display = 'none';
+    (this._SfCustomContainer as HTMLDivElement).style.display = 'none';
+  }
 
-    if(value) {
+  enableStream = () => {
       (this._SfCalendarContainer as HTMLDivElement).style.display = 'none';
       (this._SfStreamContainer as HTMLDivElement).style.display = 'flex';
-    } else {
-      (this._SfCalendarContainer as HTMLDivElement).style.display = 'flex';
-      (this._SfStreamContainer as HTMLDivElement).style.display = 'none';
-    }
+      (this._SfUpcomingContainer as HTMLDivElement).style.display = 'none';
+      (this._SfThisContainer as HTMLDivElement).style.display = 'none';
+      (this._SfPastContainer as HTMLDivElement).style.display = 'none';
+      (this._SfCustomContainer as HTMLDivElement).style.display = 'none';
+  }
 
+  enableUpcoming() {
+    (this._SfCalendarContainer as HTMLDivElement).style.display = 'none';
+    (this._SfStreamContainer as HTMLDivElement).style.display = 'none';
+    (this._SfUpcomingContainer as HTMLDivElement).style.display = 'flex';
+    (this._SfThisContainer as HTMLDivElement).style.display = 'none';
+    (this._SfPastContainer as HTMLDivElement).style.display = 'none';
+    (this._SfCustomContainer as HTMLDivElement).style.display = 'none';
+  }
+
+  enableThis() {
+    (this._SfCalendarContainer as HTMLDivElement).style.display = 'none';
+    (this._SfStreamContainer as HTMLDivElement).style.display = 'none';
+    (this._SfUpcomingContainer as HTMLDivElement).style.display = 'none';
+    (this._SfThisContainer as HTMLDivElement).style.display = 'flex';
+    (this._SfPastContainer as HTMLDivElement).style.display = 'none';
+    (this._SfCustomContainer as HTMLDivElement).style.display = 'none';
+  }
+
+  enablePast() {
+    (this._SfCalendarContainer as HTMLDivElement).style.display = 'none';
+    (this._SfStreamContainer as HTMLDivElement).style.display = 'none';
+    (this._SfUpcomingContainer as HTMLDivElement).style.display = 'none';
+    (this._SfThisContainer as HTMLDivElement).style.display = 'none';
+    (this._SfPastContainer as HTMLDivElement).style.display = 'flex';
+    (this._SfCustomContainer as HTMLDivElement).style.display = 'none';
+  }
+
+  enableCustom() {
+    (this._SfCalendarContainer as HTMLDivElement).style.display = 'none';
+    (this._SfStreamContainer as HTMLDivElement).style.display = 'none';
+    (this._SfUpcomingContainer as HTMLDivElement).style.display = 'none';
+    (this._SfThisContainer as HTMLDivElement).style.display = 'none';
+    (this._SfPastContainer as HTMLDivElement).style.display = 'none';
+    (this._SfCustomContainer as HTMLDivElement).style.display = 'flex';
   }
 
   prepareXhr = async (data: any, url: string, loaderElement: any, authorization: any) => {
@@ -578,9 +688,37 @@ export class SfIEvents extends LitElement {
     return date.getDate()
   }
 
-  getLastDayOfMonth = (month: number, year: number) => {
+  getLastDayOfMonth = (month: number, year: number): number => {
     const date = new Date(year, month + 1, 0);
     return date.getDate()
+  }
+
+  getFirstDateOfLastWeek = (startDate: Date) : Date => {
+
+    const sd = new Date(startDate.getTime());
+    var first = sd.getDate() - sd.getDay();
+    var firstday = new Date(sd.setDate(first));
+    for(var i = 0; i < 7; i++) {
+      firstday.setDate(firstday.getDate() - 1);
+    }
+    return firstday;
+
+  }
+
+  getFirstDayOfLastMonth(yourDate: Date) {
+    var d = new Date(yourDate);
+    d.setDate(1);
+    d.setMonth(d.getMonth() - 1);
+    return d;
+}
+  
+  getFirstDateOfWeek = (startDate: Date) : Date => {
+
+    const sd = new Date(startDate.getTime());
+    var first = sd.getDate() - sd.getDay();
+    var firstday = new Date(sd.setDate(first));
+    return firstday;
+
   }
 
   getBlanks = (month: number, year: number) => {
@@ -692,13 +830,49 @@ export class SfIEvents extends LitElement {
 
     var html = '<div id="stream-event-'+index+'" part="stream-event-list" class="stream-event-list">';
 
+    var total = 0;
+
     for(var i = 1; i <= lastDay; i++) {
 
       const mmdd = ("0" + (month+1)).slice(-2) + "/" + ("0" + i).slice(-2);
       if(this.events[mmdd] != null) {
+        total++;
+      }
+
+    }
+
+    html += '<div id="stream-event-summary" part="stream-event-total">';
+    html += 'Total: <strong>'+total+'</strong>';
+    html += '</div>';
+
+    for(i = 1; i <= lastDay; i++) {
+
+      const mmdd = ("0" + (month+1)).slice(-2) + "/" + ("0" + i).slice(-2);
+
+      var hide = true;
+
+      if(this.events[mmdd] != null) {
+        hide = false;
+      } else if(i === 1){
+        hide = false;
+      } else if(i === lastDay){
+        hide = false;
+      } else {
+        const mmddPrev = ("0" + (month+1)).slice(-2) + "/" + ("0" + (i-1)).slice(-2);
+        const mmddNext = ("0" + (month+1)).slice(-2) + "/" + ("0" + (i+1)).slice(-2);
+        console.log('hide', i, hide);
+        if((this.events[mmddPrev] != null || this.events[mmddNext] != null)) {
+          hide = false;
+        }
+      }
+
+      console.log('hide', i, hide);
+
+      if(this.events[mmdd] != null) {
+        total++;
         //html += '<div>'+month + ',' + year + ',' + i+'</div>'
         html += '<div part="stream-event-selected" class="d-flex stream-event-selected">';
-          html += '<div>'+("0" + i).slice(-2)+' |</div>';
+          html += '<div part="stream-event-selected-date">'+("0" + i).slice(-2)+' |</div>';
           for(var j = 0; j < (this.events[mmdd] as Array<any>).length; j++) {
             html += '<div class="stream-events-container flex-grow">';
               html += '<table>';
@@ -726,9 +900,16 @@ export class SfIEvents extends LitElement {
           }
         html += '</div>';
       } else {
-        html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected">';
-        html += '<div>'+("0" + i).slice(-2)+' | ---</div>';
-        html += '</div>';
+        if(!hide) {
+          html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected">';
+          html += '<div>'+("0" + i).slice(-2)+'</div>';
+          html += '</div>';
+        } else {
+          html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected-hidden">';
+          //html += '<div>'+("0" + i).slice(-2)+' |</div>';
+          html += '<div>.</div>';
+          html += '</div>';
+        }
       }
       
 
@@ -738,6 +919,687 @@ export class SfIEvents extends LitElement {
 
     return html;
 
+  }
+
+  renderUpcomingEvents = (index:number, startDate: Date, count: number) => {
+
+    var html = '<div id="stream-event-'+index+'" part="stream-event-list" class="stream-event-list">';
+
+    for(var i = 1; i <= count; i++) {
+
+      const mmdd = ("0" + (startDate.getMonth()+1)).slice(-2) + "/" + ("0" + startDate.getDate()).slice(-2);
+
+      var hide = true;
+
+      if(this.events[mmdd] != null) {
+        hide = false;
+      } else if(i === 1){
+        hide = false;
+      } else if(i === (count)){
+        hide = false;
+      } else {
+
+        const startNextDate = new Date(startDate.getTime());
+        startNextDate.setDate(startDate.getDate() + 1);
+
+        const startPrevDate = new Date(startDate.getTime());
+        startPrevDate.setDate(startDate.getDate() - 1);
+
+        const mmddNext = ("0" + (startNextDate.getMonth()+1)).slice(-2) + "/" + ("0" + (startNextDate.getDate())).slice(-2);
+        const mmddPrev = ("0" + (startPrevDate.getMonth()+1)).slice(-2) + "/" + ("0" + (startPrevDate.getDate())).slice(-2);
+        console.log('hide', i, hide, startNextDate, startPrevDate, mmddNext, mmddPrev);
+        if((this.events[mmddPrev] != null || this.events[mmddNext] != null)) {
+          hide = false;
+        }
+      }
+
+      if(this.events[mmdd] != null) {
+
+        html += '<div part="stream-event-selected" class="d-flex stream-event-selected">';
+          html += '<div part="stream-event-selected-date">'+("0" + startDate.getDate()).slice(-2)+'/'+(startDate.getMonth()+1)+' |</div>';
+          for(var j = 0; j < (this.events[mmdd] as Array<any>).length; j++) {
+            html += '<div class="stream-events-container flex-grow">';
+              html += '<table>';
+              html += '<thead>';
+              for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                html += '<th part="td-head">';
+                html += Object.keys(this.events[mmdd][j])[k];
+                html += '</th>';
+              }
+              html += '</thead>';
+              html += '<tbody>';
+              for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                html += '<th part="td-body">';
+                if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                  html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                } else {
+                  html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                }
+                
+                html += '</th>';
+              }
+              html += '</tbody>';
+              html += '</table>';
+            html += '</div>';
+          }
+        html += '</div>';
+
+      } else {
+
+        if(!hide) {
+          html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected">';
+          html += '<div>'+("0" + startDate.getDate()).slice(-2)+'/'+(startDate.getMonth()+1)+'</div>';
+          html += '</div>';
+        } else {
+          html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected-hidden">';
+          //html += '<div>'+("0" + i).slice(-2)+' |</div>';
+          html += '<div>.</div>';
+          html += '</div>';
+        }
+
+      }
+
+      startDate.setDate(startDate.getDate() + 1);
+
+    }
+
+    html += '</div>'
+
+    return html;
+
+  }
+
+  renderThisEvents = (index: number, startDate: Date) => {
+
+    var html = '<div id="stream-event-'+index+'" part="stream-event-list" class="stream-event-list">';
+
+    var firstDate = new Date();
+    var count = 7;
+
+    console.log('this start date', startDate);
+
+    if(index === 0) {
+
+      firstDate = (this.getFirstDateOfWeek(startDate) as Date);
+      console.log('this first date', firstDate);
+      count = 7;
+
+    }
+
+    if(index === 1) {
+
+      firstDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      count = this.getLastDayOfMonth(startDate.getFullYear(), startDate.getMonth());
+
+    }
+
+    for(var i = 1; i <= count; i++) {
+
+      const mmdd = ("0" + (firstDate.getMonth()+1)).slice(-2) + "/" + ("0" + firstDate.getDate()).slice(-2);
+
+      var hide = true;
+
+      if(this.events[mmdd] != null) {
+        hide = false;
+      } else if(i === 1){
+        hide = false;
+      } else if(i === (count)){
+        hide = false;
+      } else {
+
+        const startNextDate = new Date(firstDate.getTime());
+        startNextDate.setDate(firstDate.getDate() + 1);
+
+        const startPrevDate = new Date(firstDate.getTime());
+        startPrevDate.setDate(firstDate.getDate() - 1);
+
+        const mmddNext = ("0" + (startNextDate.getMonth()+1)).slice(-2) + "/" + ("0" + (startNextDate.getDate())).slice(-2);
+        const mmddPrev = ("0" + (startPrevDate.getMonth()+1)).slice(-2) + "/" + ("0" + (startPrevDate.getDate())).slice(-2);
+        console.log('hide', i, hide, startNextDate, startPrevDate, mmddNext, mmddPrev);
+        if((this.events[mmddPrev] != null || this.events[mmddNext] != null)) {
+          hide = false;
+        }
+      }
+
+      if(this.events[mmdd] != null) {
+
+        html += '<div part="stream-event-selected" class="d-flex stream-event-selected">';
+          html += '<div part="stream-event-selected-date">'+("0" + firstDate.getDate()).slice(-2)+'/'+(firstDate.getMonth()+1)+' |</div>';
+          for(var j = 0; j < (this.events[mmdd] as Array<any>).length; j++) {
+            html += '<div class="stream-events-container flex-grow">';
+              html += '<table>';
+              html += '<thead>';
+              for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                html += '<th part="td-head">';
+                html += Object.keys(this.events[mmdd][j])[k];
+                html += '</th>';
+              }
+              html += '</thead>';
+              html += '<tbody>';
+              for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                html += '<th part="td-body">';
+                if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                  html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                } else {
+                  html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                }
+                
+                html += '</th>';
+              }
+              html += '</tbody>';
+              html += '</table>';
+            html += '</div>';
+          }
+        html += '</div>';
+
+      } else {
+
+        if(!hide) {
+          html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected">';
+          html += '<div>'+("0" + firstDate.getDate()).slice(-2)+'/'+(firstDate.getMonth()+1)+'</div>';
+          html += '</div>';
+        } else {
+          html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected-hidden">';
+          //html += '<div>'+("0" + i).slice(-2)+' |</div>';
+          html += '<div>.</div>';
+          html += '</div>';
+        }
+
+      }
+
+      firstDate.setDate(firstDate.getDate() + 1);
+
+    }
+
+    html += '</div>'
+
+    return html;
+
+  }
+
+  renderPastEvents = (index: number, startDate: Date) => {
+
+    var html = '<div id="stream-event-'+index+'" part="stream-event-list" class="stream-event-list">';
+
+    var firstDate = new Date();
+    var count = 7;
+
+    console.log('this start date', startDate, index);
+
+    if(index === 0) {
+
+      firstDate = (this.getFirstDateOfLastWeek(startDate) as Date);
+      console.log('this first date', firstDate);
+      count = 7;
+
+    }
+
+    if(index === 1) {
+
+      firstDate = (this.getFirstDayOfLastMonth(startDate) as Date);
+      count = this.getLastDayOfLastMonth(startDate.getMonth(), startDate.getFullYear());
+
+      console.log('this start date', firstDate);
+      console.log('this start date', count);
+
+    }
+
+    for(var i = 1; i <= count; i++) {
+
+      const mmdd = ("0" + (firstDate.getMonth()+1)).slice(-2) + "/" + ("0" + firstDate.getDate()).slice(-2);
+
+      var hide = true;
+
+      if(this.events[mmdd] != null) {
+        hide = false;
+      } else if(i === 1){
+        hide = false;
+      } else if(i === (count)){
+        hide = false;
+      } else {
+
+        const startNextDate = new Date(firstDate.getTime());
+        startNextDate.setDate(firstDate.getDate() + 1);
+
+        const startPrevDate = new Date(firstDate.getTime());
+        startPrevDate.setDate(firstDate.getDate() - 1);
+
+        const mmddNext = ("0" + (startNextDate.getMonth()+1)).slice(-2) + "/" + ("0" + (startNextDate.getDate())).slice(-2);
+        const mmddPrev = ("0" + (startPrevDate.getMonth()+1)).slice(-2) + "/" + ("0" + (startPrevDate.getDate())).slice(-2);
+        console.log('hide', i, hide, startNextDate, startPrevDate, mmddNext, mmddPrev);
+        if((this.events[mmddPrev] != null || this.events[mmddNext] != null)) {
+          hide = false;
+        }
+      }
+
+      if(this.events[mmdd] != null) {
+
+        html += '<div part="stream-event-selected" class="d-flex stream-event-selected">';
+          html += '<div part="stream-event-selected-date">'+("0" + firstDate.getDate()).slice(-2)+'/'+(firstDate.getMonth()+1)+' |</div>';
+          for(var j = 0; j < (this.events[mmdd] as Array<any>).length; j++) {
+            html += '<div class="stream-events-container flex-grow">';
+              html += '<table>';
+              html += '<thead>';
+              for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                html += '<th part="td-head">';
+                html += Object.keys(this.events[mmdd][j])[k];
+                html += '</th>';
+              }
+              html += '</thead>';
+              html += '<tbody>';
+              for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                html += '<th part="td-body">';
+                if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                  html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                } else {
+                  html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                }
+                
+                html += '</th>';
+              }
+              html += '</tbody>';
+              html += '</table>';
+            html += '</div>';
+          }
+        html += '</div>';
+
+      } else {
+
+        if(!hide) {
+          html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected">';
+          html += '<div>'+("0" + firstDate.getDate()).slice(-2)+'/'+(firstDate.getMonth()+1)+'</div>';
+          html += '</div>';
+        } else {
+          html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected-hidden">';
+          //html += '<div>'+("0" + i).slice(-2)+' |</div>';
+          html += '<div>.</div>';
+          html += '</div>';
+        }
+
+      }
+
+      firstDate.setDate(firstDate.getDate() + 1);
+
+    }
+
+    html += '</div>'
+
+    return html;
+
+  }
+
+  renderRangeEvents = (firstDate: Date, count: number) => {
+
+    var html = '<div id="stream-event-0" part="stream-event-list" class="stream-event-list">';
+
+    for(var i = 1; i <= count; i++) {
+
+      const mmdd = ("0" + (firstDate.getMonth()+1)).slice(-2) + "/" + ("0" + firstDate.getDate()).slice(-2);
+
+      var hide = true;
+
+      if(this.events[mmdd] != null) {
+        hide = false;
+      } else if(i === 1){
+        hide = false;
+      } else if(i === (count)){
+        hide = false;
+      } else {
+
+        const startNextDate = new Date(firstDate.getTime());
+        startNextDate.setDate(firstDate.getDate() + 1);
+
+        const startPrevDate = new Date(firstDate.getTime());
+        startPrevDate.setDate(firstDate.getDate() - 1);
+
+        const mmddNext = ("0" + (startNextDate.getMonth()+1)).slice(-2) + "/" + ("0" + (startNextDate.getDate())).slice(-2);
+        const mmddPrev = ("0" + (startPrevDate.getMonth()+1)).slice(-2) + "/" + ("0" + (startPrevDate.getDate())).slice(-2);
+        console.log('hide', i, hide, startNextDate, startPrevDate, mmddNext, mmddPrev);
+        if((this.events[mmddPrev] != null || this.events[mmddNext] != null)) {
+          hide = false;
+        }
+      }
+
+      if(this.events[mmdd] != null) {
+
+        html += '<div part="stream-event-selected" class="d-flex stream-event-selected">';
+          html += '<div part="stream-event-selected-date">'+("0" + firstDate.getDate()).slice(-2)+'/'+(firstDate.getMonth()+1)+' |</div>';
+          for(var j = 0; j < (this.events[mmdd] as Array<any>).length; j++) {
+            html += '<div class="stream-events-container flex-grow">';
+              html += '<table>';
+              html += '<thead>';
+              for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                html += '<th part="td-head">';
+                html += Object.keys(this.events[mmdd][j])[k];
+                html += '</th>';
+              }
+              html += '</thead>';
+              html += '<tbody>';
+              for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                html += '<th part="td-body">';
+                if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                  html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                } else {
+                  html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                }
+                
+                html += '</th>';
+              }
+              html += '</tbody>';
+              html += '</table>';
+            html += '</div>';
+          }
+        html += '</div>';
+
+      } else {
+
+        if(!hide) {
+          html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected">';
+          html += '<div>'+("0" + firstDate.getDate()).slice(-2)+'/'+(firstDate.getMonth()+1)+'</div>';
+          html += '</div>';
+        } else {
+          html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected-hidden">';
+          //html += '<div>'+("0" + i).slice(-2)+' |</div>';
+          html += '<div>.</div>';
+          html += '</div>';
+        }
+
+      }
+
+      firstDate.setDate(firstDate.getDate() + 1);
+
+    }
+
+
+    html += '</div>';
+
+    (this._SfCustomContainer as HTMLDivElement).querySelector('.calendar-right-data')!.innerHTML = html;
+
+  }
+
+  checkStartDateEarliness = (value: string) => {
+
+    var startDateCalendar = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
+    var startDateChosen = new Date(value);
+
+    if(startDateChosen.getTime() > startDateCalendar.getTime()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  checkEndDateLateness = (value: string) => {
+
+    var endDateCalendar = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + (parseInt(this.calendarStartYYYY) + 1));
+    var endDateChosen = new Date(value);
+
+    console.log('end date calendar', endDateCalendar);
+    console.log('end date chosen', endDateChosen);
+
+    if(endDateChosen.getTime() > endDateCalendar.getTime()) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  processDateSelection = () => {
+
+    var startDateCalendar = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
+    var endDateCalendar = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + (parseInt(this.calendarStartYYYY) + 1));
+
+    const valueStart = ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date') as HTMLInputElement).value;
+    const valueEnd = ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date') as HTMLInputElement).value;
+
+    if(valueStart != "" && valueEnd != "") {
+      this.initCustomRightCol();
+      if(!this.checkStartDateEarliness(valueStart)) {
+        (this._SfStreamEventStatus as HTMLDivElement).innerHTML = "Chosen Start Date cannot be earlier than " + startDateCalendar;
+        return;
+      }
+      if(!this.checkEndDateLateness(valueEnd)) {
+        (this._SfStreamEventStatus as HTMLDivElement).innerHTML = "Chosen End Date cannot be later than " + endDateCalendar;
+        return;
+      }
+      if(new Date(valueStart).getTime() > new Date(valueEnd).getTime()) {
+        (this._SfStreamEventStatus as HTMLDivElement).innerHTML = "Chosen End Date cannot be earlier than chosen Start Date";
+        return;
+      }
+      if((new Date(valueEnd).getTime() - new Date(valueStart).getTime())/(1000*60*60*24) > 90) {
+        (this._SfStreamEventStatus as HTMLDivElement).innerHTML = "Chosen time window cannot be greater than 90 days";
+        return;
+      }
+      this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime())/(1000*60*60*24));
+    } else if(valueStart != "" && valueEnd == "") {
+      (this._SfStreamEventStatus as HTMLDivElement).innerHTML = "Please select End Date";
+    } else if(valueStart == "" && valueEnd != "") {
+      (this._SfStreamEventStatus as HTMLDivElement).innerHTML = "Please select Start Date";
+    } else {
+      (this._SfStreamEventStatus as HTMLDivElement).innerHTML = "Please select Start Date and End Date";
+    }
+
+  }
+
+  initCustomRightCol = () => {
+
+    var html = "";
+
+    html += '<div id="stream-event-0" part="stream-event-list" class="stream-event-list">';
+      html += '<div part="stream-event-not-selected" class="d-flex stream-event-not-selected">';
+      html += '<div><h2 id="stream-event-status">Please select Start Date and End Date</h2></div>';
+      html += '</div>';
+    html += '</div>';
+
+
+    (this._SfCustomContainer as HTMLDivElement).querySelector('.calendar-right-data')!.innerHTML = html
+
+  }
+
+  renderCustom = () => {
+
+    var html = '';
+
+    html += '<div class="d-flex flex-grow">';
+      html += '<div class="d-flex calendar-left-col flex-col align-end">';
+
+        html += '<div class="title-item-date">';
+        html += '<label part="input-label">Start Date</label><br />'
+        html += '<input id="stream-start-date" part="input" type="date" />'
+        html += '</div>';
+        html += '<div class="title-item-date">';
+        html += '<label part="input-label">End Date</label><br />'
+        html += '<input id="stream-end-date" part="input" type="date" />'
+        html += '</div>';
+
+      html += '</div>';
+
+      html += '<div class="calendar-right-data">';
+
+      html += '</div>';
+    html += '</div>';
+
+    (this._SfCustomContainer as HTMLDivElement).innerHTML = html;
+
+    this.initCustomRightCol();
+
+    (this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date')?.addEventListener('change', (ev: any) => {
+      console.log('start-date', ev);
+      this.processDateSelection();
+    });
+
+    (this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date')?.addEventListener('change', (ev: any) => {
+      console.log('end-date', ev);
+      this.processDateSelection();
+    });
+    
+
+    // for(var i = 0; i < 3; i++) {
+    //   (this._SfCustomContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', (ev: any)=> {
+    //     const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
+    //     console.log('clicked ', target);
+    //     this.renderPast(target);
+    //   })
+    // }
+  }
+
+  renderPast = (index: number = 0) => {
+
+    var html = '';
+
+    html += '<div class="d-flex flex-grow">';
+      html += '<div class="calendar-left-col">';
+
+        var part = "";
+        if(index === 0) {
+          part = "stream-month-selected";
+        } else {
+          part = "stream-month-not-selected";
+        }
+        html += '<div part="'+part+'" id="stream-month-0" part="month-title" class="title-item '+part+'">Week</div>';
+
+        part = "";
+        if(index === 1) {
+          part = "stream-month-selected";
+        } else {
+          part = "stream-month-not-selected";
+        }
+        html += '<div part="'+part+'" id="stream-month-1" part="month-title" class="title-item '+part+'">Month</div>';
+
+      html += '</div>';
+      html += '<div class="calendar-right-data">';
+
+      // var startDate = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
+      var startDate = new Date();
+      html += this.renderPastEvents(index, startDate);
+      startDate.setDate(startDate.getDate() + 1);
+        
+      html += '</div>';
+    html += '</div>';
+
+    (this._SfPastContainer as HTMLDivElement).innerHTML = html;
+
+    for(var i = 0; i < 3; i++) {
+      (this._SfPastContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', (ev: any)=> {
+        const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
+        console.log('clicked ', target);
+        this.renderPast(target);
+      })
+    }
+  }
+
+  renderUpcoming = (index: number = 0) => {
+
+    var html = '';
+
+    html += '<div class="d-flex flex-grow">';
+      html += '<div class="calendar-left-col">';
+
+        var part = "";
+        if(index === 0) {
+          part = "stream-month-selected";
+        } else {
+          part = "stream-month-not-selected";
+        }
+        html += '<div part="'+part+'" id="stream-month-0" part="month-title" class="title-item '+part+'">7 Days</div>';
+
+        part = "";
+        if(index === 1) {
+          part = "stream-month-selected";
+        } else {
+          part = "stream-month-not-selected";
+        }
+        html += '<div part="'+part+'" id="stream-month-1" part="month-title" class="title-item '+part+'">30 Days</div>';
+
+        part = "";
+        if(index === 2) {
+          part = "stream-month-selected";
+        } else {
+          part = "stream-month-not-selected";
+        }
+        html += '<div part="'+part+'" id="stream-month-2" part="month-title" class="title-item '+part+'">90 Days</div>';
+
+      html += '</div>';
+      html += '<div class="calendar-right-data">';
+
+       // var startDate = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
+       var startDate = new Date();
+      if(index === 0) {
+        html += this.renderUpcomingEvents(index, startDate, 7);
+        startDate.setDate(startDate.getDate() + 1);
+      }
+
+      if(index === 1) {
+        html += this.renderUpcomingEvents(index, startDate, 30);
+        startDate.setDate(startDate.getDate() + 1);
+      }
+
+      if(index === 2) {
+        html += this.renderUpcomingEvents(index, startDate, 90);
+        startDate.setDate(startDate.getDate() + 1);
+      }
+
+        
+      html += '</div>';
+    html += '</div>';
+
+    (this._SfUpcomingContainer as HTMLDivElement).innerHTML = html;
+
+    for(var i = 0; i < 3; i++) {
+      (this._SfUpcomingContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', (ev: any)=> {
+        const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
+        console.log('clicked ', target);
+        this.renderUpcoming(target);
+
+      })
+    }
+
+  }
+
+  renderThis = (index: number = 0) => {
+
+    var html = '';
+
+    html += '<div class="d-flex flex-grow">';
+      html += '<div class="calendar-left-col">';
+
+        var part = "";
+        if(index === 0) {
+          part = "stream-month-selected";
+        } else {
+          part = "stream-month-not-selected";
+        }
+        html += '<div part="'+part+'" id="stream-month-0" part="month-title" class="title-item '+part+'">Week</div>';
+
+        part = "";
+        if(index === 1) {
+          part = "stream-month-selected";
+        } else {
+          part = "stream-month-not-selected";
+        }
+        html += '<div part="'+part+'" id="stream-month-1" part="month-title" class="title-item '+part+'">Month</div>';
+
+      html += '</div>';
+      html += '<div class="calendar-right-data">';
+
+      // var startDate = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
+      var startDate = new Date();
+      html += this.renderThisEvents(index, startDate);
+      startDate.setDate(startDate.getDate() + 1);
+        
+      html += '</div>';
+    html += '</div>';
+
+    (this._SfThisContainer as HTMLDivElement).innerHTML = html;
+
+    for(var i = 0; i < 3; i++) {
+      (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', (ev: any)=> {
+        const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
+        console.log('clicked ', target);
+        this.renderThis(target);
+
+      })
+    }
   }
 
   renderStream = (index: number = 0) => {
@@ -824,8 +1686,9 @@ export class SfIEvents extends LitElement {
       (this._SfCalendarContainer as HTMLDivElement).querySelector('#calendar-button-' + i)?.addEventListener('click', (ev: any) => {
 
         const id = (ev.target as HTMLButtonElement).id.split("-")[2];
-        this.enableStream(true);
+        this.enableStream();
         this.renderStream(parseInt(id));
+        this.renderTabs(this.TAB_STREAM);
 
       })
 
@@ -833,7 +1696,59 @@ export class SfIEvents extends LitElement {
 
   }
 
+  renderTabs = (selectedTab: string) => {
+
+    var html = '';
+
+    html += '<button class="tab-button" id="calendar-tab-year" part="'+(selectedTab == this.TAB_YEAR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Year</button>';
+    html += '<button class="tab-button" id="calendar-tab-month" part="'+(selectedTab == this.TAB_STREAM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Month</button>';
+    html += '<button class="tab-button" id="calendar-tab-upcoming" part="'+(selectedTab == this.TAB_UPCOMING ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Upcoming</button>';
+    html += '<button class="tab-button" id="calendar-tab-this" part="'+(selectedTab == this.TAB_THIS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Current</button>';
+    html += '<button class="tab-button" id="calendar-tab-past" part="'+(selectedTab == this.TAB_PAST ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Past</button>';
+    html += '<button class="tab-button" id="calendar-tab-custom" part="'+(selectedTab == this.TAB_CUSTOM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Range</button>';
+
+    (this._SfTabContainer as HTMLDivElement).innerHTML = html;
+
+    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-year')?.addEventListener('click', () => {
+      this.enableCalendar();
+      this.renderTabs(this.TAB_YEAR);
+    });
+
+    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-month')?.addEventListener('click', () => {
+      this.enableStream();
+      this.renderTabs(this.TAB_STREAM);
+      this.renderStream();
+    });
+
+    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-upcoming')?.addEventListener('click', () => {
+      this.enableUpcoming();
+      this.renderTabs(this.TAB_UPCOMING);
+      this.renderUpcoming();
+    });
+
+    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-this')?.addEventListener('click', () => {
+      this.enableThis();
+      this.renderTabs(this.TAB_THIS);
+      this.renderThis();
+    });
+
+    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-past')?.addEventListener('click', () => {
+      this.enablePast();
+      this.renderTabs(this.TAB_PAST);
+      this.renderPast();
+    });
+
+    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-custom')?.addEventListener('click', () => {
+      this.enableCustom();
+      this.renderTabs(this.TAB_CUSTOM);
+      this.renderCustom();
+    });
+
+  }
+
   processEvent = (value: any) => {
+
+    this.events == null;
 
     console.log('processing due date', value.duedate.replace(/['"]+/g, ''));
     const duedateArr = value.duedate.replace(/['"]+/g, '').split(",") as Array<string>;
@@ -996,12 +1911,12 @@ export class SfIEvents extends LitElement {
 
   initListeners = () => {
 
-    
+  
   }
 
   loadMode = async () => {
 
-    this.enableStream(false);
+    this.enableCalendar();
     this.initListeners();
     this.initInputs();
     this.initCalendar();
@@ -1011,8 +1926,10 @@ export class SfIEvents extends LitElement {
     await this.fetchList();
     
     if(this.events != null) {
+      this.renderTabs(this.TAB_YEAR);
       this.renderCalendar();
-      this.renderStream();
+      
+      
     }
 
   }
@@ -1041,11 +1958,26 @@ export class SfIEvents extends LitElement {
         <div class="d-flex justify-center">
             <div class="loader-element"></div>
         </div>
+        <div class="d-flex justify-center" id="tab-container">
+
+        </div>
         <div class="d-flex justify-center">
           <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="calendar-container">
             
           </div>
           <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="stream-container">
+            
+          </div>
+          <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="upcoming-container">
+            
+          </div>
+          <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="this-container">
+            
+          </div>
+          <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="past-container">
+            
+          </div>
+          <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="custom-container">
             
           </div>
         </div>
