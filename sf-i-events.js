@@ -2213,6 +2213,9 @@ SfIEvents.styles = css `
       bottom: 10px;
       z-index: 99;
       position: sticky;
+      width: 96%;
+      margin-left: 2%;
+      margin-right: 2%;
     }
 
     .fixed-bottom {
