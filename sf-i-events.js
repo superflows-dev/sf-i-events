@@ -308,22 +308,45 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '<table>';
                         html += '<thead>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                            html += '<th part="td-head">';
-                            html += Object.keys(this.events[mmdd][j])[k];
-                            html += '</th>';
+                            if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                                html += '<th part="td-head" class="bg-left-no-border">';
+                                html += Object.keys(this.events[mmdd][j])[k];
+                                html += '</th>';
+                            }
                         }
+                        html += '<th part="td-head">';
+                        html += '</th>';
+                        // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                        //   html += '<th part="td-head">';
+                        //   html += Object.keys(this.events[mmdd][j])[k];
+                        //   html += '</th>';
+                        // }
                         html += '</thead>';
                         html += '<tbody>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                            html += '<th part="td-body">';
-                            if (this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
-                                html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                            if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                                html += '<td part="td-body">';
+                                if (this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                                    html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                                }
+                                else {
+                                    html += ' <sf-i-elastic-text text="' + this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "") + '" minLength="20"></sf-i-elastic-text>';
+                                }
+                                html += '</td>';
                             }
-                            else {
-                                html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
-                            }
-                            html += '</th>';
                         }
+                        html += '<td id="td-expand-' + i + '" part="td-body">';
+                        html += '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand">open_in_new</button>';
+                        html += '</td>';
+                        // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                        //   html += '<th part="td-body">';
+                        //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                        //     html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                        //   } else {
+                        //     html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                        //   }
+                        //   html += '</th>';
+                        // }
                         html += '</tbody>';
                         html += '</table>';
                         html += '</div>';
@@ -383,22 +406,45 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '<table>';
                         html += '<thead>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                            html += '<th part="td-head">';
-                            html += Object.keys(this.events[mmdd][j])[k];
-                            html += '</th>';
+                            if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                                html += '<th part="td-head" class="bg-left-no-border">';
+                                html += Object.keys(this.events[mmdd][j])[k];
+                                html += '</th>';
+                            }
                         }
+                        html += '<th part="td-head">';
+                        html += '</th>';
+                        // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                        //   html += '<th part="td-head">';
+                        //   html += Object.keys(this.events[mmdd][j])[k];
+                        //   html += '</th>';
+                        // }
                         html += '</thead>';
                         html += '<tbody>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                            html += '<th part="td-body">';
-                            if (this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
-                                html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                            if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                                html += '<td part="td-body">';
+                                if (this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                                    html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                                }
+                                else {
+                                    html += ' <sf-i-elastic-text text="' + this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "") + '" minLength="20"></sf-i-elastic-text>';
+                                }
+                                html += '</td>';
                             }
-                            else {
-                                html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
-                            }
-                            html += '</th>';
                         }
+                        html += '<td id="td-expand-' + i + '" part="td-body">';
+                        html += '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand">open_in_new</button>';
+                        html += '</td>';
+                        // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                        //   html += '<th part="td-body">';
+                        //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                        //     html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                        //   } else {
+                        //     html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                        //   }
+                        //   html += '</th>';
+                        // }
                         html += '</tbody>';
                         html += '</table>';
                         html += '</div>';
@@ -471,22 +517,45 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '<table>';
                         html += '<thead>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                            html += '<th part="td-head">';
-                            html += Object.keys(this.events[mmdd][j])[k];
-                            html += '</th>';
+                            if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                                html += '<th part="td-head" class="bg-left-no-border">';
+                                html += Object.keys(this.events[mmdd][j])[k];
+                                html += '</th>';
+                            }
                         }
+                        html += '<th part="td-head">';
+                        html += '</th>';
+                        // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                        //   html += '<th part="td-head">';
+                        //   html += Object.keys(this.events[mmdd][j])[k];
+                        //   html += '</th>';
+                        // }
                         html += '</thead>';
                         html += '<tbody>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                            html += '<th part="td-body">';
-                            if (this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
-                                html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                            if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                                html += '<td part="td-body">';
+                                if (this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                                    html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                                }
+                                else {
+                                    html += ' <sf-i-elastic-text text="' + this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "") + '" minLength="20"></sf-i-elastic-text>';
+                                }
+                                html += '</td>';
                             }
-                            else {
-                                html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
-                            }
-                            html += '</th>';
                         }
+                        html += '<td id="td-expand-' + i + '" part="td-body">';
+                        html += '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand">open_in_new</button>';
+                        html += '</td>';
+                        // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                        //   html += '<th part="td-body">';
+                        //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                        //     html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                        //   } else {
+                        //     html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                        //   }
+                        //   html += '</th>';
+                        // }
                         html += '</tbody>';
                         html += '</table>';
                         html += '</div>';
@@ -561,22 +630,45 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '<table>';
                         html += '<thead>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                            html += '<th part="td-head">';
-                            html += Object.keys(this.events[mmdd][j])[k];
-                            html += '</th>';
+                            if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                                html += '<th part="td-head" class="bg-left-no-border">';
+                                html += Object.keys(this.events[mmdd][j])[k];
+                                html += '</th>';
+                            }
                         }
+                        html += '<th part="td-head">';
+                        html += '</th>';
+                        // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                        //   html += '<th part="td-head">';
+                        //   html += Object.keys(this.events[mmdd][j])[k];
+                        //   html += '</th>';
+                        // }
                         html += '</thead>';
                         html += '<tbody>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                            html += '<th part="td-body">';
-                            if (this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
-                                html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                            if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                                html += '<td part="td-body">';
+                                if (this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                                    html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                                }
+                                else {
+                                    html += ' <sf-i-elastic-text text="' + this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "") + '" minLength="20"></sf-i-elastic-text>';
+                                }
+                                html += '</td>';
                             }
-                            else {
-                                html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
-                            }
-                            html += '</th>';
                         }
+                        html += '<td id="td-expand-' + i + '" part="td-body">';
+                        html += '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand">open_in_new</button>';
+                        html += '</td>';
+                        // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                        //   html += '<th part="td-body">';
+                        //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                        //     html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                        //   } else {
+                        //     html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                        //   }
+                        //   html += '</th>';
+                        // }
                         html += '</tbody>';
                         html += '</table>';
                         html += '</div>';
@@ -637,22 +729,45 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '<table>';
                         html += '<thead>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                            html += '<th part="td-head">';
-                            html += Object.keys(this.events[mmdd][j])[k];
-                            html += '</th>';
+                            if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                                html += '<th part="td-head" class="bg-left-no-border">';
+                                html += Object.keys(this.events[mmdd][j])[k];
+                                html += '</th>';
+                            }
                         }
+                        html += '<th part="td-head">';
+                        html += '</th>';
+                        // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                        //   html += '<th part="td-head">';
+                        //   html += Object.keys(this.events[mmdd][j])[k];
+                        //   html += '</th>';
+                        // }
                         html += '</thead>';
                         html += '<tbody>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                            html += '<th part="td-body">';
-                            if (this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
-                                html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                            if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                                html += '<td part="td-body">';
+                                if (this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                                    html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                                }
+                                else {
+                                    html += ' <sf-i-elastic-text text="' + this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "") + '" minLength="20"></sf-i-elastic-text>';
+                                }
+                                html += '</td>';
                             }
-                            else {
-                                html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
-                            }
-                            html += '</th>';
                         }
+                        html += '<td id="td-expand-' + i + '" part="td-body">';
+                        html += '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand">open_in_new</button>';
+                        html += '</td>';
+                        // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+                        //   html += '<th part="td-body">';
+                        //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                        //     html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                        //   } else {
+                        //     html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                        //   }
+                        //   html += '</th>';
+                        // }
                         html += '</tbody>';
                         html += '</table>';
                         html += '</div>';
@@ -677,6 +792,17 @@ let SfIEvents = class SfIEvents extends LitElement {
             }
             html += '</div>';
             this._SfCustomContainer.querySelector('.calendar-right-data').innerHTML = html;
+            const buttonArr = this._SfCustomContainer.querySelectorAll('.button-expand');
+            for (var i = 0; i < buttonArr.length; i++) {
+                buttonArr[i].addEventListener('click', (ev) => {
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    const mmdd = idArr[3] + "/" + idArr[4];
+                    const j = idArr[5];
+                    this._SfDetailContainer.style.display = 'block';
+                    this.renderEventDetail(this.events[mmdd][j]);
+                });
+            }
         };
         this.checkStartDateEarliness = (value) => {
             var startDateCalendar = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
@@ -823,12 +949,14 @@ let SfIEvents = class SfIEvents extends LitElement {
                         inputTagsArr[i].preselectedValues = JSON.stringify(value);
                         inputTagsArr[i].populatePreselected();
                         divTagsArr[i].innerHTML = '';
+                        var html = '';
                         for (var j = 0; j < value.length; j++) {
-                            divTagsArr[i].innerHTML += value[j];
+                            html += value[j];
                             if (j < (value.length - 1)) {
-                                divTagsArr[i].innerHTML += ",";
+                                html += ",";
                             }
                         }
+                        divTagsArr[i].innerHTML = '<sf-i-elastic-text text="' + html + '" minLength="20"></sf-i-elastic-text>';
                         this.mappedValuesTags[i] = value;
                     }
                     if (param == "users") {
@@ -838,12 +966,14 @@ let SfIEvents = class SfIEvents extends LitElement {
                         inputUsersArr[i].preselectedValues = JSON.stringify(value);
                         inputUsersArr[i].populatePreselected();
                         divUsersArr[i].innerHTML = '';
+                        var html = '';
                         for (var j = 0; j < value.length; j++) {
-                            divUsersArr[i].innerHTML += value[j];
+                            html += value[j];
                             if (j < (value.length - 1)) {
-                                divUsersArr[i].innerHTML += ",";
+                                html += ",";
                             }
                         }
+                        divUsersArr[i].innerHTML = '<sf-i-elastic-text text="' + html + '" minLength="20"></sf-i-elastic-text>';
                         this.mappedValuesUsers[i] = value;
                         this.updateMappingStatus(value, i);
                         this.calculateAndShowSummary();
@@ -932,6 +1062,17 @@ let SfIEvents = class SfIEvents extends LitElement {
                     this.renderPast(target);
                 });
             }
+            const buttonArr = this._SfPastContainer.querySelectorAll('.button-expand');
+            for (i = 0; i < buttonArr.length; i++) {
+                buttonArr[i].addEventListener('click', (ev) => {
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    const mmdd = idArr[3] + "/" + idArr[4];
+                    const j = idArr[5];
+                    this._SfDetailContainer.style.display = 'block';
+                    this.renderEventDetail(this.events[mmdd][j]);
+                });
+            }
         };
         this.renderUpcoming = (index = 0) => {
             var _a;
@@ -988,6 +1129,17 @@ let SfIEvents = class SfIEvents extends LitElement {
                     this.renderUpcoming(target);
                 });
             }
+            const buttonArr = this._SfUpcomingContainer.querySelectorAll('.button-expand');
+            for (i = 0; i < buttonArr.length; i++) {
+                buttonArr[i].addEventListener('click', (ev) => {
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    const mmdd = idArr[3] + "/" + idArr[4];
+                    const j = idArr[5];
+                    this._SfDetailContainer.style.display = 'block';
+                    this.renderEventDetail(this.events[mmdd][j]);
+                });
+            }
         };
         this.renderThis = (index = 0) => {
             var _a;
@@ -1024,6 +1176,17 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const target = parseInt(ev.target.id.split('-')[2]);
                     console.log('clicked ', target);
                     this.renderThis(target);
+                });
+            }
+            const buttonArr = this._SfThisContainer.querySelectorAll('.button-expand');
+            for (i = 0; i < buttonArr.length; i++) {
+                buttonArr[i].addEventListener('click', (ev) => {
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    const mmdd = idArr[3] + "/" + idArr[4];
+                    const j = idArr[5];
+                    this._SfDetailContainer.style.display = 'block';
+                    this.renderEventDetail(this.events[mmdd][j]);
                 });
             }
         };
@@ -1065,6 +1228,60 @@ let SfIEvents = class SfIEvents extends LitElement {
                     this.renderStream(target);
                 });
             }
+            const buttonArr = this._SfStreamContainer.querySelectorAll('.button-expand');
+            for (i = 0; i < buttonArr.length; i++) {
+                buttonArr[i].addEventListener('click', (ev) => {
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    const mmdd = idArr[3] + "/" + idArr[4];
+                    const j = idArr[5];
+                    this._SfDetailContainer.style.display = 'block';
+                    this.renderEventDetail(this.events[mmdd][j]);
+                });
+            }
+            console.log('stream button array', buttonArr);
+        };
+        this.renderEventDetail = (event) => {
+            var _a;
+            console.log('event detail', event);
+            var html = `
+    
+      <div class="d-flex justify-between m-20">
+        <button part="button-icon" class="material-icons invisible">close</button>
+        <h3 part="results-title" class="m-0">Compliance Details</h3>
+        <button id="button-detail-close" part="button-icon" class="material-icons">close</button>
+      </div>
+    
+    `;
+            html += '<div class="d-flex m-20 flex-wrap">';
+            for (var k = 0; k < Object.keys(event).length; k++) {
+                if (!this.getEventPreviewFields().includes(Object.keys(event)[k])) {
+                    html += '<div class="m-20">';
+                    html += '<div part="detail-head"><strong>' + Object.keys(event)[k] + '</strong></div>';
+                    if (event[Object.keys(event)[k]].indexOf("[") >= 0) {
+                        html += this.getEventTexts(Object.keys(event)[k], JSON.parse(event[Object.keys(event)[k]]), event);
+                    }
+                    else {
+                        html += '<sf-i-elastic-text text="' + event[Object.keys(event)[k]].replace(/"/g, "") + '" minLength="20"></sf-i-elastic-text>';
+                    }
+                    html += '</div>';
+                }
+            }
+            html += '</div>';
+            html += '<hr>';
+            html += '<div class="m-20">';
+            html += '<h3>Submission</h3>';
+            html += '<div class="d-flex m-20 flex-col">';
+            html += '<label part="input-label">Comments</label>';
+            html += '<input type="text" part="input" />';
+            html += '</div>';
+            html += '</div>';
+            html += '<div>';
+            this._SfDetailContainer.innerHTML = html;
+            (_a = this._SfDetailContainer.querySelector('#button-detail-close')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
+                this._SfDetailContainer.innerHTML = '';
+                this._SfDetailContainer.style.display = 'none';
+            });
         };
         this.renderCalendar = () => {
             var _a;
@@ -1086,11 +1303,38 @@ let SfIEvents = class SfIEvents extends LitElement {
             for (var i = 0; i < 12; i++) {
                 (_a = this._SfCalendarContainer.querySelector('#calendar-button-' + i)) === null || _a === void 0 ? void 0 : _a.addEventListener('click', (ev) => {
                     const id = ev.target.id.split("-")[2];
+                    console.log('render stream', id);
                     this.enableStream();
-                    this.renderStream(parseInt(id));
                     this.renderTabs(this.TAB_STREAM);
+                    this.renderStream(parseInt(id));
                 });
             }
+        };
+        this.renderRoleTabs = () => {
+            var _a, _b;
+            this._SfRoleTabContainer.innerHTML = '';
+            var html = '';
+            html += '<button class="tab-button" id="consumer-tab-reporter" part="' + (this.myRole == this.TAB_REPORTER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Reporter</button>';
+            html += '<button class="tab-button" id="consumer-tab-approver" part="' + (this.myRole == this.TAB_APPROVER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Approver</button>';
+            this._SfRoleTabContainer.innerHTML = html;
+            (_a = this._SfRoleTabContainer.querySelector('#consumer-tab-reporter')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', async () => {
+                this.myRole = this.TAB_REPORTER;
+                this.renderRoleTabs();
+                await this.fetchUserCalendar();
+                if (this.events != null) {
+                    this.renderTabs(this.TAB_YEAR);
+                    this.renderCalendar();
+                }
+            });
+            (_b = this._SfRoleTabContainer.querySelector('#consumer-tab-approver')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', async () => {
+                this.myRole = this.TAB_APPROVER;
+                this.renderRoleTabs();
+                await this.fetchUserCalendar();
+                if (this.events != null) {
+                    this.renderTabs(this.TAB_YEAR);
+                    this.renderCalendar();
+                }
+            });
         };
         this.renderTabs = (selectedTab) => {
             var _a, _b, _c, _d, _e, _f;
@@ -1104,8 +1348,13 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<button class="tab-button" id="calendar-tab-custom" part="' + (selectedTab == this.TAB_CUSTOM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Range</button>';
             this._SfTabContainer.innerHTML = html;
             (_a = this._SfTabContainer.querySelector('#calendar-tab-year')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
-                this.enableCalendar();
-                this.renderTabs(this.TAB_YEAR);
+                if (this.mode == "consumer") {
+                    this.loadMode();
+                }
+                else {
+                    this.enableCalendar();
+                    this.renderTabs(this.TAB_YEAR);
+                }
             });
             (_b = this._SfTabContainer.querySelector('#calendar-tab-month')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
                 this.enableStream();
@@ -1159,7 +1408,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += this.getEventTexts(Object.keys(events[index])[k], JSON.parse(events[index][Object.keys(events[index])[k]]), events[index]);
                     }
                     else {
-                        html += events[index][Object.keys(events[index])[k]].replace(/"/g, "");
+                        html += '<sf-i-elastic-text text="' + events[index][Object.keys(events[index])[k]].replace(/"/g, "") + '" minLength="20"></sf-i-elastic-text>';
                     }
                     html += '</td>';
                 }
@@ -1193,32 +1442,32 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<tr>';
             html += '</tr>';
             html += '<tr>';
-            html += '<th class="d-flex">';
-            html += '<button id="row-unmapped-table-multi-entry-cancel" part="button-icon-small" class="material-icons">chevron_left</button>';
-            html += '</th>';
-            html += '<th part="td-head">';
+            html += '<th part="td-head" class="col-date">';
             html += 'Duedate';
             html += '</th>';
-            html += '<th part="td-head">';
+            html += '<th part="td-head" class="col-tags">';
             html += 'Tags';
             html += '</th>';
             html += '<th part="td-head">';
             html += 'Users';
             html += '</th>';
+            html += '<th class="d-flex">';
+            html += '<button id="row-unmapped-table-multi-entry-cancel" part="button-icon-small" class="material-icons">close</button>';
+            html += '</th>';
             html += '</tr>';
             html += '<tr>';
-            html += '<td>';
-            html += '</td>';
-            html += '<td>';
+            html += '<td class="col-date">';
             html += '<input part="input" type="text" id="row-unmapped-input-multi-entry-date" />';
             html += '</td>';
-            html += '<td part="td-head">';
+            html += '<td part="td-head" class="col-tags">';
             html += '<sf-i-form id="row-unmapped-input-multi-entry-tags" name="Tags" label="Select Tags" apiId="' + this.apiIdTags + '" mode="multiselect-dropdown" searchPhrase="' + this._SfProject[0].querySelector('#sf-i-project').selectedTexts()[0] + '" selectProjection="name" mandatory></sf-i-form>';
             //html += '<input part="input" type="text" id="row-unmapped-input-multi-entry-tags"  />';
             html += '</td>';
             html += '<td part="td-head">';
             html += '<sf-i-form id="row-unmapped-input-multi-entry-users" name="Users" label="Select Users" apiId="' + this.apiIdUsers + '" mode="multiselect-dropdown" searchPhrase="' + this._SfProject[0].querySelector('#sf-i-project').selectedTexts()[0] + '" selectProjection="name" mandatory></sf-i-form>';
             //html += '<input part="input" type="text" id="row-unmapped-input-multi-entry-users"  />';
+            html += '</td>';
+            html += '<td>';
             html += '</td>';
             html += '</tr>';
             html += '</table>';
@@ -1307,7 +1556,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += this.getEventTexts(Object.keys(unmappedEvents[i])[k], JSON.parse(unmappedEvents[i][Object.keys(unmappedEvents[i])[k]]), unmappedEvents[i]);
                         }
                         else {
-                            html += unmappedEvents[i][Object.keys(unmappedEvents[i])[k]].replace(/"/g, "");
+                            html += ' <sf-i-elastic-text text="' + unmappedEvents[i][Object.keys(unmappedEvents[i])[k]].replace(/"/g, "") + '" minLength="20"></sf-i-elastic-text>';
                         }
                         html += '</td>';
                     }
@@ -1382,13 +1631,14 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const form = this._SfMappingContainer.querySelector('#row-unmapped-input-tags-' + clickIndex);
                     const div = this._SfMappingContainer.querySelector('#row-unmapped-div-tags-' + clickIndex);
                     div.innerHTML = '';
-                    console.log('selected values', form.selectedValues());
+                    var html = '';
                     for (var i = 0; i < form.selectedValues().length; i++) {
-                        div.innerHTML += form.selectedValues()[i];
+                        html += form.selectedValues()[i];
                         if (i < (form.selectedValues().length - 1)) {
-                            div.innerHTML += ",";
+                            html += ",";
                         }
                     }
+                    div.innerHTML = '<sf-i-elastic-text text="' + html + '" minLength="20"></sf-i-elastic-text>';
                     this.mappedValuesTags[clickIndex] = form.selectedValues();
                     // const div = ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-div-tags-'+clickIndex) as HTMLDivElement);
                     // const input = ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-input-tags-'+clickIndex) as HTMLInputElement);
@@ -1400,12 +1650,14 @@ let SfIEvents = class SfIEvents extends LitElement {
                     console.log('valuechanged called', form.selectedValues());
                     const div = this._SfMappingContainer.querySelector('#row-unmapped-div-users-' + clickIndex);
                     div.innerHTML = '';
+                    var html = '';
                     for (var i = 0; i < form.selectedValues().length; i++) {
-                        div.innerHTML += form.selectedValues()[i];
+                        html += form.selectedValues()[i];
                         if (i < (form.selectedValues().length - 1)) {
-                            div.innerHTML += ",";
+                            html += ",";
                         }
                     }
+                    div.innerHTML = '<sf-i-elastic-text text="' + html + '" minLength="20"></sf-i-elastic-text>';
                     this.mappedValuesUsers[clickIndex] = form.selectedValues();
                     this.updateMappingStatus(form.selectedValues(), clickIndex);
                     this.calculateAndShowSummary();
@@ -1472,14 +1724,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                     this._SfMappingContainer.querySelector('#row-unmapped-table' + i).style.display = 'block';
                 }
                 if (this.myRole == this.TAB_APPROVER) {
+                    this._SfMappingContainer.querySelectorAll('.col-date')[0].style.display = 'none';
+                    this._SfMappingContainer.querySelectorAll('.col-date')[1].style.display = 'none';
                     this._SfMappingContainer.querySelector('.col-date-' + i).style.display = 'none';
                     this._SfMappingContainer.querySelector('.col-date-head-' + i).style.display = 'none';
+                    this._SfMappingContainer.querySelectorAll('.col-tags')[0].style.display = 'none';
+                    this._SfMappingContainer.querySelectorAll('.col-tags')[1].style.display = 'none';
                     this._SfMappingContainer.querySelector('.col-tags-' + i).style.display = 'none';
                     this._SfMappingContainer.querySelector('.col-tags-head-' + i).style.display = 'none';
                 }
                 else {
+                    this._SfMappingContainer.querySelectorAll('.col-date')[0].style.display = 'table-cell';
+                    this._SfMappingContainer.querySelectorAll('.col-date')[1].style.display = 'table-cell';
                     this._SfMappingContainer.querySelector('.col-date-' + i).style.display = 'table-cell';
                     this._SfMappingContainer.querySelector('.col-date-head-' + i).style.display = 'table-cell';
+                    this._SfMappingContainer.querySelectorAll('.col-tags')[0].style.display = 'table-cell';
+                    this._SfMappingContainer.querySelectorAll('.col-tags')[1].style.display = 'table-cell';
                     this._SfMappingContainer.querySelector('.col-tags-' + i).style.display = 'table-cell';
                     this._SfMappingContainer.querySelector('.col-tags-head-' + i).style.display = 'table-cell';
                 }
@@ -1536,7 +1796,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += ',';
                         }
                     }
-                    this._SfMappingContainer.querySelector('#row-unmapped-div-tags-' + i).innerHTML = html;
+                    this._SfMappingContainer.querySelector('#row-unmapped-div-tags-' + i).innerHTML = '<sf-i-elastic-text text="' + html + '" minLength="20"></sf-i-elastic-text>';
                     this._SfMappingContainer.querySelector('#row-unmapped-input-tags-' + i).preselectedValues = JSON.stringify(this.mappedValuesTags[i]);
                     //((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-input-tags-'+i) as SfIForm)!.populatePreselected();
                 }
@@ -1548,7 +1808,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += ',';
                         }
                     }
-                    this._SfMappingContainer.querySelector('#row-unmapped-div-users-' + i).innerHTML = html;
+                    this._SfMappingContainer.querySelector('#row-unmapped-div-users-' + i).innerHTML = '<sf-i-elastic-text text="' + html + '" minLength="20"></sf-i-elastic-text>';
                     this._SfMappingContainer.querySelector('#row-unmapped-input-users-' + i).preselectedValues = JSON.stringify(this.mappedValuesUsers[i]);
                     //((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-input-users-'+i) as SfIForm)!.populatePreselected();
                 }
@@ -1743,8 +2003,36 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this.setError(jsonRespose.error);
             }
         };
+        this.fetchUserCalendar = async () => {
+            let url = "https://" + this.apiId + ".execute-api.us-east-1.amazonaws.com/test/getuserevents";
+            const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+            const xhr = (await this.prepareXhr({ "projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole }, url, this._SfLoader, authorization));
+            this._SfLoader.innerHTML = '';
+            if (xhr.status == 200) {
+                const jsonRespose = JSON.parse(xhr.responseText);
+                this.showChosenProject();
+                console.log(jsonRespose);
+                this.events = (jsonRespose.data.events);
+                if (this.events != null) {
+                    this.renderTabs(this.TAB_YEAR);
+                    this.renderCalendar();
+                }
+                // this.renderChosenProject(events);
+            }
+            else {
+                if (xhr.status === 404) {
+                    this.showChosenProject();
+                    this._SfTitleChosenProject.innerHTML = this._SfProject[0].querySelector('#sf-i-project').selectedTexts()[0];
+                    this.renderChosenProject();
+                }
+                else {
+                    const jsonRespose = JSON.parse(xhr.responseText);
+                    this.setError(jsonRespose.error);
+                }
+            }
+        };
         this.fetchCalendar = async () => {
-            this.apiBodyList = '{"id": "' + this._SfProject[0].querySelector('#sf-i-project').selectedValues()[0] + '"}';
+            //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
             let url = "https://" + this.apiId + ".execute-api.us-east-1.amazonaws.com/test/getcalendar";
             const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
             const xhr = (await this.prepareXhr({ "projectid": this._SfProject[0].querySelector('#sf-i-project').selectedValues()[0] }, url, this._SfLoader, authorization));
@@ -1965,7 +2253,9 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this.enableCalendar();
                 this.initInputs();
                 this.initCalendar();
-                await this.fetchList();
+                this.myRole = this.TAB_REPORTER;
+                this.renderRoleTabs();
+                await this.fetchUserCalendar();
                 if (this.events != null) {
                     this.renderTabs(this.TAB_YEAR);
                     this.renderCalendar();
@@ -2134,6 +2424,11 @@ let SfIEvents = class SfIEvents extends LitElement {
           <div class="d-flex justify-center">
               <div class="loader-element"></div>
           </div>
+          
+          <div class="d-flex justify-center mb-20" id="role-tab-container">
+
+          </div>
+          
           <div class="d-flex justify-center" id="tab-container">
 
           </div>
@@ -2156,6 +2451,8 @@ let SfIEvents = class SfIEvents extends LitElement {
             <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="custom-container">
               
             </div>
+          </div>
+          <div id="detail-container" class="hide" part="detail-container">
           </div>
           <div class="d-flex justify-between">
               <div class="lb"></div>
@@ -2201,6 +2498,10 @@ SfIEvents.styles = css `
       padding-bottom: 5px;
     }
 
+    .m-20 {
+      margin: 20px;
+    }
+
     .text-start {
       text-align: start;
     }
@@ -2211,7 +2512,7 @@ SfIEvents.styles = css `
 
     #button-back-add-mapping {
       bottom: 10px;
-      z-index: 99;
+      z-index: 98;
       position: sticky;
       width: 96%;
       margin-left: 2%;
@@ -2238,7 +2539,7 @@ SfIEvents.styles = css `
       width: 100%;
     }
 
-    input {
+    input:not([type='radio']) {
 
     border-width: 0px;      
     border-radius: 5px;
@@ -2283,6 +2584,10 @@ SfIEvents.styles = css `
 
     .bg-left {
       border-top: solid 1px #dcdcdc;
+      padding-right: 5px;
+    }
+
+    .bg-left-no-border {
       padding-right: 5px;
     }
 
@@ -2715,6 +3020,12 @@ __decorate([
 ], SfIEvents.prototype, "apiBodyDetail", void 0);
 __decorate([
     property()
+], SfIEvents.prototype, "userProfileId", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "projectId", void 0);
+__decorate([
+    property()
 ], SfIEvents.prototype, "apiResponseFieldList", void 0);
 __decorate([
     property()
@@ -2831,6 +3142,9 @@ __decorate([
     query('#upcoming-container')
 ], SfIEvents.prototype, "_SfUpcomingContainer", void 0);
 __decorate([
+    query('#detail-container')
+], SfIEvents.prototype, "_SfDetailContainer", void 0);
+__decorate([
     query('#this-container')
 ], SfIEvents.prototype, "_SfThisContainer", void 0);
 __decorate([
@@ -2851,6 +3165,9 @@ __decorate([
 __decorate([
     query('#mapping-tab-container')
 ], SfIEvents.prototype, "_SfMappingTabContainer", void 0);
+__decorate([
+    query('#role-tab-container')
+], SfIEvents.prototype, "_SfRoleTabContainer", void 0);
 __decorate([
     queryAssignedElements({ slot: 'project' })
 ], SfIEvents.prototype, "_SfProject", void 0);

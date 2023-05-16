@@ -74,6 +74,12 @@ export class SfIEvents extends LitElement {
   apiBodyDetail!: string;
 
   @property()
+  userProfileId!: string;
+
+  @property()
+  projectId!: string;
+
+  @property()
   apiResponseFieldList!: string;
 
   @property()
@@ -178,6 +184,10 @@ export class SfIEvents extends LitElement {
       padding-bottom: 5px;
     }
 
+    .m-20 {
+      margin: 20px;
+    }
+
     .text-start {
       text-align: start;
     }
@@ -188,7 +198,7 @@ export class SfIEvents extends LitElement {
 
     #button-back-add-mapping {
       bottom: 10px;
-      z-index: 99;
+      z-index: 98;
       position: sticky;
       width: 96%;
       margin-left: 2%;
@@ -215,7 +225,7 @@ export class SfIEvents extends LitElement {
       width: 100%;
     }
 
-    input {
+    input:not([type='radio']) {
 
     border-width: 0px;      
     border-radius: 5px;
@@ -260,6 +270,10 @@ export class SfIEvents extends LitElement {
 
     .bg-left {
       border-top: solid 1px #dcdcdc;
+      padding-right: 5px;
+    }
+
+    .bg-left-no-border {
       padding-right: 5px;
     }
 
@@ -724,6 +738,9 @@ export class SfIEvents extends LitElement {
   @query('#upcoming-container')
   _SfUpcomingContainer: any;
 
+  @query('#detail-container')
+  _SfDetailContainer: any;
+
   @query('#this-container')
   _SfThisContainer: any;
 
@@ -744,6 +761,9 @@ export class SfIEvents extends LitElement {
 
   @query('#mapping-tab-container')
   _SfMappingTabContainer: any;
+
+  @query('#role-tab-container')
+  _SfRoleTabContainer: any;
 
   @queryAssignedElements({slot: 'project'})
   _SfProject: any;
@@ -1111,22 +1131,47 @@ export class SfIEvents extends LitElement {
               html += '<table>';
               html += '<thead>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                html += '<th part="td-head">';
-                html += Object.keys(this.events[mmdd][j])[k];
-                html += '</th>';
+                if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                  html += '<th part="td-head" class="bg-left-no-border">';
+                  html += Object.keys(this.events[mmdd][j])[k];
+                  html += '</th>';
+                }
               }
+              html += '<th part="td-head">';
+              html += '</th>';
+              // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+              //   html += '<th part="td-head">';
+              //   html += Object.keys(this.events[mmdd][j])[k];
+              //   html += '</th>';
+              // }
               html += '</thead>';
               html += '<tbody>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                html += '<th part="td-body">';
-                if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
-                  html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
-                } else {
-                  html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+        
+                  html += '<td part="td-body">';
+                  if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                    html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                  } else {
+                    html += ' <sf-i-elastic-text text="'+this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "")+'" minLength="20"></sf-i-elastic-text>';
+                  }
+                  html += '</td>';
+                  
                 }
-                
-                html += '</th>';
               }
+              html += '<td id="td-expand-'+i+'" part="td-body">';
+              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
+              html += '</td>';
+              // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+              //   html += '<th part="td-body">';
+              //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+              //     html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+              //   } else {
+              //     html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+              //   }
+                
+              //   html += '</th>';
+              // }
               html += '</tbody>';
               html += '</table>';
             html += '</div>';
@@ -1197,22 +1242,47 @@ export class SfIEvents extends LitElement {
               html += '<table>';
               html += '<thead>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                html += '<th part="td-head">';
-                html += Object.keys(this.events[mmdd][j])[k];
-                html += '</th>';
+                if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                  html += '<th part="td-head" class="bg-left-no-border">';
+                  html += Object.keys(this.events[mmdd][j])[k];
+                  html += '</th>';
+                }
               }
+              html += '<th part="td-head">';
+              html += '</th>';
+              // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+              //   html += '<th part="td-head">';
+              //   html += Object.keys(this.events[mmdd][j])[k];
+              //   html += '</th>';
+              // }
               html += '</thead>';
               html += '<tbody>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                html += '<th part="td-body">';
-                if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
-                  html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
-                } else {
-                  html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+        
+                  html += '<td part="td-body">';
+                  if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                    html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                  } else {
+                    html += ' <sf-i-elastic-text text="'+this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "")+'" minLength="20"></sf-i-elastic-text>';
+                  }
+                  html += '</td>';
+                  
                 }
-                
-                html += '</th>';
               }
+              html += '<td id="td-expand-'+i+'" part="td-body">';
+              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
+              html += '</td>';
+              // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+              //   html += '<th part="td-body">';
+              //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+              //     html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+              //   } else {
+              //     html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+              //   }
+                
+              //   html += '</th>';
+              // }
               html += '</tbody>';
               html += '</table>';
             html += '</div>';
@@ -1307,22 +1377,48 @@ export class SfIEvents extends LitElement {
               html += '<table>';
               html += '<thead>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                html += '<th part="td-head">';
-                html += Object.keys(this.events[mmdd][j])[k];
-                html += '</th>';
+                if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                  html += '<th part="td-head" class="bg-left-no-border">';
+                  html += Object.keys(this.events[mmdd][j])[k];
+                  html += '</th>';
+                }
               }
+              html += '<th part="td-head">';
+              html += '</th>';
+              // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+              //   html += '<th part="td-head">';
+              //   html += Object.keys(this.events[mmdd][j])[k];
+              //   html += '</th>';
+              // }
+              
               html += '</thead>';
               html += '<tbody>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                html += '<th part="td-body">';
-                if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
-                  html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
-                } else {
-                  html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+        
+                  html += '<td part="td-body">';
+                  if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                    html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                  } else {
+                    html += ' <sf-i-elastic-text text="'+this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "")+'" minLength="20"></sf-i-elastic-text>';
+                  }
+                  html += '</td>';
+                  
                 }
-                
-                html += '</th>';
               }
+              html += '<td id="td-expand-'+i+'" part="td-body">';
+              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
+              html += '</td>';
+              // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+              //   html += '<th part="td-body">';
+              //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+              //     html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+              //   } else {
+              //     html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+              //   }
+                
+              //   html += '</th>';
+              // }
               html += '</tbody>';
               html += '</table>';
             html += '</div>';
@@ -1420,22 +1516,47 @@ export class SfIEvents extends LitElement {
               html += '<table>';
               html += '<thead>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                html += '<th part="td-head">';
-                html += Object.keys(this.events[mmdd][j])[k];
-                html += '</th>';
+                if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                  html += '<th part="td-head" class="bg-left-no-border">';
+                  html += Object.keys(this.events[mmdd][j])[k];
+                  html += '</th>';
+                }
               }
+              html += '<th part="td-head">';
+              html += '</th>';
+              // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+              //   html += '<th part="td-head">';
+              //   html += Object.keys(this.events[mmdd][j])[k];
+              //   html += '</th>';
+              // }
               html += '</thead>';
               html += '<tbody>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                html += '<th part="td-body">';
-                if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
-                  html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
-                } else {
-                  html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+        
+                  html += '<td part="td-body">';
+                  if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                    html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                  } else {
+                    html += ' <sf-i-elastic-text text="'+this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "")+'" minLength="20"></sf-i-elastic-text>';
+                  }
+                  html += '</td>';
+                  
                 }
-                
-                html += '</th>';
               }
+              html += '<td id="td-expand-'+i+'" part="td-body">';
+              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
+              html += '</td>';
+              // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+              //   html += '<th part="td-body">';
+              //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+              //     html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+              //   } else {
+              //     html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+              //   }
+                
+              //   html += '</th>';
+              // }
               html += '</tbody>';
               html += '</table>';
             html += '</div>';
@@ -1510,22 +1631,47 @@ export class SfIEvents extends LitElement {
               html += '<table>';
               html += '<thead>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                html += '<th part="td-head">';
-                html += Object.keys(this.events[mmdd][j])[k];
-                html += '</th>';
+                if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+                  html += '<th part="td-head" class="bg-left-no-border">';
+                  html += Object.keys(this.events[mmdd][j])[k];
+                  html += '</th>';
+                }
               }
+              html += '<th part="td-head">';
+              html += '</th>';
+              // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+              //   html += '<th part="td-head">';
+              //   html += Object.keys(this.events[mmdd][j])[k];
+              //   html += '</th>';
+              // }
               html += '</thead>';
               html += '<tbody>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
-                html += '<th part="td-body">';
-                if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
-                  html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
-                } else {
-                  html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+                if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
+        
+                  html += '<td part="td-body">';
+                  if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+                    html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+                  } else {
+                    html += ' <sf-i-elastic-text text="'+this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "")+'" minLength="20"></sf-i-elastic-text>';
+                  }
+                  html += '</td>';
+                  
                 }
-                
-                html += '</th>';
               }
+              html += '<td id="td-expand-'+i+'" part="td-body">';
+              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
+              html += '</td>';
+              // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
+              //   html += '<th part="td-body">';
+              //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
+              //     html += this.getEventTexts(Object.keys(this.events[mmdd][j])[k], JSON.parse(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]]), this.events[mmdd][j]);
+              //   } else {
+              //     html += this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].replace(/"/g, "");
+              //   }
+                
+              //   html += '</th>';
+              // }
               html += '</tbody>';
               html += '</table>';
             html += '</div>';
@@ -1556,6 +1702,25 @@ export class SfIEvents extends LitElement {
     html += '</div>';
 
     (this._SfCustomContainer as HTMLDivElement).querySelector('.calendar-right-data')!.innerHTML = html;
+
+    const buttonArr = (this._SfCustomContainer as HTMLDivElement).querySelectorAll('.button-expand') as NodeListOf<HTMLButtonElement>;
+
+    for(var i = 0; i < buttonArr.length; i++) {
+
+      buttonArr[i].addEventListener('click', (ev: any) => {
+
+        const id = ev.target.id;
+        const idArr = id.split("-")
+        const mmdd = idArr[3] + "/" + idArr[4];
+        const j = idArr[5];
+
+        (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+
+        this.renderEventDetail(this.events[mmdd][j]);
+  
+      })
+
+    }
 
   }
 
@@ -1745,12 +1910,14 @@ export class SfIEvents extends LitElement {
           inputTagsArr[i].preselectedValues = JSON.stringify(value);
           inputTagsArr[i].populatePreselected();
           divTagsArr[i].innerHTML = '';
+          var html = '';
           for(var j = 0; j < value.length; j++) {
-            divTagsArr[i].innerHTML += value[j];
+            html += value[j];
             if(j < (value.length - 1)) {
-              divTagsArr[i].innerHTML += ",";
+              html += ",";
             }
           }
+          divTagsArr[i].innerHTML = '<sf-i-elastic-text text="'+html+'" minLength="20"></sf-i-elastic-text>';
           this.mappedValuesTags[i] = value;
         }
         if(param == "users") {
@@ -1760,12 +1927,14 @@ export class SfIEvents extends LitElement {
           inputUsersArr[i].preselectedValues = JSON.stringify(value);
           inputUsersArr[i].populatePreselected();
           divUsersArr[i].innerHTML = '';
+          var html = '';
           for(var j = 0; j < value.length; j++) {
-            divUsersArr[i].innerHTML += value[j];
+            html += value[j];
             if(j < (value.length - 1)) {
-              divUsersArr[i].innerHTML += ",";
+              html += ",";
             }
           }
+          divUsersArr[i].innerHTML = '<sf-i-elastic-text text="'+html+'" minLength="20"></sf-i-elastic-text>';
           this.mappedValuesUsers[i] = value;
           this.updateMappingStatus(value, i);
           this.calculateAndShowSummary();
@@ -1820,6 +1989,8 @@ export class SfIEvents extends LitElement {
       console.log('end-date', ev);
       this.processDateSelection();
     });
+
+    
     
 
     // for(var i = 0; i < 3; i++) {
@@ -1874,6 +2045,26 @@ export class SfIEvents extends LitElement {
         this.renderPast(target);
       })
     }
+
+    const buttonArr = (this._SfPastContainer as HTMLDivElement).querySelectorAll('.button-expand') as NodeListOf<HTMLButtonElement>;
+
+    for(i = 0; i < buttonArr.length; i++) {
+
+      buttonArr[i].addEventListener('click', (ev: any) => {
+
+        const id = ev.target.id;
+        const idArr = id.split("-")
+        const mmdd = idArr[3] + "/" + idArr[4];
+        const j = idArr[5];
+
+        (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+
+        this.renderEventDetail(this.events[mmdd][j]);
+  
+      })
+
+    }
+
   }
 
   renderUpcoming = (index: number = 0) => {
@@ -1942,6 +2133,25 @@ export class SfIEvents extends LitElement {
       })
     }
 
+    const buttonArr = (this._SfUpcomingContainer as HTMLDivElement).querySelectorAll('.button-expand') as NodeListOf<HTMLButtonElement>;
+
+    for(i = 0; i < buttonArr.length; i++) {
+
+      buttonArr[i].addEventListener('click', (ev: any) => {
+
+        const id = ev.target.id;
+        const idArr = id.split("-")
+        const mmdd = idArr[3] + "/" + idArr[4];
+        const j = idArr[5];
+
+        (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+
+        this.renderEventDetail(this.events[mmdd][j]);
+  
+      })
+
+    }
+
   }
 
   renderThis = (index: number = 0) => {
@@ -1987,6 +2197,25 @@ export class SfIEvents extends LitElement {
         this.renderThis(target);
 
       })
+    }
+
+    const buttonArr = (this._SfThisContainer as HTMLDivElement).querySelectorAll('.button-expand') as NodeListOf<HTMLButtonElement>;
+
+    for(i = 0; i < buttonArr.length; i++) {
+
+      buttonArr[i].addEventListener('click', (ev: any) => {
+
+        const id = ev.target.id;
+        const idArr = id.split("-")
+        const mmdd = idArr[3] + "/" + idArr[4];
+        const j = idArr[5];
+
+        (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+
+        this.renderEventDetail(this.events[mmdd][j]);
+  
+      })
+
     }
   }
 
@@ -2042,6 +2271,85 @@ export class SfIEvents extends LitElement {
       })
     }
 
+    const buttonArr = (this._SfStreamContainer as HTMLDivElement).querySelectorAll('.button-expand') as NodeListOf<HTMLButtonElement>;
+
+    for(i = 0; i < buttonArr.length; i++) {
+
+      buttonArr[i].addEventListener('click', (ev: any) => {
+
+        const id = ev.target.id;
+        const idArr = id.split("-")
+        const mmdd = idArr[3] + "/" + idArr[4];
+        const j = idArr[5];
+
+        (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+
+        this.renderEventDetail(this.events[mmdd][j]);
+  
+      })
+
+    }
+
+    console.log('stream button array', buttonArr);
+
+  }
+
+  renderEventDetail = (event: any) => {
+
+    console.log('event detail', event);
+
+    var html = `
+    
+      <div class="d-flex justify-between m-20">
+        <button part="button-icon" class="material-icons invisible">close</button>
+        <h3 part="results-title" class="m-0">Compliance Details</h3>
+        <button id="button-detail-close" part="button-icon" class="material-icons">close</button>
+      </div>
+    
+    `;
+
+    html += '<div class="d-flex m-20 flex-wrap">';
+
+    for(var k = 0; k < Object.keys(event).length; k++) {
+      if(!this.getEventPreviewFields().includes(Object.keys(event)[k])) {
+
+        html += '<div class="m-20">';
+        html += '<div part="detail-head"><strong>'+Object.keys(event)[k]+'</strong></div>'
+        if(event[Object.keys(event)[k]].indexOf("[") >= 0) {
+          html += this.getEventTexts(Object.keys(event)[k], JSON.parse(event[Object.keys(event)[k]]), event);
+        } else {
+          html += '<sf-i-elastic-text text="'+event[Object.keys(event)[k]].replace(/"/g, "")+'" minLength="20"></sf-i-elastic-text>';
+        }
+        html += '</div>';
+        
+      }
+    }
+
+    html += '</div>';
+
+    html += '<hr>';
+
+    html += '<div class="m-20">';
+
+      html += '<h3>Submission</h3>';
+      html += '<div class="d-flex m-20 flex-col">';
+      html += '<label part="input-label">Comments</label>';
+      html += '<input type="text" part="input" />';
+      html += '</div>';
+
+      html += '</div>';
+    html += '<div>';
+
+    (this._SfDetailContainer as HTMLDivElement).innerHTML = html;
+
+    (this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close')?.addEventListener('click', () => {
+
+      (this._SfDetailContainer as HTMLDivElement).innerHTML = '';
+      (this._SfDetailContainer as HTMLDivElement).style.display = 'none';
+
+    });
+
+
   }
 
   renderCalendar = () => {
@@ -2074,13 +2382,51 @@ export class SfIEvents extends LitElement {
       (this._SfCalendarContainer as HTMLDivElement).querySelector('#calendar-button-' + i)?.addEventListener('click', (ev: any) => {
 
         const id = (ev.target as HTMLButtonElement).id.split("-")[2];
+        console.log('render stream', id);
         this.enableStream();
-        this.renderStream(parseInt(id));
         this.renderTabs(this.TAB_STREAM);
+        this.renderStream(parseInt(id));
 
       })
 
     }
+
+  }
+
+  renderRoleTabs = () => {
+
+    (this._SfRoleTabContainer as HTMLDivElement).innerHTML = '';
+
+    var html = '';
+
+    html += '<button class="tab-button" id="consumer-tab-reporter" part="'+(this.myRole == this.TAB_REPORTER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Reporter</button>';
+    html += '<button class="tab-button" id="consumer-tab-approver" part="'+(this.myRole == this.TAB_APPROVER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Approver</button>';
+    
+    (this._SfRoleTabContainer as HTMLDivElement).innerHTML = html;
+
+    (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-reporter')?.addEventListener('click', async () => {
+
+      this.myRole = this.TAB_REPORTER;
+      this.renderRoleTabs();
+      await this.fetchUserCalendar();
+      if(this.events != null) {
+        this.renderTabs(this.TAB_YEAR);
+        this.renderCalendar();
+      }
+
+    });
+
+    (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-approver')?.addEventListener('click', async () => {
+
+      this.myRole = this.TAB_APPROVER;
+      this.renderRoleTabs();
+      await this.fetchUserCalendar();
+      if(this.events != null) {
+        this.renderTabs(this.TAB_YEAR);
+        this.renderCalendar();
+      }
+
+    })
 
   }
 
@@ -2100,8 +2446,12 @@ export class SfIEvents extends LitElement {
     (this._SfTabContainer as HTMLDivElement).innerHTML = html;
 
     (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-year')?.addEventListener('click', () => {
-      this.enableCalendar();
-      this.renderTabs(this.TAB_YEAR);
+      if(this.mode == "consumer") {
+        this.loadMode();
+      } else {
+        this.enableCalendar();
+        this.renderTabs(this.TAB_YEAR);
+      }
     });
 
     (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-month')?.addEventListener('click', () => {
@@ -2162,7 +2512,7 @@ export class SfIEvents extends LitElement {
   renderExpandEvent = (events:any, index: any) => {
 
     var html = '';
-
+                  
     for(var k = 0; k < Object.keys(events[index]).length; k++) {
       if(!this.getEventPreviewFields().includes(Object.keys(events[index])[k])) {
 
@@ -2170,7 +2520,7 @@ export class SfIEvents extends LitElement {
         if(events[index][Object.keys(events[index])[k]].indexOf("[") >= 0) {
           html += this.getEventTexts(Object.keys(events[index])[k], JSON.parse(events[index][Object.keys(events[index])[k]]), events[index]);
         } else {
-          html += events[index][Object.keys(events[index])[k]].replace(/"/g, "");
+          html += '<sf-i-elastic-text text="'+events[index][Object.keys(events[index])[k]].replace(/"/g, "")+'" minLength="20"></sf-i-elastic-text>';
         }
         html += '</td>';
         
@@ -2216,32 +2566,32 @@ export class SfIEvents extends LitElement {
     html += '<tr>';
     html += '</tr>';
     html += '<tr>';
-    html += '<th class="d-flex">';
-    html += '<button id="row-unmapped-table-multi-entry-cancel" part="button-icon-small" class="material-icons">chevron_left</button>';
-    html += '</th>';
-    html += '<th part="td-head">';
+    html += '<th part="td-head" class="col-date">';
     html += 'Duedate';
     html += '</th>';
-    html += '<th part="td-head">';
+    html += '<th part="td-head" class="col-tags">';
     html += 'Tags';
     html += '</th>';
     html += '<th part="td-head">';
     html += 'Users';
     html += '</th>';
+    html += '<th class="d-flex">';
+    html += '<button id="row-unmapped-table-multi-entry-cancel" part="button-icon-small" class="material-icons">close</button>';
+    html += '</th>';
     html += '</tr>';
     html += '<tr>';
-    html += '<td>';
-    html += '</td>';
-    html += '<td>';
+    html += '<td class="col-date">';
     html += '<input part="input" type="text" id="row-unmapped-input-multi-entry-date" />';
     html += '</td>';
-    html += '<td part="td-head">';
+    html += '<td part="td-head" class="col-tags">';
     html += '<sf-i-form id="row-unmapped-input-multi-entry-tags" name="Tags" label="Select Tags" apiId="'+this.apiIdTags+'" mode="multiselect-dropdown" searchPhrase="'+(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedTexts()[0]+'" selectProjection="name" mandatory></sf-i-form>';
     //html += '<input part="input" type="text" id="row-unmapped-input-multi-entry-tags"  />';
     html += '</td>';
     html += '<td part="td-head">';
     html += '<sf-i-form id="row-unmapped-input-multi-entry-users" name="Users" label="Select Users" apiId="'+this.apiIdUsers+'" mode="multiselect-dropdown" searchPhrase="'+(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedTexts()[0]+'" selectProjection="name" mandatory></sf-i-form>';
     //html += '<input part="input" type="text" id="row-unmapped-input-multi-entry-users"  />';
+    html += '</td>';
+    html += '<td>';
     html += '</td>';
     html += '</tr>';
     html += '</table>';
@@ -2337,7 +2687,7 @@ export class SfIEvents extends LitElement {
           if(unmappedEvents[i][Object.keys(unmappedEvents[i])[k]].indexOf("[") >= 0) {
             html += this.getEventTexts(Object.keys(unmappedEvents[i])[k], JSON.parse(unmappedEvents[i][Object.keys(unmappedEvents[i])[k]]), unmappedEvents[i]);
           } else {
-            html += unmappedEvents[i][Object.keys(unmappedEvents[i])[k]].replace(/"/g, "");
+            html += ' <sf-i-elastic-text text="'+unmappedEvents[i][Object.keys(unmappedEvents[i])[k]].replace(/"/g, "")+'" minLength="20"></sf-i-elastic-text>';
           }
           html += '</td>';
           
@@ -2429,13 +2779,14 @@ export class SfIEvents extends LitElement {
         const form = ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-input-tags-'+clickIndex) as SfIForm);
         const div = ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-div-tags-'+clickIndex) as HTMLDivElement);
         div.innerHTML = '';
-        console.log('selected values', form.selectedValues());
+        var html = '';
         for(var i = 0; i < form.selectedValues().length; i++) {
-          div.innerHTML += form.selectedValues()[i];
+          html += form.selectedValues()[i];
           if(i < (form.selectedValues().length - 1)) {
-            div.innerHTML += ",";
+            html += ",";
           }
         }
+        div.innerHTML = '<sf-i-elastic-text text="'+html+'" minLength="20"></sf-i-elastic-text>';
         this.mappedValuesTags[clickIndex] = form.selectedValues();
 
         // const div = ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-div-tags-'+clickIndex) as HTMLDivElement);
@@ -2451,12 +2802,14 @@ export class SfIEvents extends LitElement {
         console.log('valuechanged called', form.selectedValues());
         const div = ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-div-users-'+clickIndex) as HTMLDivElement);
         div.innerHTML = '';
+        var html = '';
         for(var i = 0; i < form.selectedValues().length; i++) {
-          div.innerHTML += form.selectedValues()[i];
+          html += form.selectedValues()[i];
           if(i < (form.selectedValues().length - 1)) {
-            div.innerHTML += ",";
+            html += ",";
           }
         }
+        div.innerHTML = '<sf-i-elastic-text text="'+html+'" minLength="20"></sf-i-elastic-text>';
         this.mappedValuesUsers[clickIndex] = form.selectedValues();
         this.updateMappingStatus(form.selectedValues(), clickIndex);
         this.calculateAndShowSummary();        
@@ -2560,13 +2913,21 @@ export class SfIEvents extends LitElement {
       }
 
       if(this.myRole == this.TAB_APPROVER) {
+        ((this._SfMappingContainer as HTMLDivElement).querySelectorAll('.col-date') as NodeListOf<HTMLElement>)[0].style.display = 'none';
+        ((this._SfMappingContainer as HTMLDivElement).querySelectorAll('.col-date') as NodeListOf<HTMLElement>)[1].style.display = 'none';
         ((this._SfMappingContainer as HTMLDivElement).querySelector('.col-date-'+i) as HTMLElement).style.display = 'none';
         ((this._SfMappingContainer as HTMLDivElement).querySelector('.col-date-head-'+i) as HTMLElement).style.display = 'none';
+        ((this._SfMappingContainer as HTMLDivElement).querySelectorAll('.col-tags') as NodeListOf<HTMLElement>)[0].style.display = 'none';
+        ((this._SfMappingContainer as HTMLDivElement).querySelectorAll('.col-tags') as NodeListOf<HTMLElement>)[1].style.display = 'none';
         ((this._SfMappingContainer as HTMLDivElement).querySelector('.col-tags-'+i) as HTMLElement).style.display = 'none';
         ((this._SfMappingContainer as HTMLDivElement).querySelector('.col-tags-head-'+i) as HTMLElement).style.display = 'none';
       } else {
+        ((this._SfMappingContainer as HTMLDivElement).querySelectorAll('.col-date') as NodeListOf<HTMLElement>)[0].style.display = 'table-cell';
+        ((this._SfMappingContainer as HTMLDivElement).querySelectorAll('.col-date') as NodeListOf<HTMLElement>)[1].style.display = 'table-cell';
         ((this._SfMappingContainer as HTMLDivElement).querySelector('.col-date-'+i) as HTMLElement).style.display = 'table-cell';
         ((this._SfMappingContainer as HTMLDivElement).querySelector('.col-date-head-'+i) as HTMLElement).style.display = 'table-cell';
+        ((this._SfMappingContainer as HTMLDivElement).querySelectorAll('.col-tags') as NodeListOf<HTMLElement>)[0].style.display = 'table-cell';
+        ((this._SfMappingContainer as HTMLDivElement).querySelectorAll('.col-tags') as NodeListOf<HTMLElement>)[1].style.display = 'table-cell';
         ((this._SfMappingContainer as HTMLDivElement).querySelector('.col-tags-'+i) as HTMLElement).style.display = 'table-cell';
         ((this._SfMappingContainer as HTMLDivElement).querySelector('.col-tags-head-'+i) as HTMLElement).style.display = 'table-cell';
       }
@@ -2651,7 +3012,7 @@ export class SfIEvents extends LitElement {
             html += ',';
           }
         }
-        ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-div-tags-'+i) as HTMLDivElement)!.innerHTML = html;
+        ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-div-tags-'+i) as HTMLDivElement)!.innerHTML = '<sf-i-elastic-text text="'+html+'" minLength="20"></sf-i-elastic-text>';
         ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-input-tags-'+i) as SfIForm)!.preselectedValues = JSON.stringify(this.mappedValuesTags[i]);
         //((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-input-tags-'+i) as SfIForm)!.populatePreselected();
       }
@@ -2665,7 +3026,7 @@ export class SfIEvents extends LitElement {
             html += ',';
           }
         }
-        ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-div-users-'+i) as HTMLDivElement)!.innerHTML = html;
+        ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-div-users-'+i) as HTMLDivElement)!.innerHTML = '<sf-i-elastic-text text="'+html+'" minLength="20"></sf-i-elastic-text>';
         ((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-input-users-'+i) as SfIForm)!.preselectedValues = JSON.stringify(this.mappedValuesUsers[i]);
         //((this._SfMappingContainer as HTMLDivElement).querySelector('#row-unmapped-input-users-'+i) as SfIForm)!.populatePreselected();
       }
@@ -2938,9 +3299,46 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchUserCalendar = async() => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getuserevents";
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.showChosenProject();
+      console.log(jsonRespose);
+      this.events = (jsonRespose.data.events)
+      
+      if(this.events != null) {
+        this.renderTabs(this.TAB_YEAR);
+        this.renderCalendar();
+      }
+      // this.renderChosenProject(events);
+      
+    } else {
+
+      if(xhr.status === 404) {
+
+        this.showChosenProject();
+        (this._SfTitleChosenProject as HTMLElement).innerHTML = (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedTexts()[0];
+        this.renderChosenProject();
+
+      } else {
+        const jsonRespose = JSON.parse(xhr.responseText);
+        this.setError(jsonRespose.error);
+      }
+
+    }
+
+  }
+
   fetchCalendar = async() => {
 
-    this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
+    //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getcalendar";
 
@@ -3229,8 +3627,9 @@ export class SfIEvents extends LitElement {
       this.enableCalendar();
       this.initInputs();
       this.initCalendar();
-
-      await this.fetchList();
+      this.myRole = this.TAB_REPORTER;
+      this.renderRoleTabs();
+      await this.fetchUserCalendar();
       
       if(this.events != null) {
         this.renderTabs(this.TAB_YEAR);
@@ -3375,6 +3774,11 @@ export class SfIEvents extends LitElement {
           <div class="d-flex justify-center">
               <div class="loader-element"></div>
           </div>
+          
+          <div class="d-flex justify-center mb-20" id="role-tab-container">
+
+          </div>
+          
           <div class="d-flex justify-center" id="tab-container">
 
           </div>
@@ -3397,6 +3801,8 @@ export class SfIEvents extends LitElement {
             <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="custom-container">
               
             </div>
+          </div>
+          <div id="detail-container" class="hide" part="detail-container">
           </div>
           <div class="d-flex justify-between">
               <div class="lb"></div>

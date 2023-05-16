@@ -34,6 +34,8 @@ export declare class SfIEvents extends LitElement {
     apiMethodDetail: string;
     apiBodyList: string;
     apiBodyDetail: string;
+    userProfileId: string;
+    projectId: string;
     apiResponseFieldList: string;
     myRole: string;
     calendarStartDD: string;
@@ -79,6 +81,7 @@ export declare class SfIEvents extends LitElement {
     _SfContainerProjectActions: any;
     _SfStreamContainer: any;
     _SfUpcomingContainer: any;
+    _SfDetailContainer: any;
     _SfThisContainer: any;
     _SfPastContainer: any;
     _SfCustomContainer: any;
@@ -86,6 +89,7 @@ export declare class SfIEvents extends LitElement {
     _SfStreamEventStatus: any;
     _SfTabContainer: any;
     _SfMappingTabContainer: any;
+    _SfRoleTabContainer: any;
     _SfProject: any;
     getEventField: (field: string) => any;
     getParentFieldFromDepedencies: (field: string) => any;
@@ -129,7 +133,9 @@ export declare class SfIEvents extends LitElement {
     renderUpcoming: (index?: number) => void;
     renderThis: (index?: number) => void;
     renderStream: (index?: number) => void;
+    renderEventDetail: (event: any) => void;
     renderCalendar: () => void;
+    renderRoleTabs: () => void;
     renderTabs: (selectedTab: string) => void;
     renderMappingTabs: (selectedTab: string) => void;
     renderExpandEvent: (events: any, index: any) => void;
@@ -149,6 +155,7 @@ export declare class SfIEvents extends LitElement {
     processEvent: (value: any) => void;
     renderChosenProject: (events?: any) => void;
     fetchDetail: (value: any) => Promise<void>;
+    fetchUserCalendar: () => Promise<void>;
     fetchCalendar: () => Promise<void>;
     fetchEventMap: () => Promise<void>;
     fetchList: () => Promise<void>;

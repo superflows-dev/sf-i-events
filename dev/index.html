@@ -17,6 +17,7 @@
         import {SfISelect} from 'https://unpkg.com/sf-i-select@1.0.80/sf-i-select.js?module';
         import {SfIForm} from 'https://unpkg.com/sf-i-form@1.0.60/sf-i-form.js?module';
         import {SfISubSelect} from 'https://unpkg.com/sf-i-sub-select@1.0.81/sf-i-sub-select.js?module';
+        import {SfIElasticText} from 'https://unpkg.com/sf-i-elastic-text@1.0.2/sf-i-elastic-text.js?module';
     </script>
     <style>
       
@@ -101,6 +102,27 @@
         box-shadow: inset 20px 20px 60px #c5c5c5,
           inset -20px -20px 60px #ffffff;
         transition: 0.3s;
+      }
+
+      sf-i-events::part(detail-head) {
+        font-weight: 400;
+        color: gray;
+        text-transform: capitalize;
+        font-size: 90%;
+      }
+      
+      sf-i-events::part(detail-container) {
+        position: fixed;
+        left: 0px;
+        bottom: 0px;
+        width: 100%;
+        background-color: #efefef;
+        box-shadow: 1px 1px 10px 0 rgba(0, 0, 0, 0.25), -1px -1px 10px 0 rgba(255, 255, 255, 0.6);
+        border-top: solid 1px rgba(255, 255, 255, 0.3);
+        border-left: solid 1px rgba(255, 255, 255, 0.3);
+        border-bottom: solid 1px rgba(0, 0, 0, 0.1);
+        border-right: solid 1px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
       }
 
       sf-i-events::part(filter-title) {
@@ -426,6 +448,39 @@
     <sf-i-events 
       name="Calendar"
       apiId="8icpy39ru0"
+      mode="consumer"
+      userProfileId="85c82053-c318-4fea-aecd-f155528fd40b"
+      projectId="10daf75f-cb8f-45a5-95b7-ff9f27c4600a"
+      eventFieldDependencies="[{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;country&quot;, &quot;child&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;category&quot;, &quot;child&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;frequency&quot;, &quot;child&quot;: &quot;subfrequency&quot;}]"
+      eventFields="[{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;3z3fiubz8e&quot;, &quot;field&quot;: &quot;riskarea&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;5s7ih5uw4h&quot;, &quot;field&quot;: &quot;jurisdiction&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;oqze24s784&quot;, &quot;field&quot;: &quot;updatetype&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;zu3kh9cq2c&quot;, &quot;field&quot;: &quot;country&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8ijy7mze67&quot;, &quot;field&quot;: &quot;specificity&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;et1hdzg882&quot;, &quot;field&quot;: &quot;risk&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;lhpn6gh0il&quot;, &quot;field&quot;: &quot;frequency&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8an2d4j1gc&quot;, &quot;field&quot;: &quot;category&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;vofssiq1t3&quot;, &quot;field&quot;: &quot;obligationtype&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;clnu4kk1ah&quot;, &quot;field&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;aysa6i6723&quot;, &quot;field&quot;: &quot;subfrequency&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;mdkc0e2bo5&quot;, &quot;field&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;sf-i-form&quot;, &quot;apiId&quot;: &quot;4wb2x6fkga&quot;, &quot;field&quot;: &quot;statute&quot;, &quot;projectField&quot;: &quot;name&quot;}]"
+      eventPreviewFields="[&quot;obligationtitle&quot;]"
+      calendarStartDD="01"
+      calendarStartMM="04"
+      calendarStartYYYY="2023"
+      >
+
+      <div slot="project">
+
+        <sf-i-form 
+          id="sf-i-project"
+          name="Projects"
+          label="Select Project *"
+          apiId="tcic9iqenc"
+          mode="select"
+          selectProjection="name"
+          ignoreProjections="[&quot;compliance&quot;,&quot;search&quot;,&quot;updatetype&quot;,&quot;shortid&quot;]"
+          searchPhrase=''
+          mandatory
+          >
+        </sf-i-form>
+
+      </div>
+
+    </sf-i-events>
+
+    <!-- <sf-i-events 
+      name="Calendar"
+      apiId="8icpy39ru0"
       apiIdUsers="rnmvvr922j"
       apiIdTags="j385cxf2p0"
       mode="admin"
@@ -461,7 +516,7 @@
 
       </div>
 
-    </sf-i-events>
+    </sf-i-events> -->
     
     <!-- <sf-i-events 
       name="Compliances"
