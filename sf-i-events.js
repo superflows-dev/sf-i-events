@@ -13,6 +13,7 @@ import { LitElement, html, css } from 'lit';
 import { customElement, query, queryAssignedElements, property } from 'lit/decorators.js';
 // import {customElement, query, property} from 'lit/decorators.js';
 import Util from './util';
+import { Chart, registerables } from 'chart.js';
 // import {LitElement, html, css} from 'lit';
 // import {customElement} from 'lit/decorators.js';
 /*
@@ -43,7 +44,11 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.TAB_CUSTOM = "custom";
         this.TAB_REPORTER = "reporter";
         this.TAB_APPROVER = "approver";
+        this.COLOR_APPROVED = "#20a39e";
+        this.COLOR_NOT_STARTED = "#A4A9AD";
+        this.COLOR_IN_PROGRESS = "#FFBA49";
         this.myRole = this.TAB_REPORTER;
+        this.chart = null;
         this.calendar = [];
         this.mappedValuesDueDates = {};
         this.mappedValuesUsers = {};
@@ -52,6 +57,11 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.mappings = null;
         this.monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         this.events = null;
+        this.eventsInWindow = null;
+        this.eventHideFields = null;
+        this.getEventHideFields = () => {
+            return JSON.parse(this.eventHideFields);
+        };
         this.eventPreviewFields = null;
         this.getEventPreviewFields = () => {
             return JSON.parse(this.eventPreviewFields);
@@ -76,7 +86,11 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.getApiBodyDetail = () => {
             return JSON.parse(this.apiBodyDetail);
         };
+        this.csvDataCompliances = "";
+        this.csvDataStats = "";
         this.flow = "";
+        this.fill = "solid";
+        this.filterTags = [];
         this.getEventField = (field) => {
             for (var i = 0; i < this.getEventFields().length; i++) {
                 if (this.getEventFields()[i].field == field) {
@@ -205,26 +219,70 @@ let SfIEvents = class SfIEvents extends LitElement {
                 html += dateNumber - (this.getBlanks(month, year) - i - 1);
                 html += '</div>';
             }
+            const currMonth = new Date().getMonth();
+            const currDate = new Date().getDate();
+            console.log('currmonth', currMonth, 'currdate', currDate);
             for (i = 0; i < this.getLastDayOfMonth(month, year); i++) {
                 const mmdd = ("0" + (month + 1)).slice(-2) + "/" + ("0" + (i + 1)).slice(-2);
                 var partName = "";
                 if (this.events[mmdd] != null) {
                     partName = "event-calendar-day-with-event";
                     html += '<div part="' + partName + '" class="day-item date-item fw-600">';
-                    html += '<div>';
-                    html += (i + 1);
-                    html += '</div>';
+                    if (month === currMonth && (i + 1) === currDate) {
+                        html += '<div part="event-calendar-day-today">';
+                        html += (i + 1);
+                        html += '</div>';
+                    }
+                    else {
+                        html += '<div>';
+                        html += (i + 1);
+                        html += '</div>';
+                    }
+                    var approved = 0;
+                    var inProgress = 0;
+                    var notStarted = 0;
+                    var total = 0;
+                    for (var j = 0; j < this.events[mmdd].length; j++) {
+                        //console.log('events', i + ',' + j, JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]))
+                        total++;
+                        if (this.events[mmdd][j].documents == null || this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] == null || JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length === 0) {
+                            notStarted++;
+                        }
+                        else if (this.events[mmdd][j].approved != null && this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]) {
+                            approved++;
+                        }
+                        else {
+                            inProgress++;
+                        }
+                    }
+                    var percApproved = (approved * 100) / total;
+                    var percInProgress = (inProgress * 100) / total;
+                    var percNotStarted = (notStarted * 100) / total;
+                    console.log('percentages', mmdd, percApproved, percInProgress, percNotStarted);
                     html += '<div class="d-flex justify-center">';
-                    html += '<div part="event-date-indicator-primary" class="dot"></div>';
+                    //html += '<div part="event-date-indicator-primary" class="dot"></div>'
+                    html += '<div class="dot" style="width: ' + (percApproved / 2) + '%; background-color: ' + this.COLOR_APPROVED + '"></div>';
+                    html += '<div class="dot" style="width: ' + (percInProgress / 2) + '%; background-color: ' + this.COLOR_IN_PROGRESS + '"></div>';
+                    html += '<div class="dot" style="width: ' + (percNotStarted / 2) + '%; background-color: ' + this.COLOR_NOT_STARTED + '"></div>';
                     html += '</div>';
                     html += '</div>';
                 }
                 else {
                     partName = "event-calendar-day-without-event";
                     html += '<div part="' + partName + '" class="day-item date-item fw-100">';
-                    html += '<div>';
-                    html += (i + 1);
-                    html += '</div>';
+                    // html += '<div>'
+                    //   html += (i + 1);
+                    // html += '</div>'
+                    if (month === currMonth && (i + 1) === currDate) {
+                        html += '<div part="event-calendar-day-today">';
+                        html += (i + 1);
+                        html += '</div>';
+                    }
+                    else {
+                        html += '<div>';
+                        html += (i + 1);
+                        html += '</div>';
+                    }
                     html += '</div>';
                 }
             }
@@ -265,18 +323,25 @@ let SfIEvents = class SfIEvents extends LitElement {
         };
         this.renderStreamEvents = (index, month, year) => {
             const lastDay = this.getLastDayOfMonth(month, year);
-            var html = '<div id="stream-event-' + index + '" part="stream-event-list" class="stream-event-list">';
-            var total = 0;
-            for (var i = 1; i <= lastDay; i++) {
-                const mmdd = ("0" + (month + 1)).slice(-2) + "/" + ("0" + i).slice(-2);
-                if (this.events[mmdd] != null) {
-                    total++;
-                }
-            }
-            html += '<div id="stream-event-summary" part="stream-event-total">';
-            html += 'Total: <strong>' + total + '</strong>';
+            var html = '';
+            html += '<div class="mb-20 stream-event-list" part="stream-event-list">';
+            html += '<canvas id="myChart"></canvas>';
+            html += '<div id="chart-settings-controls"></div>';
+            html += '<div id="chart-settings"></div>';
             html += '</div>';
-            for (i = 1; i <= lastDay; i++) {
+            var total = 0, notStarted = 0, approved = 0, inProgress = 0;
+            html += '<div id="stream-event-' + index + '" part="stream-event-list" class="stream-event-list">';
+            html += '<div id="stream-event-summary" part="stream-event-total" class="d-flex">';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Total:</span> <span id="graph-total">DASHBOARD_TOTAL</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Approved:</span> <span id="graph-approved">DASHBOARD_APPROVED</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
+            html += '</div>';
+            this.eventsInWindow = [];
+            var csvCols = "";
+            var csvValues = "";
+            var period = ("0" + (month + 1)).slice(-2) + "/" + ("0" + 1).slice(-2) + ' - ' + ("0" + (month + 1)).slice(-2) + "/" + ("0" + lastDay).slice(-2);
+            for (var i = 1; i <= lastDay; i++) {
                 const mmdd = ("0" + (month + 1)).slice(-2) + "/" + ("0" + i).slice(-2);
                 var hide = true;
                 if (this.events[mmdd] != null) {
@@ -298,24 +363,66 @@ let SfIEvents = class SfIEvents extends LitElement {
                 }
                 console.log('hide', i, hide);
                 if (this.events[mmdd] != null) {
-                    total++;
                     //html += '<div>'+month + ',' + year + ',' + i+'</div>'
                     html += '<div part="stream-event-selected" class="d-flex stream-event-selected">';
                     html += '<div part="stream-event-selected-date">' + ("0" + i).slice(-2) + ' |</div>';
                     html += '<div class="stream-event-list-container flex-grow">';
                     for (var j = 0; j < this.events[mmdd].length; j++) {
+                        total++;
+                        this.events[mmdd][j]['mmdd'] = mmdd;
+                        this.eventsInWindow.push(this.events[mmdd][j]);
+                        var partStatus = "";
+                        if (this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]) != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()])) {
+                            partStatus = "status-approved";
+                        }
+                        else if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            partStatus = "status-in-progress";
+                        }
+                        else {
+                            partStatus = "status-not-started";
+                        }
                         html += '<div class="stream-events-container flex-grow">';
-                        html += '<table>';
+                        html += '<div class="hidden-tags hide">' + JSON.stringify(this.events[mmdd][j]['tags']) + '</div>';
+                        html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>';
+                        html += '<table class="stream-events-container-table" part="' + partStatus + '">';
                         html += '<thead>';
+                        html += '<th part="td-head">';
+                        html += 'Status';
+                        if (csvCols.indexOf('Status') < 0) {
+                            csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate';
+                        }
+                        html += '</th>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                             if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                                 html += '<th part="td-head" class="bg-left-no-border">';
                                 html += Object.keys(this.events[mmdd][j])[k];
-                                html += '</th>';
                             }
                         }
                         html += '<th part="td-head">';
                         html += '</th>';
+                        console.log('listing docs', this.events[mmdd][j].documents);
+                        if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Docs';
+                            html += '</th>';
+                        }
+                        else {
+                            notStarted++;
+                        }
+                        if (this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Comments';
+                            html += '</th>';
+                        }
+                        else {
+                        }
+                        if (this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Updated';
+                            html += '</th>';
+                        }
+                        else {
+                        }
                         // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                         //   html += '<th part="td-head">';
                         //   html += Object.keys(this.events[mmdd][j])[k];
@@ -323,6 +430,26 @@ let SfIEvents = class SfIEvents extends LitElement {
                         // }
                         html += '</thead>';
                         html += '<tbody>';
+                        csvValues += (period + ',');
+                        if (partStatus == "status-approved") {
+                            approved++;
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-done">check_circle</span>';
+                            csvValues += 'approved,';
+                            html += '</td>';
+                        }
+                        else if (partStatus == "status-in-progress") {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-pending">pending</span>';
+                            csvValues += 'in-progress,';
+                            html += '</td>';
+                        }
+                        else {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-not-started">schedule</span>';
+                            csvValues += 'not started,';
+                            html += '</td>';
+                        }
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                             if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                                 html += '<td part="td-body">';
@@ -335,9 +462,34 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 html += '</td>';
                             }
                         }
+                        csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
                         html += '<td id="td-expand-' + i + '" part="td-body">';
-                        html += '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand">open_in_new</button>';
+                        html += '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand mr-20">open_in_new</button>';
                         html += '</td>';
+                        if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons muted">description</span>';
+                            html += JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length;
+                            html += '</td>';
+                        }
+                        else {
+                        }
+                        if (this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons muted">forum</span>';
+                            html += (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length;
+                            html += '</td>';
+                        }
+                        else {
+                        }
+                        if (this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).getTime());
+                            html += '</td>';
+                        }
+                        else {
+                        }
+                        csvValues += '\n';
                         // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                         //   html += '<th part="td-body">';
                         //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
@@ -349,6 +501,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         // }
                         html += '</tbody>';
                         html += '</table>';
+                        html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>';
                         html += '</div>';
                     }
                     html += '</div>';
@@ -369,10 +522,36 @@ let SfIEvents = class SfIEvents extends LitElement {
                 }
             }
             html += '</div>';
+            this.csvDataCompliances = csvCols + "\n" + csvValues;
+            inProgress = total - notStarted - approved;
+            console.log('progress', total, notStarted, approved);
+            html = html.replace("DASHBOARD_TOTAL", total + "");
+            html = html.replace("DASHBOARD_NOT_STARTED", notStarted + "");
+            html = html.replace("DASHBOARD_APPROVED", approved + "");
+            html = html.replace("DASHBOARD_IN_PROGRESS", inProgress + "");
+            this.csvDataStats = 'Period,Total,Not Started,Approved,In Progress\n';
+            this.csvDataStats += period + "," + total + "," + notStarted + "," + approved + "," + inProgress;
             return html;
         };
         this.renderUpcomingEvents = (index, startDate, count) => {
-            var html = '<div id="stream-event-' + index + '" part="stream-event-list" class="stream-event-list">';
+            var html = '';
+            html += '<div class="mb-20 stream-event-list" part="stream-event-list">';
+            html += '<canvas id="myChart"></canvas>';
+            html += '<div id="chart-settings-controls"></div>';
+            html += '<div id="chart-settings"></div>';
+            html += '</div>';
+            html += '<div id="stream-event-' + index + '" part="stream-event-list" class="stream-event-list">';
+            var total = 0, notStarted = 0, approved = 0, inProgress = 0;
+            html += '<div id="stream-event-summary" part="stream-event-total" class="d-flex">';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Total:</span> <span id="graph-total">DASHBOARD_TOTAL</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Approved:</span> <span id="graph-approved">DASHBOARD_APPROVED</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
+            html += '</div>';
+            this.eventsInWindow = [];
+            var csvCols = "";
+            var csvValues = "";
+            var period = ("0" + (startDate.getMonth() + 1)).slice(-2) + "/" + ("0" + 1).slice(-2) + ' - ' + ("0" + (startDate.getMonth() + 1)).slice(-2) + "/" + ("0" + count).slice(-2);
             for (var i = 1; i <= count; i++) {
                 const mmdd = ("0" + (startDate.getMonth() + 1)).slice(-2) + "/" + ("0" + startDate.getDate()).slice(-2);
                 var hide = true;
@@ -402,9 +581,30 @@ let SfIEvents = class SfIEvents extends LitElement {
                     html += '<div part="stream-event-selected-date">' + ("0" + startDate.getDate()).slice(-2) + '/' + (startDate.getMonth() + 1) + ' |</div>';
                     html += '<div class="stream-event-list-container flex-grow">';
                     for (var j = 0; j < this.events[mmdd].length; j++) {
+                        total++;
+                        this.events[mmdd][j]['mmdd'] = mmdd;
+                        this.eventsInWindow.push(this.events[mmdd][j]);
+                        var partStatus = "";
+                        if (this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]) != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()])) {
+                            partStatus = "status-approved";
+                        }
+                        else if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            partStatus = "status-in-progress";
+                        }
+                        else {
+                            partStatus = "status-not-started";
+                        }
                         html += '<div class="stream-events-container flex-grow">';
-                        html += '<table>';
+                        html += '<div class="hidden-tags hide">' + JSON.stringify(this.events[mmdd][j]['tags']) + '</div>';
+                        html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>';
+                        html += '<table class="stream-events-container-table" >';
                         html += '<thead>';
+                        html += '<th part="td-head">';
+                        html += 'Status';
+                        if (csvCols.indexOf('Status') < 0) {
+                            csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate';
+                        }
+                        html += '</th>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                             if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                                 html += '<th part="td-head" class="bg-left-no-border">';
@@ -412,8 +612,31 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 html += '</th>';
                             }
                         }
+                        // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
+                        //   html += '<th part="td-head">';
+                        //   html += '</th>';
+                        // }
                         html += '<th part="td-head">';
                         html += '</th>';
+                        console.log('listing docs', this.events[mmdd][j].documents);
+                        if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Docs';
+                            html += '</th>';
+                        }
+                        else {
+                            notStarted++;
+                        }
+                        if (this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Comments';
+                            html += '</th>';
+                        }
+                        if (this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Updated';
+                            html += '</th>';
+                        }
                         // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                         //   html += '<th part="td-head">';
                         //   html += Object.keys(this.events[mmdd][j])[k];
@@ -421,6 +644,26 @@ let SfIEvents = class SfIEvents extends LitElement {
                         // }
                         html += '</thead>';
                         html += '<tbody>';
+                        csvValues += (period + ',');
+                        if (partStatus == "status-approved") {
+                            approved++;
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-done">check_circle</span>';
+                            csvValues += 'approved,';
+                            html += '</td>';
+                        }
+                        else if (partStatus == "status-in-progress") {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-pending">pending</span>';
+                            csvValues += 'in-progress,';
+                            html += '</td>';
+                        }
+                        else {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-not-started">schedule</span>';
+                            csvValues += 'not started,';
+                            html += '</td>';
+                        }
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                             if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                                 html += '<td part="td-body">';
@@ -433,9 +676,36 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 html += '</td>';
                             }
                         }
+                        // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
+                        //   html += '<td part="td-body">';
+                        //   html += '<span class="material-icons">description</span>'
+                        //   if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
+                        //     html += JSON.parse(this.events[mmdd][j].documents).length
+                        //   }
+                        //   html += '</td>';
+                        // }
+                        csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
                         html += '<td id="td-expand-' + i + '" part="td-body">';
                         html += '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand">open_in_new</button>';
                         html += '</td>';
+                        if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons muted">description</span>';
+                            html += JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length;
+                            html += '</td>';
+                        }
+                        if (this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons muted">forum</span>';
+                            html += (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length;
+                            html += '</td>';
+                        }
+                        if (this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).getTime());
+                            html += '</td>';
+                        }
+                        csvValues += '\n';
                         // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                         //   html += '<th part="td-body">';
                         //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
@@ -447,6 +717,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         // }
                         html += '</tbody>';
                         html += '</table>';
+                        html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>';
                         html += '</div>';
                     }
                     html += '</div>';
@@ -468,10 +739,26 @@ let SfIEvents = class SfIEvents extends LitElement {
                 startDate.setDate(startDate.getDate() + 1);
             }
             html += '</div>';
+            console.log('csvValues', csvValues);
+            this.csvDataCompliances = csvCols + "\n" + csvValues;
+            inProgress = total - notStarted - approved;
+            console.log('progress', total, notStarted, approved);
+            html = html.replace("DASHBOARD_TOTAL", total + "");
+            html = html.replace("DASHBOARD_NOT_STARTED", notStarted + "");
+            html = html.replace("DASHBOARD_APPROVED", approved + "");
+            html = html.replace("DASHBOARD_IN_PROGRESS", inProgress + "");
+            this.csvDataStats = 'Period,Total,Not Started,Approved,In Progress\n';
+            this.csvDataStats += period + "," + total + "," + notStarted + "," + approved + "," + inProgress;
             return html;
         };
         this.renderThisEvents = (index, startDate) => {
-            var html = '<div id="stream-event-' + index + '" part="stream-event-list" class="stream-event-list">';
+            var html = '';
+            html += '<div class="mb-20 stream-event-list" part="stream-event-list">';
+            html += '<canvas id="myChart"></canvas>';
+            html += '<div id="chart-settings-controls"></div>';
+            html += '<div id="chart-settings"></div>';
+            html += '</div>';
+            html += '<div id="stream-event-' + index + '" part="stream-event-list" class="stream-event-list">';
             var firstDate = new Date();
             var count = 7;
             console.log('this start date', startDate);
@@ -484,6 +771,17 @@ let SfIEvents = class SfIEvents extends LitElement {
                 firstDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
                 count = this.getLastDayOfMonth(startDate.getFullYear(), startDate.getMonth());
             }
+            var total = 0, notStarted = 0, approved = 0, inProgress = 0;
+            html += '<div id="stream-event-summary" part="stream-event-total" class="d-flex">';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Total:</span> <span id="graph-total">DASHBOARD_TOTAL</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Approved:</span> <span id="graph-approved">DASHBOARD_APPROVED</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
+            html += '</div>';
+            this.eventsInWindow = [];
+            var csvCols = "";
+            var csvValues = "";
+            var period = ("0" + (firstDate.getMonth() + 1)).slice(-2) + "/" + ("0" + 1).slice(-2) + ' - ' + ("0" + (firstDate.getMonth() + 1)).slice(-2) + "/" + ("0" + count).slice(-2);
             for (var i = 1; i <= count; i++) {
                 const mmdd = ("0" + (firstDate.getMonth() + 1)).slice(-2) + "/" + ("0" + firstDate.getDate()).slice(-2);
                 var hide = true;
@@ -513,9 +811,30 @@ let SfIEvents = class SfIEvents extends LitElement {
                     html += '<div part="stream-event-selected-date">' + ("0" + firstDate.getDate()).slice(-2) + '/' + (firstDate.getMonth() + 1) + ' |</div>';
                     html += '<div class="stream-event-list-container flex-grow">';
                     for (var j = 0; j < this.events[mmdd].length; j++) {
+                        total++;
+                        this.events[mmdd][j]['mmdd'] = mmdd;
+                        this.eventsInWindow.push(this.events[mmdd][j]);
+                        var partStatus = "";
+                        if (this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]) != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()])) {
+                            partStatus = "status-approved";
+                        }
+                        else if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            partStatus = "status-in-progress";
+                        }
+                        else {
+                            partStatus = "status-not-started";
+                        }
                         html += '<div class="stream-events-container flex-grow">';
-                        html += '<table>';
+                        html += '<div class="hidden-tags hide">' + JSON.stringify(this.events[mmdd][j]['tags']) + '</div>';
+                        html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>';
+                        html += '<table class="stream-events-container-table">';
                         html += '<thead>';
+                        html += '<th part="td-head">';
+                        html += 'Status';
+                        if (csvCols.indexOf('Status') < 0) {
+                            csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate';
+                        }
+                        html += '</th>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                             if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                                 html += '<th part="td-head" class="bg-left-no-border">';
@@ -523,8 +842,31 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 html += '</th>';
                             }
                         }
+                        // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
+                        //   html += '<th part="td-head">';
+                        //   html += '</th>';
+                        // }
                         html += '<th part="td-head">';
                         html += '</th>';
+                        console.log('listing docs', this.events[mmdd][j].documents);
+                        if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Docs';
+                            html += '</th>';
+                        }
+                        else {
+                            notStarted++;
+                        }
+                        if (this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Comments';
+                            html += '</th>';
+                        }
+                        if (this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Updated';
+                            html += '</th>';
+                        }
                         // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                         //   html += '<th part="td-head">';
                         //   html += Object.keys(this.events[mmdd][j])[k];
@@ -532,6 +874,26 @@ let SfIEvents = class SfIEvents extends LitElement {
                         // }
                         html += '</thead>';
                         html += '<tbody>';
+                        csvValues += (period + ',');
+                        if (partStatus == "status-approved") {
+                            approved++;
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-done">check_circle</span>';
+                            csvValues += 'approved,';
+                            html += '</td>';
+                        }
+                        else if (partStatus == "status-in-progress") {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-pending">pending</span>';
+                            csvValues += 'in-progress,';
+                            html += '</td>';
+                        }
+                        else {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-not-started">schedule</span>';
+                            csvValues += 'not started,';
+                            html += '</td>';
+                        }
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                             if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                                 html += '<td part="td-body">';
@@ -544,9 +906,36 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 html += '</td>';
                             }
                         }
+                        // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
+                        //   html += '<td part="td-body">';
+                        //   html += '<span class="material-icons">description</span>'
+                        //   if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
+                        //     html += JSON.parse(this.events[mmdd][j].documents).length
+                        //   }
+                        //   html += '</td>';
+                        // }
+                        csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
                         html += '<td id="td-expand-' + i + '" part="td-body">';
                         html += '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand">open_in_new</button>';
                         html += '</td>';
+                        if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons muted">description</span>';
+                            html += JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length;
+                            html += '</td>';
+                        }
+                        if (this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons muted">forum</span>';
+                            html += (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length;
+                            html += '</td>';
+                        }
+                        if (this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).getTime());
+                            html += '</td>';
+                        }
+                        csvValues += '\n';
                         // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                         //   html += '<th part="td-body">';
                         //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
@@ -558,6 +947,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         // }
                         html += '</tbody>';
                         html += '</table>';
+                        html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>';
                         html += '</div>';
                     }
                     html += '</div>';
@@ -579,10 +969,25 @@ let SfIEvents = class SfIEvents extends LitElement {
                 firstDate.setDate(firstDate.getDate() + 1);
             }
             html += '</div>';
+            this.csvDataCompliances = csvCols + "\n" + csvValues;
+            inProgress = total - notStarted - approved;
+            console.log('progress', total, notStarted, approved);
+            html = html.replace("DASHBOARD_TOTAL", total + "");
+            html = html.replace("DASHBOARD_NOT_STARTED", notStarted + "");
+            html = html.replace("DASHBOARD_APPROVED", approved + "");
+            html = html.replace("DASHBOARD_IN_PROGRESS", inProgress + "");
+            this.csvDataStats = 'Period,Total,Not Started,Approved,In Progress\n';
+            this.csvDataStats += period + "," + total + "," + notStarted + "," + approved + "," + inProgress;
             return html;
         };
         this.renderPastEvents = (index, startDate) => {
-            var html = '<div id="stream-event-' + index + '" part="stream-event-list" class="stream-event-list">';
+            var html = '';
+            html += '<div class="mb-20 stream-event-list" part="stream-event-list">';
+            html += '<canvas id="myChart"></canvas>';
+            html += '<div id="chart-settings-controls"></div>';
+            html += '<div id="chart-settings"></div>';
+            html += '</div>';
+            html += '<div id="stream-event-' + index + '" part="stream-event-list" class="stream-event-list">';
             var firstDate = new Date();
             var count = 7;
             console.log('this start date', startDate, index);
@@ -597,6 +1002,17 @@ let SfIEvents = class SfIEvents extends LitElement {
                 console.log('this start date', firstDate);
                 console.log('this start date', count);
             }
+            var total = 0, notStarted = 0, approved = 0, inProgress = 0;
+            html += '<div id="stream-event-summary" part="stream-event-total" class="d-flex">';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Total:</span> <span id="graph-total">DASHBOARD_TOTAL</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Approved:</span> <span id="graph-approved">DASHBOARD_APPROVED</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
+            html += '</div>';
+            this.eventsInWindow = [];
+            var csvCols = "";
+            var csvValues = "";
+            var period = ("0" + (firstDate.getMonth() + 1)).slice(-2) + "/" + ("0" + 1).slice(-2) + ' - ' + ("0" + (firstDate.getMonth() + 1)).slice(-2) + "/" + ("0" + count).slice(-2);
             for (var i = 1; i <= count; i++) {
                 const mmdd = ("0" + (firstDate.getMonth() + 1)).slice(-2) + "/" + ("0" + firstDate.getDate()).slice(-2);
                 var hide = true;
@@ -626,9 +1042,30 @@ let SfIEvents = class SfIEvents extends LitElement {
                     html += '<div part="stream-event-selected-date">' + ("0" + firstDate.getDate()).slice(-2) + '/' + (firstDate.getMonth() + 1) + ' |</div>';
                     html += '<div class="stream-event-list-container flex-grow">';
                     for (var j = 0; j < this.events[mmdd].length; j++) {
+                        total++;
+                        this.events[mmdd][j]['mmdd'] = mmdd;
+                        this.eventsInWindow.push(this.events[mmdd][j]);
+                        var partStatus = "";
+                        if (this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]) != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()])) {
+                            partStatus = "status-approved";
+                        }
+                        else if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            partStatus = "status-in-progress";
+                        }
+                        else {
+                            partStatus = "status-not-started";
+                        }
                         html += '<div class="stream-events-container flex-grow">';
-                        html += '<table>';
+                        html += '<div class="hidden-tags hide">' + JSON.stringify(this.events[mmdd][j]['tags']) + '</div>';
+                        html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>';
+                        html += '<table class="stream-events-container-table">';
                         html += '<thead>';
+                        html += '<th part="td-head">';
+                        html += 'Status';
+                        if (csvCols.indexOf('Status') < 0) {
+                            csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate';
+                        }
+                        html += '</th>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                             if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                                 html += '<th part="td-head" class="bg-left-no-border">';
@@ -636,8 +1073,31 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 html += '</th>';
                             }
                         }
+                        // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
+                        //   html += '<th part="td-head">';
+                        //   html += '</th>';
+                        // }
                         html += '<th part="td-head">';
                         html += '</th>';
+                        console.log('listing docs', this.events[mmdd][j].documents);
+                        if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Docs';
+                            html += '</th>';
+                        }
+                        else {
+                            notStarted++;
+                        }
+                        if (this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Comments';
+                            html += '</th>';
+                        }
+                        if (this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Updated';
+                            html += '</th>';
+                        }
                         // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                         //   html += '<th part="td-head">';
                         //   html += Object.keys(this.events[mmdd][j])[k];
@@ -645,6 +1105,26 @@ let SfIEvents = class SfIEvents extends LitElement {
                         // }
                         html += '</thead>';
                         html += '<tbody>';
+                        csvValues += (period + ',');
+                        if (partStatus == "status-approved") {
+                            approved++;
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-done">check_circle</span>';
+                            csvValues += 'approved,';
+                            html += '</td>';
+                        }
+                        else if (partStatus == "status-in-progress") {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-pending">pending</span>';
+                            csvValues += 'in-progress,';
+                            html += '</td>';
+                        }
+                        else {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-not-started">schedule</span>';
+                            csvValues += 'not started,';
+                            html += '</td>';
+                        }
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                             if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                                 html += '<td part="td-body">';
@@ -657,9 +1137,36 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 html += '</td>';
                             }
                         }
+                        // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
+                        //   html += '<td part="td-body">';
+                        //   html += '<span class="material-icons">description</span>'
+                        //   if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
+                        //     html += JSON.parse(this.events[mmdd][j].documents).length
+                        //   }
+                        //   html += '</td>';
+                        // }
+                        csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
                         html += '<td id="td-expand-' + i + '" part="td-body">';
                         html += '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand">open_in_new</button>';
                         html += '</td>';
+                        if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons muted">description</span>';
+                            html += JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length;
+                            html += '</td>';
+                        }
+                        if (this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons muted">forum</span>';
+                            html += (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length;
+                            html += '</td>';
+                        }
+                        if (this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).getTime());
+                            html += '</td>';
+                        }
+                        csvValues += '\n';
                         // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                         //   html += '<th part="td-body">';
                         //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
@@ -671,6 +1178,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         // }
                         html += '</tbody>';
                         html += '</table>';
+                        html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>';
                         html += '</div>';
                     }
                     html += '</div>';
@@ -692,10 +1200,36 @@ let SfIEvents = class SfIEvents extends LitElement {
                 firstDate.setDate(firstDate.getDate() + 1);
             }
             html += '</div>';
+            this.csvDataCompliances = csvCols + "\n" + csvValues;
+            inProgress = total - notStarted - approved;
+            console.log('progress', total, notStarted, approved);
+            html = html.replace("DASHBOARD_TOTAL", total + "");
+            html = html.replace("DASHBOARD_NOT_STARTED", notStarted + "");
+            html = html.replace("DASHBOARD_APPROVED", approved + "");
+            html = html.replace("DASHBOARD_IN_PROGRESS", inProgress + "");
+            this.csvDataStats = 'Period,Total,Not Started,Approved,In Progress\n';
+            this.csvDataStats += period + "," + total + "," + notStarted + "," + approved + "," + inProgress;
             return html;
         };
         this.renderRangeEvents = (firstDate, count) => {
-            var html = '<div id="stream-event-0" part="stream-event-list" class="stream-event-list">';
+            var html = '';
+            html += '<div class="mb-20 stream-event-list" part="stream-event-list">';
+            html += '<canvas id="myChart"></canvas>';
+            html += '<div id="chart-settings-controls"></div>';
+            html += '<div id="chart-settings"></div>';
+            html += '</div>';
+            html += '<div id="stream-event-0" part="stream-event-list" class="stream-event-list">';
+            var total = 0, notStarted = 0, approved = 0, inProgress = 0;
+            html += '<div id="stream-event-summary" part="stream-event-total" class="d-flex">';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Total:</span> <span id="graph-total">DASHBOARD_TOTAL</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Approved:</span> <span id="graph-approved">DASHBOARD_APPROVED</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
+            html += '<div part="badge-dashboard" class="mr-10"><span class="muted">In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
+            html += '</div>';
+            this.eventsInWindow = [];
+            var csvCols = "";
+            var csvValues = "";
+            var period = ("0" + (firstDate.getMonth() + 1)).slice(-2) + "/" + ("0" + 1).slice(-2) + ' - ' + ("0" + (firstDate.getMonth() + 1)).slice(-2) + "/" + ("0" + count).slice(-2);
             for (var i = 1; i <= count; i++) {
                 const mmdd = ("0" + (firstDate.getMonth() + 1)).slice(-2) + "/" + ("0" + firstDate.getDate()).slice(-2);
                 var hide = true;
@@ -725,9 +1259,30 @@ let SfIEvents = class SfIEvents extends LitElement {
                     html += '<div part="stream-event-selected-date">' + ("0" + firstDate.getDate()).slice(-2) + '/' + (firstDate.getMonth() + 1) + ' |</div>';
                     html += '<div class="stream-event-list-container flex-grow">';
                     for (var j = 0; j < this.events[mmdd].length; j++) {
+                        total++;
+                        this.events[mmdd][j]['mmdd'] = mmdd;
+                        this.eventsInWindow.push(this.events[mmdd][j]);
+                        var partStatus = "";
+                        if (this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]) != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()])) {
+                            partStatus = "status-approved";
+                        }
+                        else if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            partStatus = "status-in-progress";
+                        }
+                        else {
+                            partStatus = "status-not-started";
+                        }
                         html += '<div class="stream-events-container flex-grow">';
-                        html += '<table>';
+                        html += '<div class="hidden-tags hide">' + JSON.stringify(this.events[mmdd][j]['tags']) + '</div>';
+                        html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>';
+                        html += '<table class="stream-events-container-table">';
                         html += '<thead>';
+                        html += '<th part="td-head">';
+                        html += 'Status';
+                        if (csvCols.indexOf('Status') < 0) {
+                            csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate';
+                        }
+                        html += '</th>';
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                             if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                                 html += '<th part="td-head" class="bg-left-no-border">';
@@ -735,8 +1290,31 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 html += '</th>';
                             }
                         }
+                        // if(JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                        //   html += '<th part="td-head">';
+                        //   html += '</th>';
+                        // }
                         html += '<th part="td-head">';
                         html += '</th>';
+                        console.log('listing docs', this.events[mmdd][j].documents);
+                        if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Docs';
+                            html += '</th>';
+                        }
+                        else {
+                            notStarted++;
+                        }
+                        if (this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Comments';
+                            html += '</th>';
+                        }
+                        if (this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<th part="td-head">';
+                            html += 'Updated';
+                            html += '</th>';
+                        }
                         // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                         //   html += '<th part="td-head">';
                         //   html += Object.keys(this.events[mmdd][j])[k];
@@ -744,6 +1322,26 @@ let SfIEvents = class SfIEvents extends LitElement {
                         // }
                         html += '</thead>';
                         html += '<tbody>';
+                        csvValues += (period + ',');
+                        if (partStatus == "status-approved") {
+                            approved++;
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-done">check_circle</span>';
+                            csvValues += 'approved,';
+                            html += '</td>';
+                        }
+                        else if (partStatus == "status-in-progress") {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-pending">pending</span>';
+                            csvValues += 'in-progress,';
+                            html += '</td>';
+                        }
+                        else {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons color-not-started">schedule</span>';
+                            csvValues += 'not started,';
+                            html += '</td>';
+                        }
                         for (var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                             if (this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                                 html += '<td part="td-body">';
@@ -756,9 +1354,37 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 html += '</td>';
                             }
                         }
+                        // console.log('docs list',this.events[mmdd][j].documents);
+                        // if(JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                        //   html += '<td part="td-body">';
+                        //   html += '<span class="material-icons">description</span>'
+                        //   if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
+                        //     html += JSON.parse(this.events[mmdd][j].documents).length
+                        //   }
+                        //   html += '</td>';
+                        // }
+                        csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
                         html += '<td id="td-expand-' + i + '" part="td-body">';
                         html += '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand">open_in_new</button>';
                         html += '</td>';
+                        if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons muted">description</span>';
+                            html += JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length;
+                            html += '</td>';
+                        }
+                        if (this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += '<span class="material-icons muted">forum</span>';
+                            html += (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length;
+                            html += '</td>';
+                        }
+                        if (this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+                            html += '<td part="td-body">';
+                            html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).getTime());
+                            html += '</td>';
+                        }
+                        csvValues += '\n';
                         // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                         //   html += '<th part="td-body">';
                         //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
@@ -770,6 +1396,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         // }
                         html += '</tbody>';
                         html += '</table>';
+                        html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>';
                         html += '</div>';
                     }
                     html += '</div>';
@@ -791,6 +1418,15 @@ let SfIEvents = class SfIEvents extends LitElement {
                 firstDate.setDate(firstDate.getDate() + 1);
             }
             html += '</div>';
+            this.csvDataCompliances = csvCols + "\n" + csvValues;
+            inProgress = total - notStarted - approved;
+            this.csvDataStats = 'Period,Total,Not Started,Approved,In Progress\n';
+            this.csvDataStats += period + "," + total + "," + notStarted + "," + approved + "," + inProgress;
+            console.log('progress', total, notStarted, approved);
+            html = html.replace("DASHBOARD_TOTAL", total + "");
+            html = html.replace("DASHBOARD_NOT_STARTED", notStarted + "");
+            html = html.replace("DASHBOARD_APPROVED", approved + "");
+            html = html.replace("DASHBOARD_IN_PROGRESS", inProgress + "");
             this._SfCustomContainer.querySelector('.calendar-right-data').innerHTML = html;
             const buttonArr = this._SfCustomContainer.querySelectorAll('.button-expand');
             for (var i = 0; i < buttonArr.length; i++) {
@@ -800,7 +1436,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const mmdd = idArr[3] + "/" + idArr[4];
                     const j = idArr[5];
                     this._SfDetailContainer.style.display = 'block';
-                    this.renderEventDetail(this.events[mmdd][j]);
+                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
                 });
             }
         };
@@ -845,8 +1481,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                     this._SfStreamEventStatus.innerHTML = "Chosen End Date cannot be earlier than chosen Start Date";
                     return;
                 }
-                if ((new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24) > 90) {
-                    this._SfStreamEventStatus.innerHTML = "Chosen time window cannot be greater than 90 days";
+                if ((new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24) > 365) {
+                    this._SfStreamEventStatus.innerHTML = "Chosen time window cannot be greater than 365 days";
                     return;
                 }
                 this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24));
@@ -859,6 +1495,49 @@ let SfIEvents = class SfIEvents extends LitElement {
             }
             else {
                 this._SfStreamEventStatus.innerHTML = "Please select Start Date and End Date";
+            }
+            console.log('rendering chart', this._SfCustomContainer.innerHTML);
+            if (this._SfCustomContainer.innerHTML.indexOf('myChart') >= 0) {
+                const ctx = this._SfCustomContainer.querySelector('#myChart');
+                this._SfCustomContainer.querySelector('#myChart').style.maxWidth = '400px';
+                this._SfCustomContainer.querySelector('#myChart').style.maxHeight = '400px';
+                var dataApproved = this._SfCustomContainer.querySelector('#graph-approved').innerHTML;
+                var dataNotStarted = this._SfCustomContainer.querySelector('#graph-not-started').innerHTML;
+                var dataInProgress = this._SfCustomContainer.querySelector('#graph-in-progress').innerHTML;
+                if (this.fill == "pattern") {
+                    const data = {
+                        labels: ['Approved', 'Not Started', 'In Progress'],
+                        datasets: [{
+                                label: 'Compliances',
+                                data: [dataApproved, dataNotStarted, dataInProgress],
+                                borderWidth: 1,
+                                backgroundColor: [
+                                    Util.createDiagonalPattern3(this.COLOR_APPROVED),
+                                    Util.createDiagonalPattern2(this.COLOR_NOT_STARTED),
+                                    Util.createDiagonalPattern1(this.COLOR_IN_PROGRESS)
+                                ]
+                            }]
+                    };
+                    this.renderChartSettings(this._SfCustomContainer, -1, ctx);
+                    this.renderChart(ctx, 'doughnut', data);
+                }
+                if (this.fill == "solid") {
+                    const data = {
+                        labels: ['Approved', 'Not Started', 'In Progress'],
+                        datasets: [{
+                                label: 'Compliances',
+                                data: [dataApproved, dataNotStarted, dataInProgress],
+                                borderWidth: 1,
+                                backgroundColor: [
+                                    this.COLOR_APPROVED,
+                                    this.COLOR_NOT_STARTED,
+                                    this.COLOR_IN_PROGRESS
+                                ]
+                            }]
+                    };
+                    this.renderChartSettings(this._SfCustomContainer, -1, ctx);
+                    this.renderChart(ctx, 'doughnut', data);
+                }
             }
         };
         this.initCustomRightCol = () => {
@@ -887,7 +1566,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             return false;
         };
         this.calculateAndShowSummary = () => {
-            console.log('showing summary');
+            console.log('showing summary', this.mappedValuesUsers);
             const inputArr = this._SfMappingContainer.querySelectorAll('.input-users');
             var mapped = 0;
             for (var i = 0; i < Object.keys(this.mappedValuesUsers).length; i++) {
@@ -990,6 +1669,93 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this._SfMappingContainer.querySelector('#row-unmapped-status-' + clickIndex).innerHTML = '<span class="material-icons color-pending">pending</done>';
             }
         };
+        this.filterEventsInWindow = (tags, ctx) => {
+            const arrData = [];
+            console.log('window', this.eventsInWindow);
+            for (var i = 0; i < tags.length; i++) {
+                var countApproved = 0;
+                var countInProgress = 0;
+                var countNotStarted = 0;
+                for (var j = 0; j < this.eventsInWindow.length; j++) {
+                    const event = this.eventsInWindow[j];
+                    for (var l = 0; l < event.tags.length; l++) {
+                        if ((event.tags[l] + "").toLowerCase().indexOf((tags[i] + "").toLowerCase().split(';')[1]) >= 0) {
+                            //console.log('found', event.documents[event.mmdd + '/' + new Date().getFullYear()], event.approved[event.mmdd + '/' + new Date().getFullYear()], event.approved[event.mmdd + '/' + new Date().getFullYear()].approved);
+                            if (event.documents == null || event.documents[event.mmdd + '/' + new Date().getFullYear()] == null || JSON.parse(event.documents[event.mmdd + '/' + new Date().getFullYear()]) == null) {
+                                countNotStarted++;
+                            }
+                            else if (event.approved != null && event.approved[event.mmdd + '/' + new Date().getFullYear()] != null && !event.approved[event.mmdd + '/' + new Date().getFullYear()]) {
+                                countInProgress++;
+                            }
+                            else if (event.approved != null && event.approved[event.mmdd + '/' + new Date().getFullYear()] != null && event.approved[event.mmdd + '/' + new Date().getFullYear()]) {
+                                countApproved++;
+                            }
+                        }
+                    }
+                }
+                const arrItem = [countApproved, countInProgress, countNotStarted];
+                arrData.push(arrItem);
+            }
+            console.log(arrData);
+            const dataSetApproved = [];
+            const dataSetInProgress = [];
+            const dataSetNotStarted = [];
+            for (i = 0; i < arrData.length; i++) {
+                dataSetApproved.push(arrData[i][0]);
+                dataSetInProgress.push(arrData[i][1]);
+                dataSetNotStarted.push(arrData[i][2]);
+            }
+            const tagsCompressed = [];
+            for (i = 0; i < tags.length; i++) {
+                tagsCompressed.push(this.truncate(tags[i].split(';')[0], 20, false, false));
+            }
+            if (this.fill == "solid") {
+                const data = {
+                    labels: tagsCompressed,
+                    datasets: [
+                        {
+                            label: 'Approved',
+                            data: dataSetApproved,
+                            backgroundColor: '#20a39e'
+                        },
+                        {
+                            label: 'In Progress',
+                            data: dataSetInProgress,
+                            backgroundColor: '#FFBA49'
+                        },
+                        {
+                            label: 'Not Started',
+                            data: dataSetNotStarted,
+                            backgroundColor: '#A4A9AD'
+                        }
+                    ]
+                };
+                this.renderChart(ctx, 'bar', data);
+            }
+            else {
+                const data = {
+                    labels: tagsCompressed,
+                    datasets: [
+                        {
+                            label: 'Approved',
+                            data: dataSetApproved,
+                            backgroundColor: Util.createDiagonalPattern3('#20a39e')
+                        },
+                        {
+                            label: 'In Progress',
+                            data: dataSetInProgress,
+                            backgroundColor: Util.createDiagonalPattern1('#FFBA49')
+                        },
+                        {
+                            label: 'Not Started',
+                            data: dataSetNotStarted,
+                            backgroundColor: Util.createDiagonalPattern2('#A4A9AD')
+                        }
+                    ]
+                };
+                this.renderChart(ctx, 'bar', data);
+            }
+        };
         this.renderCustom = () => {
             var _a, _b;
             var html = '';
@@ -1070,8 +1836,48 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const mmdd = idArr[3] + "/" + idArr[4];
                     const j = idArr[5];
                     this._SfDetailContainer.style.display = 'block';
-                    this.renderEventDetail(this.events[mmdd][j]);
+                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
                 });
+            }
+            const ctx = this._SfPastContainer.querySelector('#myChart');
+            this._SfPastContainer.querySelector('#myChart').style.maxWidth = '400px';
+            this._SfPastContainer.querySelector('#myChart').style.maxHeight = '400px';
+            var dataApproved = this._SfPastContainer.querySelector('#graph-approved').innerHTML;
+            var dataNotStarted = this._SfPastContainer.querySelector('#graph-not-started').innerHTML;
+            var dataInProgress = this._SfPastContainer.querySelector('#graph-in-progress').innerHTML;
+            if (this.fill == "pattern") {
+                const data = {
+                    labels: ['Approved', 'Not Started', 'In Progress'],
+                    datasets: [{
+                            label: 'Compliances',
+                            data: [dataApproved, dataNotStarted, dataInProgress],
+                            borderWidth: 1,
+                            backgroundColor: [
+                                Util.createDiagonalPattern3(this.COLOR_APPROVED),
+                                Util.createDiagonalPattern2(this.COLOR_NOT_STARTED),
+                                Util.createDiagonalPattern1(this.COLOR_IN_PROGRESS)
+                            ]
+                        }]
+                };
+                this.renderChartSettings(this._SfPastContainer, -1, ctx);
+                this.renderChart(ctx, 'doughnut', data);
+            }
+            if (this.fill == "solid") {
+                const data = {
+                    labels: ['Approved', 'Not Started', 'In Progress'],
+                    datasets: [{
+                            label: 'Compliances',
+                            data: [dataApproved, dataNotStarted, dataInProgress],
+                            borderWidth: 1,
+                            backgroundColor: [
+                                this.COLOR_APPROVED,
+                                this.COLOR_NOT_STARTED,
+                                this.COLOR_IN_PROGRESS
+                            ]
+                        }]
+                };
+                this.renderChartSettings(this._SfPastContainer, -1, ctx);
+                this.renderChart(ctx, 'doughnut', data);
             }
         };
         this.renderUpcoming = (index = 0) => {
@@ -1137,8 +1943,48 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const mmdd = idArr[3] + "/" + idArr[4];
                     const j = idArr[5];
                     this._SfDetailContainer.style.display = 'block';
-                    this.renderEventDetail(this.events[mmdd][j]);
+                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
                 });
+            }
+            const ctx = this._SfUpcomingContainer.querySelector('#myChart');
+            this._SfUpcomingContainer.querySelector('#myChart').style.maxWidth = '400px';
+            this._SfUpcomingContainer.querySelector('#myChart').style.maxHeight = '400px';
+            var dataApproved = this._SfUpcomingContainer.querySelector('#graph-approved').innerHTML;
+            var dataNotStarted = this._SfUpcomingContainer.querySelector('#graph-not-started').innerHTML;
+            var dataInProgress = this._SfUpcomingContainer.querySelector('#graph-in-progress').innerHTML;
+            if (this.fill == "pattern") {
+                const data = {
+                    labels: ['Approved', 'Not Started', 'In Progress'],
+                    datasets: [{
+                            label: 'Compliances',
+                            data: [dataApproved, dataNotStarted, dataInProgress],
+                            borderWidth: 1,
+                            backgroundColor: [
+                                Util.createDiagonalPattern3(this.COLOR_APPROVED),
+                                Util.createDiagonalPattern2(this.COLOR_NOT_STARTED),
+                                Util.createDiagonalPattern1(this.COLOR_IN_PROGRESS)
+                            ]
+                        }]
+                };
+                this.renderChartSettings(this._SfUpcomingContainer, -1, ctx);
+                this.renderChart(ctx, 'doughnut', data);
+            }
+            if (this.fill == "solid") {
+                const data = {
+                    labels: ['Approved', 'Not Started', 'In Progress'],
+                    datasets: [{
+                            label: 'Compliances',
+                            data: [dataApproved, dataNotStarted, dataInProgress],
+                            borderWidth: 1,
+                            backgroundColor: [
+                                this.COLOR_APPROVED,
+                                this.COLOR_NOT_STARTED,
+                                this.COLOR_IN_PROGRESS
+                            ]
+                        }]
+                };
+                this.renderChartSettings(this._SfUpcomingContainer, -1, ctx);
+                this.renderChart(ctx, 'doughnut', data);
             }
         };
         this.renderThis = (index = 0) => {
@@ -1186,8 +2032,48 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const mmdd = idArr[3] + "/" + idArr[4];
                     const j = idArr[5];
                     this._SfDetailContainer.style.display = 'block';
-                    this.renderEventDetail(this.events[mmdd][j]);
+                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
                 });
+            }
+            const ctx = this._SfThisContainer.querySelector('#myChart');
+            this._SfThisContainer.querySelector('#myChart').style.maxWidth = '400px';
+            this._SfThisContainer.querySelector('#myChart').style.maxHeight = '400px';
+            var dataApproved = this._SfThisContainer.querySelector('#graph-approved').innerHTML;
+            var dataNotStarted = this._SfThisContainer.querySelector('#graph-not-started').innerHTML;
+            var dataInProgress = this._SfThisContainer.querySelector('#graph-in-progress').innerHTML;
+            if (this.fill == "pattern") {
+                const data = {
+                    labels: ['Approved', 'Not Started', 'In Progress'],
+                    datasets: [{
+                            label: 'Compliances',
+                            data: [dataApproved, dataNotStarted, dataInProgress],
+                            borderWidth: 1,
+                            backgroundColor: [
+                                Util.createDiagonalPattern3(this.COLOR_APPROVED),
+                                Util.createDiagonalPattern2(this.COLOR_NOT_STARTED),
+                                Util.createDiagonalPattern1(this.COLOR_IN_PROGRESS)
+                            ]
+                        }]
+                };
+                this.renderChartSettings(this._SfThisContainer, -1, ctx);
+                this.renderChart(ctx, 'doughnut', data);
+            }
+            if (this.fill == "solid") {
+                const data = {
+                    labels: ['Approved', 'Not Started', 'In Progress'],
+                    datasets: [{
+                            label: 'Compliances',
+                            data: [dataApproved, dataNotStarted, dataInProgress],
+                            borderWidth: 1,
+                            backgroundColor: [
+                                this.COLOR_APPROVED,
+                                this.COLOR_NOT_STARTED,
+                                this.COLOR_IN_PROGRESS
+                            ]
+                        }]
+                };
+                this.renderChartSettings(this._SfThisContainer, -1, ctx);
+                this.renderChart(ctx, 'doughnut', data);
             }
         };
         this.renderStream = (index = 0) => {
@@ -1236,13 +2122,52 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const mmdd = idArr[3] + "/" + idArr[4];
                     const j = idArr[5];
                     this._SfDetailContainer.style.display = 'block';
-                    this.renderEventDetail(this.events[mmdd][j]);
+                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
                 });
             }
-            console.log('stream button array', buttonArr);
+            const ctx = this._SfStreamContainer.querySelector('#myChart');
+            this._SfStreamContainer.querySelector('#myChart').style.maxWidth = '400px';
+            this._SfStreamContainer.querySelector('#myChart').style.maxHeight = '400px';
+            var dataApproved = this._SfStreamContainer.querySelector('#graph-approved').innerHTML;
+            var dataNotStarted = this._SfStreamContainer.querySelector('#graph-not-started').innerHTML;
+            var dataInProgress = this._SfStreamContainer.querySelector('#graph-in-progress').innerHTML;
+            if (this.fill == "pattern") {
+                const data = {
+                    labels: ['Approved', 'Not Started', 'In Progress'],
+                    datasets: [{
+                            label: 'Compliances',
+                            data: [dataApproved, dataNotStarted, dataInProgress],
+                            borderWidth: 1,
+                            backgroundColor: [
+                                Util.createDiagonalPattern3(this.COLOR_APPROVED),
+                                Util.createDiagonalPattern2(this.COLOR_NOT_STARTED),
+                                Util.createDiagonalPattern1(this.COLOR_IN_PROGRESS)
+                            ]
+                        }]
+                };
+                this.renderChartSettings(this._SfStreamContainer, -1, ctx);
+                this.renderChart(ctx, 'doughnut', data);
+            }
+            if (this.fill == "solid") {
+                const data = {
+                    labels: ['Approved', 'Not Started', 'In Progress'],
+                    datasets: [{
+                            label: 'Compliances',
+                            data: [dataApproved, dataNotStarted, dataInProgress],
+                            borderWidth: 1,
+                            backgroundColor: [
+                                this.COLOR_APPROVED,
+                                this.COLOR_NOT_STARTED,
+                                this.COLOR_IN_PROGRESS
+                            ]
+                        }]
+                };
+                this.renderChartSettings(this._SfStreamContainer, -1, ctx);
+                this.renderChart(ctx, 'doughnut', data);
+            }
         };
-        this.renderEventDetail = (event) => {
-            var _a;
+        this.renderEventDetail = (event, mmddyyyy) => {
+            var _a, _b, _c;
             console.log('event detail', event);
             var html = `
     
@@ -1256,32 +2181,174 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<div class="d-flex m-20 flex-wrap">';
             for (var k = 0; k < Object.keys(event).length; k++) {
                 if (!this.getEventPreviewFields().includes(Object.keys(event)[k])) {
-                    html += '<div class="m-20">';
-                    html += '<div part="detail-head"><strong>' + Object.keys(event)[k] + '</strong></div>';
-                    if (event[Object.keys(event)[k]].indexOf("[") >= 0) {
-                        html += this.getEventTexts(Object.keys(event)[k], JSON.parse(event[Object.keys(event)[k]]), event);
+                    if (!this.getEventHideFields().includes(Object.keys(event)[k])) {
+                        html += '<div class="m-20">';
+                        html += '<div part="detail-head"><strong>' + Object.keys(event)[k] + '</strong></div>';
+                        console.log(Object.keys(event)[k], event[Object.keys(event)[k]]);
+                        if ((event[Object.keys(event)[k]] + "").indexOf("[") >= 0) {
+                            html += this.getEventTexts(Object.keys(event)[k], JSON.parse(event[Object.keys(event)[k]]), event);
+                        }
+                        else {
+                            html += '<sf-i-elastic-text text="' + (event[Object.keys(event)[k]] + "").replace(/"/g, "") + '" minLength="20"></sf-i-elastic-text>';
+                        }
+                        html += '</div>';
                     }
-                    else {
-                        html += '<sf-i-elastic-text text="' + event[Object.keys(event)[k]].replace(/"/g, "") + '" minLength="20"></sf-i-elastic-text>';
-                    }
-                    html += '</div>';
                 }
             }
-            html += '</div>';
-            html += '<hr>';
-            html += '<div class="m-20">';
-            html += '<h3>Submission</h3>';
-            html += '<div class="d-flex m-20 flex-col">';
-            html += '<label part="input-label">Comments</label>';
-            html += '<input type="text" part="input" />';
-            html += '</div>';
-            html += '</div>';
-            html += '<div>';
+            let comments, docs, approved;
+            if (this.mode == "consumer") {
+                comments = event['comments'] == null ? [] : event['comments'][mmddyyyy] == null ? [] : (event['comments'][mmddyyyy]);
+                docs = event['documents'] == null ? [] : event['documents'][mmddyyyy] == null ? [] : JSON.parse(event['documents'][mmddyyyy]);
+                approved = event['approved'] == null ? false : event['approved'][mmddyyyy] == null ? false : event['approved'][mmddyyyy];
+                console.log('docs received', event['documents']);
+                console.log('docs received', comments);
+                console.log('docs received', approved);
+                if (approved) {
+                    html += '<div class="m-20">';
+                    html += '<div part="detail-head"><strong>Approved</strong></div>';
+                    html += '<span class="material-icons color-done">check_circle</span>';
+                    html += '</div>';
+                }
+                html += '</div>';
+                if (this.myRole == this.TAB_APPROVER) {
+                    if (docs.length > 0) {
+                        html += '<div class="m-20" part="report-container">';
+                        html += '<div class="d-flex justify-between align-center">';
+                        html += '<button class="invisible" part="button">Save</button>';
+                        html += '<h3 part="results-title" class="m-0">Approve Compliance</h3>';
+                        html += '<button id="button-uploader-submit-approve" class="button-submit" part="button">Save</button>';
+                        html += '</div>';
+                        html += '<div class="m-20">';
+                        html += '<label part="input-label">Supporting Documents</label>';
+                        html += '<slot name="uploader"></slot>';
+                        html += '</div>';
+                        html += '<div class="d-flex m-20 flex-col">';
+                        html += '<label part="input-label">Approver Comments</label>';
+                        html += '<input id="input-approver-comments" type="text" part="input" value=""/><br />';
+                        html += '<div>';
+                        html += '<label part="input-label">Approve?</label><br />';
+                        html += '<div class="mt-5">';
+                        html += '<input id="input-approve-yes" name="radio-approved" type="radio"/> Yes';
+                        html += '<input id="input-approve-no" name="radio-approved" type="radio" checked/> No';
+                        html += '</div>';
+                        html += '</div>';
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                }
+                else {
+                    html += '<div class="m-20" part="report-container">';
+                    html += '<div class="d-flex justify-between align-center">';
+                    html += '<button class="invisible" part="button">Save</button>';
+                    html += '<h3 part="results-title" class="m-0">Report Compliance</h3>';
+                    html += '<button id="button-uploader-submit-report" class="button-submit" part="button">Save</button>';
+                    html += '</div>';
+                    html += '<div class="d-flex m-20 flex-col">';
+                    html += '<label part="input-label">Reporter Comments</label>';
+                    html += '<input id="input-reporter-comments" type="text" part="input" value=""/><br />';
+                    html += '<label part="input-label">Supporting Documents</label>';
+                    html += '<slot name="uploader"></slot>';
+                    html += '</div>';
+                    html += '</div>';
+                }
+                html += '<div class="m-20">';
+                html += '<div class="d-flex flex-col">';
+                html += '<h3 class="muted">Comments</h3>';
+                for (var i = 0; i < comments.length; i++) {
+                    html += '<div part="commentbox" class="d-flex commentbox ' + (comments[i].author + "").toLowerCase() + 'box">';
+                    html += '<div class="mr-20"><strong>' + comments[i].author + '</strong></div>';
+                    html += '<div class="">' + comments[i].comment + '<br /><small><span class="muted">' + comments[i].timestamp + '</span></small></div>';
+                    html += '</div>';
+                }
+                if (comments.length === 0) {
+                    html += '<div><strong>No comments yet!</strong></div>';
+                }
+                html += '</div>';
+                html += '<div>';
+            }
             this._SfDetailContainer.innerHTML = html;
             (_a = this._SfDetailContainer.querySelector('#button-detail-close')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
                 this._SfDetailContainer.innerHTML = '';
                 this._SfDetailContainer.style.display = 'none';
             });
+            if (this.mode == "consumer") {
+                (_b = this._SfDetailContainer.querySelector('#button-uploader-submit-approve')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', async () => {
+                    const comments = this._SfDetailContainer.querySelector('#input-approver-comments').value;
+                    const approved = this._SfDetailContainer.querySelector('#input-approve-yes').checked;
+                    console.log(comments, approved);
+                    await this.uploadReview(mmddyyyy, event["id"], comments, approved);
+                    var clickEvent = new MouseEvent("click", {
+                        "view": window,
+                        "bubbles": true,
+                        "cancelable": false
+                    });
+                    this._SfDetailContainer.querySelector('#button-detail-close').dispatchEvent(clickEvent);
+                    await this.fetchUserCalendar();
+                    if (this.getCurrentTab() == this.TAB_STREAM) {
+                        this.renderTabs(this.TAB_STREAM);
+                        this.renderStream();
+                    }
+                });
+                if (this.myRole == this.TAB_REPORTER) {
+                    if (approved) {
+                        this._SfDetailContainer.querySelector('#button-uploader-submit-report').style.visibility = 'hidden';
+                    }
+                    else {
+                        this._SfDetailContainer.querySelector('#button-uploader-submit-report').style.visibility = 'visible';
+                        (_c = this._SfDetailContainer.querySelector('#button-uploader-submit-report')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', async () => {
+                            const reportercomments = this._SfDetailContainer.querySelector('#input-reporter-comments').value;
+                            const docs = this._SfUploader[0].querySelector('#uploader').selectedValues();
+                            if (docs.length === 0) {
+                                this.setError('No documents uploaded!');
+                                setTimeout(() => {
+                                    this.clearMessages();
+                                }, 3000);
+                            }
+                            else {
+                                await this.uploadReport(mmddyyyy, event["id"], reportercomments, docs);
+                                var clickEvent = new MouseEvent("click", {
+                                    "view": window,
+                                    "bubbles": true,
+                                    "cancelable": false
+                                });
+                                this._SfDetailContainer.querySelector('#button-detail-close').dispatchEvent(clickEvent);
+                                await this.fetchUserCalendar();
+                                if (this.getCurrentTab() == this.TAB_STREAM) {
+                                    this.renderTabs(this.TAB_STREAM);
+                                    this.renderStream();
+                                }
+                            }
+                        });
+                    }
+                }
+                if (this._SfUploader[0] != null) {
+                    this._SfUploader[0].querySelector('#uploader').addEventListener('uploadCompleted', (ev) => {
+                        console.log(ev);
+                    });
+                    this._SfUploader[0].querySelector('#uploader').prepopulatedInputArr = JSON.stringify([]);
+                    this._SfUploader[0].querySelector('#uploader').loadMode();
+                    if (docs.length) {
+                        this._SfUploader[0].querySelector('#uploader').prepopulatedInputArr = JSON.stringify(docs);
+                        this._SfUploader[0].querySelector('#uploader').loadMode();
+                    }
+                    if (this.myRole == this.TAB_APPROVER || approved) {
+                        this._SfUploader[0].querySelector('#uploader').readOnly = true;
+                        this._SfUploader[0].querySelector('#uploader').loadMode();
+                    }
+                    else {
+                        this._SfUploader[0].querySelector('#uploader').readOnly = false;
+                        this._SfUploader[0].querySelector('#uploader').loadMode();
+                    }
+                }
+                console.log('approved 1', event["approved"], this.myRole, this.TAB_APPROVER);
+                if (this.myRole == this.TAB_APPROVER) {
+                    console.log('approved 1', event["approved"], this.myRole, this.TAB_APPROVER);
+                    if (event["approved"][mmddyyyy] === true) {
+                        console.log('approved 2', event["approved"], this.myRole, this.TAB_APPROVER);
+                        this._SfDetailContainer.querySelector('#input-approve-yes').checked = true;
+                    }
+                }
+            }
         };
         this.renderCalendar = () => {
             var _a;
@@ -1312,6 +2379,7 @@ let SfIEvents = class SfIEvents extends LitElement {
         };
         this.renderRoleTabs = () => {
             var _a, _b;
+            console.log('render role tabs');
             this._SfRoleTabContainer.innerHTML = '';
             var html = '';
             html += '<button class="tab-button" id="consumer-tab-reporter" part="' + (this.myRole == this.TAB_REPORTER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Reporter</button>';
@@ -1321,6 +2389,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this.myRole = this.TAB_REPORTER;
                 this.renderRoleTabs();
                 await this.fetchUserCalendar();
+                this.enableCalendar();
                 if (this.events != null) {
                     this.renderTabs(this.TAB_YEAR);
                     this.renderCalendar();
@@ -1330,22 +2399,284 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this.myRole = this.TAB_APPROVER;
                 this.renderRoleTabs();
                 await this.fetchUserCalendar();
+                this.enableCalendar();
                 if (this.events != null) {
                     this.renderTabs(this.TAB_YEAR);
                     this.renderCalendar();
                 }
             });
         };
+        this.csvmaker = (data) => {
+            // Empty array for storing the values
+            let csvRows = [];
+            // Headers is basically a keys of an
+            // object which is id, name, and
+            // profession
+            const headers = Object.keys(data);
+            // As for making csv format, headers 
+            // must be separated by comma and
+            // pushing it into array
+            csvRows.push(headers.join(','));
+            // Pushing Object values into array
+            // with comma separation
+            const values = Object.values(data).join(',');
+            csvRows.push(values);
+            // Returning the array joining with new line 
+            return csvRows.join('\n');
+        };
+        this.renderChartSettingsFilters = (container, ctx) => {
+            var _a, _b;
+            console.log(container);
+            var html = `
+    
+      <div class="m-10" part="input">
+        <div class="d-flex justify-end">
+          <button id="chart-control-cancel" class="material-icons" part="button-icon-small">close</button>
+        </div>
+        <div class="d-flex justify-center align-end">
+          <sf-i-form id="input-multi-entry-tags" name="Tags" label="Select Tags" apiId="${this.apiIdTags}" mode="multiselect-dropdown" searchPhrase="${this.projectName}" selectProjection="name" mandatory></sf-i-form>
+          <button id="chart-control-plot" part="button" class="ml-20">Plot</button>          
+        </div>
+      </div>
+    
+    `;
+            container.innerHTML = html;
+            (_a = container.querySelector('#chart-control-plot')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
+                var _a;
+                const query = container.querySelector('#input-multi-entry-tags').selectedValues();
+                this.filterTags = query;
+                let eventContainer = null;
+                if (this.getCurrentTab() == this.TAB_STREAM) {
+                    eventContainer = this._SfStreamContainer;
+                }
+                if (this.getCurrentTab() == this.TAB_UPCOMING) {
+                    eventContainer = this._SfUpcomingContainer;
+                }
+                if (this.getCurrentTab() == this.TAB_THIS) {
+                    eventContainer = this._SfThisContainer;
+                }
+                if (this.getCurrentTab() == this.TAB_PAST) {
+                    eventContainer = this._SfPastContainer;
+                }
+                if (this.getCurrentTab() == this.TAB_CUSTOM) {
+                    eventContainer = this._SfCustomContainer;
+                }
+                const divs = eventContainer.querySelectorAll('.stream-events-container');
+                const tables = eventContainer.querySelectorAll('.stream-events-container-table');
+                const hiddenTitles = eventContainer.querySelectorAll('.hidden-title');
+                const hiddenFilternames = eventContainer.querySelectorAll('.hidden-filtername');
+                const filternames = eventContainer.querySelectorAll('.filtername');
+                const streamEventSummary = eventContainer.querySelector('#stream-event-summary');
+                if (this.filterTags.length > 0) {
+                    streamEventSummary.style.display = 'none';
+                }
+                else {
+                    streamEventSummary.style.display = 'block';
+                }
+                for (var i = 0; i < divs.length; i++) {
+                    var found = false;
+                    var filterMatched = "";
+                    const tagsEmbedded = JSON.parse(((_a = divs[i].querySelector('.hidden-tags')) === null || _a === void 0 ? void 0 : _a.innerHTML) + "");
+                    console.log(tagsEmbedded);
+                    for (var count1 = 0; count1 < tagsEmbedded.length; count1++) {
+                        for (var count2 = 0; count2 < this.filterTags.length; count2++) {
+                            if (tagsEmbedded[count1].toLowerCase().indexOf(this.filterTags[count2].toLowerCase()) >= 0) {
+                                found = true;
+                                filterMatched += (this.filterTags[count2].split(';')[0] + ", ");
+                            }
+                        }
+                    }
+                    if (!found) {
+                        tables[i].style.display = 'none';
+                        hiddenTitles[i].style.display = 'block';
+                        hiddenFilternames[i].style.display = 'none';
+                        filternames[i].innerHTML = '';
+                    }
+                    else {
+                        tables[i].style.display = 'block';
+                        hiddenTitles[i].style.display = 'none';
+                        hiddenFilternames[i].style.display = 'block';
+                        filternames[i].innerHTML = filterMatched.replace(/,\s*$/, "");
+                        ;
+                    }
+                }
+                this.filterEventsInWindow(query, ctx);
+            });
+            (_b = container.querySelector('#chart-control-cancel')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
+                container.innerHTML = '';
+                container.dispatchEvent(new CustomEvent('canceled', { bubbles: true }));
+            });
+        };
+        this.renderChartSettingsSettings = (container) => {
+            var _a, _b, _c, _d, _e;
+            var html = `
+    
+      <div class="m-10" part="input">
+        <div class="d-flex justify-end">
+          <button id="chart-control-cancel" class="material-icons" part="button-icon-small">close</button>
+        </div>
+
+        <div class="d-flex justify-center">
+          <div part="input" class="p-10 mr-10">
+            <div part="td-head">Stats</div>
+            <div part="td-body" class="d-flex align-center mt-5">
+              <input type="radio" id="radio-csv" class="switch-csv" value="Excel" checked/>
+              <label for="radio-csv">Csv</label>
+              <input type="radio" id="radio-image" class="switch-image" value="Image" />
+              <label for="radio-image">Image</label>
+            </div>
+            <div class="d-flex justify-center">
+              <button id="button-download-stats" part="button" class="mt-5">Download</button>
+            </div>
+          </div>
+          <div part="input" class="p-10 ml-10">
+            <div part="td-head">Compliances</div>
+            <div part="td-body" class="d-flex align-center mt-5">
+              <input type="radio" id="radio-csv" class="switch-csv" value="Excel" checked/>
+              <label for="radio-csv">Csv</label>
+            </div>
+            <div class="d-flex justify-center">
+              <button id="button-download-compliances" part="button" class="mt-5">Download</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+    `;
+            container.innerHTML = html;
+            (_a = container.querySelector('#chart-control-cancel')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
+                container.innerHTML = '';
+                container.dispatchEvent(new CustomEvent('canceled', { bubbles: true }));
+            });
+            (_b = container.querySelector('#button-download-compliances')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
+                console.log('csvValues compliances', this.csvDataCompliances);
+                const blob = new Blob([this.csvDataCompliances], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.setAttribute('href', url);
+                a.setAttribute('download', 'download.csv');
+                a.click();
+            });
+            (_c = container.querySelector('#button-download-stats')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', () => {
+                const blob = new Blob([this.csvDataStats], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.setAttribute('href', url);
+                a.setAttribute('download', 'download.csv');
+                a.click();
+            });
+            (_d = container.querySelector('.switch-solid')) === null || _d === void 0 ? void 0 : _d.addEventListener('click', () => {
+                this.fill = "solid";
+                if (this.getCurrentTab() == this.TAB_STREAM) {
+                    this.renderStream();
+                }
+            });
+            (_e = container.querySelector('.switch-pattern')) === null || _e === void 0 ? void 0 : _e.addEventListener('click', () => {
+                this.fill = "pattern";
+                if (this.getCurrentTab() == this.TAB_STREAM) {
+                    this.renderStream();
+                }
+            });
+        };
+        this.renderChartSettings = (container, selectedTab = -1, ctx) => {
+            var _a, _b;
+            var html = '';
+            html += '<div class="d-flex justify-end align-start">';
+            if (selectedTab === 0) {
+                html += '<button class="tab-button" id="chart-control-filters" part="calendar-tab-button-selected" class="mr-10"><span class="material-icons">filter_list</span></button>';
+            }
+            else {
+                html += '<button class="tab-button" id="chart-control-filters" part="calendar-tab-button-not-selected" class="mr-10"><span class="material-icons">filter_list</span></button>';
+            }
+            if (selectedTab === 1) {
+                html += '<button class="tab-button" id="chart-control-settings" part="calendar-tab-button-selected" class="mr-10"><span class="material-icons">cloud_download</span></button>';
+            }
+            else {
+                html += '<button class="tab-button" id="chart-control-settings" part="calendar-tab-button-not-selected" class="mr-10"><span class="material-icons">cloud_download</span></button>';
+            }
+            html += '</div>';
+            container.querySelector('#chart-settings-controls').innerHTML = html;
+            (_a = container.querySelector('#chart-settings-controls').querySelector('#chart-control-settings')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
+                this.renderChartSettings(container, 1, ctx);
+            });
+            (_b = container.querySelector('#chart-settings-controls').querySelector('#chart-control-filters')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
+                this.renderChartSettings(container, 0, ctx);
+            });
+            if (selectedTab === 0) {
+                this.renderChartSettingsFilters(container.querySelector('#chart-settings'), ctx);
+            }
+            if (selectedTab === 1) {
+                this.renderChartSettingsSettings(container.querySelector('#chart-settings'));
+            }
+            container.querySelector('#chart-settings').addEventListener('canceled', () => {
+                console.log('canceled');
+                this.renderChartSettings(container, -1, ctx);
+                this.renderStream();
+            });
+            // (container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-settings-cancel')?.addEventListener('click', () => {
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-filters-cancel') as HTMLButtonElement).style.display = 'none';
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-settings-cancel') as HTMLButtonElement).style.display = 'none';
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-settings') as HTMLButtonElement).style.display = 'flex';
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-filters') as HTMLButtonElement).style.display = 'flex';
+            //   (container.querySelector('#chart-settings') as HTMLDivElement).innerHTML = '';
+            // });
+            // (container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-filters-cancel')?.addEventListener('click', () => {
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-filters-cancel') as HTMLButtonElement).style.display = 'none';
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-settings-cancel') as HTMLButtonElement).style.display = 'none';
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-settings') as HTMLButtonElement).style.display = 'flex';
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-filters') as HTMLButtonElement).style.display = 'flex';
+            //   (container.querySelector('#chart-settings') as HTMLDivElement).innerHTML = '';
+            // });
+            // (container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-filters')?.addEventListener('click', () => {
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-filters-cancel') as HTMLButtonElement).style.display = 'flex';
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-settings-cancel') as HTMLButtonElement).style.display = 'none';
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-settings') as HTMLButtonElement).style.display = 'none';
+            //   ((container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-filters') as HTMLButtonElement).style.display = 'none';
+            //   (container.querySelector('#chart-settings') as HTMLDivElement).innerHTML = '';
+            //   this.renderChartSettingsFilters((container.querySelector('#chart-settings') as HTMLDivElement));
+            // })
+        };
+        this.renderChart = (ctx, type, data) => {
+            console.log('rendering chart', type, data);
+            if (this.chart != null) {
+                this.chart.destroy();
+            }
+            this.chart = new Chart(ctx, {
+                type: type,
+                data: data,
+            });
+        };
+        this.getCurrentTab = () => {
+            if (this._SfCalendarContainer.style.display == 'flex') {
+                return this.TAB_YEAR;
+            }
+            if (this._SfStreamContainer.style.display == 'flex') {
+                return this.TAB_STREAM;
+            }
+            if (this._SfUpcomingContainer.style.display == 'flex') {
+                return this.TAB_UPCOMING;
+            }
+            if (this._SfThisContainer.style.display == 'flex') {
+                return this.TAB_THIS;
+            }
+            if (this._SfPastContainer.style.display == 'flex') {
+                return this.TAB_PAST;
+            }
+            if (this._SfCustomContainer.style.display == 'flex') {
+                return this.TAB_CUSTOM;
+            }
+            return "";
+        };
         this.renderTabs = (selectedTab) => {
             var _a, _b, _c, _d, _e, _f;
             this.clearAllCalendars();
             var html = '';
-            html += '<button class="tab-button" id="calendar-tab-year" part="' + (selectedTab == this.TAB_YEAR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Year</button>';
-            html += '<button class="tab-button" id="calendar-tab-month" part="' + (selectedTab == this.TAB_STREAM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Month</button>';
-            html += '<button class="tab-button" id="calendar-tab-upcoming" part="' + (selectedTab == this.TAB_UPCOMING ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Upcoming</button>';
-            html += '<button class="tab-button" id="calendar-tab-this" part="' + (selectedTab == this.TAB_THIS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Current</button>';
-            html += '<button class="tab-button" id="calendar-tab-past" part="' + (selectedTab == this.TAB_PAST ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Past</button>';
-            html += '<button class="tab-button" id="calendar-tab-custom" part="' + (selectedTab == this.TAB_CUSTOM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Range</button>';
+            html += '<button class="tab-button mb-10" id="calendar-tab-year" part="' + (selectedTab == this.TAB_YEAR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Year</button>';
+            html += '<button class="tab-button mb-10" id="calendar-tab-month" part="' + (selectedTab == this.TAB_STREAM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Month</button>';
+            html += '<button class="tab-button mb-10" id="calendar-tab-upcoming" part="' + (selectedTab == this.TAB_UPCOMING ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Upcoming</button>';
+            html += '<button class="tab-button mb-10" id="calendar-tab-this" part="' + (selectedTab == this.TAB_THIS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Current</button>';
+            html += '<button class="tab-button mb-10" id="calendar-tab-past" part="' + (selectedTab == this.TAB_PAST ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Past</button>';
+            html += '<button class="tab-button mb-10" id="calendar-tab-custom" part="' + (selectedTab == this.TAB_CUSTOM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Range</button>';
             this._SfTabContainer.innerHTML = html;
             (_a = this._SfTabContainer.querySelector('#calendar-tab-year')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
                 if (this.mode == "consumer") {
@@ -1388,6 +2719,14 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<button class="tab-button" id="mapping-tab-reporter" part="' + (selectedTab == this.TAB_REPORTER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Reporter</button>';
             html += '<button class="tab-button" id="mapping-tab-approver" part="' + (selectedTab == this.TAB_APPROVER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Approver</button>';
             this._SfMappingTabContainer.innerHTML = html;
+            if (this.myRole == this.TAB_REPORTER) {
+                console.log('sync mapping reporter');
+                this._SfButtonBackSyncMapping.style.visibility = 'visible';
+            }
+            else {
+                console.log('sync mapping approver');
+                this._SfButtonBackSyncMapping.style.visibility = 'hidden';
+            }
             (_a = this._SfMappingTabContainer.querySelector('#mapping-tab-reporter')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
                 this.myRole = this.TAB_REPORTER;
                 this.fetchEventMap();
@@ -1432,7 +2771,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             this.mappedValuesDueDates = {};
             this.mappedValuesTags = {};
             this.mappedValuesUsers = {};
-            console.log('rendering mapping', unmappedEvents, this.mappedValuesDueDates, this.mappedValuesUsers, this.mappedValuesTags);
+            console.log('rendering mapping1', unmappedEvents, this.mappedValuesDueDates, this.mappedValuesUsers, this.mappedValuesTags);
             var html = '';
             html += '<div class="d-flex align-center mt-20">';
             html += '<div id="row-unmapped-graph" class="d-flex flex-grow"><div class="div-graph-complete"></div><div class="div-graph-pending"></div></div>';
@@ -1763,24 +3102,31 @@ let SfIEvents = class SfIEvents extends LitElement {
             return -1;
         };
         this.prepopulateMapping = (mappings) => {
-            console.log('mappings', mappings);
+            console.log('mappings5', mappings, this.mappedValuesUsers);
             if (mappings == null) {
                 return;
             }
             for (var i = 0; i < Object.keys(mappings.duedates).length; i++) {
                 const eventId = Object.keys(mappings.duedates)[i];
                 const index = this.getIndexFromId(eventId);
-                this.mappedValuesDueDates[index] = mappings.duedates[eventId];
+                if (index >= 0) {
+                    this.mappedValuesDueDates[index] = mappings.duedates[eventId];
+                }
             }
             for (var i = 0; i < Object.keys(mappings.tags).length; i++) {
                 const eventId = Object.keys(mappings.tags)[i];
                 const index = this.getIndexFromId(eventId);
-                this.mappedValuesTags[index] = mappings.tags[eventId];
+                if (index >= 0) {
+                    this.mappedValuesTags[index] = mappings.tags[eventId];
+                }
             }
             for (var i = 0; i < Object.keys(mappings.users).length; i++) {
                 const eventId = Object.keys(mappings.users)[i];
                 const index = this.getIndexFromId(eventId);
-                this.mappedValuesUsers[index] = mappings.users[eventId];
+                console.log('mapping users', index);
+                if (index >= 0) {
+                    this.mappedValuesUsers[index] = mappings.users[eventId];
+                }
             }
             console.log(this.mappedValuesDueDates);
             console.log(this.mappedValuesTags);
@@ -1831,7 +3177,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             }
         };
         this.clearAllCalendars = () => {
-            this._SfCalendarContainer.innerHTML = "";
+            //(this._SfCalendarContainer as HTMLDivElement).innerHTML = "";
             this._SfStreamContainer.innerHTML = "";
             this._SfUpcomingContainer.innerHTML = "";
             this._SfThisContainer.innerHTML = "";
@@ -1867,6 +3213,72 @@ let SfIEvents = class SfIEvents extends LitElement {
                 tags: transformedTags,
                 users: transformedUsers
             };
+        };
+        this.uploadReview = async (mmddyyyy, eventid, comments, approved) => {
+            let url = "https://" + this.apiId + ".execute-api.us-east-1.amazonaws.com/test/upload";
+            const body = {
+                "mmddyyyy": mmddyyyy,
+                "projectid": this.projectId,
+                "type": "review",
+                "eventid": eventid,
+                "comments": comments,
+                "approved": approved
+            };
+            const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+            const xhr = (await this.prepareXhr(body, url, this._SfLoader, authorization));
+            this._SfLoader.innerHTML = '';
+            if (xhr.status == 200) {
+                const jsonRespose = JSON.parse(xhr.responseText);
+                console.log('jsonResponse sync', jsonRespose);
+                this.setSuccess("Report uploaded successfully!");
+                setTimeout(() => {
+                    this.clearMessages();
+                    // this.showChosenMapping();
+                    // this.fetchEventMap();
+                    // if(this.myRole == this.TAB_REPORTER) {
+                    //   this.renderMappingTabs(this.TAB_REPORTER);
+                    // } else {
+                    //   this.renderMappingTabs(this.TAB_APPROVER);
+                    // }
+                }, 2000);
+            }
+            else {
+                const jsonRespose = JSON.parse(xhr.responseText);
+                this.setError(jsonRespose.error);
+            }
+        };
+        this.uploadReport = async (mmddyyyy, eventid, comments, docs) => {
+            let url = "https://" + this.apiId + ".execute-api.us-east-1.amazonaws.com/test/upload";
+            const body = {
+                "mmddyyyy": mmddyyyy,
+                "projectid": this.projectId,
+                "type": "report",
+                "eventid": eventid,
+                "comments": comments,
+                "docs": JSON.stringify(docs)
+            };
+            const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+            const xhr = (await this.prepareXhr(body, url, this._SfLoader, authorization));
+            this._SfLoader.innerHTML = '';
+            if (xhr.status == 200) {
+                const jsonRespose = JSON.parse(xhr.responseText);
+                console.log('jsonResponse sync', jsonRespose);
+                this.setSuccess("Report uploaded successfully!");
+                setTimeout(() => {
+                    this.clearMessages();
+                    // this.showChosenMapping();
+                    // this.fetchEventMap();
+                    // if(this.myRole == this.TAB_REPORTER) {
+                    //   this.renderMappingTabs(this.TAB_REPORTER);
+                    // } else {
+                    //   this.renderMappingTabs(this.TAB_APPROVER);
+                    // }
+                }, 2000);
+            }
+            else {
+                const jsonRespose = JSON.parse(xhr.responseText);
+                this.setError(jsonRespose.error);
+            }
         };
         this.uploadMapping = async () => {
             let url = "https://" + this.apiId + ".execute-api.us-east-1.amazonaws.com/test/mapevents";
@@ -1909,7 +3321,10 @@ let SfIEvents = class SfIEvents extends LitElement {
             if (xhr.status == 200) {
                 const jsonRespose = JSON.parse(xhr.responseText);
                 console.log('jsonResponse sync', jsonRespose);
-                this.loadMode();
+                // this.loadMode();
+                this.showChosenMapping();
+                this.fetchEventMap();
+                this.renderMappingTabs(this.TAB_REPORTER);
             }
             else {
                 const jsonRespose = JSON.parse(xhr.responseText);
@@ -1921,7 +3336,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             console.log('processing due date', value.duedate.replace(/['"]+/g, ''));
             console.log('processing due date', this.mappings);
             var duedate = value.duedate;
-            if (this.mappings.duedates[value.id] != null && this.mappings.duedates[value.id] != "") {
+            if (this.mappings != null && this.mappings.duedates != null && this.mappings.duedates[value.id] != null && this.mappings.duedates[value.id] != "") {
                 duedate = this.mappings.duedates[value.id];
             }
             const duedateArr = duedate.replace(/['"]+/g, '').split(",");
@@ -1964,6 +3379,18 @@ let SfIEvents = class SfIEvents extends LitElement {
                         this.events[mmdd].push(value);
                     }
                 }
+                else {
+                    if ((new Date().getFullYear() + "") == dateArr[2]) {
+                        const mmdd = ("0" + (parseInt(dateArr[1]))).slice(-2) + "/" + ("0" + dateArr[0]).slice(-2);
+                        if (this.events == null) {
+                            this.events = {};
+                        }
+                        if (this.events[mmdd] == null) {
+                            this.events[mmdd] = [];
+                        }
+                        this.events[mmdd].push(value);
+                    }
+                }
             }
             console.log('calendar processed', this.calendar);
             console.log('event processed', this.events);
@@ -1990,6 +3417,8 @@ let SfIEvents = class SfIEvents extends LitElement {
             body.id = value;
             console.log('detail', value, body);
             let url = "https://" + this.apiIdDetail + ".execute-api.us-east-1.amazonaws.com/test/" + this.apiMethodDetail;
+            console.log('fetch events detail url', url);
+            console.log('fetch events detail body', body);
             const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
             const xhr = (await this.prepareXhr(body, url, this._SfLoader, authorization));
             this._SfLoader.innerHTML = '';
@@ -2071,10 +3500,14 @@ let SfIEvents = class SfIEvents extends LitElement {
                 console.log(jsonRespose);
                 this.unmappedEvents = jsonRespose.data.unmappedEvents;
                 this.mappings = jsonRespose.data.mappings;
+                console.log('mappings-1', 'fetcheventmap', this.mappings);
+                console.log('mappings0', 'fetcheventmap', this.mappedValuesUsers);
                 this.renderMapping(this.unmappedEvents);
+                console.log('mappings1', 'fetcheventmap', this.mappedValuesUsers);
                 this.prepopulateMapping(this.mappings);
+                console.log('mappings2', 'fetcheventmap', this.mappedValuesUsers);
                 this.applyFilter();
-                if (jsonRespose.data.mappings != null) {
+                if (jsonRespose.data.mappings != null && this.myRole != this.TAB_APPROVER) {
                     this._SfButtonBackCalendarMapping.style.visibility = 'visible';
                 }
                 else {
@@ -2084,16 +3517,23 @@ let SfIEvents = class SfIEvents extends LitElement {
             else {
                 const jsonRespose = JSON.parse(xhr.responseText);
                 this.setError(jsonRespose.error);
+                this.fetchList();
+                setTimeout(() => {
+                    this.clearMessages();
+                }, 3000);
             }
         };
         this.fetchList = async () => {
             console.log('calendar fetching list', this.apiIdList);
             const body = this.getApiBodyList();
             if (this.apiIdList != null) {
+                body.id = this._SfProject[0].querySelector('#sf-i-project').selectedValues()[0];
                 let url = "https://" + this.apiIdList + ".execute-api.us-east-1.amazonaws.com/test/" + this.apiMethodList;
+                console.log('fetch events url', url);
                 const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
                 const xhr = (await this.prepareXhr(body, url, this._SfLoader, authorization));
                 this._SfLoader.innerHTML = '';
+                console.log('fetch events body', body);
                 if (xhr.status == 200) {
                     const jsonRespose = JSON.parse(xhr.responseText);
                     console.log('list response', JSON.stringify(jsonRespose));
@@ -2182,14 +3622,14 @@ let SfIEvents = class SfIEvents extends LitElement {
                 elems[index].style.display = 'flex';
             }
         };
-        this.truncate = (str, n, useWordBoundary) => {
+        this.truncate = (str, n, useWordBoundary, ellipsis = true) => {
             if (str.length <= n) {
                 return str;
             }
             const subString = str.slice(0, n - 1); // the original check
             return (useWordBoundary
                 ? subString.slice(0, subString.lastIndexOf(" "))
-                : subString) + "&hellip;";
+                : subString) + (ellipsis ? "&hellip;" : "...");
         };
         this.initListenersAdmin = () => {
             var _a, _b, _c, _d, _e, _f, _g;
@@ -2245,6 +3685,8 @@ let SfIEvents = class SfIEvents extends LitElement {
             });
         };
         this.loadMode = async () => {
+            Chart.register(...registerables);
+            //Chart.register(Colors);
             if (this.mode == "admin") {
                 this.showChooseProject();
                 this.initListenersAdmin();
@@ -2312,6 +3754,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             return html `
           
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <div class="SfIEventsC">
             
           <div class="d-flex justify-center">
@@ -2354,7 +3797,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                     </div>
                     <h3 part="results-title" id="title-chosen-mapping" class="m-0">Project Name</h3>
                     <div>
-                      <button id="button-back-sync-mapping" part="button-icon" class="button-icon"><span class="material-icons">sync</span></button>
+                      <button id="button-back-sync-mapping" part="button-icon" class="button-icon"><span class="material-icons">cloud_download</span></button>
                       <button id="button-back-calendar-mapping" part="button-icon" class="invisible button-icon"><span class="material-icons">calendar_month</span></button>
                       &nbsp;
                     </div>
@@ -2368,26 +3811,26 @@ let SfIEvents = class SfIEvents extends LitElement {
                 <div id="container-chosen-project" class="chosen-project hide d-flex justify-center align-start mt-20">
                   
                 </div>
-                <div class="chosen-project d-flex justify-center" id="tab-container">
+                <div class="chosen-project d-flex justify-center flex-wrap" id="tab-container">
 
                 </div>
               
-                <div class="chosen-project d-flex flex-grow flex-wrap justify-center align-stretch" id="calendar-container">
+                <div class="chosen-project d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="calendar-container">
                   
                 </div>
-                <div class="chosen-project d-flex flex-grow flex-wrap justify-center align-stretch" id="stream-container">
+                <div class="chosen-project d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="stream-container">
                   
                 </div>
-                <div class="chosen-project d-flex flex-grow flex-wrap justify-center align-stretch" id="upcoming-container">
+                <div class="chosen-project d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="upcoming-container">
                   
                 </div>
-                <div class="chosen-project d-flex flex-grow flex-wrap justify-center align-stretch" id="this-container">
+                <div class="chosen-project d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="this-container">
                   
                 </div>
-                <div class="chosen-project d-flex flex-grow flex-wrap justify-center align-stretch" id="past-container">
+                <div class="chosen-project d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="past-container">
                   
                 </div>
-                <div class="chosen-project d-flex flex-grow flex-wrap justify-center align-stretch" id="custom-container">
+                <div class="chosen-project d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="custom-container">
                   
                 </div>
 
@@ -2398,6 +3841,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                 </div>
               </div>
               <div class="rb"></div>
+          </div>
+          <div id="detail-container" class="hide" part="detail-container">
           </div>
           <div class="d-flex justify-between">
               <div class="lb"></div>
@@ -2419,6 +3864,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             return html `
           
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <div class="SfIEventsC">
           
           <div class="d-flex justify-center">
@@ -2429,26 +3875,26 @@ let SfIEvents = class SfIEvents extends LitElement {
 
           </div>
           
-          <div class="d-flex justify-center" id="tab-container">
+          <div class="d-flex justify-center flex-wrap" id="tab-container">
 
           </div>
           <div class="d-flex justify-center">
-            <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="calendar-container">
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="calendar-container">
               
             </div>
-            <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="stream-container">
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="stream-container">
               
             </div>
-            <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="upcoming-container">
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="upcoming-container">
               
             </div>
-            <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="this-container">
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="this-container">
               
             </div>
-            <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="past-container">
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="past-container">
               
             </div>
-            <div class="d-flex flex-grow flex-wrap justify-center align-stretch" id="custom-container">
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="custom-container">
               
             </div>
           </div>
@@ -2486,6 +3932,30 @@ SfIEvents.styles = css `
       visibility: hidden;
     }
 
+    .scroll-x {
+      overflow-x: auto;
+    }
+
+    .p-10 {
+      padding: 10px;
+    }
+
+    .commentbox {
+      padding: 10px;
+      border: solid 1px gray;
+      border-radius: 10px;
+    }
+
+    .reporterbox {
+      width: 90%;
+      margin-right: 10%;
+    }
+
+    .approverbox {
+      width: 90%;
+      margin-left: 5%;
+    }
+
     .pr-5 {
       padding-right: 5px;
     }
@@ -2502,12 +3972,32 @@ SfIEvents.styles = css `
       margin: 20px;
     }
 
+    .m-10 {
+      margin: 10px;
+    }
+
     .text-start {
       text-align: start;
     }
 
+    .text-center {
+      text-align: center;
+    }
+
     .mb-100 {
       margin-bottom: 100px;
+    }
+
+    .mb-10 {
+      margin-bottom: 10px;
+    }
+
+    .mb-5 {
+      margin-bottom: 5px;
+    }
+
+    .mt-5 {
+      margin-top: 5px;
     }
 
     #button-back-add-mapping {
@@ -2563,11 +4053,15 @@ SfIEvents.styles = css `
     }
 
     .color-pending {
-      color: #f49315;
+      color: #FFBA49;
+    }
+
+    .color-not-started {
+      color: #888888;
     }
 
     .color-done {
-      color: #64a692;
+      color: #20a39e;
     }
 
     .pr-10 {
@@ -2595,12 +4089,28 @@ SfIEvents.styles = css `
       margin: 0px;
     }
 
+    .mt-10 {
+      margin-top: 10px;
+    }
+
+    .mt-5 {
+      margin-top: 5px;
+    }
+
     .ml-10 {
       margin-left: 10px;
     }
 
     .mt-20 {
       margin-top: 20px;
+    }
+
+    .ml-20 {
+      margin-left: 20px;
+    }
+
+    .mr-20 {
+      margin-right: 20px;
     }
 
     .mb-20 {
@@ -2623,6 +4133,11 @@ SfIEvents.styles = css `
     .link {
       text-decoration: underline;
       cursor: pointer;
+    }
+
+    .button-submit {
+      font-weight: 800;
+      font-size: 110%;
     }
 
     .mr-10 {
@@ -2746,8 +4261,7 @@ SfIEvents.styles = css `
     }
 
     .dot {
-      width: 6px;
-      height: 6px;
+      height: 4px;
       border-radius: 3px;
     }
 
@@ -3026,10 +4540,16 @@ __decorate([
 ], SfIEvents.prototype, "projectId", void 0);
 __decorate([
     property()
+], SfIEvents.prototype, "projectName", void 0);
+__decorate([
+    property()
 ], SfIEvents.prototype, "apiResponseFieldList", void 0);
 __decorate([
     property()
 ], SfIEvents.prototype, "myRole", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "chart", void 0);
 __decorate([
     property()
 ], SfIEvents.prototype, "calendarStartDD", void 0);
@@ -3065,6 +4585,12 @@ __decorate([
 ], SfIEvents.prototype, "events", void 0);
 __decorate([
     property()
+], SfIEvents.prototype, "eventsInWindow", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "eventHideFields", void 0);
+__decorate([
+    property()
 ], SfIEvents.prototype, "eventPreviewFields", void 0);
 __decorate([
     property()
@@ -3074,10 +4600,22 @@ __decorate([
 ], SfIEvents.prototype, "eventFieldDependencies", void 0);
 __decorate([
     property()
+], SfIEvents.prototype, "csvDataCompliances", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "csvDataStats", void 0);
+__decorate([
+    property()
 ], SfIEvents.prototype, "mode", void 0);
 __decorate([
     property()
 ], SfIEvents.prototype, "flow", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "fill", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "filterTags", void 0);
 __decorate([
     query('.SfIEventsC')
 ], SfIEvents.prototype, "_SfIEventsC", void 0);
@@ -3171,6 +4709,9 @@ __decorate([
 __decorate([
     queryAssignedElements({ slot: 'project' })
 ], SfIEvents.prototype, "_SfProject", void 0);
+__decorate([
+    queryAssignedElements({ slot: 'uploader' })
+], SfIEvents.prototype, "_SfUploader", void 0);
 SfIEvents = __decorate([
     customElement('sf-i-events')
 ], SfIEvents);
