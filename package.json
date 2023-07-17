@@ -1,7 +1,7 @@
 {
   "name": "sf-i-events",
   "private": false,
-  "version": "1.0.87",
+  "version": "1.0.130",
   "description": "Superflows Navigation Component",
   "main": "sf-i-events.js",
   "module": "sf-i-events.js",
@@ -51,7 +51,7 @@
   "license": "MIT",
   "repository": "superflows-dev/sf-i-events",
   "dependencies": {
-    "chart.js": "^3.9.0",
+    "chart.js": "3.9.0",
     "fs": "^0.0.1-security",
     "lit": "^2.2.4",
     "patternomaly": "^1.3.2",

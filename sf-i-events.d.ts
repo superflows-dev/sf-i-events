@@ -22,11 +22,16 @@ export declare class SfIEvents extends LitElement {
     TAB_THIS: string;
     TAB_PAST: string;
     TAB_CUSTOM: string;
+    TAB_ADHOC: string;
     TAB_REPORTER: string;
     TAB_APPROVER: string;
     COLOR_APPROVED: string;
     COLOR_NOT_STARTED: string;
     COLOR_IN_PROGRESS: string;
+    COLOR_PAST_DUE_DATE: string;
+    COLOR_LATE_EXECUTED: string;
+    COLOR_LATE_APPROVED: string;
+    CERTIFICATE_HTML: string;
     name: string;
     apiId: string;
     apiIdList: string;
@@ -38,6 +43,7 @@ export declare class SfIEvents extends LitElement {
     apiBodyList: string;
     apiBodyDetail: string;
     userProfileId: string;
+    userName: string;
     projectId: string;
     projectName: string;
     apiResponseFieldList: string;
@@ -52,6 +58,7 @@ export declare class SfIEvents extends LitElement {
     mappedValuesTags: any;
     unmappedEvents: any;
     mappings: any;
+    triggers: any;
     monthNames: string[];
     events: any;
     eventsInWindow: any;
@@ -67,6 +74,9 @@ export declare class SfIEvents extends LitElement {
     getApiBodyDetail: () => any;
     csvDataCompliances: string;
     csvDataStats: string;
+    htmlDataCompliances: string;
+    htmlDataStats: string;
+    period: string;
     mode: string;
     flow: string;
     fill: string;
@@ -97,6 +107,7 @@ export declare class SfIEvents extends LitElement {
     _SfThisContainer: any;
     _SfPastContainer: any;
     _SfCustomContainer: any;
+    _SfAdhocContainer: any;
     _SfMappingContainer: any;
     _SfStreamEventStatus: any;
     _SfTabContainer: any;
@@ -113,6 +124,7 @@ export declare class SfIEvents extends LitElement {
     enableThis(): void;
     enablePast(): void;
     enableCustom(): void;
+    enableAdhoc(): void;
     prepareXhr: (data: any, url: string, loaderElement: any, authorization: any) => Promise<unknown>;
     clearMessages: () => void;
     setError: (msg: string) => void;
@@ -125,6 +137,9 @@ export declare class SfIEvents extends LitElement {
     getBlanks: (month: number, year: number) => number;
     insertDates: (month: number, year: number) => string;
     insertDayNames: () => string;
+    getPastDueDate: (mmdd: string) => boolean;
+    getLateExecuted: (mmdd: string, event: any) => boolean;
+    getLateApproved: (mmdd: string, event: any) => boolean;
     renderStreamEvents: (index: number, month: number, year: number) => string;
     renderUpcomingEvents: (index: number, startDate: Date, count: number) => string;
     renderThisEvents: (index: number, startDate: Date) => string;
@@ -142,11 +157,14 @@ export declare class SfIEvents extends LitElement {
     updateInAllSelections: (param: string, value: any) => void;
     updateMappingStatus: (value: any, clickIndex: number) => void;
     filterEventsInWindow: (tags: Array<string>, ctx: any) => void;
+    renderAdhoc: (events?: Array<any> | null, triggers?: Array<any> | null) => void;
     renderCustom: () => void;
     renderPast: (index?: number) => void;
     renderUpcoming: (index?: number) => void;
     renderThis: (index?: number) => void;
     renderStream: (index?: number) => void;
+    renderCompletenessGraph: (divContainer: HTMLDivElement) => void;
+    renderTimelinessGraph: (divContainer: HTMLDivElement) => void;
     renderEventDetail: (event: any, mmddyyyy: any) => void;
     renderCalendar: () => void;
     renderRoleTabs: () => void;
@@ -170,8 +188,10 @@ export declare class SfIEvents extends LitElement {
         tags: any;
         users: any;
     };
+    uploadUnTriggerEvent: (eventid: string, mmdd: string) => Promise<void>;
+    uploadTriggerEvent: (eventid: string, dateofoccurrence: string) => Promise<void>;
     uploadReview: (mmddyyyy: string, eventid: string, comments: string, approved: any) => Promise<void>;
-    uploadReport: (mmddyyyy: string, eventid: string, comments: string, docs: any) => Promise<void>;
+    uploadReport: (mmddyyyy: string, eventid: string, comments: string, doc: string, docs: any) => Promise<void>;
     uploadMapping: () => Promise<void>;
     uploadEvents: () => Promise<void>;
     processEvent: (value: any) => void;
@@ -179,6 +199,7 @@ export declare class SfIEvents extends LitElement {
     fetchDetail: (value: any) => Promise<void>;
     fetchUserCalendar: () => Promise<void>;
     fetchCalendar: () => Promise<void>;
+    fetchAdhoc: () => Promise<void>;
     fetchEventMap: () => Promise<void>;
     fetchList: () => Promise<void>;
     initCalendar: () => Promise<void>;
