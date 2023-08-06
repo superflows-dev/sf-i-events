@@ -11,6 +11,7 @@ import Util from './util';
 import {SfIForm} from 'sf-i-form';
 import {SfIUploader} from 'sf-i-uploader';
 import {Chart, ChartItem, registerables} from 'chart.js';
+import { SfIElasticText } from 'sf-i-elastic-text';
 // import {LitElement, html, css} from 'lit';
 // import {customElement} from 'lit/decorators.js';
 
@@ -36,6 +37,7 @@ DB: partitionKey, rangeKey, values
 @customElement('sf-i-events')
 export class SfIEvents extends LitElement {
 
+  SEARCH_BLOCK_SIZE = 10;
   TAB_YEAR = "year";
   TAB_STREAM = "stream";
   TAB_UPCOMING = "upcoming";
@@ -45,6 +47,17 @@ export class SfIEvents extends LitElement {
   TAB_ADHOC = "adhoc";
   TAB_REPORTER = "reporter";
   TAB_APPROVER = "approver";
+  TAB_STATUTES = "statutes";
+  TAB_COMPLIANCES = "compliances";
+  TAB_ENTITIES = "entities";
+  TAB_LOCATIONS = "locations";
+  TAB_TAGS = "tags";
+  TAB_REPORTERS = "reporters";
+  TAB_APPROVERS = "approvers";
+  TAB_DUEDATES = "duedates";
+  TAB_ALERTSCHEDULES = "alertschedules";
+  TAB_INTERNALCONTROLS = "internalcontrols";
+  TAB_CALENDAR = "calendar";
   COLOR_APPROVED = "#50cf01";
   COLOR_NOT_STARTED = "#A4A9AD";
   COLOR_IN_PROGRESS = "#ffe505"
@@ -205,11 +218,21 @@ export class SfIEvents extends LitElement {
   
   `;
 
+  
+  @property()
+  projectId!: string;
+
   @property()
   name!: string;
 
   @property()
   apiId!: string;
+
+  @property()
+  apiIdStatutes!: string;
+
+  @property()
+  apiIdCompliances!: string;
 
   @property()
   apiIdList!: string;
@@ -239,16 +262,22 @@ export class SfIEvents extends LitElement {
   userProfileId!: string;
 
   @property()
+  entityId!: string;
+
+  @property()
+  locationId!: string;
+
+  @property()
   userName!: string;
   
-  @property()
-  projectId!: string;
-
   @property()
   projectName!: string;
 
   @property()
   apiResponseFieldList!: string;
+
+  @property()
+  myOnboardingTab: string = this.TAB_STATUTES;
 
   @property()
   myRole: string = this.TAB_REPORTER;
@@ -487,7 +516,7 @@ export class SfIEvents extends LitElement {
     }
 
     .div-graph-complete {
-      background-color: #64a692;
+      background-color: #50cf01;
       height: 100%;
       width: 0%;
     }
@@ -1008,6 +1037,7 @@ export class SfIEvents extends LitElement {
       }
 
     }
+    
 
   `;
   
@@ -1034,6 +1064,21 @@ export class SfIEvents extends LitElement {
 
   @query('#button-generate')
   _SfButtonGenerate: any;
+
+  @query('.button-search')
+  _SfButtonSearch: any;
+
+  @query('.button-save')
+  _SfButtonSave: any;
+
+  @query('.button-next')
+  _SfButtonNext: any;
+
+  @query('.button-prev')
+  _SfButtonPrev: any;
+
+  @query('.input-search')
+  _SfInputSearch: any;
 
   @query('#button-sync-chosen-project')
   _SfButtonSyncChosenProject: any;
@@ -1103,6 +1148,75 @@ export class SfIEvents extends LitElement {
 
   @query('#role-tab-container')
   _SfRoleTabContainer: any;
+
+  @query('#onboarding-tab-container')
+  _SfOnboardingTabContainer: any;
+
+  @query('#statutes-list-container')
+  _SfOnboardingStatutesListContainer: any;
+
+  @query('#statutes-container')
+  _SfOnboardingStatutesContainer: any;
+
+  @query('#compliances-list-container')
+  _SfOnboardingCompliancesListContainer: any;
+
+  @query('#compliances-container')
+  _SfOnboardingCompliancesContainer: any;
+
+  @query('#entities-list-container')
+  _SfOnboardingEntitiesListContainer: any;
+
+  @query('#entities-container')
+  _SfOnboardingEntitiesContainer: any;
+
+  @query('#locations-list-container')
+  _SfOnboardingLocationsListContainer: any;
+
+  @query('#locations-container')
+  _SfOnboardingLocationsContainer: any;
+
+  @query('#tags-list-container')
+  _SfOnboardingTagsListContainer: any;
+
+  @query('#tags-container')
+  _SfOnboardingTagsContainer: any;
+
+  @query('#reporters-list-container')
+  _SfOnboardingReportersListContainer: any;
+
+  @query('#reporters-container')
+  _SfOnboardingReportersContainer: any;
+  
+  @query('#approvers-container')
+  _SfOnboardingApproversContainer: any;
+
+  @query('#approvers-list-container')
+  _SfOnboardingApproversListContainer: any;
+
+  @query('#duedates-list-container')
+  _SfOnboardingDuedatesListContainer: any;
+
+  @query('#duedates-container')
+  _SfOnboardingDuedatesContainer: any;
+
+  @query('#alertschedules-list-container')
+  _SfOnboardingAlertSchedulesListContainer: any;
+
+  @query('#alertschedules-container')
+  _SfOnboardingAlertSchedulesContainer: any;
+
+  @query('#internalcontrols-list-container')
+  _SfOnboardingInternalControlsListContainer: any;
+
+  @query('#internalcontrols-container')
+  _SfOnboardingInternalControlsContainer: any;
+
+  @query('#calendar-list-container')
+  _SfOnboardingCalendarListContainer: any;
+
+  @query('#calendar-container')
+  _SfOnboardingCalendarContainer: any;
 
   @queryAssignedElements({slot: 'project'})
   _SfProject: any;
@@ -1390,11 +1504,10 @@ export class SfIEvents extends LitElement {
           var total = 0;
 
           for(var j = 0; j < this.events[mmdd].length; j++) {
-            //console.log('events', i + ',' + j, JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]))
             total++;
-            if(this.events[mmdd][j].documents == null || this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] == null || JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length === 0) {
+            if(this.events[mmdd][j].documents == null || this.events[mmdd][j].documents == null || (this.events[mmdd][j].documents).length === 0) {
               notStarted++;
-            } else if(this.events[mmdd][j].approved != null && this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]){
+            } else if(this.events[mmdd][j].approved != null && this.events[mmdd][j].approved){
               approved++;
             } else {
               inProgress++;
@@ -1536,9 +1649,9 @@ export class SfIEvents extends LitElement {
 
   getLateApproved = (mmdd: string, event: any) => {
 
-    console.log('get late approved', event.lastupdated, mmdd, event.lastupdated[mmdd + "/" + new Date().getFullYear()]);
+    console.log('get late approved', event.lastupdated, mmdd, event.lastupdated);
 
-    const tsLastUpdated = new Date((event.lastupdated[mmdd + "/" + new Date().getFullYear()])).getTime();
+    const tsLastUpdated = new Date((event.lastupdated)).getTime();
 
     console.log('get late approved', tsLastUpdated);
 
@@ -1645,7 +1758,7 @@ export class SfIEvents extends LitElement {
             var partStatus = "";
             var lateStatus = "";
 
-            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]) != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()])) {
+            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved) != null && (this.events[mmdd][j].approved)) {
               partStatus = "status-approved";
               if(this.getLateExecuted(mmdd, this.events[mmdd][j])) {
                 lateStatus = "late-executed"
@@ -1654,7 +1767,7 @@ export class SfIEvents extends LitElement {
                   lateStatus = "late-approved"
                 }
               }
-            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
               partStatus = "status-in-progress";
               if(this.getPastDueDate(mmdd)) {
                 lateStatus = "past-due-date"
@@ -1687,7 +1800,7 @@ export class SfIEvents extends LitElement {
               html += '<th part="td-head">';
               html += '</th>';
               console.log('listing docs',this.events[mmdd][j].documents )
-              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Docs'
                 html += '</th>';
@@ -1696,13 +1809,13 @@ export class SfIEvents extends LitElement {
                   notStarted++;
                 }
               }
-              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Comments'
                 html += '</th>';
               } else {
               }
-              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Updated'
                 html += '</th>';
@@ -1784,23 +1897,23 @@ export class SfIEvents extends LitElement {
               html += '<td id="td-expand-'+i+'" part="td-body">';
               html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-20">open_in_new</button>'
               html += '</td>';
-              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
-                html += JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length
+                html += (this.events[mmdd][j].documents).length
                 html += '</td>';
               } else {
               }
-              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">forum</span>'
-                html += (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length
+                html += (this.events[mmdd][j].comments).length
                 html += '</td>';
               } else {
               }
-              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<td part="td-body">';
-                html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).getTime())
+                html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated).getTime())
                 html += '</td>';
               } else {
               }
@@ -1950,7 +2063,7 @@ export class SfIEvents extends LitElement {
             var partStatus = "";
             var lateStatus = "";
 
-            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]) != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()])) {
+            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved) != null && (this.events[mmdd][j].approved)) {
               partStatus = "status-approved";
               if(this.getLateExecuted(mmdd, this.events[mmdd][j])) {
                 lateStatus = "late-executed"
@@ -1959,7 +2072,7 @@ export class SfIEvents extends LitElement {
                   lateStatus = "late-approved"
                 }
               }
-            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
               partStatus = "status-in-progress";
               if(this.getPastDueDate(mmdd)) {
                 lateStatus = "past-due-date"
@@ -1990,26 +2103,23 @@ export class SfIEvents extends LitElement {
                   html += '</th>';
                 }
               }
-              // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
-              //   html += '<th part="td-head">';
-              //   html += '</th>';
-              // }
+              
               html += '<th part="td-head">';
               html += '</th>';
               console.log('listing docs',this.events[mmdd][j].documents )
-              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Docs'
                 html += '</th>';
               } else {
                 notStarted++;
               }
-              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Comments'
                 html += '</th>';
               }
-              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Updated'
                 html += '</th>';
@@ -2084,34 +2194,27 @@ export class SfIEvents extends LitElement {
                   
                 }
               }
-              // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
-              //   html += '<td part="td-body">';
-              //   html += '<span class="material-icons">description</span>'
-              //   if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
-              //     html += JSON.parse(this.events[mmdd][j].documents).length
-              //   }
-              //   html += '</td>';
-              // }
+              
               csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
               html += '<td id="td-expand-'+i+'" part="td-body">';
               html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
               html += '</td>';
-              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
-                html += JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length
+                html += (this.events[mmdd][j].documents).length
                 html += '</td>';
               }
-              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">forum</span>'
-                html += (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length
+                html += (this.events[mmdd][j].comments).length
                 html += '</td>';
               }
-              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<td part="td-body">';
-                html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).getTime())
+                html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated).getTime())
                 html += '</td>';
               }
               csvValues += '\n';
@@ -2285,7 +2388,7 @@ export class SfIEvents extends LitElement {
             var partStatus = "";
             var lateStatus = "";
 
-            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]) != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()])) {
+            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved) != null && (this.events[mmdd][j].approved)) {
               partStatus = "status-approved";
               if(this.getLateExecuted(mmdd, this.events[mmdd][j])) {
                 lateStatus = "late-executed"
@@ -2294,7 +2397,7 @@ export class SfIEvents extends LitElement {
                   lateStatus = "late-approved"
                 }
               }
-            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
               partStatus = "status-in-progress";
               if(this.getPastDueDate(mmdd)) {
                 lateStatus = "past-due-date"
@@ -2325,26 +2428,24 @@ export class SfIEvents extends LitElement {
                   html += '</th>';
                 }
               }
-              // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
-              //   html += '<th part="td-head">';
-              //   html += '</th>';
-              // }
+              
+              
               html += '<th part="td-head">';
               html += '</th>';
               console.log('listing docs',this.events[mmdd][j].documents )
-              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Docs'
                 html += '</th>';
               } else {
                 notStarted++;
               }
-              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Comments'
                 html += '</th>';
               }
-              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Updated'
                 html += '</th>';
@@ -2420,34 +2521,27 @@ export class SfIEvents extends LitElement {
                   
                 }
               }
-              // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
-              //   html += '<td part="td-body">';
-              //   html += '<span class="material-icons">description</span>'
-              //   if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
-              //     html += JSON.parse(this.events[mmdd][j].documents).length
-              //   }
-              //   html += '</td>';
-              // }
+              
               csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
               html += '<td id="td-expand-'+i+'" part="td-body">';
               html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
               html += '</td>';
-              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
-                html += JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length
+                html += (this.events[mmdd][j].documents).length
                 html += '</td>';
               }
-              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">forum</span>'
-                html += (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length
+                html += (this.events[mmdd][j].comments).length
                 html += '</td>';
               }
-              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<td part="td-body">';
-                html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).getTime())
+                html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated).getTime())
                 html += '</td>';
               }
               csvValues += '\n';
@@ -2622,7 +2716,7 @@ export class SfIEvents extends LitElement {
             var partStatus = "";
             var lateStatus = "";
 
-            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]) != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()])) {
+            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved) != null && (this.events[mmdd][j].approved)) {
               partStatus = "status-approved";
               if(this.getLateExecuted(mmdd, this.events[mmdd][j])) {
                 lateStatus = "late-executed"
@@ -2631,7 +2725,7 @@ export class SfIEvents extends LitElement {
                   lateStatus = "late-approved"
                 }
               }
-            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
               partStatus = "status-in-progress";
               if(this.getPastDueDate(mmdd)) {
                 lateStatus = "past-due-date"
@@ -2662,26 +2756,23 @@ export class SfIEvents extends LitElement {
                   html += '</th>';
                 }
               }
-              // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
-              //   html += '<th part="td-head">';
-              //   html += '</th>';
-              // }
+              
               html += '<th part="td-head">';
               html += '</th>';
               console.log('listing docs',this.events[mmdd][j].documents )
-              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Docs'
                 html += '</th>';
               } else {
                 notStarted++;
               }
-              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Comments'
                 html += '</th>';
               }
-              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Updated'
                 html += '</th>';
@@ -2756,34 +2847,27 @@ export class SfIEvents extends LitElement {
                   
                 }
               }
-              // if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
-              //   html += '<td part="td-body">';
-              //   html += '<span class="material-icons">description</span>'
-              //   if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
-              //     html += JSON.parse(this.events[mmdd][j].documents).length
-              //   }
-              //   html += '</td>';
-              // }
+              
               csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
               html += '<td id="td-expand-'+i+'" part="td-body">';
               html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
               html += '</td>';
-              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
-                html += JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length
+                html += (this.events[mmdd][j].documents).length
                 html += '</td>';
               }
-              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">forum</span>'
-                html += (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length
+                html += (this.events[mmdd][j].comments).length
                 html += '</td>';
               }
-              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<td part="td-body">';
-                html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).getTime())
+                html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated).getTime())
                 html += '</td>';
               }
               csvValues += '\n';
@@ -2935,7 +3019,7 @@ export class SfIEvents extends LitElement {
             var partStatus = "";
             var lateStatus = "";
 
-            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()]) != null && (this.events[mmdd][j].approved[mmdd + "/" + new Date().getFullYear()])) {
+            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved) != null && (this.events[mmdd][j].approved)) {
               partStatus = "status-approved";
               if(this.getLateExecuted(mmdd, this.events[mmdd][j])) {
                 lateStatus = "late-executed"
@@ -2944,7 +3028,7 @@ export class SfIEvents extends LitElement {
                   lateStatus = "late-approved"
                 }
               }
-            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
               partStatus = "status-in-progress";
               if(this.getPastDueDate(mmdd)) {
                 lateStatus = "past-due-date"
@@ -2975,26 +3059,22 @@ export class SfIEvents extends LitElement {
                   html += '</th>';
                 }
               }
-              // if(JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
-              //   html += '<th part="td-head">';
-              //   html += '</th>';
-              // }
               html += '<th part="td-head">';
               html += '</th>';
               console.log('listing docs',this.events[mmdd][j].documents )
-              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Docs'
                 html += '</th>';
               } else {
                 notStarted++;
               }
-              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Comments'
                 html += '</th>';
               }
-              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Updated'
                 html += '</th>';
@@ -3070,36 +3150,26 @@ export class SfIEvents extends LitElement {
                 }
               }
 
-              // console.log('docs list',this.events[mmdd][j].documents);
-
-              // if(JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
-              //   html += '<td part="td-body">';
-              //   html += '<span class="material-icons">description</span>'
-              //   if(JSON.parse(this.events[mmdd][j].documents).length > 0) {
-              //     html += JSON.parse(this.events[mmdd][j].documents).length
-              //   }
-              //   html += '</td>';
-              // }
               csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
               html += '<td id="td-expand-'+i+'" part="td-body">';
               html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
               html += '</td>';
-              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()] != null && JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
-                html += JSON.parse(this.events[mmdd][j].documents[mmdd + "/" + new Date().getFullYear()]).length
+                html += (this.events[mmdd][j].documents).length
                 html += '</td>';
               }
-              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">forum</span>'
-                html += (this.events[mmdd][j].comments[mmdd + "/" + new Date().getFullYear()]).length
+                html += (this.events[mmdd][j].comments).length
                 html += '</td>';
               }
-              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()] != null && (this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).length > 0) {
+              if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<td part="td-body">';
-                html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated[mmdd + "/" + new Date().getFullYear()]).getTime())
+                html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated).getTime())
                 html += '</td>';
               }
               csvValues += '\n';
@@ -3468,12 +3538,11 @@ export class SfIEvents extends LitElement {
         for(var l = 0; l < event.tags.length; l++) {
 
           if((event.tags[l] + "").toLowerCase().indexOf((tags[i] + "").toLowerCase().split(';')[1]) >= 0) {
-            //console.log('found', event.documents[event.mmdd + '/' + new Date().getFullYear()], event.approved[event.mmdd + '/' + new Date().getFullYear()], event.approved[event.mmdd + '/' + new Date().getFullYear()].approved);
             if(event.documents == null || event.documents[event.mmdd + '/' + new Date().getFullYear()] == null || JSON.parse(event.documents[event.mmdd + '/' + new Date().getFullYear()]) == null) {
               countNotStarted++;
-            } else if(event.approved != null && event.approved[event.mmdd + '/' + new Date().getFullYear()] != null && !event.approved[event.mmdd + '/' + new Date().getFullYear()]) {
+            } else if(event.approved != null && event.approved != null && !event.approved) {
               countInProgress++;
-            } else if(event.approved != null && event.approved[event.mmdd + '/' + new Date().getFullYear()] != null && event.approved[event.mmdd + '/' + new Date().getFullYear()]) {
+            } else if(event.approved != null && event.approved != null && event.approved) {
               countApproved++;
             }
           }
@@ -3564,6 +3633,160 @@ export class SfIEvents extends LitElement {
 
   }
 
+  sleep = (ms: number) => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
+
+  hideTabContainers = async () => {
+
+    (this._SfOnboardingStatutesContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingCompliancesContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingEntitiesContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingLocationsContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingTagsContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingReportersContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingApproversContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingDuedatesContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingInternalControlsContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingCalendarContainer as HTMLDivElement).style.display = 'none';
+
+    (this._SfOnboardingStatutesContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingCompliancesContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingEntitiesContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingLocationsContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingTagsContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingReportersContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingApproversContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingDuedatesContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingInternalControlsContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingCalendarContainer as HTMLDivElement).innerHTML = '';
+
+  }
+
+  loadOnboardingStatutes = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingStatutesContainer as HTMLDivElement).style.display = 'flex';
+    const mappedStatutes = await this.fetchMappedStatutes();
+    console.log('mappedstatutes', mappedStatutes);
+    this.renderOnboardingStatutes(mappedStatutes);
+  }
+
+  loadOnboardingCompliances = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingCompliancesContainer as HTMLDivElement).style.display = 'flex';
+    const mappedStatutes = await this.fetchMappedStatutes();
+    const mappedCompliances = await this.fetchMappedCompliances();
+    this.renderOnboardingCompliances(mappedStatutes, mappedCompliances);
+  }
+
+  loadOnboardingEntities = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingEntitiesContainer as HTMLDivElement).style.display = 'flex';
+    const mappedEntities = await this.fetchMappedEntities();
+    const mappedCompliances = await this.fetchMappedCompliances();
+    // const mappedStatutes = await this.fetchMappedStatutes();
+    console.log('mappedCompliances', mappedCompliances);
+    console.log('mappedEntities', mappedEntities);
+    this.renderOnboardingEntities(mappedEntities, mappedCompliances);
+  }
+
+  loadOnboardingLocations = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingLocationsContainer as HTMLDivElement).style.display = 'flex';
+    const mappedSerializedEntities = await this.fetchMappedSerializedEntities();
+    const mappedLocations = await this.fetchMappedLocations();
+    console.log('mappedserializedentities', mappedSerializedEntities);
+    console.log('mappedlocations', mappedLocations);
+    this.renderOnboardingLocations(mappedLocations, mappedSerializedEntities);
+  }
+
+  loadOnboardingTags = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingTagsContainer as HTMLDivElement).style.display = 'flex';
+    const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
+    const mappedTags = await this.fetchMappedTags();
+    console.log('mappedserializedlocations', mappedSerializedLocations);
+    console.log('mappedtags', mappedTags);
+    this.renderOnboardingTags(mappedTags, mappedSerializedLocations);
+  }
+
+  loadOnboardingReporters = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingReportersContainer as HTMLDivElement).style.display = 'flex';
+    const mappedSerializedTags = await this.fetchMappedSerializedTags();
+    const mappedReporters = await this.fetchMappedReporters();
+    console.log('mappedserializedtags', mappedSerializedTags);
+    console.log('mappedreporters', mappedReporters);
+    this.renderOnboardingReporters(mappedReporters, mappedSerializedTags);
+  }
+
+  loadOnboardingApprovers = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingApproversContainer as HTMLDivElement).style.display = 'flex';
+    const mappedSerializedReporters = await this.fetchMappedSerializedReporters();
+    const mappedApprovers = await this.fetchMappedApprovers();
+    console.log('mappedserializedreporters', mappedSerializedReporters);
+    console.log('mappedapprovers', mappedApprovers);
+    this.renderOnboardingApprovers(mappedApprovers, mappedSerializedReporters);
+  }
+
+  loadOnboardingDuedates = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingDuedatesContainer as HTMLDivElement).style.display = 'flex';
+    const mappedSerializedApprovers = await this.fetchMappedSerializedApprovers();
+    const mappedDuedates = await this.fetchMappedDuedates();
+    console.log('mappedserializedapprovers', mappedSerializedApprovers);
+    console.log('mappedduedates', mappedDuedates);
+    this.renderOnboardingDuedates(mappedDuedates, mappedSerializedApprovers);
+  }
+
+  loadOnboardingAlertSchedules = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).style.display = 'flex';
+    const mappedSerializedDuedates = await this.fetchMappedSerializedDuedates();
+    const mappedAlertSchedules = await this.fetchMappedAlertSchedules();
+    console.log('mappedserializedduedates', mappedSerializedDuedates);
+    console.log('mappedalertschedules', mappedAlertSchedules);
+    this.renderOnboardingAlertSchedules(mappedAlertSchedules, mappedSerializedDuedates);
+  }
+
+  loadOnboardingInternalControls = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingInternalControlsContainer as HTMLDivElement).style.display = 'flex';
+    const mappedSerializedAlertSchedules = await this.fetchMappedSerializedAlertSchedules();
+    const mappedInternalControls = await this.fetchMappedInternalControls();
+    console.log('mappedserializedalertschedules', mappedSerializedAlertSchedules);
+    console.log('mappedinternalcontrols', mappedInternalControls);
+    this.renderOnboardingInternalControls(mappedInternalControls, mappedSerializedAlertSchedules);
+  }
+
+  loadOnboardingCalendar = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingCalendarContainer as HTMLDivElement).style.display = 'flex';
+    this.renderOnboardingCalendar();
+  }
+
+  // processTriggers = async (triggers: any) => {
+
+  //   // console.log('processing triggers', triggers);
+  //   // for(var i = 0; i < Object.keys(triggers).length; i++) {
+
+  //   //   console.log("processing triggers", (triggers[Object.keys(triggers)[i]] as Array<any>).length);
+
+  //   //   for(var j = 0; j < (triggers[Object.keys(triggers)[i]] as Array<any>).length; j++) {
+  //   //     console.log("processing trigger project=", this.mode == "admin" ? (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0] : this.projectId, triggers[Object.keys(triggers)[i]], Object.keys(triggers)[i], triggers[Object.keys(triggers)[i]][j]["timestamp"]);
+  //   //     this.sleep(5000);
+  //   //     await this.uploadReprogramTrigger(Object.keys(triggers)[i], triggers[Object.keys(triggers)[i]][j]["timestamp"]);
+  //   //   }
+
+  //   // }
+
+  // }
+
   renderAdhoc = (events: Array<any>|null = null, triggers: Array<any>|null = null) => {
 
     if(events == null) {
@@ -3595,7 +3818,7 @@ export class SfIEvents extends LitElement {
 
       html += '<div part="stream-event-selected" class="p-10 mb-10">';
 
-        html += '<div class="d-flex">';
+        html += '<div class="d-flex align-start">';
           html += '<div class="mb-10 flex-grow" part="adhoc-question">'+events[i].question.replace(/"/g, '')+'</div>';
           html += '<button id="button-bolt-'+i+'" part="button-icon" class="material-icons">electric_bolt</button>'
         html += '</div>'
@@ -3635,8 +3858,11 @@ export class SfIEvents extends LitElement {
             html += '</thead>';
 
             console.log('trigger', triggers![events[i].id]);
+            console.log('events', Object.keys(this.events))
 
             for(var j = (triggers![events[i].id].length-1); j >= 0; j--) {
+
+              if(this.events[triggers![events[i].id][j].newduedate] == null) continue;
 
               var classBg = "";
 
@@ -3656,6 +3882,8 @@ export class SfIEvents extends LitElement {
               html += Util.timeSince(new Date(triggers![events[i].id][j].newduedatestr).getTime()) + ' on ' + triggers![events[i].id][j].newduedate.split("/")[1] + "/" + triggers![events[i].id][j].newduedate.split("/")[0];
               html += '</td>';
 
+              console.log('trigger2', triggers![events[i].id][j].newduedate);
+
               for(var k = 0; k < (this.events[triggers![events[i].id][j].newduedate] as Array<any>).length; k++) {
                 const dEvent = (this.events[triggers![events[i].id][j].newduedate] as Array<any>)[k];
                 if(dEvent.id == events[i].id) {
@@ -3663,7 +3891,7 @@ export class SfIEvents extends LitElement {
                   var partStatus = "";
                   var lateStatus = "";
 
-                  if(dEvent.approved != null && (dEvent.approved[triggers![events[i].id][j].newduedate + "/" + new Date().getFullYear()]) != null && (dEvent.approved[triggers![events[i].id][j].newduedate + "/" + new Date().getFullYear()])) {
+                  if(dEvent.approved != null && (dEvent.approved) != null && (dEvent.approved)) {
                     partStatus = "Approved";
                     if(this.getLateExecuted(triggers![events[i].id][j].newduedate, dEvent)) {
                       lateStatus = "Late-executed"
@@ -3672,7 +3900,7 @@ export class SfIEvents extends LitElement {
                         lateStatus = "Late-approved"
                       }
                     }
-                  } else if(dEvent.documents != null && dEvent.documents[triggers![events[i].id][j].newduedate + "/" + new Date().getFullYear()] != null && JSON.parse(dEvent.documents[triggers![events[i].id][j].newduedate + "/" + new Date().getFullYear()]).length > 0) {
+                  } else if(dEvent.documents != null && dEvent.documents != null && (dEvent.documents).length > 0) {
                     partStatus = "In-progress";
                     if(this.getPastDueDate(triggers![events[i].id][j].newduedate)) {
                       lateStatus = "Past-due-date"
@@ -4426,10 +4654,10 @@ export class SfIEvents extends LitElement {
 
     let comments, docs, approved, dateOfCompletion;
 
-    comments = event['comments'] == null ? [] : event['comments'][mmddyyyy] == null ? [] :  (event['comments'][mmddyyyy]);
-    docs = event['documents'] == null ? [] : event['documents'][mmddyyyy] == null ? [] :  JSON.parse(event['documents'][mmddyyyy]);
-    approved = event['approved'] == null ? false : event['approved'][mmddyyyy] == null ? false : event['approved'][mmddyyyy];
-    dateOfCompletion = event['dateofcompletion'] == null ? '' : event['dateofcompletion'][mmddyyyy] == null ? '' : event['dateofcompletion'][mmddyyyy];
+    comments = event['comments'] == null ? [] : event['comments'] == null ? [] :  (event['comments']);
+    docs = event['documents'] == null ? [] : event['documents'] == null ? [] :  (event['documents']);
+    approved = event['approved'] == null ? false : event['approved'] == null ? false : event['approved'];
+    dateOfCompletion = event['dateofcompletion'] == null ? '' : event['dateofcompletion'] == null ? '' : event['dateofcompletion'];
 
 
     console.log('event detail', event);
@@ -4781,7 +5009,7 @@ export class SfIEvents extends LitElement {
             "cancelable": false
         });
         ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
-        await this.fetchUserCalendar();
+        await this.fetchUserCalendar_2();
         if(this.getCurrentTab() == this.TAB_STREAM) {
           this.renderTabs(this.TAB_STREAM);
           this.renderStream();
@@ -4831,7 +5059,7 @@ export class SfIEvents extends LitElement {
                     "cancelable": false
                 });
                 ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
-                await this.fetchUserCalendar();
+                await this.fetchUserCalendar_2();
                 if(this.getCurrentTab() == this.TAB_STREAM) {
                   this.renderTabs(this.TAB_STREAM);
                   this.renderStream();
@@ -4876,7 +5104,7 @@ export class SfIEvents extends LitElement {
       console.log('approved 1', event["approved"], this.myRole, this.TAB_APPROVER);
       if(this.myRole == this.TAB_APPROVER) {
         console.log('approved 1', event["approved"], this.myRole, this.TAB_APPROVER);
-        if(event["approved"][mmddyyyy] === true) {
+        if(event["approved"] === true) {
           console.log('approved 2', event["approved"], this.myRole, this.TAB_APPROVER);
           ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approve-yes') as HTMLInputElement).checked = true;
         }
@@ -4927,6 +5155,859 @@ export class SfIEvents extends LitElement {
 
   }
 
+  renderTaggingTable = (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string) => {
+
+    console.log('divelement', divElement);
+    console.log('sourcearray', sourceArray);
+    console.log('taggingarray', taggingArray);
+    console.log('uniqcols', uniqCols);
+
+    if(taggingArray.length === 0 || sourceArray.length === 0) return;
+
+    const foundArr = [];
+
+    console.log('tagging array before', taggingArray.data.mappings.mappings.length);
+
+    for(var i = 0; i < taggingArray.data.mappings.mappings.length; i++) {
+
+      var found = false;
+      for(var j = 0; j < sourceArray.data.mappings.mappings.length; j++) {
+
+        var equal = true;
+
+        for(var k = 0; k < uniqCols.length; k++) {
+
+          if(sourceArray.data.mappings.mappings[j] != null && taggingArray.data.mappings.mappings[i] != null) {
+            if(sourceArray.data.mappings.mappings[j][uniqCols[k]] != taggingArray.data.mappings.mappings[i][uniqCols[k]]) {
+              equal = false;
+            }
+          }
+          
+        }
+
+        if(equal) {
+          found = true;
+        }
+
+      }
+      if(found) {
+        foundArr.push(taggingArray.data.mappings.mappings[i]);
+      }
+
+    }
+
+    taggingArray.data.mappings.mappings = foundArr;
+
+    console.log('tagging array after', taggingArray.data.mappings.mappings.length);
+
+    // for(var i = 0; i < sourceArray.data.mappings.mappings.length; i++) {
+
+    //   var found = false;
+    //   for(var j = 0; j < taggingArray.data.mappings.mappings.length; j++) {
+
+    //     var equal = true;
+
+    //     for(var k = 0; k < uniqCols.length; k++) {
+    //       if(sourceArray.data.mappings.mappings[i][uniqCols[k]] != taggingArray.data.mappings.mappings[j][uniqCols[k]]) {
+    //         equal = false;
+    //       }
+    //     }
+
+    //     if(equal) {
+    //       found = true;
+    //     }
+
+    //   }
+
+    //   if(found) {
+
+    //     foundId.push();
+
+    //   }
+
+    // }
+
+
+
+    var tagged = 0;
+
+    for(var j = 0; j < taggingArray.data.mappings.mappings.length; j++) {
+
+      if(taggingArray.data.mappings.mappings[j] != null) {
+        if(taggingArray.data.mappings.mappings[j][colName].length > 0) {
+          tagged++;
+        }
+  
+      }
+      
+    }
+
+    // for(i = 0; i < sourceArray.data.mappings.mappings.length; i++) {
+    //   for(var j = 0; j < taggingArray.data.mappings.mappings.length; j++) {
+
+    //     var equal = true;
+
+    //     for(var k = 0; k < uniqCols.length; k++) {
+    //       if(sourceArray.data.mappings.mappings[i][uniqCols[k]] != taggingArray.data.mappings.mappings[j][uniqCols[k]]) {
+    //         equal = false;
+    //       }
+    //     }
+
+    //     if(equal) {
+    //       if(taggingArray.data.mappings.mappings[j][colName].length > 0) {
+    //         tagged++;
+    //       }
+    //     }
+
+    //   }
+    // }
+
+    var html = '';
+
+    var status = '';
+    if(tagged < sourceArray.data.mappings.mappings.length) {
+      status = '<span class="color-pending material-icons">pending</span>';
+    } else {
+      status = '<span class="color-done material-icons">check_circle</span>';
+    }
+
+    html += '<div class="left-sticky mb-10 d-flex justify-between align-center"><h3 part="results-title" class="d-flex align-center">'+status+'&nbsp;&nbsp;Mapped '+tagged+' out of '+sourceArray.data.mappings.mappings.length+'</h3><button part="button" class="button-save">Save</button></div>'
+
+    html += '<table>';
+
+    html += '<thead>';
+    html += '<th part="td-head" class="td-head">'
+    html += colName;
+    html += '</th>'
+    for(i = 0; i < uniqCols.length; i++) {
+      html += '<th part="td-head" class="td-head">'
+      html += uniqCols[i];
+      html += '</th>'
+    }
+    for(i = 0; i < sourceCols.length; i++) {
+      html += '<th part="td-head" class="td-head">'
+      html += sourceCols[i];
+      html += '</th>'
+    }
+    
+    for(i = 0; i < JSON.parse(sourceArray.data.mappings.mappings[0].cols).length; i++) {
+      html += '<th part="td-head" class="td-head">'
+      html += JSON.parse(sourceArray.data.mappings.mappings[0].cols)[i];
+      html += '</th>'
+    }
+    html += '</thead>';
+    html += '<tbody>';
+
+    for(i = 0; i < sourceArray.data.mappings.mappings.length; i++) {
+
+      var classBg = "";
+
+      if(i%2 === 0) {
+        classBg = 'td-light';
+      } else {
+        classBg = 'td-dark';
+      }
+
+      html += '<tr>';
+
+      html += '<td class="td-body '+classBg+'" part="td-key">'
+      if(apiIdDropdown.length > 0) {
+        html += '<sf-i-form id="tags-'+i+'" class="tags-input tags-'+i+'" name="Tags" label="Select '+colName+'" apiId="'+apiIdDropdown+'" mode="multiselect-dropdown" searchPhrase="'+this.projectName+'" selectProjection="name" mandatory></sf-i-form>';
+      } else {
+        html += '<input id="tags-'+i+'" type="text" part="input" class="tags-input"/>';
+      }
+      html += '</td>'
+
+      for(var l = 0; l < uniqCols.length; l++) {
+        html += '<td class="td-body '+classBg+'" part="td-key">'
+        html += '<sf-i-elastic-text text="'+sourceArray.data.mappings.mappings[i][uniqCols[l]]+'" minLength="10"></sf-i-elastic-text>';
+        html += '</td>'
+      }
+
+      // html += '<td class="td-body '+classBg+'" part="td-body">';
+      // html += '<sf-i-elastic-text text="'+sourceArray.data.mappings.mappings[i].id+'" minLength="10"></sf-i-elastic-text>';
+      // html += '</td>';
+
+      for(l = 0; l < sourceCols.length; l++) {
+
+        for(var j = 0; j < JSON.parse(sourceArray.data.mappings.mappings[0].cols).length; j++) {
+
+          if(sourceCols[l] == JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j]) {
+  
+            html += '<td class="td-body '+classBg+'" part="td-body">';
+  
+            console.log('isArray', sourceCols[l], Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j]));
+            if(Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j])) {
+              
+              for(var k = 0; k < JSON.parse(sourceArray.data.mappings.mappings[i].data)[j].length; k++) {
+                html +=  ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j][k]+'" minLength="60"></sf-i-elastic-text>');
+              }
+      
+            } else {
+              html += ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j]+'" minLength="60"></sf-i-elastic-text>')
+            }
+  
+            html += '</td>';
+  
+          }
+  
+        }
+
+      }
+
+      for(var j = 0; j < JSON.parse(sourceArray.data.mappings.mappings[0].cols).length; j++) {
+          
+          html += '<td class="td-body '+classBg+'" part="td-body">';
+
+          if(Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j])) {
+
+            for(var k = 0; k < JSON.parse(sourceArray.data.mappings.mappings[i].data)[j].length; k++) {
+              html +=  ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j][k]+'" minLength="80"></sf-i-elastic-text>');
+              // if(k < (JSON.parse(jsonData[i].data.data)[j].length - 1)) {
+              //   html += "; ";
+              // }
+            }
+    
+          } else {
+            html += ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j]+'" minLength="80"></sf-i-elastic-text>')
+          }
+
+          html += '</td>';
+  
+        }
+
+
+      html += '</tr>';
+      console.log('i=', i);
+
+    }
+    html += '</tbody>';
+    html += '</table>';
+
+    divElement.innerHTML = html;
+
+    const multiArr = (divElement as HTMLDivElement).querySelectorAll('.tags-input') as NodeListOf<SfIForm|HTMLInputElement>;
+
+    for(var i = 0; i < multiArr.length; i++) {
+
+      console.log('preselect', i, apiIdDropdown);
+
+      if(apiIdDropdown.length > 0) {
+
+        if(taggingArray.data.mappings.mappings[i] != null && taggingArray.data.mappings.mappings[i][colName] != null) {
+          (multiArr[i] as SfIForm).preselectedValues = JSON.stringify(taggingArray.data.mappings.mappings[i][colName]);
+        }
+
+        console.log('preselect', multiArr[i]);
+
+        multiArr[i].addEventListener('valueChanged', (  ) => {
+
+          taggingArray.data.mappings.mappings = [];
+
+          for(var count = 0; count < sourceArray.data.mappings.mappings.length; count++) {
+            taggingArray.data.mappings.mappings[count] = sourceArray.data.mappings.mappings[count];
+            taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as SfIForm).selectedValues();
+          }
+
+          // const id = e.target.id;
+          // const index = id.split('-')[1];
+          // console.log((multiArr[index] as SfIForm).selectedValues());
+          // if(taggingArray.data.mappings.mappings[index] == null) {
+          //   taggingArray.data.mappings.mappings[index] = sourceArray.data.mappings.mappings[index];
+          // }            
+          // taggingArray.data.mappings.mappings[index][colName] = (multiArr[index] as SfIForm).selectedValues();
+          
+          this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown)
+  
+        });
+
+      } else {
+
+        if(taggingArray.data.mappings.mappings[i] != null) {
+          (multiArr[i] as HTMLInputElement).value = taggingArray.data.mappings.mappings[i][colName];
+        }
+
+        multiArr[i].addEventListener('keyup', (e: any) => {
+
+          if(e.key == "Enter") {
+
+            taggingArray.data.mappings.mappings = [];
+
+            for(var count = 0; count < sourceArray.data.mappings.mappings.length; count++) {
+              taggingArray.data.mappings.mappings[count] = sourceArray.data.mappings.mappings[count];
+              taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as HTMLInputElement).value;
+            }
+
+            // const id = e.target.id;
+            // const index = id.split('-')[1];
+            
+            // taggingArray.data.mappings.mappings[index][colName] = (multiArr[index] as HTMLInputElement).value;
+            this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown)
+    
+          }
+
+        });
+
+      }
+
+  
+    }
+
+    const buttonSave = (divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement;
+    buttonSave.addEventListener('click', async () => {
+      await uploadFunction(taggingArray.data.mappings);
+      refreshFunction();
+    });
+
+  }
+
+  renderMappingTable = (divElement: any, jsonData: Array<any>, cursor: Array<any>, fetchFunction: any, searchString: string, mappedArray: any, found: number, uploadFunction: any, refreshFunction: any) => {
+    console.log('divelement', divElement);
+    console.log('jsonData', jsonData);
+    console.log('cursor', cursor);
+    console.log('fetch', fetchFunction);
+    console.log('searchstring', searchString);
+
+    if(jsonData.length === 0) return;
+
+    var html = '';
+
+    html += '<div class="d-flex justify-between align-center left-sticky">';
+    html += '<h3 part="results-title">Search Results ('+found+')</h3>';
+    html += '<button part="button" class="button-save">Save</button>';
+    html += '</div>';
+
+    html += '<table>';
+
+    html += '<thead>';
+    html += '<th part="td-head" class="td-head left-sticky">'
+    html += 'Select';
+    html += '</th>'
+    html += '<th part="td-head" class="td-head">'
+    html += 'Id';
+    html += '</th>'
+    for(var i = 0; i < jsonData[0].cols.length; i++) {
+      html += '<th part="td-head" class="td-head">'
+      html += jsonData[0].cols[i]
+      html += '</th>'
+    }
+    html += '</thead>'
+
+    html += '<tbody>'
+    for(var i = 0; i < jsonData.length; i++) {
+
+      var classBg = "";
+
+      if(i%2 === 0) {
+        classBg = 'td-light';
+      } else {
+        classBg = 'td-dark';
+      }
+
+      var mapped = "";
+
+      if(jsonData[i].mapped) {
+        mapped = "checked";
+      }
+
+      html += '<tr>';
+      html += '<td part="td-action" class="left-sticky">';
+      html += '<div id="select-'+i+'"><input class="checkbox checkbox-'+i+'" part="input" type="checkbox" '+mapped+'/></div>';
+      html += '</td>';
+      html += '<td part="td-body" class="'+classBg+'">';
+      html += '<sf-i-elastic-text class="statute id-'+i+'" text="'+(jsonData[i].id)+'" minLength="80"></sf-i-elastic-text>';
+      html += '</td>';
+      //let data = JSON.parse(jsonData[i].fields.data);
+      for(var j = 0; j < JSON.parse(jsonData[i].data.cols).length; j++) {
+
+        if(jsonData[i].cols.includes(JSON.parse(jsonData[i].data.cols)[j])) {
+          html += '<td part="td-body" class="td-body '+classBg+'">';
+          if(Array.isArray(JSON.parse(jsonData[i].data.data)[j])) {
+
+            for(var k = 0; k < JSON.parse(jsonData[i].data.data)[j].length; k++) {
+              html +=  ('<sf-i-elastic-text text="'+JSON.parse(jsonData[i].data.data)[j][k]+'" minLength="80"></sf-i-elastic-text>');
+              // if(k < (JSON.parse(jsonData[i].data.data)[j].length - 1)) {
+              //   html += "; ";
+              // }
+            }
+
+          } else {
+            html += ('<sf-i-elastic-text text="'+JSON.parse(jsonData[i].data.data)[j]+'" minLength="80"></sf-i-elastic-text>')
+          }
+          html += '</td>';
+        }
+
+      }
+      html += '</tr>';
+    }
+    html += '</tbody>'
+    html += '</table>';
+
+    html += '<div class="mt-10 mb-10 d-flex justify-center align-center left-sticky">';
+      if(cursor[cursor.length - 1].prev != "") {
+        html += '<button part="button-icon" class="material-icons ml-10 mr-10 button-prev">navigate_before</button>'
+      }
+      html += '<label part="input-label" class="ml-10 mr-10">'+cursor.length+' of '+Math.ceil(found/this.SEARCH_BLOCK_SIZE)+'</label>'
+      if(jsonData.length === this.SEARCH_BLOCK_SIZE) {
+        html += '<button part="button-icon" class="material-icons ml-10 mr-10 button-next">navigate_next</button>'
+      }
+    html += '</div>';
+
+    divElement.innerHTML = html;
+
+    (this._SfButtonNext as HTMLButtonElement)?.addEventListener('click', async () => {
+      const resultFunction = await fetchFunction(searchString, cursor[cursor.length - 1].next);
+      console.log(resultFunction);
+      if(resultFunction != null) {
+        const jsonData1 = [];
+        for(var i = 0; i < resultFunction.values.length; i++) {
+          var mapped = false;
+          for(var j = 0; j < mappedArray.data.mappings.mappings.length; j++) {
+            if(mappedArray.data.mappings.mappings[j].id == resultFunction.values[i].id) {
+              if(mappedArray.data.mappings.mappings[j].selected) {
+                mapped = true;
+              }
+            }
+          }
+          for(var j = 0; j < mappedArray.data.mappings.mappings.length; j++) {
+            if(mappedArray.data.mappings.mappings[j].id == resultFunction.values[i].id) {
+              if(mappedArray.data.mappings.mappings[j].selected) {
+                mapped = true;
+              }
+            }
+          }
+
+          jsonData1.push({id: resultFunction.values[i].id, mapped: mapped, data: resultFunction.values[i].fields, cols: jsonData[0].cols})
+        }
+        console.log('clicked', jsonData1);
+        cursor.push({prev: cursor[cursor.length - 1].next, next: resultFunction.cursor})
+        this.renderMappingTable(divElement, jsonData1, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction)
+      }
+    });
+
+    (this._SfButtonPrev as HTMLButtonElement)?.addEventListener('click', async () => {
+      cursor.pop();
+      const resultFunction = await fetchFunction(searchString, cursor[cursor.length - 1].prev);
+      console.log(resultFunction);
+      if(resultFunction != null) {
+        const jsonData1 = [];
+        for(var i = 0; i < resultFunction.values.length; i++) {
+          var mapped = false;
+          for(var j = 0; j < mappedArray.data.mappings.mappings.length; j++) {
+            if(mappedArray.data.mappings.mappings[j].id == resultFunction.values[i].id) {
+              if(mappedArray.data.mappings.mappings[j].selected) {
+                mapped = true;
+              }
+            }
+          }
+          jsonData1.push({id: resultFunction.values[i].id, mapped: mapped, data: resultFunction.values[i].fields, cols: jsonData[0].cols})
+        }
+        console.log('clicked', jsonData1);
+        this.renderMappingTable(divElement, jsonData1, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction)
+      }
+    });
+
+    (this._SfButtonSave as HTMLButtonElement)?.addEventListener('click', async () => {
+      const checkboxArr = (divElement as HTMLDivElement).querySelectorAll('.checkbox') as NodeListOf<HTMLInputElement>;
+      const statuteArr = (divElement as HTMLDivElement).querySelectorAll('.statute') as NodeListOf<SfIElasticText>;
+      console.log(checkboxArr);
+      console.log(statuteArr);
+      const jsonArr = [];
+      for(var i = 0; i < checkboxArr.length; i++) {
+        jsonArr.push({id: (statuteArr[i] as SfIElasticText).text, selected: checkboxArr[i].checked, data: jsonData[i].data.data, cols: jsonData[i].data.cols})
+      }
+      console.log('jsonArr', jsonArr);
+      await uploadFunction({"searchstring": searchString, "mappings": jsonArr});
+      refreshFunction();
+    });
+
+
+  }
+
+  renderOnboardingCalendar = () => {
+
+    var html = '';
+
+    html += '<div id="calendar-list-container" class="d-flex justify-center w-100 scroll-x pb-10 pt-10">';
+    html += '<button part="button" class="button-submit">Generate Calendar</button>';
+    html += '</div>';
+
+    (this._SfOnboardingCalendarContainer as HTMLDivElement).innerHTML = html;
+
+    (this._SfOnboardingCalendarContainer as HTMLDivElement).querySelector('.button-submit')?.addEventListener('click', () => {
+      console.log('submit clicked');
+    })
+
+  }
+
+  renderOnboardingInternalControls = (mappedInternalControls: any, mappedSerializedAlertSchedules: any) => {
+
+    var html = '';
+
+    html += '<div id="internalcontrols-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingInternalControlsContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingInternalControlsListContainer as HTMLDivElement),mappedSerializedAlertSchedules, mappedInternalControls, ["obligation", "country", "statute"], this.uploadInternalControlsMapping, this.loadMode, "internalcontrols", ["id", "entityname", "locationname"], '');
+
+  }
+
+  renderOnboardingAlertSchedules = (mappedAlertSchedules: any, mappedSerializedDuedates: any) => {
+
+    var html = '';
+
+    html += '<div id="alertschedules-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingAlertSchedulesListContainer as HTMLDivElement),mappedSerializedDuedates, mappedAlertSchedules, ["obligation", "country", "statute"], this.uploadAlertSchedulesMapping, this.loadMode, "alertschedules", ["id", "entityname", "locationname"], '');
+
+  }
+
+  renderOnboardingDuedates = (mappedDuedates: any, mappedSerializedApprovers: any) => {
+
+    var html = '';
+
+    html += '<div id="duedates-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingDuedatesContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingDuedatesListContainer as HTMLDivElement),mappedSerializedApprovers, mappedDuedates, ["obligation", "country", "statute"], this.uploadDuedatesMapping, this.loadMode, "duedates", ["id", "entityname", "locationname"], '');
+
+  }
+
+  renderOnboardingReporters = (mappedReporters: any, mappedSerializedTags: any) => {
+
+    var html = '';
+
+    html += '<div id="reporters-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingReportersContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingReportersListContainer as HTMLDivElement),mappedSerializedTags, mappedReporters, ["obligation", "country", "statute"], this.uploadReportersMapping, this.loadMode, "reporters", ["id", "entityname", "locationname"], this.apiIdUsers);
+
+  }
+
+  renderOnboardingApprovers = (mappedApprovers: any, mappedSerializedReporters: any) => {
+
+    var html = '';
+
+    html += '<div id="approvers-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingApproversContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingApproversListContainer as HTMLDivElement),mappedSerializedReporters, mappedApprovers, ["obligation", "country", "statute"], this.uploadApproversMapping, this.loadMode, "approvers", ["id", "entityname", "locationname"], this.apiIdUsers);
+
+  }
+
+  renderOnboardingTags = (mappedTags: any, mappedSerializedLocations: any) => {
+
+    var html = '';
+
+    html += '<div id="tags-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingTagsContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingTagsListContainer as HTMLDivElement),mappedSerializedLocations, mappedTags, ["obligation", "country", "statute"], this.uploadTagsMapping, this.loadMode, "tags", ["id", "entityname", "locationname"], this.apiIdTags,);
+
+  }
+
+  renderOnboardingLocations = (mappedLocations: any, mappedSerializedEntities: any) => {
+
+    var html = '';
+
+    html += '<div id="locations-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingLocationsContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingLocationsListContainer as HTMLDivElement),mappedSerializedEntities, mappedLocations, ["obligation", "country", "statute"], this.uploadLocationsMapping, this.loadMode, "locations", ["id", "entityname"], this.apiIdTags);
+
+  }
+
+  renderOnboardingCompliances = (mappedStatutes: any, mappedCompliances: any) => {
+
+    console.log('mappedcompliances', mappedCompliances);
+    console.log('mappedstatutes', mappedStatutes);
+
+    var searchString = "";
+
+    for(var i = 0; i < (mappedStatutes.data.mappings.mappings as Array<any>).length; i++) {
+      searchString += (mappedStatutes.data.mappings.mappings as Array<any>)[i].id;
+      if(i < (mappedStatutes.data.mappings.mappings as Array<any>).length - 1) {
+        searchString += '|';
+      }
+    }
+
+    console.log('searchstring', searchString);
+
+    var initCursor = "";
+
+    var html = '';
+
+    html += '<div class="d-flex flex-col w-100">';
+    html += '<label part="input-label">Search Compliances</label>';
+      html += '<div class="d-flex">';
+      html += '<input part="input" type="text" class="w-100 input-search" placeholder="Use | to separate..." disabled/>'
+      html += '<button part="button-icon" class="ml-10 material-icons button-search">search</button>'
+      html += '</div>';
+    html += '</div>';
+
+    html += '<div id="compliances-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingCompliancesContainer as HTMLDivElement).innerHTML = html;
+
+    // (this._SfInputSearch as HTMLInputElement).addEventListener('keyup', (e: any) => {
+    //   if(e.key == 'Enter') {
+    //     (this._SfButtonSearch as HTMLButtonElement).click();
+    //   }
+    // });
+    
+    (this._SfButtonSearch as HTMLButtonElement).addEventListener('click', async () => {
+      console.log('clicked', mappedStatutes.data.mappings.mappings);
+      // const searchString = (this._SfInputSearch as HTMLButtonElement).value;
+      if(searchString.length > 0) {
+        const resultCompliances = await this.fetchSearchCompliances(searchString, "");
+        console.log('resultcompliances', resultCompliances);
+        if(resultCompliances != null) {
+          const jsonData = [];
+          for(var i = 0; i < resultCompliances.values.length; i++) {
+            var mapped = false;
+            for(var j = 0; j < mappedCompliances.data.mappings.mappings.length; j++) {
+              if(mappedCompliances.data.mappings.mappings[j].id == resultCompliances.values[i].id) {
+                if(mappedCompliances.data.mappings.mappings[j].selected) {
+                  mapped = true;
+                }
+              }
+            }
+
+            jsonData.push({id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "state", "category", "obligation", "risk", "riskarea", "frequency"]})
+          }
+          console.log('clicked', jsonData);
+          this.renderMappingTable((this._SfOnboardingCompliancesListContainer as HTMLDivElement), jsonData, [{prev: initCursor, next: resultCompliances.cursor}], this.fetchSearchCompliances, searchString, mappedCompliances, resultCompliances.found, this.uploadCompliancesMapping, this.loadMode)
+        }
+      }
+    });
+
+    console.log('compliances searchstring', searchString);
+
+    if(searchString != "") {
+      (this._SfInputSearch as HTMLInputElement).value = searchString;
+      (this._SfButtonSearch as HTMLButtonElement).click();
+    }
+
+  }
+
+  renderOnboardingEntities = (mappedEntities: any, mappedCompliances: any) => {
+
+    var html = '';
+
+    html += '<div id="entities-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingEntitiesContainer as HTMLDivElement).innerHTML = html;
+
+    const arr1 = [];
+
+    for(var i = 0; i < mappedCompliances.data.mappings.mappings.length; i++) {
+      if(mappedCompliances.data.mappings.mappings[i].selected) {
+        arr1.push(mappedCompliances.data.mappings.mappings[i]);
+      }
+    }
+
+    mappedCompliances.data.mappings.mappings = arr1;
+
+    const arr2 = [];
+    for(var i = 0; i < mappedEntities.data.mappings.mappings.length; i++) {
+      if(mappedEntities.data.mappings.mappings[i].selected) {
+        arr2.push(mappedEntities.data.mappings.mappings[i]);
+      }
+    }
+
+    mappedEntities.data.mappings.mappings = arr2;
+
+    this.renderTaggingTable((this._SfOnboardingEntitiesListContainer as HTMLDivElement), mappedCompliances, mappedEntities, ["obligation", "country", "statute"], this.uploadEntitiesMapping, this.loadMode, "entities", ["id"], this.apiIdTags);
+
+  }
+
+  renderOnboardingStatutes = (mappedStatutes: any) => {
+
+    var initCursor = "";
+
+    var html = '';
+
+    html += '<div class="d-flex flex-col w-100">';
+    html += '<label part="input-label">Search Statutes</label>';
+      html += '<div class="d-flex">';
+      html += '<input part="input" type="text" class="w-100 input-search" placeholder="Use | to separate..." autofocus/>'
+      html += '<button part="button-icon" class="ml-10 material-icons button-search">search</button>'
+      html += '</div>';
+    html += '</div>';
+
+    html += '<div id="statutes-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingStatutesContainer as HTMLDivElement).innerHTML = html;
+
+    (this._SfInputSearch as HTMLInputElement).addEventListener('keyup', (e: any) => {
+      if(e.key == 'Enter') {
+        (this._SfButtonSearch as HTMLButtonElement).click();
+      }
+    });
+    
+    (this._SfButtonSearch as HTMLButtonElement).addEventListener('click', async () => {
+      console.log('clicked', mappedStatutes.data.mappings.mappings);
+      const searchString = (this._SfInputSearch as HTMLButtonElement).value;
+      console.log('clicked', searchString);
+      if(searchString.length > 0) {
+        const resultStatutes = await this.fetchSearchStatutes(searchString, "");
+        if(resultStatutes != null) {
+          const jsonData = [];
+          for(var i = 0; i < resultStatutes.values.length; i++) {
+            var mapped = false;
+            for(var j = 0; j < mappedStatutes.data.mappings.mappings.length; j++) {
+              if(mappedStatutes.data.mappings.mappings[j].id == resultStatutes.values[i].id) {
+                console.log('comparing',mappedStatutes.data.mappings.mappings[j].id,resultStatutes.values[i].id);
+                if(mappedStatutes.data.mappings.mappings[j].selected) {
+                  mapped = true;
+                }
+              }
+            }
+
+            jsonData.push({id: resultStatutes.values[i].id, mapped: mapped, data: resultStatutes.values[i].fields, cols: ["country", "state", "name", "category", "shortid"]})
+          }
+          console.log('clicked', jsonData);
+          this.renderMappingTable((this._SfOnboardingStatutesListContainer as HTMLDivElement), jsonData, [{prev: initCursor, next: resultStatutes.cursor}], this.fetchSearchStatutes, searchString, mappedStatutes, resultStatutes.found, this.uploadStatutesMapping, this.loadMode)
+        }
+      }
+    });
+
+    if(mappedStatutes.data.mappings.searchstring != "" && mappedStatutes.data.mappings.searchstring != null) {
+      (this._SfInputSearch as HTMLInputElement).value = mappedStatutes.data.mappings.searchstring;
+      (this._SfButtonSearch as HTMLButtonElement).click();
+    }
+
+  }
+
+  renderOnboardingTabs = () => {
+
+    console.log('render onboarding tabs');
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).innerHTML = '';
+
+    var html = '';
+
+    html += '<button class="tab-button mb-10" id="onboarding-tab-statutes" part="'+(this.myOnboardingTab == this.TAB_STATUTES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Statutes</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-compliances" part="'+(this.myOnboardingTab == this.TAB_COMPLIANCES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Compliances</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-entities" part="'+(this.myOnboardingTab == this.TAB_ENTITIES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Entities</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-locations" part="'+(this.myOnboardingTab == this.TAB_LOCATIONS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Locations</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-tags" part="'+(this.myOnboardingTab == this.TAB_TAGS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Tags</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-reporters" part="'+(this.myOnboardingTab == this.TAB_REPORTERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Reporters</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-approvers" part="'+(this.myOnboardingTab == this.TAB_APPROVERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Approvers</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-duedates" part="'+(this.myOnboardingTab == this.TAB_DUEDATES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Duedates</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-alertschedules" part="'+(this.myOnboardingTab == this.TAB_ALERTSCHEDULES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Alert Schedules</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-internalcontrols" part="'+(this.myOnboardingTab == this.TAB_INTERNALCONTROLS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Internal Controls</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-calendar" part="'+(this.myOnboardingTab == this.TAB_CALENDAR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Calendar</button>';
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).innerHTML = html;
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-statutes')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_STATUTES;
+      this.renderOnboardingTabs();
+      await this.loadOnboardingStatutes();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-compliances')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_COMPLIANCES;
+      this.renderOnboardingTabs();
+      this.loadOnboardingCompliances();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-entities')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_ENTITIES;
+      this.renderOnboardingTabs();
+      this.loadOnboardingEntities();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-locations')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_LOCATIONS;
+      this.renderOnboardingTabs();
+      this.loadOnboardingLocations();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-tags')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_TAGS;
+      this.renderOnboardingTabs();
+      this.loadOnboardingTags();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-reporters')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_REPORTERS;
+      this.renderOnboardingTabs();
+      this.loadOnboardingReporters();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-approvers')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_APPROVERS;
+      this.renderOnboardingTabs();
+      this.loadOnboardingApprovers();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-duedates')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_DUEDATES;
+      this.renderOnboardingTabs();
+      this.loadOnboardingDuedates();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-alertschedules')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_ALERTSCHEDULES;
+      this.renderOnboardingTabs();
+      this.loadOnboardingAlertSchedules();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-internalcontrols')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_INTERNALCONTROLS;
+      this.renderOnboardingTabs();
+      this.loadOnboardingInternalControls();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-calendar')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_CALENDAR;
+      this.renderOnboardingTabs();
+      this.loadOnboardingCalendar();
+
+    });
+
+  }
+
   renderRoleTabs = () => {
 
     console.log('render role tabs');
@@ -4944,7 +6025,7 @@ export class SfIEvents extends LitElement {
 
       this.myRole = this.TAB_REPORTER;
       this.renderRoleTabs();
-      await this.fetchUserCalendar();
+      await this.fetchUserCalendar_2();
       this.enableCalendar();
       if(this.events != null) {
         this.renderTabs(this.TAB_YEAR);
@@ -4957,7 +6038,7 @@ export class SfIEvents extends LitElement {
 
       this.myRole = this.TAB_APPROVER;
       this.renderRoleTabs();
-      await this.fetchUserCalendar();
+      await this.fetchUserCalendar_2();
       this.enableCalendar();
       if(this.events != null) {
         this.renderTabs(this.TAB_YEAR);
@@ -5051,6 +6132,8 @@ export class SfIEvents extends LitElement {
       } else {
         streamEventSummary.style.display = 'block';
       }
+
+      console.log('divs', divs);
 
       for(var i = 0; i < divs.length; i++) {
         var found = false;
@@ -6142,14 +7225,286 @@ export class SfIEvents extends LitElement {
 
   }
 
-  uploadUnTriggerEvent = async (eventid: string, mmdd: string) => {
-
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/untriggerevent";
+  uploadInternalControlsMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedinternalcontrols";
 
     const body = { 
-      "mmdd": mmdd,
       "projectid": this.projectId, 
-      "eventid": eventid
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadAlertSchedulesMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedalertschedules";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadDuedatesMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedduedates";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadApproversMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedapprovers";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadReportersMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedreporters";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadTagsMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedtags";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadLocationsMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedlocations";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadEntitiesMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedentities";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadCompliancesMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedcompliances";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadStatutesMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedstatutes";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadUnTriggerEvent = async (eventid: string, mmdd: string) => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/untriggermyevent";
+
+    const body = { 
+      "mmdd": mmdd, 
+      "projectid": this.projectId, 
+      "eventid": eventid,
+      "entityid": this.entityId,
+      "locationid": this.locationId
     } 
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
@@ -6160,7 +7515,7 @@ export class SfIEvents extends LitElement {
       const jsonRespose = JSON.parse(xhr.responseText);
       console.log('jsonResponse sync', jsonRespose);
       this.setSuccess("Event untriggered successfully!");
-      await this.fetchUserCalendar();
+      await this.fetchUserCalendar_2();
       setTimeout(() => {
         this.clearMessages()
         this.renderTabs(this.TAB_ADHOC);
@@ -6179,12 +7534,14 @@ export class SfIEvents extends LitElement {
 
   uploadTriggerEvent = async (eventid: string, dateofoccurrence: string) => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/triggerevent";
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/triggermyevent";
 
     const body = { 
       "dateofoccurrence": dateofoccurrence,
       "projectid": this.projectId, 
-      "eventid": eventid
+      "eventid": eventid,
+      "entityid": this.entityId,
+      "locationid": this.locationId
     } 
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
@@ -6195,7 +7552,7 @@ export class SfIEvents extends LitElement {
       const jsonRespose = JSON.parse(xhr.responseText);
       console.log('jsonResponse sync', jsonRespose);
       this.setSuccess("Event triggered successfully!");
-      await this.fetchUserCalendar();
+      await this.fetchUserCalendar_2();
       setTimeout(() => {
         this.clearMessages()
         this.renderTabs(this.TAB_ADHOC);
@@ -6213,7 +7570,7 @@ export class SfIEvents extends LitElement {
   }
 
   uploadReview = async (mmddyyyy: string, eventid: string, comments: string, approved: any) => {
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/upload";
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/uploadreview";
 
     const body = { 
       "mmddyyyy": mmddyyyy,
@@ -6221,7 +7578,9 @@ export class SfIEvents extends LitElement {
       "type": "review",
       "eventid": eventid,
       "comments": comments,
-      "approved": approved
+      "approved": approved,
+      "entityid": this.entityId,
+      "locationid": this.locationId
     } 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
@@ -6249,7 +7608,7 @@ export class SfIEvents extends LitElement {
   }
 
   uploadReport = async (mmddyyyy: string, eventid: string, comments: string, doc: string, docs: any) => {
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/upload";
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/uploadreport";
 
     const body = { 
       "mmddyyyy": mmddyyyy,
@@ -6258,6 +7617,8 @@ export class SfIEvents extends LitElement {
       "eventid": eventid,
       "comments": comments,
       "dateofcompletion": doc,
+      "entityid": this.entityId,
+      "locationid": this.locationId,
       "docs": JSON.stringify(docs)
     } 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
@@ -6338,6 +7699,25 @@ export class SfIEvents extends LitElement {
       this.showChosenMapping();
       this.fetchEventMap();
       this.renderMappingTabs(this.TAB_REPORTER);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+    }
+  }
+
+  uploadReprogramTrigger = async (eventid: string, timestamp: string) => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/reprogramtrigger";
+
+    const body = { "projectid": (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0], "eventid": eventid, "timestamp": timestamp + ""} 
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
       
     } else {
       const jsonRespose = JSON.parse(xhr.responseText);
@@ -6464,6 +7844,405 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchSearchStatutes = async (searchString: string, cursor: string = "") => {
+
+    let url = "https://"+this.apiIdStatutes+".execute-api.us-east-1.amazonaws.com/test/list";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"searchstring": searchString, "cursor": cursor}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchSearchCompliances = async (searchString: string, cursor: string = "") => {
+
+    let url = "https://"+this.apiIdCompliances+".execute-api.us-east-1.amazonaws.com/test/list";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"searchstring": searchString, "cursor": cursor}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedLocations = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedlocations";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedCompliances = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedcompliances";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedSerializedAlertSchedules = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedalertschedules";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedSerializedDuedates = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedduedates";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedSerializedApprovers = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedapprovers";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedSerializedReporters = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedreporters";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedSerializedTags = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedtags";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedSerializedLocations = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedlocations";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedSerializedEntities = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedentities";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedInternalControls = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedinternalcontrols";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedAlertSchedules = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedalertschedules";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedDuedates = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedduedates";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedReporters = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedreporters";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedApprovers = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedapprovers";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedTags = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedtags";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedEntities = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedentities";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedStatutes = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedstatutes";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
   fetchDetail = async (value: any) => {
 
     const body: any = this.getApiBodyList();
@@ -6490,6 +8269,43 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchUserCalendar_2 = async() => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmyevents";
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "locationid": this.locationId, "adhoc": "false"}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.showChosenProject();
+      console.log(jsonRespose);
+      this.events = (jsonRespose.data.events)
+      
+      if(this.events != null) {
+        this.renderTabs(this.TAB_YEAR);
+        this.renderCalendar();
+      }
+      // this.renderChosenProject(events);
+      
+    } else {
+
+      if(xhr.status === 404) {
+
+        this.showChosenProject();
+        (this._SfTitleChosenProject as HTMLElement).innerHTML = (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedTexts()[0];
+        this.renderChosenProject();
+
+      } else {
+        const jsonRespose = JSON.parse(xhr.responseText);
+        this.setError(jsonRespose.error);
+      }
+
+    }
+
+  }
+  
   fetchUserCalendar = async() => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getuserevents";
@@ -6566,10 +8382,34 @@ export class SfIEvents extends LitElement {
 
   }
 
-  fetchAdhoc = async () => {
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getunmappedadhocevents";
+  fetchReprogramAdhoc = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/reprogramtrigger";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.mode == "admin" ? (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0] : this.projectId, "role": this.myRole}, url, this._SfLoader, authorization)) as any;
+    const xhr : any = (await this.prepareXhr({"projectid": this.mode == "admin" ? (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0] : this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      this.fetchList();
+      setTimeout(() => {
+        this.clearMessages();
+      }, 3000);
+
+    }
+  }
+
+  fetchAdhoc = async (reprogramTriggers: boolean = false) => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmyevents";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "locationid": this.locationId, "adhoc": "true"}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
     if(xhr.status == 200) {
 
@@ -6578,19 +8418,12 @@ export class SfIEvents extends LitElement {
       this.unmappedEvents = jsonRespose.data.unmappedEvents;
       this.mappings = jsonRespose.data.mappings;
       this.triggers = jsonRespose.data.triggers;
-      // console.log('mappings-1', 'fetcheventmap', this.mappings)
-      // console.log('mappings0', 'fetcheventmap', this.mappedValuesUsers)
-      this.renderAdhoc(this.unmappedEvents, this.triggers)
-      // console.log('mappings1', 'fetcheventmap', this.mappedValuesUsers)
-      // this.prepopulateMapping(this.mappings);
-      // console.log('mappings2', 'fetcheventmap', this.mappedValuesUsers)
-      // this.applyFilter();
-      // if(jsonRespose.data.mappings != null && this.myRole != this.TAB_APPROVER) {
-      //   (this._SfButtonBackCalendarMapping as HTMLButtonElement).style.visibility = 'visible';
-      // } else {
-      //   (this._SfButtonBackCalendarMapping as HTMLButtonElement).style.visibility = 'hidden';
-      // }
-      
+      if(!reprogramTriggers) {
+        this.renderAdhoc(this.unmappedEvents, this.triggers);
+      } else {
+        // await this.processTriggers(this.triggers);
+      }
+
     } else {
 
       const jsonRespose = JSON.parse(xhr.responseText);
@@ -6678,7 +8511,9 @@ export class SfIEvents extends LitElement {
         }
 
         console.log('all events processed');
-        this.uploadEvents();
+        await this.uploadEvents();
+        await this.fetchReprogramAdhoc();
+        //await this.fetchAdhoc(true);
         
       } else {
         const jsonRespose = JSON.parse(xhr.responseText);
@@ -6863,7 +8698,14 @@ export class SfIEvents extends LitElement {
     Chart.register(...registerables);
     //Chart.register(Colors);
 
-    if(this.mode == "admin") {
+    if(this.mode == "onboarding") {
+
+      this.myOnboardingTab = this.TAB_STATUTES;
+      this.renderOnboardingTabs();
+      this.loadOnboardingStatutes();
+      //((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-compliances') as HTMLButtonElement).click();
+
+    } else if(this.mode == "admin") {
 
       this.showChooseProject();
       this.initListenersAdmin();
@@ -6875,7 +8717,7 @@ export class SfIEvents extends LitElement {
       this.initCalendar();
       this.myRole = this.TAB_REPORTER;
       this.renderRoleTabs();
-      await this.fetchUserCalendar();
+      await this.fetchUserCalendar_2();
       
       if(this.events != null) {
         this.renderTabs(this.TAB_YEAR);
@@ -6902,7 +8744,77 @@ export class SfIEvents extends LitElement {
   
   override render() {
 
-    if(this.mode == "admin") {
+    if(this.mode == "onboarding") {
+
+      return html`
+          
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <div class="SfIEventsC">
+          
+          <div class="d-flex justify-center">
+              <div class="loader-element"></div>
+          </div>
+          
+          <div class="d-flex justify-center mb-20 flex-wrap" id="onboarding-tab-container">
+
+          </div>
+          
+          <div class="d-flex justify-center">
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="statutes-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="compliances-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="entities-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="locations-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="tags-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="reporters-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="approvers-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="duedates-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="alertschedules-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="internalcontrols-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="calendar-container">
+              
+            </div>
+          </div>
+          
+          <div class="d-flex justify-between">
+              <div class="lb"></div>
+              <div>
+                <div class="div-row-error div-row-submit gone">
+                  <div part="errormsg" class="div-row-error-message"></div>
+                </div>
+                <div class="div-row-success div-row-submit gone">
+                  <div part="successmsg" class="div-row-success-message"></div>
+                </div>
+              </div>
+              <div class="rb"></div>
+          </div>
+        </div>
+
+      `;
+
+
+    } else if(this.mode == "admin") {
 
       return html`
           
