@@ -5512,7 +5512,7 @@ export class SfIEvents extends LitElement {
 
       html += '<tr>';
       html += '<td part="td-action" class="left-sticky">';
-      html += '<div id="select-'+i+'"><input class="checkbox checkbox-'+i+'" part="input" type="checkbox" '+mapped+'/></div>';
+      html += '<div id="select-'+i+'"><input class="checkbox checkbox-'+i+'" part="input-checkbox" type="checkbox" '+mapped+'/></div>';
       html += '</td>';
       html += '<td part="td-body" class="'+classBg+'">';
       html += '<sf-i-elastic-text class="statute id-'+i+'" text="'+(jsonData[i].id)+'" minLength="80"></sf-i-elastic-text>';
@@ -5635,7 +5635,7 @@ export class SfIEvents extends LitElement {
     (this._SfOnboardingCalendarContainer as HTMLDivElement).innerHTML = html;
 
     (this._SfOnboardingCalendarContainer as HTMLDivElement).querySelector('.button-submit')?.addEventListener('click', () => {
-      console.log('submit clicked');
+      this.fetchGetMappedCalendar();
     })
 
   }
@@ -5896,6 +5896,44 @@ export class SfIEvents extends LitElement {
 
   }
 
+  clickOnboardingTabs = () => {
+
+    if(this.myOnboardingTab == this.TAB_STATUTES) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-statutes') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_COMPLIANCES) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-compliances') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_ENTITIES) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-entities') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_LOCATIONS) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-locations') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_TAGS) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-tags') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_REPORTERS) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-reporters') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_APPROVERS) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-approvers') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_DUEDATES) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-duedates') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_ALERTSCHEDULES) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-alertschedules') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_INTERNALCONTROLS) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-internalcontrols') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_CALENDAR) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-calendar') as HTMLButtonElement).click();
+    }
+
+  }
+
   renderOnboardingTabs = () => {
 
     console.log('render onboarding tabs');
@@ -6006,6 +6044,7 @@ export class SfIEvents extends LitElement {
 
     });
 
+    
   }
 
   renderRoleTabs = () => {
@@ -8269,6 +8308,20 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchGetMappedCalendar = async() => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedcalendar";
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization);
+    this.setSuccess('Operation triggered! It will complete in the background in a few minutes...');
+    setTimeout(() => {
+      this.clearMessages();
+      this._SfLoader.innerHTML = '';
+    }, 3000);
+
+  }
+
   fetchUserCalendar_2 = async() => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmyevents";
@@ -8700,9 +8753,10 @@ export class SfIEvents extends LitElement {
 
     if(this.mode == "onboarding") {
 
-      this.myOnboardingTab = this.TAB_STATUTES;
+      //this.myOnboardingTab = this.TAB_STATUTES;
       this.renderOnboardingTabs();
-      this.loadOnboardingStatutes();
+      this.clickOnboardingTabs();
+      //this.loadOnboardingStatutes();
       //((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-compliances') as HTMLButtonElement).click();
 
     } else if(this.mode == "admin") {

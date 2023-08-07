@@ -3668,7 +3668,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 }
                 html += '<tr>';
                 html += '<td part="td-action" class="left-sticky">';
-                html += '<div id="select-' + i + '"><input class="checkbox checkbox-' + i + '" part="input" type="checkbox" ' + mapped + '/></div>';
+                html += '<div id="select-' + i + '"><input class="checkbox checkbox-' + i + '" part="input-checkbox" type="checkbox" ' + mapped + '/></div>';
                 html += '</td>';
                 html += '<td part="td-body" class="' + classBg + '">';
                 html += '<sf-i-elastic-text class="statute id-' + i + '" text="' + (jsonData[i].id) + '" minLength="80"></sf-i-elastic-text>';
@@ -3776,7 +3776,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '</div>';
             this._SfOnboardingCalendarContainer.innerHTML = html;
             (_a = this._SfOnboardingCalendarContainer.querySelector('.button-submit')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
-                console.log('submit clicked');
+                this.fetchGetMappedCalendar();
             });
         };
         this.renderOnboardingInternalControls = (mappedInternalControls, mappedSerializedAlertSchedules) => {
@@ -3953,6 +3953,41 @@ let SfIEvents = class SfIEvents extends LitElement {
             if (mappedStatutes.data.mappings.searchstring != "" && mappedStatutes.data.mappings.searchstring != null) {
                 this._SfInputSearch.value = mappedStatutes.data.mappings.searchstring;
                 this._SfButtonSearch.click();
+            }
+        };
+        this.clickOnboardingTabs = () => {
+            if (this.myOnboardingTab == this.TAB_STATUTES) {
+                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-statutes').click();
+            }
+            if (this.myOnboardingTab == this.TAB_COMPLIANCES) {
+                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-compliances').click();
+            }
+            if (this.myOnboardingTab == this.TAB_ENTITIES) {
+                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-entities').click();
+            }
+            if (this.myOnboardingTab == this.TAB_LOCATIONS) {
+                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-locations').click();
+            }
+            if (this.myOnboardingTab == this.TAB_TAGS) {
+                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-tags').click();
+            }
+            if (this.myOnboardingTab == this.TAB_REPORTERS) {
+                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-reporters').click();
+            }
+            if (this.myOnboardingTab == this.TAB_APPROVERS) {
+                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-approvers').click();
+            }
+            if (this.myOnboardingTab == this.TAB_DUEDATES) {
+                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-duedates').click();
+            }
+            if (this.myOnboardingTab == this.TAB_ALERTSCHEDULES) {
+                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-alertschedules').click();
+            }
+            if (this.myOnboardingTab == this.TAB_INTERNALCONTROLS) {
+                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-internalcontrols').click();
+            }
+            if (this.myOnboardingTab == this.TAB_CALENDAR) {
+                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-calendar').click();
             }
         };
         this.renderOnboardingTabs = () => {
@@ -5776,6 +5811,16 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this.setError(jsonRespose.error);
             }
         };
+        this.fetchGetMappedCalendar = async () => {
+            let url = "https://" + this.apiId + ".execute-api.us-east-1.amazonaws.com/test/getmappedcalendar";
+            const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+            this.prepareXhr({ "projectid": this.projectId }, url, this._SfLoader, authorization);
+            this.setSuccess('Operation triggered! It will complete in the background in a few minutes...');
+            setTimeout(() => {
+                this.clearMessages();
+                this._SfLoader.innerHTML = '';
+            }, 3000);
+        };
         this.fetchUserCalendar_2 = async () => {
             let url = "https://" + this.apiId + ".execute-api.us-east-1.amazonaws.com/test/getmyevents";
             const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
@@ -6107,9 +6152,10 @@ let SfIEvents = class SfIEvents extends LitElement {
             Chart.register(...registerables);
             //Chart.register(Colors);
             if (this.mode == "onboarding") {
-                this.myOnboardingTab = this.TAB_STATUTES;
+                //this.myOnboardingTab = this.TAB_STATUTES;
                 this.renderOnboardingTabs();
-                this.loadOnboardingStatutes();
+                this.clickOnboardingTabs();
+                //this.loadOnboardingStatutes();
                 //((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-compliances') as HTMLButtonElement).click();
             }
             else if (this.mode == "admin") {

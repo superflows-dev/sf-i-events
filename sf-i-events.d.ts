@@ -238,6 +238,7 @@ export declare class SfIEvents extends LitElement {
     renderOnboardingCompliances: (mappedStatutes: any, mappedCompliances: any) => void;
     renderOnboardingEntities: (mappedEntities: any, mappedCompliances: any) => void;
     renderOnboardingStatutes: (mappedStatutes: any) => void;
+    clickOnboardingTabs: () => void;
     renderOnboardingTabs: () => void;
     renderRoleTabs: () => void;
     csvmaker: (data: any) => string;
@@ -299,6 +300,7 @@ export declare class SfIEvents extends LitElement {
     fetchMappedEntities: () => Promise<any>;
     fetchMappedStatutes: () => Promise<any>;
     fetchDetail: (value: any) => Promise<void>;
+    fetchGetMappedCalendar: () => Promise<void>;
     fetchUserCalendar_2: () => Promise<void>;
     fetchUserCalendar: () => Promise<void>;
     fetchCalendar: () => Promise<void>;

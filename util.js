@@ -221,6 +221,7 @@ async function callApi(url, data, authorization) {
             }
         });
         xhr.open("POST", url);
+        xhr.timeout = 600000;
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         if (authorization != null) {
