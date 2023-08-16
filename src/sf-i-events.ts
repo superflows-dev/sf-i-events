@@ -57,6 +57,8 @@ export class SfIEvents extends LitElement {
   TAB_DUEDATES = "duedates";
   TAB_ALERTSCHEDULES = "alertschedules";
   TAB_INTERNALCONTROLS = "internalcontrols";
+  TAB_FUNCTIONS = "functions";
+  TAB_COUNTRIES = "countries";
   TAB_CALENDAR = "calendar";
   COLOR_APPROVED = "#50cf01";
   COLOR_NOT_STARTED = "#A4A9AD";
@@ -1170,6 +1172,18 @@ export class SfIEvents extends LitElement {
   @query('#entities-container')
   _SfOnboardingEntitiesContainer: any;
 
+  @query('#functions-container')
+  _SfOnboardingFunctionsContainer: any;
+
+  @query('#functions-list-container')
+  _SfOnboardingFunctionsListContainer: any;
+
+  @query('#countries-container')
+  _SfOnboardingCountriesContainer: any;
+
+  @query('#countries-list-container')
+  _SfOnboardingCountriesListContainer: any;
+
   @query('#locations-list-container')
   _SfOnboardingLocationsListContainer: any;
 
@@ -1791,14 +1805,17 @@ export class SfIEvents extends LitElement {
                 htmlCols += '<tr><th>Id</th><th>Status</th><th>Obligation</th></tr>'
               }
               html += '</th>';
+              html += '<th part="td-head">';
+              html += '</th>';
+              html += '<th part="td-head">';
+              html += 'Location'
+              html += '</th>'
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                   html += '<th part="td-head" class="bg-left-no-border">';
                   html += Object.keys(this.events[mmdd][j])[k];
                 }
               }
-              html += '<th part="td-head">';
-              html += '</th>';
               console.log('listing docs',this.events[mmdd][j].documents )
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
@@ -1879,6 +1896,10 @@ export class SfIEvents extends LitElement {
                 
                 html += '</td>';
               }
+              html += '<td id="td-expand-'+i+'" part="td-body">';
+              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>'
+              html += '</td>';
+              html += '<td part="td-body"><sf-i-elastic-text text="'+this.events[mmdd][j]["locationname"]+'" minLength="20"></sf-i-elastic-text></td>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
         
@@ -1894,9 +1915,6 @@ export class SfIEvents extends LitElement {
               }
               csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
-              html += '<td id="td-expand-'+i+'" part="td-body">';
-              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-20">open_in_new</button>'
-              html += '</td>';
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
@@ -2096,6 +2114,11 @@ export class SfIEvents extends LitElement {
                 htmlCols += '<tr><th>Id</th><th>Status</th><th>Obligation</th></tr>' 
               }
               html += '</th>';
+              html += '<th part="td-head">';
+              html += '</th>';
+              html += '<th part="td-head">';
+              html += 'Location'
+              html += '</th>'
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                   html += '<th part="td-head" class="bg-left-no-border">';
@@ -2103,9 +2126,6 @@ export class SfIEvents extends LitElement {
                   html += '</th>';
                 }
               }
-              
-              html += '<th part="td-head">';
-              html += '</th>';
               console.log('listing docs',this.events[mmdd][j].documents )
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
@@ -2181,6 +2201,10 @@ export class SfIEvents extends LitElement {
                 
                 html += '</td>';
               }
+              html += '<td id="td-expand-'+i+'" part="td-body">';
+              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>'
+              html += '</td>';
+              html += '<td part="td-body"><sf-i-elastic-text text="'+this.events[mmdd][j]["locationname"]+'" minLength="20"></sf-i-elastic-text></td>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
         
@@ -2197,9 +2221,7 @@ export class SfIEvents extends LitElement {
               
               csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
-              html += '<td id="td-expand-'+i+'" part="td-body">';
-              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
-              html += '</td>';
+
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
@@ -2421,6 +2443,11 @@ export class SfIEvents extends LitElement {
                 htmlCols += '<tr><th>Id</th><th>Status</th><th>Obligation</th></tr>' 
               }
               html += '</th>';
+              html += '<th part="td-head">';
+              html += '</th>';
+              html += '<th part="td-head">';
+              html += 'Location'
+              html += '</th>'
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                   html += '<th part="td-head" class="bg-left-no-border">';
@@ -2429,9 +2456,6 @@ export class SfIEvents extends LitElement {
                 }
               }
               
-              
-              html += '<th part="td-head">';
-              html += '</th>';
               console.log('listing docs',this.events[mmdd][j].documents )
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
@@ -2508,6 +2532,10 @@ export class SfIEvents extends LitElement {
                 
                 html += '</td>';
               }
+              html += '<td id="td-expand-'+i+'" part="td-body">';
+              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>'
+              html += '</td>';
+              html += '<td part="td-body"><sf-i-elastic-text text="'+this.events[mmdd][j]["locationname"]+'" minLength="20"></sf-i-elastic-text></td>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
         
@@ -2524,9 +2552,7 @@ export class SfIEvents extends LitElement {
               
               csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
-              html += '<td id="td-expand-'+i+'" part="td-body">';
-              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
-              html += '</td>';
+
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
@@ -2749,6 +2775,11 @@ export class SfIEvents extends LitElement {
                 htmlCols += '<tr><th>Id</th><th>Status</th><th>Obligation</th></tr>' 
               }
               html += '</th>';
+              html += '<th part="td-head">';
+              html += '</th>';
+              html += '<th part="td-head">';
+              html += 'Location'
+              html += '</th>'
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                   html += '<th part="td-head" class="bg-left-no-border">';
@@ -2757,8 +2788,6 @@ export class SfIEvents extends LitElement {
                 }
               }
               
-              html += '<th part="td-head">';
-              html += '</th>';
               console.log('listing docs',this.events[mmdd][j].documents )
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
@@ -2834,6 +2863,10 @@ export class SfIEvents extends LitElement {
                 
                 html += '</td>';
               }
+              html += '<td id="td-expand-'+i+'" part="td-body">';
+              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>'
+              html += '</td>';
+              html += '<td part="td-body"><sf-i-elastic-text text="'+this.events[mmdd][j]["locationname"]+'" minLength="20"></sf-i-elastic-text></td>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
         
@@ -2850,9 +2883,7 @@ export class SfIEvents extends LitElement {
               
               csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
-              html += '<td id="td-expand-'+i+'" part="td-body">';
-              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
-              html += '</td>';
+
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
@@ -3052,6 +3083,11 @@ export class SfIEvents extends LitElement {
                 htmlCols += '<tr><th>Id</th><th>Status</th><th>Obligation</th></tr>' 
               }
               html += '</th>';
+              html += '<th part="td-head">';
+              html += '</th>';
+              html += '<th part="td-head">';
+              html += 'Location'
+              html += '</th>'
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                   html += '<th part="td-head" class="bg-left-no-border">';
@@ -3136,6 +3172,10 @@ export class SfIEvents extends LitElement {
                 
                 html += '</td>';
               }
+              html += '<td id="td-expand-'+i+'" part="td-body">';
+              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>'
+              html += '</td>';
+              html += '<td part="td-body"><sf-i-elastic-text text="'+this.events[mmdd][j]["locationname"]+'" minLength="20"></sf-i-elastic-text></td>';
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
         
@@ -3152,9 +3192,7 @@ export class SfIEvents extends LitElement {
 
               csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
-              html += '<td id="td-expand-'+i+'" part="td-body">';
-              html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand">open_in_new</button>'
-              html += '</td>';
+
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
@@ -3643,8 +3681,10 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingStatutesContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingCompliancesContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingCountriesContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingEntitiesContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingLocationsContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingFunctionsContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingTagsContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingReportersContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingApproversContainer as HTMLDivElement).style.display = 'none';
@@ -3655,8 +3695,10 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingStatutesContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingCompliancesContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingCountriesContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingEntitiesContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingLocationsContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingFunctionsContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingTagsContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingReportersContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingApproversContainer as HTMLDivElement).innerHTML = '';
@@ -3683,15 +3725,26 @@ export class SfIEvents extends LitElement {
     this.renderOnboardingCompliances(mappedStatutes, mappedCompliances);
   }
 
+  loadOnboardingCountries = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingCountriesContainer as HTMLDivElement).style.display = 'flex';
+    const mappedCountries = await this.fetchMappedCountries();
+    const mappedCompliances = await this.fetchMappedCompliances();
+    // const mappedStatutes = await this.fetchMappedStatutes();
+    console.log('mappedCompliances', mappedCompliances);
+    console.log('mappedCountries', mappedCountries);
+    this.renderOnboardingCountries(mappedCountries, mappedCompliances);
+  }
+
   loadOnboardingEntities = async () => {
     this.hideTabContainers();
     (this._SfOnboardingEntitiesContainer as HTMLDivElement).style.display = 'flex';
     const mappedEntities = await this.fetchMappedEntities();
-    const mappedCompliances = await this.fetchMappedCompliances();
+    const mappedSerializedCountries = await this.fetchMappedSerializedCountries();
     // const mappedStatutes = await this.fetchMappedStatutes();
-    console.log('mappedCompliances', mappedCompliances);
+    console.log('mappedSerializedCountries', mappedSerializedCountries);
     console.log('mappedEntities', mappedEntities);
-    this.renderOnboardingEntities(mappedEntities, mappedCompliances);
+    this.renderOnboardingEntities(mappedEntities, mappedSerializedCountries);
   }
 
   loadOnboardingLocations = async () => {
@@ -3704,14 +3757,24 @@ export class SfIEvents extends LitElement {
     this.renderOnboardingLocations(mappedLocations, mappedSerializedEntities);
   }
 
+  loadOnboardingFunctions = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingFunctionsContainer as HTMLDivElement).style.display = 'flex';
+    const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
+    const mappedFunctions = await this.fetchMappedFunctions();
+    console.log('mappedserializedlocations', mappedSerializedLocations);
+    console.log('mappedfunctions', mappedFunctions);
+    this.renderOnboardingFunctions(mappedFunctions, mappedSerializedLocations);
+  }
+
   loadOnboardingTags = async () => {
     this.hideTabContainers();
     (this._SfOnboardingTagsContainer as HTMLDivElement).style.display = 'flex';
-    const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
+    const mappedSerializedFunctions = await this.fetchMappedSerializedFunctions();
     const mappedTags = await this.fetchMappedTags();
-    console.log('mappedserializedlocations', mappedSerializedLocations);
+    console.log('mappedserializedfunctions', mappedSerializedFunctions);
     console.log('mappedtags', mappedTags);
-    this.renderOnboardingTags(mappedTags, mappedSerializedLocations);
+    this.renderOnboardingTags(mappedTags, mappedSerializedFunctions);
   }
 
   loadOnboardingReporters = async () => {
@@ -3767,25 +3830,9 @@ export class SfIEvents extends LitElement {
   loadOnboardingCalendar = async () => {
     this.hideTabContainers();
     (this._SfOnboardingCalendarContainer as HTMLDivElement).style.display = 'flex';
-    this.renderOnboardingCalendar();
+    const calendarJobs = await this.fetchCalendarJobs();
+    this.renderOnboardingCalendar(calendarJobs);
   }
-
-  // processTriggers = async (triggers: any) => {
-
-  //   // console.log('processing triggers', triggers);
-  //   // for(var i = 0; i < Object.keys(triggers).length; i++) {
-
-  //   //   console.log("processing triggers", (triggers[Object.keys(triggers)[i]] as Array<any>).length);
-
-  //   //   for(var j = 0; j < (triggers[Object.keys(triggers)[i]] as Array<any>).length; j++) {
-  //   //     console.log("processing trigger project=", this.mode == "admin" ? (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0] : this.projectId, triggers[Object.keys(triggers)[i]], Object.keys(triggers)[i], triggers[Object.keys(triggers)[i]][j]["timestamp"]);
-  //   //     this.sleep(5000);
-  //   //     await this.uploadReprogramTrigger(Object.keys(triggers)[i], triggers[Object.keys(triggers)[i]][j]["timestamp"]);
-  //   //   }
-
-  //   // }
-
-  // }
 
   renderAdhoc = (events: Array<any>|null = null, triggers: Array<any>|null = null) => {
 
@@ -3822,6 +3869,9 @@ export class SfIEvents extends LitElement {
           html += '<div class="mb-10 flex-grow" part="adhoc-question">'+events[i].question.replace(/"/g, '')+'</div>';
           html += '<button id="button-bolt-'+i+'" part="button-icon" class="material-icons">electric_bolt</button>'
         html += '</div>'
+        html += '<div class="d-flex align-start mb-10">';
+          html += '<div part="input-labal">'+events[i].locationname+'</div>';
+        html += '</div>'
         html += '<div class="d-flex align-center flex-wrap">';
           html += '<div class="mr-20" part="adhoc-triggers">';
             html += "Triggers: " + (triggers![events[i].id].length > 0 ? triggers![events[i].id].length : 0);
@@ -3836,6 +3886,8 @@ export class SfIEvents extends LitElement {
           }
           
         html += '</div>';
+
+        console.log('triggers', events[i].id, triggers![events[i].id].length);
 
         if(triggers![events[i].id].length > 0) {
 
@@ -3942,7 +3994,7 @@ export class SfIEvents extends LitElement {
               html += '<input id="dateofoccurrence_'+events[i].id+'" part="input" type="date" />'
             html += '</div>';
           html += '</div>';
-          html += '<button id="trigger_'+events[i].id+'" part="button" class="button-trigger mt-10 cursor">Trigger</button>'
+          html += '<button id="trigger_'+events[i].id+'_'+events[i].locationid+'" part="button" class="button-trigger mt-10 cursor">Trigger</button>'
         html += '</div>';
       html += '</div>';
 
@@ -4027,10 +4079,11 @@ export class SfIEvents extends LitElement {
 
         //const button = (ev.target as HTMLDivElement);
         const eventid = ev.target.id.split('_')[1];
+        const locationid = ev.target.id.split('_')[2];
         if(((this._SfAdhocContainer as HTMLDivElement).querySelector('#dateofoccurrence_'+eventid) as HTMLInputElement).value.trim().length > 0) {
           const dateofoccurrence = new Date(((this._SfAdhocContainer as HTMLDivElement).querySelector('#dateofoccurrence_'+eventid) as HTMLInputElement).value).getTime();
           console.log('eventid', eventid, dateofoccurrence);
-          this.uploadTriggerEvent(eventid, dateofoccurrence + "")  
+          this.uploadTriggerEvent(locationid, eventid, dateofoccurrence + "")  
         }
         
       });
@@ -5155,7 +5208,7 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderTaggingTable = (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string) => {
+  renderTaggingTable = (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any) => {
 
     console.log('divelement', divElement);
     console.log('sourcearray', sourceArray);
@@ -5200,34 +5253,7 @@ export class SfIEvents extends LitElement {
 
     console.log('tagging array after', taggingArray.data.mappings.mappings.length);
 
-    // for(var i = 0; i < sourceArray.data.mappings.mappings.length; i++) {
-
-    //   var found = false;
-    //   for(var j = 0; j < taggingArray.data.mappings.mappings.length; j++) {
-
-    //     var equal = true;
-
-    //     for(var k = 0; k < uniqCols.length; k++) {
-    //       if(sourceArray.data.mappings.mappings[i][uniqCols[k]] != taggingArray.data.mappings.mappings[j][uniqCols[k]]) {
-    //         equal = false;
-    //       }
-    //     }
-
-    //     if(equal) {
-    //       found = true;
-    //     }
-
-    //   }
-
-    //   if(found) {
-
-    //     foundId.push();
-
-    //   }
-
-    // }
-
-
+    
 
     var tagged = 0;
 
@@ -5242,25 +5268,6 @@ export class SfIEvents extends LitElement {
       
     }
 
-    // for(i = 0; i < sourceArray.data.mappings.mappings.length; i++) {
-    //   for(var j = 0; j < taggingArray.data.mappings.mappings.length; j++) {
-
-    //     var equal = true;
-
-    //     for(var k = 0; k < uniqCols.length; k++) {
-    //       if(sourceArray.data.mappings.mappings[i][uniqCols[k]] != taggingArray.data.mappings.mappings[j][uniqCols[k]]) {
-    //         equal = false;
-    //       }
-    //     }
-
-    //     if(equal) {
-    //       if(taggingArray.data.mappings.mappings[j][colName].length > 0) {
-    //         tagged++;
-    //       }
-    //     }
-
-    //   }
-    // }
 
     var html = '';
 
@@ -5312,7 +5319,7 @@ export class SfIEvents extends LitElement {
 
       html += '<td class="td-body '+classBg+'" part="td-key">'
       if(apiIdDropdown.length > 0) {
-        html += '<sf-i-form id="tags-'+i+'" class="tags-input tags-'+i+'" name="Tags" label="Select '+colName+'" apiId="'+apiIdDropdown+'" mode="multiselect-dropdown" searchPhrase="'+this.projectName+'" selectProjection="name" mandatory></sf-i-form>';
+        html += '<sf-i-form id="tags-'+i+'" class="tags-input tags-'+i+'" name="Tags" label="Select '+colName+'" apiId="'+apiIdDropdown+'" mode="multiselect-dropdown" searchPhrase="'+this.projectName+((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "")+'" selectProjection="name" mandatory></sf-i-form>';
       } else {
         html += '<input id="tags-'+i+'" type="text" part="input" class="tags-input"/>';
       }
@@ -5324,9 +5331,6 @@ export class SfIEvents extends LitElement {
         html += '</td>'
       }
 
-      // html += '<td class="td-body '+classBg+'" part="td-body">';
-      // html += '<sf-i-elastic-text text="'+sourceArray.data.mappings.mappings[i].id+'" minLength="10"></sf-i-elastic-text>';
-      // html += '</td>';
 
       for(l = 0; l < sourceCols.length; l++) {
 
@@ -5363,9 +5367,7 @@ export class SfIEvents extends LitElement {
 
             for(var k = 0; k < JSON.parse(sourceArray.data.mappings.mappings[i].data)[j].length; k++) {
               html +=  ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j][k]+'" minLength="80"></sf-i-elastic-text>');
-              // if(k < (JSON.parse(jsonData[i].data.data)[j].length - 1)) {
-              //   html += "; ";
-              // }
+              
             }
     
           } else {
@@ -5409,15 +5411,8 @@ export class SfIEvents extends LitElement {
             taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as SfIForm).selectedValues();
           }
 
-          // const id = e.target.id;
-          // const index = id.split('-')[1];
-          // console.log((multiArr[index] as SfIForm).selectedValues());
-          // if(taggingArray.data.mappings.mappings[index] == null) {
-          //   taggingArray.data.mappings.mappings[index] = sourceArray.data.mappings.mappings[index];
-          // }            
-          // taggingArray.data.mappings.mappings[index][colName] = (multiArr[index] as SfIForm).selectedValues();
           
-          this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown)
+          this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase)
   
         });
 
@@ -5438,11 +5433,8 @@ export class SfIEvents extends LitElement {
               taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as HTMLInputElement).value;
             }
 
-            // const id = e.target.id;
-            // const index = id.split('-')[1];
             
-            // taggingArray.data.mappings.mappings[index][colName] = (multiArr[index] as HTMLInputElement).value;
-            this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown)
+            this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase)
     
           }
 
@@ -5624,19 +5616,67 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderOnboardingCalendar = () => {
+  refreshCalendar = async () => {
+
+    console.log('tabs',this.myOnboardingTab,this.TAB_CALENDAR);
+    
+    if(this.myOnboardingTab == this.TAB_CALENDAR) {
+
+      const calendarJobs = await this.fetchCalendarJobs();
+
+      if(calendarJobs.data.status == "0" || calendarJobs.data.status == "1") {
+        
+        setTimeout(async () => {
+          await this.loadOnboardingCalendar();
+          this.refreshCalendar();
+        }, 10000);
+      }
+
+    }
+
+  }
+
+  renderOnboardingCalendar = (calendarJobs: any) => {
+
+    console.log('calendarjobs', calendarJobs);
 
     var html = '';
 
-    html += '<div id="calendar-list-container" class="d-flex justify-center w-100 scroll-x pb-10 pt-10">';
-    html += '<button part="button" class="button-submit">Generate Calendar</button>';
+    html += '<div id="calendar-list-container" class="pb-10 pt-10 w-100">';
+
+      html += '<div class="d-flex justify-center align-center w-100">';
+        html += '<h3 part="results-title">Calendar Status</h3>';
+      html += '</div>';
+    
+      html += '<div class="d-flex justify-center align-center w-100">';
+
+        html += '<div class="p-10">';
+          html += '<div part="input-label" class="text-center">Job Status</div>';
+          html += '<div class="d-flex align-center text-center">' + (calendarJobs.data.status == "0" ? "<span class=\"color-not-started material-icons\">schedule</span>&nbsp;Initialized" : calendarJobs.data.status == "1" ? "<span class=\"color-pending material-icons\">pending</span>&nbsp;In-Progress" : "<span class=\"color-done material-icons\">check_circle</span>&nbsp;Complete" ) + '</div>';
+        html += '</div>';
+
+        html += '<div class="p-10">';
+          html += '<div part="input-label" class="text-center">Last Updated</div>';
+          html += '<div class="text-center">' + new Date(calendarJobs.data.lastupdated).toLocaleString() + '</div>';
+        html += '</div>';
+      html += '</div>';
+
+      html += '<div class="d-flex justify-center align-center w-100 mt-20">';
+        html += '<button part="button" class="button-submit d-flex align-center"><span class="material-icons">bolt</span>&nbsp;<span>Update Calendar</span></button>';
+      html += '</div>';
+
     html += '</div>';
 
     (this._SfOnboardingCalendarContainer as HTMLDivElement).innerHTML = html;
 
-    (this._SfOnboardingCalendarContainer as HTMLDivElement).querySelector('.button-submit')?.addEventListener('click', () => {
-      this.fetchGetMappedCalendar();
-    })
+    (this._SfOnboardingCalendarContainer as HTMLDivElement).querySelector('.button-submit')?.addEventListener('click', async () => {
+      await this.fetchGetMappedCalendar();
+      setTimeout( () => {
+        this.refreshCalendar();
+      }, 10000);
+    });
+
+    //this.refreshCalendar();
 
   }
 
@@ -5649,7 +5689,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingInternalControlsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingInternalControlsListContainer as HTMLDivElement),mappedSerializedAlertSchedules, mappedInternalControls, ["obligation", "country", "statute"], this.uploadInternalControlsMapping, this.loadMode, "internalcontrols", ["id", "entityname", "locationname"], '');
+    this.renderTaggingTable((this._SfOnboardingInternalControlsListContainer as HTMLDivElement),mappedSerializedAlertSchedules, mappedInternalControls, ["obligation", "country", "statute"], this.uploadInternalControlsMapping, this.loadMode, "internalcontrols", ["id", "entityname", "locationname"], '', "");
 
   }
 
@@ -5662,7 +5702,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingAlertSchedulesListContainer as HTMLDivElement),mappedSerializedDuedates, mappedAlertSchedules, ["obligation", "country", "statute"], this.uploadAlertSchedulesMapping, this.loadMode, "alertschedules", ["id", "entityname", "locationname"], '');
+    this.renderTaggingTable((this._SfOnboardingAlertSchedulesListContainer as HTMLDivElement),mappedSerializedDuedates, mappedAlertSchedules, ["obligation", "country", "statute"], this.uploadAlertSchedulesMapping, this.loadMode, "alertschedules", ["id", "entityname", "locationname"], '', "");
 
   }
 
@@ -5675,7 +5715,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingDuedatesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingDuedatesListContainer as HTMLDivElement),mappedSerializedApprovers, mappedDuedates, ["obligation", "country", "statute"], this.uploadDuedatesMapping, this.loadMode, "duedates", ["id", "entityname", "locationname"], '');
+    this.renderTaggingTable((this._SfOnboardingDuedatesListContainer as HTMLDivElement),mappedSerializedApprovers, mappedDuedates, ["obligation", "country", "statute"], this.uploadDuedatesMapping, this.loadMode, "duedates", ["id", "entityname", "locationname"], '', "");
 
   }
 
@@ -5688,7 +5728,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingReportersContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingReportersListContainer as HTMLDivElement),mappedSerializedTags, mappedReporters, ["obligation", "country", "statute"], this.uploadReportersMapping, this.loadMode, "reporters", ["id", "entityname", "locationname"], this.apiIdUsers);
+    this.renderTaggingTable((this._SfOnboardingReportersListContainer as HTMLDivElement),mappedSerializedTags, mappedReporters, ["obligation", "country", "statute"], this.uploadReportersMapping, this.loadMode, "reporters", ["id", "entityname", "locationname"], this.apiIdUsers, "");
 
   }
 
@@ -5701,11 +5741,11 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingApproversContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingApproversListContainer as HTMLDivElement),mappedSerializedReporters, mappedApprovers, ["obligation", "country", "statute"], this.uploadApproversMapping, this.loadMode, "approvers", ["id", "entityname", "locationname"], this.apiIdUsers);
+    this.renderTaggingTable((this._SfOnboardingApproversListContainer as HTMLDivElement),mappedSerializedReporters, mappedApprovers, ["obligation", "country", "statute"], this.uploadApproversMapping, this.loadMode, "approvers", ["id", "entityname", "locationname"], this.apiIdUsers, "");
 
   }
 
-  renderOnboardingTags = (mappedTags: any, mappedSerializedLocations: any) => {
+  renderOnboardingTags = (mappedTags: any, mappedSerializedFunctions: any) => {
 
     var html = '';
 
@@ -5714,7 +5754,20 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingTagsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingTagsListContainer as HTMLDivElement),mappedSerializedLocations, mappedTags, ["obligation", "country", "statute"], this.uploadTagsMapping, this.loadMode, "tags", ["id", "entityname", "locationname"], this.apiIdTags,);
+    this.renderTaggingTable((this._SfOnboardingTagsListContainer as HTMLDivElement),mappedSerializedFunctions, mappedTags, ["obligation", "country", "statute"], this.uploadTagsMapping, this.loadMode, "tags", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Tag");
+
+  }
+
+  renderOnboardingFunctions = (mappedFunctions: any, mappedSerializedLocations: any) => {
+
+    var html = '';
+
+    html += '<div id="functions-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingFunctionsContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingFunctionsListContainer as HTMLDivElement),mappedSerializedLocations, mappedFunctions, ["obligation", "country", "statute"], this.uploadFunctionsMapping, this.loadMode, "functions", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Function");
 
   }
 
@@ -5727,7 +5780,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingLocationsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingLocationsListContainer as HTMLDivElement),mappedSerializedEntities, mappedLocations, ["obligation", "country", "statute"], this.uploadLocationsMapping, this.loadMode, "locations", ["id", "entityname"], this.apiIdTags);
+    this.renderTaggingTable((this._SfOnboardingLocationsListContainer as HTMLDivElement),mappedSerializedEntities, mappedLocations, ["obligation", "country", "statute"], this.uploadLocationsMapping, this.loadMode, "locations", ["id", "countryname", "entityname"], this.apiIdTags, "&Location");
 
   }
 
@@ -5739,11 +5792,11 @@ export class SfIEvents extends LitElement {
     var searchString = "";
 
     for(var i = 0; i < (mappedStatutes.data.mappings.mappings as Array<any>).length; i++) {
-      searchString += (mappedStatutes.data.mappings.mappings as Array<any>)[i].id;
-      if(i < (mappedStatutes.data.mappings.mappings as Array<any>).length - 1) {
-        searchString += '|';
+      if((mappedStatutes.data.mappings.mappings as Array<any>)[i].selected) {
+        searchString += (mappedStatutes.data.mappings.mappings as Array<any>)[i].id + "|";
       }
     }
+    searchString = searchString.slice(0, -1);
 
     console.log('searchstring', searchString);
 
@@ -5788,7 +5841,7 @@ export class SfIEvents extends LitElement {
               }
             }
 
-            jsonData.push({id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "state", "category", "obligation", "risk", "riskarea", "frequency"]})
+            jsonData.push({id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "state", "category", "statute", "obligation", "risk", "riskarea", "frequency"]})
           }
           console.log('clicked', jsonData);
           this.renderMappingTable((this._SfOnboardingCompliancesListContainer as HTMLDivElement), jsonData, [{prev: initCursor, next: resultCompliances.cursor}], this.fetchSearchCompliances, searchString, mappedCompliances, resultCompliances.found, this.uploadCompliancesMapping, this.loadMode)
@@ -5805,7 +5858,7 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderOnboardingEntities = (mappedEntities: any, mappedCompliances: any) => {
+  renderOnboardingEntities = (mappedEntities: any, mappedSerializedCountries: any) => {
 
     var html = '';
 
@@ -5813,6 +5866,19 @@ export class SfIEvents extends LitElement {
     html += '</div>';
 
     (this._SfOnboardingEntitiesContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingEntitiesListContainer as HTMLDivElement),mappedSerializedCountries, mappedEntities, ["obligation", "country", "statute"], this.uploadEntitiesMapping, this.loadMode, "entities", ["id", "countryname"], this.apiIdTags, "&Entity");
+
+  }
+
+  renderOnboardingCountries = (mappedCountries: any, mappedCompliances: any) => {
+
+    var html = '';
+
+    html += '<div id="countries-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingCountriesContainer as HTMLDivElement).innerHTML = html;
 
     const arr1 = [];
 
@@ -5824,16 +5890,16 @@ export class SfIEvents extends LitElement {
 
     mappedCompliances.data.mappings.mappings = arr1;
 
-    const arr2 = [];
-    for(var i = 0; i < mappedEntities.data.mappings.mappings.length; i++) {
-      if(mappedEntities.data.mappings.mappings[i].selected) {
-        arr2.push(mappedEntities.data.mappings.mappings[i]);
-      }
-    }
+    // const arr2 = [];
+    // for(var i = 0; i < mappedCountries.data.mappings.mappings.length; i++) {
+    //   if(mappedCountries.data.mappings.mappings[i].selected) {
+    //     arr2.push(mappedCountries.data.mappings.mappings[i]);
+    //   }
+    // }
 
-    mappedEntities.data.mappings.mappings = arr2;
+    // mappedCountries.data.mappings.mappings = arr2;
 
-    this.renderTaggingTable((this._SfOnboardingEntitiesListContainer as HTMLDivElement), mappedCompliances, mappedEntities, ["obligation", "country", "statute"], this.uploadEntitiesMapping, this.loadMode, "entities", ["id"], this.apiIdTags);
+    this.renderTaggingTable((this._SfOnboardingCountriesListContainer as HTMLDivElement), mappedCompliances, mappedCountries, ["obligation", "country", "statute"], this.uploadCountriesMapping, this.loadMode, "countries", ["id"], this.apiIdTags, "-Country");
 
   }
 
@@ -5904,11 +5970,17 @@ export class SfIEvents extends LitElement {
     if(this.myOnboardingTab == this.TAB_COMPLIANCES) {
       ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-compliances') as HTMLButtonElement).click();
     }
+    if(this.myOnboardingTab == this.TAB_COUNTRIES) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-countries') as HTMLButtonElement).click();
+    }
     if(this.myOnboardingTab == this.TAB_ENTITIES) {
       ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-entities') as HTMLButtonElement).click();
     }
     if(this.myOnboardingTab == this.TAB_LOCATIONS) {
       ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-locations') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_FUNCTIONS) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-functions') as HTMLButtonElement).click();
     }
     if(this.myOnboardingTab == this.TAB_TAGS) {
       ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-tags') as HTMLButtonElement).click();
@@ -5944,8 +6016,10 @@ export class SfIEvents extends LitElement {
 
     html += '<button class="tab-button mb-10" id="onboarding-tab-statutes" part="'+(this.myOnboardingTab == this.TAB_STATUTES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Statutes</button>';
     html += '<button class="tab-button mb-10" id="onboarding-tab-compliances" part="'+(this.myOnboardingTab == this.TAB_COMPLIANCES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Compliances</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-countries" part="'+(this.myOnboardingTab == this.TAB_COUNTRIES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Countries</button>';
     html += '<button class="tab-button mb-10" id="onboarding-tab-entities" part="'+(this.myOnboardingTab == this.TAB_ENTITIES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Entities</button>';
     html += '<button class="tab-button mb-10" id="onboarding-tab-locations" part="'+(this.myOnboardingTab == this.TAB_LOCATIONS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Locations</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-functions" part="'+(this.myOnboardingTab == this.TAB_FUNCTIONS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Functions</button>';
     html += '<button class="tab-button mb-10" id="onboarding-tab-tags" part="'+(this.myOnboardingTab == this.TAB_TAGS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Tags</button>';
     html += '<button class="tab-button mb-10" id="onboarding-tab-reporters" part="'+(this.myOnboardingTab == this.TAB_REPORTERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Reporters</button>';
     html += '<button class="tab-button mb-10" id="onboarding-tab-approvers" part="'+(this.myOnboardingTab == this.TAB_APPROVERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Approvers</button>';
@@ -5972,6 +6046,14 @@ export class SfIEvents extends LitElement {
 
     });
 
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-countries')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_COUNTRIES;
+      this.renderOnboardingTabs();
+      this.loadOnboardingCountries();
+
+    });
+
     (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-entities')?.addEventListener('click', async () => {
 
       this.myOnboardingTab = this.TAB_ENTITIES;
@@ -5985,6 +6067,14 @@ export class SfIEvents extends LitElement {
       this.myOnboardingTab = this.TAB_LOCATIONS;
       this.renderOnboardingTabs();
       this.loadOnboardingLocations();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-functions')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_FUNCTIONS;
+      this.renderOnboardingTabs();
+      this.loadOnboardingFunctions();
 
     });
 
@@ -7426,6 +7516,33 @@ export class SfIEvents extends LitElement {
 
   }
 
+  uploadFunctionsMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedfunctions";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
   uploadLocationsMapping = async (data: any) => {
     console.log('uploading..', data);
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedlocations";
@@ -7456,6 +7573,33 @@ export class SfIEvents extends LitElement {
   uploadEntitiesMapping = async (data: any) => {
     console.log('uploading..', data);
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedentities";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadCountriesMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedcountries";
 
     const body = { 
       "projectid": this.projectId, 
@@ -7511,9 +7655,23 @@ export class SfIEvents extends LitElement {
     console.log('uploading..', data);
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedstatutes";
 
+    var searchstring = '';
+
+    for(var i = 0; i < data.mappings.length; i++) {
+
+      const dataItem = JSON.parse(data.mappings[i].data);
+      console.log(dataItem[3])
+      searchstring += dataItem[3];
+      if(i < (data.mappings.length - 1)) {
+        searchstring += '|';
+      }
+
+    }
+
     const body = { 
       "projectid": this.projectId, 
-      "data": JSON.stringify(data)
+      "data": JSON.stringify(data),
+      "compliancessearchstring": searchstring
     }
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
@@ -7571,7 +7729,7 @@ export class SfIEvents extends LitElement {
 
   }
 
-  uploadTriggerEvent = async (eventid: string, dateofoccurrence: string) => {
+  uploadTriggerEvent = async (locationId: string, eventid: string, dateofoccurrence: string) => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/triggermyevent";
 
@@ -7580,8 +7738,10 @@ export class SfIEvents extends LitElement {
       "projectid": this.projectId, 
       "eventid": eventid,
       "entityid": this.entityId,
-      "locationid": this.locationId
+      "locationid": locationId
     } 
+
+    console.log('uploading...', body);
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
@@ -7946,6 +8106,27 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchMappedFunctions = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedfunctions";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
   fetchMappedCompliances = async () => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedcompliances";
@@ -8093,9 +8274,51 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchMappedSerializedFunctions = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedfunctions";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
   fetchMappedSerializedEntities = async () => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedentities";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedSerializedCountries = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedcountries";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -8240,6 +8463,27 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchMappedCountries = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedcountries";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
   fetchMappedEntities = async () => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedentities";
@@ -8264,6 +8508,27 @@ export class SfIEvents extends LitElement {
   fetchMappedStatutes = async () => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedstatutes";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchCalendarJobs = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getcalendarjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -8322,9 +8587,53 @@ export class SfIEvents extends LitElement {
 
   }
 
+  foundCalendarInLocal = () => {
+    const localKey = this.projectId + ';' + this.userProfileId + ';' + this.entityId + ';' + this.locationId;
+    var foundInLocal = false;
+    if(localStorage.getItem(localKey) != null) {
+      if(localStorage.getItem(localKey) != "") {
+        foundInLocal = true;
+      }
+    }
+    return foundInLocal;
+  }
+
+  getLocalKey = () => {
+    const localKey = this.projectId + ';' + this.userProfileId + ';' + this.entityId + ';' + this.locationId;
+    return localKey;
+  }
+
+  cleanLocalStorage = () => {
+    
+    const delKeys = [];
+    for(var i = 0; i < localStorage.length; i++) {
+      if(localStorage.key(i) != this.getLocalKey()) {
+        delKeys.push(localStorage.key(i));
+      }
+    }
+    for( var i = 0; i < delKeys.length; i++) {
+      localStorage.removeItem(delKeys[i] || "");
+    }
+  }
+
   fetchUserCalendar_2 = async() => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmyevents";
+    if(this.foundCalendarInLocal()) {
+      const jsonRespose = JSON.parse(localStorage.getItem(this.getLocalKey()) || "");
+      this.showChosenProject();
+      console.log(jsonRespose);
+      this.events = (jsonRespose.data.events)
+      if(this.events != null) {
+        this.renderTabs(this.TAB_YEAR);
+        this.renderCalendar();
+      }
+    }
+
+    this.cleanLocalStorage();
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/"+ ( (this.locationId != null && this.locationId != "") ? "getmyevents" : "getallmyevents" );
+
+    console.log('fetch calendar url', url);
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "locationid": this.locationId, "adhoc": "false"}, url, this._SfLoader, authorization)) as any;
@@ -8332,15 +8641,21 @@ export class SfIEvents extends LitElement {
     if(xhr.status == 200) {
 
       const jsonRespose = JSON.parse(xhr.responseText);
-      this.showChosenProject();
-      console.log(jsonRespose);
-      this.events = (jsonRespose.data.events)
-      
-      if(this.events != null) {
-        this.renderTabs(this.TAB_YEAR);
-        this.renderCalendar();
+      console.log('foundinlocal', this.foundCalendarInLocal());
+
+      if(this.foundCalendarInLocal()) {
+        this.events = (jsonRespose.data.events)
+      } else {
+        this.showChosenProject();
+        console.log(jsonRespose);
+        this.events = (jsonRespose.data.events)
+        if(this.events != null) {
+          this.renderTabs(this.TAB_YEAR);
+          this.renderCalendar();
+        }
       }
-      // this.renderChosenProject(events);
+
+      localStorage.setItem(this.getLocalKey(), xhr.responseText);
       
     } else {
 
@@ -8460,7 +8775,7 @@ export class SfIEvents extends LitElement {
 
   fetchAdhoc = async (reprogramTriggers: boolean = false) => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmyevents";
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/"+ ( (this.locationId != null && this.locationId != "") ? "getmyevents" : "getallmyevents" );
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "locationid": this.locationId, "adhoc": "true"}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -8773,7 +9088,7 @@ export class SfIEvents extends LitElement {
       this.renderRoleTabs();
       await this.fetchUserCalendar_2();
       
-      if(this.events != null) {
+      if(this.events != null && !this.foundCalendarInLocal()) {
         this.renderTabs(this.TAB_YEAR);
         this.renderCalendar();
       }
@@ -8822,10 +9137,16 @@ export class SfIEvents extends LitElement {
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="compliances-container">
               
             </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="countries-container">
+              
+            </div>
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="entities-container">
               
             </div>
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="locations-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="functions-container">
               
             </div>
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="tags-container">
