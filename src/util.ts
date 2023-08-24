@@ -269,8 +269,17 @@ async function callApi(url: string, data: string, authorization: any) {
 
 }
 
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
 const exportFunctions = {
-   callApi, validateName, readCookie, timeSince, createDiagonalPattern1, createDiagonalPattern2, createDiagonalPattern3
+   callApi, validateName, readCookie, timeSince, createDiagonalPattern1, createDiagonalPattern2, createDiagonalPattern3, getRandomColor
 };
 
 export default exportFunctions;
