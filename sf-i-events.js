@@ -2807,13 +2807,18 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const event = this.eventsInWindow[j];
                     for (var l = 0; l < event.tags.length; l++) {
                         if ((event.tags[l] + "").toLowerCase().indexOf((tags[i] + "").toLowerCase().split(';')[1]) >= 0) {
-                            if (event.documents == null || event.documents[event.mmdd + '/' + new Date().getFullYear()] == null || JSON.parse(event.documents[event.mmdd + '/' + new Date().getFullYear()]) == null) {
+                            console.log('plot approved', event.approved);
+                            //if(event.documents == null || event.documents[event.mmdd + '/' + new Date().getFullYear()] == null || JSON.parse(event.documents[event.mmdd + '/' + new Date().getFullYear()]) == null) {
+                            if (event.documents == null || event.documents.length === 0) {
                                 countNotStarted++;
                             }
-                            else if (event.approved != null && event.approved != null && !event.approved) {
+                            else if (event.approved == null) {
                                 countInProgress++;
                             }
-                            else if (event.approved != null && event.approved != null && event.approved) {
+                            else if (!event.approved) {
+                                countInProgress++;
+                            }
+                            else if (event.approved) {
                                 countApproved++;
                             }
                         }
@@ -2831,6 +2836,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 dataSetInProgress.push(arrData[i][1]);
                 dataSetNotStarted.push(arrData[i][2]);
             }
+            console.log('plotting dataset', dataSetApproved, dataSetInProgress, dataSetNotStarted);
             const tagsCompressed = [];
             for (i = 0; i < tags.length; i++) {
                 tagsCompressed.push(this.truncate(tags[i].split(';')[0], 20, false, false));
@@ -6454,8 +6460,9 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 drawBorder: false
                             },
                             ticks: {
-                                display: false
+                                display: false,
                             },
+                            stacked: true,
                         },
                         y: {
                             grid: {
@@ -6463,10 +6470,16 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 drawBorder: false
                             },
                             ticks: {
-                                display: false
-                            }
+                                display: type == 'bar' ? true : false,
+                                font: {
+                                    size: window.innerWidth > window.innerHeight ? window.innerWidth / 170 : window.innerWidth / 40,
+                                }
+                            },
+                            stacked: true,
                         }
                     },
+                    barPercentage: 0.8,
+                    categoryPercentage: 0.5,
                     plugins: {
                         legend: {
                             display: true,
@@ -6474,7 +6487,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                             align: "center",
                             labels: {
                                 font: {
-                                    size: window.innerWidth > window.innerHeight ? window.innerWidth / 170 : window.innerWidth / 33,
+                                    size: 10,
                                 },
                                 boxWidth: 10,
                                 boxHeight: 10,
