@@ -449,7 +449,7 @@ let SfIEvents = class SfIEvents extends LitElement {
         };
         this.insertDates = (month, year) => {
             var html = "";
-            html += '<div class="d-flex align-baseline flex-grow flex-wrap bg-white p-10">';
+            html += '<div part="bg-calendar" class="d-flex align-baseline flex-grow flex-wrap p-10">';
             const dateNumber = this.getLastDayOfLastMonth(month, year);
             for (var i = 0; i < this.getBlanks(month, year); i++) {
                 html += '<div class="day-item date-item-before fw-100">';
@@ -532,7 +532,7 @@ let SfIEvents = class SfIEvents extends LitElement {
         };
         this.insertDayNames = () => {
             var html = "";
-            html += '<div class="d-flex align-center flex-grow bg-white p-10">';
+            html += '<div part="bg-calendar" class="d-flex align-center flex-grow p-10">';
             html += '<div part="calendar-day-name" class="day-item fw-100">';
             html += 'S';
             html += '</div>';
@@ -5127,10 +5127,10 @@ let SfIEvents = class SfIEvents extends LitElement {
             for (var i = 0; i < 12; i++) {
                 const monthStatus = this.getMonthStatus(startDate.getMonth(), startDate.getFullYear());
                 console.log('monthstatus', monthStatus);
-                html += '<div class="calendar-item d-flex flex-col flex-grow" part="calendar-month" style="background: linear-gradient(to right, ' + this.COLOR_NOT_STARTED + ' 0%, ' + this.COLOR_NOT_STARTED + ' ' + parseInt(monthStatus['percNotStarted'] + "") + '%, ' + this.COLOR_IN_PROGRESS + ' ' + parseInt(monthStatus['percNotStarted'] + "") + '%, ' + this.COLOR_IN_PROGRESS + ' ' + (parseInt(monthStatus['percNotStarted'] + "") + parseInt(monthStatus['percInProgress'] + "")) + '%, ' + this.COLOR_APPROVED + ' ' + parseInt(monthStatus['percInProgress'] + "") + '%, ' + this.COLOR_APPROVED + ' 100%);">';
-                html += '<div class="d-flex justify-between align-center bg-white p-10">';
-                html += '<div part="month-title" class="title-item bg-white">' + this.monthNames[startDate.getMonth()] + '&nbsp;&nbsp;' + startDate.getFullYear() + '</div>';
-                html += '<button id="calendar-button-' + i + '" part="button-icon-small" class="title-item material-icons">open_in_new</button>';
+                html += '<div class="calendar-item d-flex flex-col flex-grow" part="calendar-month" style="background: linear-gradient(to right, ' + this.COLOR_APPROVED + ' 0%, ' + this.COLOR_APPROVED + ' ' + parseInt(monthStatus['percApproved'] + "") + '%, ' + this.COLOR_IN_PROGRESS + ' ' + parseInt(monthStatus['percApproved'] + "") + '%, ' + this.COLOR_IN_PROGRESS + ' ' + (parseInt(monthStatus['percApproved'] + "") + parseInt(monthStatus['percInProgress'] + "")) + '%, ' + this.COLOR_NOT_STARTED + ' ' + (parseInt(monthStatus['percApproved'] + "") + parseInt(monthStatus['percInProgress'] + "")) + '%, ' + this.COLOR_NOT_STARTED + ' 100%);">';
+                html += '<div part="bg-calendar" class="d-flex justify-between align-center p-10">';
+                html += '<div part="month-title" class="title-item">' + this.monthNames[startDate.getMonth()] + '&nbsp;&nbsp;' + startDate.getFullYear() + '</div>';
+                html += '<button id="calendar-button-' + i + '" part="button-icon-small-light" class="title-item material-icons">open_in_new</button>';
                 html += '</div>';
                 html += this.insertDayNames();
                 html += this.insertDates(startDate.getMonth(), startDate.getFullYear());
@@ -9323,6 +9323,7 @@ SfIEvents.styles = css `
     }
 
     .calendar-item {
+      padding: 8px;
       width: 90%;
       margin-bottom: 20px;
     }
@@ -9543,7 +9544,7 @@ SfIEvents.styles = css `
       .calendar-item {
         width: 20%;
         margin: 2%;
-        padding: 10px;
+        padding: 8px;
       }
 
       .main-container {
