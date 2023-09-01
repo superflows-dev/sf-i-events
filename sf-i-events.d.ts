@@ -274,7 +274,7 @@ export declare class SfIEvents extends LitElement {
     renderRiskGraph: (divContainer: HTMLDivElement) => void;
     renderEventDetail: (event: any, mmddyyyy: any) => void;
     renderCalendar: () => void;
-    renderTaggingTable: (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any) => void;
+    renderTaggingTable: (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any, mandatoryFields: any) => void;
     renderMappingTable: (divElement: any, jsonData: Array<any>, cursor: Array<any>, fetchFunction: any, searchString: string, mappedArray: any, found: number, uploadFunction: any, refreshFunction: any) => void;
     refreshCalendar: () => Promise<void>;
     renderOnboardingCalendar: (calendarJobs: any) => void;

@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200;300;400;600&display=swap" rel="stylesheet">
     <script type="module">
         import {SfISelect} from 'https://unpkg.com/sf-i-select@1.0.80/sf-i-select.js?module';
-        import {SfIForm} from 'https://unpkg.com/sf-i-form@1.0.106/sf-i-form.js?module';
+        import {SfIForm} from 'https://unpkg.com/sf-i-form@1.0.107/sf-i-form.js?module';
         import {SfISubSelect} from 'https://unpkg.com/sf-i-sub-select@1.0.81/sf-i-sub-select.js?module';
         import {SfIElasticText} from 'https://unpkg.com/sf-i-elastic-text@1.0.7/sf-i-elastic-text.js?module';
         import {SfIUploader} from 'https://unpkg.com/sf-i-uploader@1.0.15/sf-i-uploader.js?module';
@@ -96,6 +96,10 @@
         border-bottom: solid 1px rgba(255, 255, 255, 0.8);
         border-right: solid 1px rgba(255, 255, 255, 0.8);
         transition: 0.3s;
+      }
+
+      sf-i-events::part(row-mapped) {
+        border: solid 1px greenyellow;
       }
 
       sf-i-events::part(badge-filtered) {
@@ -593,7 +597,7 @@
     </sf-i-events>
      -->
 
-    <!-- <sf-i-events
+    <sf-i-events
     
       projectId="41ab3c86-ccc0-4c0e-8e31-cd079a07a710"
       projectName="ABC Global"
@@ -606,7 +610,7 @@
     
     >
 
-    </sf-i-events> -->
+    </sf-i-events>
 
     <!-- <sf-i-events 
       name="Calendar"
@@ -654,14 +658,14 @@
 
     <!-- Blank Entity-->
 
-    <sf-i-events 
+    <!-- <sf-i-events 
       name="Calendar"
       apiId="8icpy39ru0"
       mode="consumer"
-      userProfileId="4266edf5-cb77-4e0b-9eaa-51db52f0d89d"
+      userProfileId="5fe96caa-1a44-4a2d-921a-920d29433eca"
       entityId="7e1512a7-a474-4f62-9967-75d6b0fc25d2"
-      locationId="9903b44b-6714-4906-bf00-a219c4ecfe0a"
-      projectId="3237530b-17e1-411e-a438-dd42a4e3b9be"
+      countryId="07d73b44-648d-4301-82c4-d6df43397824"
+      projectId="41ab3c86-ccc0-4c0e-8e31-cd079a07a710"
       apiIdUsers="rnmvvr922j"
       apiIdTags="j385cxf2p0"
       projectName="ABC Tyres"
@@ -696,7 +700,7 @@
 
       </div>
 
-    </sf-i-events>
+    </sf-i-events> -->
 
 
     <!-- <sf-i-events 

@@ -471,7 +471,6 @@ export class SfIEvents extends LitElement {
 
   static override styles = css`
 
-
     @media (orientation: landscape) {
 
       .chart-container {
@@ -7114,6 +7113,9 @@ export class SfIEvents extends LitElement {
       
       for(var i = 0; i < complianceFields.length; i++) {
 
+        console.log(complianceFields[i]);
+        console.log(event[complianceFields[i]]);
+
         if(!this.getEventPreviewFields().includes(complianceFields[i])) {
     
           if(!this.getEventHideFields().includes(complianceFields[i])) {
@@ -7495,7 +7497,7 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderTaggingTable = (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any) => {
+  renderTaggingTable = (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any, mandatoryFields: any) => {
 
     console.log('divelement', divElement);
     console.log('sourcearray', sourceArray);
@@ -7534,13 +7536,28 @@ export class SfIEvents extends LitElement {
         foundArr.push(taggingArray.data.mappings.mappings[i]);
       }
 
+      console.log('found', taggingArray.data.mappings.mappings[i].id, found);
+
     }
 
     taggingArray.data.mappings.mappings = foundArr;
 
-    console.log('tagging array after', taggingArray.data.mappings.mappings.length);
+    console.log('tagging array after', taggingArray.data.mappings.mappings.length,taggingArray.data.mappings.mappings);
 
-    
+    let mandatoryPresent = true;
+
+    for(i = 0; i < (mandatoryFields as Array<string>).length; i++) {
+
+      for(var j = 0; j < taggingArray.data.mappings.mappings.length; j++) {
+
+        console.log('checking mandatory', mandatoryFields[i], taggingArray.data.mappings.mappings[j], taggingArray.data.mappings.mappings[j][mandatoryFields[i]])
+        if(taggingArray.data.mappings.mappings[j][mandatoryFields[i]] == null) {
+          mandatoryPresent = false;
+        }
+
+      }
+
+    }
 
     var tagged = 0;
 
@@ -7565,9 +7582,18 @@ export class SfIEvents extends LitElement {
       status = '<span class="color-done material-icons">check_circle</span>';
     }
 
-    html += '<div class="left-sticky mb-10 d-flex justify-between align-center"><h3 part="results-title" class="d-flex align-center">'+status+'&nbsp;&nbsp;Mapped '+tagged+' out of '+sourceArray.data.mappings.mappings.length+'</h3><button part="button" class="button-save">Save</button></div>'
+    var mandatoryStatus = '';
+    if(!mandatoryPresent) {
+      mandatoryStatus = '<span class="color-late-executed material-icons">error</span>&nbsp;&nbsp;Mandatory fields are not present';
+    } else {
+      mandatoryStatus = '<span class="color-done material-icons">check_circle</span>&nbsp;&nbsp;Mandatory fields are present';
+    }
 
-    html += '<table>';
+    html += '<div class="left-sticky mb-10 d-flex justify-between align-center"><h4 part="results-title" class="d-flex align-center m-0">'+status+'&nbsp;&nbsp;Mapped '+tagged+' out of '+sourceArray.data.mappings.mappings.length+'</h4><button part="button" class="button-save">Save</button></div>'
+
+    html += '<div class="left-sticky mb-10 d-flex justify-between align-center"><h4 part="results-title" class="d-flex align-center m-0">' + mandatoryStatus + '</h4></div>'
+
+    html += '<table class="mt-20">';
 
     html += '<thead>';
     html += '<th part="td-head" class="td-head">'
@@ -7614,7 +7640,7 @@ export class SfIEvents extends LitElement {
 
       for(var l = 0; l < uniqCols.length; l++) {
         html += '<td class="td-body '+classBg+'" part="td-key">'
-        html += '<sf-i-elastic-text text="'+sourceArray.data.mappings.mappings[i][uniqCols[l]]+'" minLength="10"></sf-i-elastic-text>';
+        html += '<sf-i-elastic-text text="'+sourceArray.data.mappings.mappings[i][uniqCols[l]].replace(/ *\([^)]*\) */g, "")+'" minLength="60"></sf-i-elastic-text>';
         html += '</td>'
       }
 
@@ -7679,12 +7705,34 @@ export class SfIEvents extends LitElement {
 
     for(var i = 0; i < multiArr.length; i++) {
 
-      console.log('preselect', i, apiIdDropdown);
-
       if(apiIdDropdown.length > 0) {
 
-        if(taggingArray.data.mappings.mappings[i] != null && taggingArray.data.mappings.mappings[i][colName] != null) {
-          (multiArr[i] as SfIForm).preselectedValues = JSON.stringify(taggingArray.data.mappings.mappings[i][colName]);
+        for(var j = 0; j < taggingArray.data.mappings.mappings.length; j++) {
+
+          var equal = true;
+
+          for(var k = 0; k < uniqCols.length; k++) {
+
+            if(sourceArray.data.mappings.mappings[i] != null && taggingArray.data.mappings.mappings[j] != null) {
+              if(sourceArray.data.mappings.mappings[i][uniqCols[k]] != taggingArray.data.mappings.mappings[j][uniqCols[k]]) {
+                equal = false;
+              }
+            }
+            
+          }
+
+          if(equal) {
+            
+            // if(taggingArray.data.mappings.mappings[i] != null && taggingArray.data.mappings.mappings[i][colName] != null) {
+            //   (multiArr[i] as SfIForm).preselectedValues = JSON.stringify(taggingArray.data.mappings.mappings[i][colName]);
+            // }
+            (multiArr[i] as SfIForm).preselectedValues = JSON.stringify(taggingArray.data.mappings.mappings[j][colName]);
+            if(taggingArray.data.mappings.mappings[j][colName].length > 0) {
+              ((multiArr[i] as SfIForm).parentElement as HTMLTableCellElement).setAttribute("part", "row-mapped");
+            }
+
+          }
+
         }
 
         console.log('preselect', multiArr[i]);
@@ -7699,7 +7747,7 @@ export class SfIEvents extends LitElement {
           }
 
           
-          this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase)
+          this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields)
   
         });
 
@@ -7721,7 +7769,7 @@ export class SfIEvents extends LitElement {
             }
 
             
-            this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase)
+            this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields)
     
           }
 
@@ -7980,7 +8028,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingInternalControlsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingInternalControlsListContainer as HTMLDivElement),mappedSerializedAlertSchedules, mappedInternalControls, ["obligation", "country", "statute"], this.uploadInternalControlsMapping, this.loadMode, "internalcontrols", ["id", "entityname", "locationname"], '', "");
+    this.renderTaggingTable((this._SfOnboardingInternalControlsListContainer as HTMLDivElement),mappedSerializedAlertSchedules, mappedInternalControls, ["obligation", "country", "statute"], this.uploadInternalControlsMapping, this.loadMode, "internalcontrols", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "duedates", "alertschedules", "internalcontrols"]);
 
   }
 
@@ -7993,7 +8041,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingAlertSchedulesListContainer as HTMLDivElement),mappedSerializedDuedates, mappedAlertSchedules, ["obligation", "country", "statute"], this.uploadAlertSchedulesMapping, this.loadMode, "alertschedules", ["id", "entityname", "locationname"], '', "");
+    this.renderTaggingTable((this._SfOnboardingAlertSchedulesListContainer as HTMLDivElement),mappedSerializedDuedates, mappedAlertSchedules, ["obligation", "country", "statute"], this.uploadAlertSchedulesMapping, this.loadMode, "alertschedules", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "duedates", "alertschedules"]);
 
   }
 
@@ -8006,7 +8054,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingDuedatesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingDuedatesListContainer as HTMLDivElement),mappedSerializedApprovers, mappedDuedates, ["obligation", "country", "statute"], this.uploadDuedatesMapping, this.loadMode, "duedates", ["id", "entityname", "locationname"], '', "");
+    this.renderTaggingTable((this._SfOnboardingDuedatesListContainer as HTMLDivElement),mappedSerializedApprovers, mappedDuedates, ["obligation", "country", "statute"], this.uploadDuedatesMapping, this.loadMode, "duedates", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "duedates"]);
 
   }
 
@@ -8019,7 +8067,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingReportersContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingReportersListContainer as HTMLDivElement),mappedSerializedTags, mappedReporters, ["obligation", "country", "statute"], this.uploadReportersMapping, this.loadMode, "reporters", ["id", "entityname", "locationname"], this.apiIdUsers, "");
+    this.renderTaggingTable((this._SfOnboardingReportersListContainer as HTMLDivElement),mappedSerializedTags, mappedReporters, ["obligation", "country", "statute"], this.uploadReportersMapping, this.loadMode, "reporters", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["reporters", "functions", "tags"]);
 
   }
 
@@ -8032,7 +8080,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingApproversContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingApproversListContainer as HTMLDivElement),mappedSerializedReporters, mappedApprovers, ["obligation", "country", "statute"], this.uploadApproversMapping, this.loadMode, "approvers", ["id", "entityname", "locationname"], this.apiIdUsers, "");
+    this.renderTaggingTable((this._SfOnboardingApproversListContainer as HTMLDivElement),mappedSerializedReporters, mappedApprovers, ["obligation", "country", "statute"], this.uploadApproversMapping, this.loadMode, "approvers", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters"]);
 
   }
 
@@ -8045,7 +8093,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingTagsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingTagsListContainer as HTMLDivElement),mappedSerializedFunctions, mappedTags, ["obligation", "country", "statute"], this.uploadTagsMapping, this.loadMode, "tags", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Tag");
+    this.renderTaggingTable((this._SfOnboardingTagsListContainer as HTMLDivElement),mappedSerializedFunctions, mappedTags, ["obligation", "country", "statute"], this.uploadTagsMapping, this.loadMode, "tags", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Tag", ["tags", "functions"]);
 
   }
 
@@ -8058,7 +8106,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingFunctionsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingFunctionsListContainer as HTMLDivElement),mappedSerializedLocations, mappedFunctions, ["obligation", "country", "statute"], this.uploadFunctionsMapping, this.loadMode, "functions", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Function");
+    this.renderTaggingTable((this._SfOnboardingFunctionsListContainer as HTMLDivElement),mappedSerializedLocations, mappedFunctions, ["obligation", "country", "statute"], this.uploadFunctionsMapping, this.loadMode, "functions", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Function", ["functions"]);
 
   }
 
@@ -8071,7 +8119,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingLocationsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingLocationsListContainer as HTMLDivElement),mappedSerializedEntities, mappedLocations, ["obligation", "country", "statute"], this.uploadLocationsMapping, this.loadMode, "locations", ["id", "countryname", "entityname"], this.apiIdTags, "&Location");
+    this.renderTaggingTable((this._SfOnboardingLocationsListContainer as HTMLDivElement),mappedSerializedEntities, mappedLocations, ["obligation", "country", "statute"], this.uploadLocationsMapping, this.loadMode, "locations", ["id", "countryname", "entityname"], this.apiIdTags, "&Location", ["locations"]);
 
   }
 
@@ -8132,7 +8180,7 @@ export class SfIEvents extends LitElement {
               }
             }
 
-            jsonData.push({id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "state", "category", "statute", "applicability", "obligation", "risk", "riskarea", "frequency"]})
+            jsonData.push({id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "state", "category", "statute", "applicability", "obligation", "risk", "riskarea", "frequency", "penalty"]})
           }
           console.log('clicked', jsonData);
           this.renderMappingTable((this._SfOnboardingCompliancesListContainer as HTMLDivElement), jsonData, [{prev: initCursor, next: resultCompliances.cursor}], this.fetchSearchCompliances, searchString, mappedCompliances, resultCompliances.found, this.uploadCompliancesMapping, this.loadMode)
@@ -8158,7 +8206,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingEntitiesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingEntitiesListContainer as HTMLDivElement),mappedSerializedCountries, mappedEntities, ["obligation", "country", "statute"], this.uploadEntitiesMapping, this.loadMode, "entities", ["id", "countryname"], this.apiIdTags, "&Entity");
+    this.renderTaggingTable((this._SfOnboardingEntitiesListContainer as HTMLDivElement),mappedSerializedCountries, mappedEntities, ["obligation", "country", "statute"], this.uploadEntitiesMapping, this.loadMode, "entities", ["id", "countryname"], this.apiIdTags, "&Entity", ["entities"]);
 
   }
 
@@ -8190,7 +8238,7 @@ export class SfIEvents extends LitElement {
 
     // mappedCountries.data.mappings.mappings = arr2;
 
-    this.renderTaggingTable((this._SfOnboardingCountriesListContainer as HTMLDivElement), mappedCompliances, mappedCountries, ["obligation", "country", "statute"], this.uploadCountriesMapping, this.loadMode, "countries", ["id"], this.apiIdTags, "-Country");
+    this.renderTaggingTable((this._SfOnboardingCountriesListContainer as HTMLDivElement), mappedCompliances, mappedCountries, ["obligation", "country", "statute"], this.uploadCountriesMapping, this.loadMode, "countries", ["id"], this.apiIdTags, "-Country", ["countries"]);
 
   }
 
@@ -8499,7 +8547,7 @@ export class SfIEvents extends LitElement {
 
     var html = `
     
-      <div class="m-10" part="input">
+      <div class="m-10" part="filters-container">
         <div class="d-flex justify-end">
           <button id="chart-control-cancel" class="material-icons" part="button-icon-small">close</button>
         </div>
@@ -8598,41 +8646,41 @@ export class SfIEvents extends LitElement {
 
     var html = `
     
-      <div class="m-10" part="input">
+      <div class="m-10" part="settings-container">
         <div class="d-flex justify-end">
           <button id="chart-control-cancel" class="material-icons" part="button-icon-small">close</button>
         </div>
 
         <div class="d-flex justify-center">
-          <div part="input" class="p-10 mr-10">
+          <div class="p-10 mr-10">
             <div part="td-head">Stats</div>
             <div part="td-body" class="d-flex align-center mt-5">
-              <input type="radio" id="radio-csv" class="switch-csv" value="Excel" checked name="radio-report"/>
-              <label for="radio-csv">Csv</label>
-              <input type="radio" id="radio-image" class="switch-image" value="Image" name="radio-report"/>
-              <label for="radio-image">Image</label>
+              <input type="radio" id="radio-csv" class="switch-csv" value="Excel" checked name="radio-report" part="radio-download"/>
+              <label for="radio-csv" part="label-radio-download">Csv</label>
+              <input type="radio" id="radio-image" class="switch-image" value="Image" name="radio-report" part="radio-download"/>
+              <label for="radio-image" part="label-radio-download">Image</label>
             </div>
-            <div class="d-flex justify-center">
+            <div class="d-flex">
               <button id="button-download-stats" part="button" class="mt-5">Download</button>
             </div>
           </div>
-          <div part="input" class="p-10 ml-10 mr-10">
+          <div class="p-10 ml-10 mr-10">
             <div part="td-head">Compliances</div>
             <div part="td-body" class="d-flex align-center mt-5">
-              <input type="radio" id="radio-csv" class="switch-csv" value="Excel" checked/>
-              <label for="radio-csv">Csv</label>
+              <input type="radio" id="radio-csv" class="switch-csv" value="Excel" checked part="radio-download"/>
+              <label for="radio-csv" part="label-radio-download">Csv</label>
             </div>
-            <div class="d-flex justify-center">
+            <div class="d-flex">
               <button id="button-download-compliances" part="button" class="mt-5">Download</button>
             </div>
           </div>
-          <div part="input" class="p-10 ml-10">
+          <div class="p-10 ml-10">
             <div part="td-head">Certificate</div>
             <div part="td-body" class="d-flex align-center mt-5">
-              <input type="radio" id="radio-html" class="switch-html" value="Html" checked/>
-              <label for="radio-html">Html</label>
+              <input type="radio" id="radio-html" class="switch-html" value="Html" checked part="radio-download"/>
+              <label for="radio-html" part="label-radio-download">Html</label>
             </div>
-            <div class="d-flex justify-center">
+            <div class="d-flex">
               <button id="button-download-certificate" part="button" class="mt-5">Download</button>
             </div>
           </div>
@@ -8685,10 +8733,26 @@ export class SfIEvents extends LitElement {
       }
 
       if(radioImage.checked) {
+
         const a = document.createElement('a')
         a.setAttribute('href', (this.chart as Chart).toBase64Image())
-        a.setAttribute('download', 'download.png');
+        a.setAttribute('download', 'download_'+new Date().getTime()+'.png');
         a.click()
+
+        if(this.chart2 != null) {
+          const a2 = document.createElement('a')
+          a2.setAttribute('href', (this.chart2 as Chart).toBase64Image())
+          a2.setAttribute('download', 'download_completeness_'+new Date().getTime()+'.png');
+          a2.click()
+        }
+
+        if(this.chart3 != null) {
+          const a3 = document.createElement('a')
+          a3.setAttribute('href', (this.chart3 as Chart).toBase64Image())
+          a3.setAttribute('download', 'download_timeliness_'+new Date().getTime()+'.png');
+          a3.click()
+        }
+
       }
 
     })
