@@ -415,9 +415,41 @@ let SfIEvents = class SfIEvents extends LitElement {
             const day = date.getDay();
             return day;
         };
+        this.getMonthStatus = (month, year) => {
+            //html += '<div class="d-flex align-baseline flex-grow flex-wrap">';
+            const currMonth = new Date().getMonth();
+            const currDate = new Date().getDate();
+            console.log('currmonth', currMonth, 'currdate', currDate);
+            var approved = 0;
+            var inProgress = 0;
+            var notStarted = 0;
+            var total = 0;
+            for (var i = 0; i < this.getLastDayOfMonth(month, year); i++) {
+                const mmdd = ("0" + (month + 1)).slice(-2) + "/" + ("0" + (i + 1)).slice(-2);
+                if (this.events[mmdd] != null) {
+                    for (var j = 0; j < this.events[mmdd].length; j++) {
+                        total++;
+                        if (this.events[mmdd][j].documents == null || this.events[mmdd][j].documents == null || (this.events[mmdd][j].documents).length === 0) {
+                            notStarted++;
+                        }
+                        else if (this.events[mmdd][j].approved != null && this.events[mmdd][j].approved) {
+                            approved++;
+                        }
+                        else {
+                            inProgress++;
+                        }
+                    }
+                }
+            }
+            console.log('month-status', approved, inProgress, notStarted, total);
+            var percApproved = (approved * 100) / total;
+            var percInProgress = (inProgress * 100) / total;
+            var percNotStarted = (notStarted * 100) / total;
+            return { percNotStarted, percInProgress, percApproved };
+        };
         this.insertDates = (month, year) => {
             var html = "";
-            html += '<div class="d-flex align-baseline flex-grow flex-wrap">';
+            html += '<div class="d-flex align-baseline flex-grow flex-wrap bg-white p-10">';
             const dateNumber = this.getLastDayOfLastMonth(month, year);
             for (var i = 0; i < this.getBlanks(month, year); i++) {
                 html += '<div class="day-item date-item-before fw-100">';
@@ -500,7 +532,7 @@ let SfIEvents = class SfIEvents extends LitElement {
         };
         this.insertDayNames = () => {
             var html = "";
-            html += '<div class="d-flex align-center flex-grow">';
+            html += '<div class="d-flex align-center flex-grow bg-white p-10">';
             html += '<div part="calendar-day-name" class="day-item fw-100">';
             html += 'S';
             html += '</div>';
@@ -5093,9 +5125,11 @@ let SfIEvents = class SfIEvents extends LitElement {
             var startDate = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
             var html = '';
             for (var i = 0; i < 12; i++) {
-                html += '<div class="calendar-item d-flex flex-col flex-grow" part="calendar-month">';
-                html += '<div class="d-flex justify-between align-center">';
-                html += '<div part="month-title" class="title-item">' + this.monthNames[startDate.getMonth()] + '&nbsp;&nbsp;' + startDate.getFullYear() + '</div>';
+                const monthStatus = this.getMonthStatus(startDate.getMonth(), startDate.getFullYear());
+                console.log('monthstatus', monthStatus);
+                html += '<div class="calendar-item d-flex flex-col flex-grow" part="calendar-month" style="background: linear-gradient(to right, ' + this.COLOR_NOT_STARTED + ' 0%, ' + this.COLOR_NOT_STARTED + ' ' + parseInt(monthStatus['percNotStarted'] + "") + '%, ' + this.COLOR_IN_PROGRESS + ' ' + parseInt(monthStatus['percNotStarted'] + "") + '%, ' + this.COLOR_IN_PROGRESS + ' ' + (parseInt(monthStatus['percNotStarted'] + "") + parseInt(monthStatus['percInProgress'] + "")) + '%, ' + this.COLOR_APPROVED + ' ' + parseInt(monthStatus['percInProgress'] + "") + '%, ' + this.COLOR_APPROVED + ' 100%);">';
+                html += '<div class="d-flex justify-between align-center bg-white p-10">';
+                html += '<div part="month-title" class="title-item bg-white">' + this.monthNames[startDate.getMonth()] + '&nbsp;&nbsp;' + startDate.getFullYear() + '</div>';
                 html += '<button id="calendar-button-' + i + '" part="button-icon-small" class="title-item material-icons">open_in_new</button>';
                 html += '</div>';
                 html += this.insertDayNames();
@@ -8808,6 +8842,10 @@ let SfIEvents = class SfIEvents extends LitElement {
 };
 SfIEvents.styles = css `
 
+    .bg-white {
+      background-color: white;
+    }
+
     @media (orientation: landscape) {
 
       .chart-container {
@@ -9505,7 +9543,7 @@ SfIEvents.styles = css `
       .calendar-item {
         width: 20%;
         margin: 2%;
-        padding: 1%;
+        padding: 10px;
       }
 
       .main-container {

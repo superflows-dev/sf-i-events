@@ -211,6 +211,11 @@ export declare class SfIEvents extends LitElement {
     getFirstDayOfLastMonth(yourDate: Date): Date;
     getFirstDateOfWeek: (startDate: Date) => Date;
     getBlanks: (month: number, year: number) => number;
+    getMonthStatus: (month: number, year: number) => {
+        percNotStarted: number;
+        percInProgress: number;
+        percApproved: number;
+    };
     insertDates: (month: number, year: number) => string;
     insertDayNames: () => string;
     getPastDueDate: (mmdd: string) => boolean;
