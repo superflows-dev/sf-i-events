@@ -37,6 +37,15 @@ let SfIEvents = class SfIEvents extends LitElement {
     constructor() {
         super();
         this.SEARCH_BLOCK_SIZE = 10;
+        this.FLOW_GRAPH_COMPLETENESS = "completeness";
+        this.FLOW_GRAPH_TIMELINESS = "timeliness";
+        this.FLOW_GRAPH_RISKAREAS = "riskarea";
+        this.FLOW_GRAPH_RISKSEVERITY = "risk";
+        this.FLOW_GRAPH_LOCATION = "locationname";
+        this.FLOW_GRAPH_FUNCTION = "functions";
+        this.FLOW_GRAPH_OBLIGATIONTYPE = "obligationtype";
+        this.FLOW_GRAPH_JURISDICTION = "jurisdiction";
+        this.FLOW_GRAPH_FREQUENCY = "frequency";
         this.TAB_YEAR = "year";
         this.TAB_STREAM = "stream";
         this.TAB_UPCOMING = "upcoming";
@@ -270,6 +279,7 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.htmlDataCompliances = "";
         this.htmlDataStats = "";
         this.period = "";
+        this.flowGraph = "";
         this.flow = "";
         this.fill = "solid";
         this.filterTags = [];
@@ -965,23 +975,23 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<div part="stream-event-chart-selection" class="mb-20">';
             html += '<div part="td-head" class="mb-5">Select Chart</div>';
             html += '<div class="mb-10 d-flex flex-wrap align-center">';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" checked>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') + '>';
             html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') + '>';
             html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') + '>';
             html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') + '>';
             html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') + '>';
             html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') + '>';
             html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') + '>';
             html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') + '>';
             html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') + '>';
             html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
             html += '</div>';
             html += '</div>';
@@ -1028,6 +1038,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                     }
                 }
                 console.log('hide', i, hide);
+                console.log('flowgraph', this.flowGraph);
                 if (this.events[mmdd] != null) {
                     //html += '<div>'+month + ',' + year + ',' + i+'</div>'
                     html += '<div part="stream-event-selected" class="d-flex stream-event-selected">';
@@ -1135,18 +1146,33 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "late-executed") {
                                 lateExecuted++;
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-late-executed">running_with_errors</span>';
+                                }
                                 csvValues += 'approved late-executed,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span></td>');
                             }
                             else if (lateStatus == "late-approved") {
                                 lateApproved++;
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-late-approved">running_with_errors</span>';
+                                }
                                 csvValues += 'approved late-approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-done">check_circle</span></td>');
                             }
@@ -1156,12 +1182,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
-                                html += '<span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                }
                                 csvValues += 'in-progress past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'in-progress,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span></td>');
                             }
@@ -1171,12 +1207,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
-                                html += '<span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                }
                                 csvValues += 'not started past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-icons color-not-started">schedule</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'not started,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span></td>');
                             }
@@ -1236,6 +1282,16 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '</tbody>';
                         html += '</table>';
                         html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>';
+                        if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS && this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                            let graphParam = '';
+                            if (Array.isArray(this.events[mmdd][j][this.flowGraph])) {
+                                graphParam = this.events[mmdd][j][this.flowGraph].toString().replace(/ *\([^)]*\) */g, "");
+                            }
+                            else {
+                                graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
+                            }
+                            html += '<div class="d-flex"><div part="badge-filter-name" class="filtername mb-20">' + graphParam + '</div></div>';
+                        }
                         html += '</div>';
                     }
                     html += '</div>';
@@ -1279,23 +1335,23 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<div part="stream-event-chart-selection" class="mb-20">';
             html += '<div part="td-head" class="mb-5">Select Chart</div>';
             html += '<div class="mb-10 d-flex flex-wrap align-center">';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" checked>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') + '>';
             html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') + '>';
             html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') + '>';
             html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') + '>';
             html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') + '>';
             html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') + '>';
             html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') + '>';
             html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') + '>';
             html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') + '>';
             html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
             html += '</div>';
             html += '</div>';
@@ -1450,18 +1506,33 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "late-executed") {
                                 lateExecuted++;
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-late-executed">running_with_errors</span>';
+                                }
                                 csvValues += 'approved late-executed,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span></td>');
                             }
                             else if (lateStatus == "late-approved") {
                                 lateApproved++;
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-late-approved">running_with_errors</span>';
+                                }
                                 csvValues += 'approved late-approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-done">check_circle</span></td>');
                             }
@@ -1471,12 +1542,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
-                                html += '<span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                }
                                 csvValues += 'in-progress past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'in-progress,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span></td>');
                             }
@@ -1486,12 +1567,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
-                                html += '<span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                }
                                 csvValues += 'not started past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-icons color-not-started">schedule</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'not started,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span></td>');
                             }
@@ -1554,6 +1645,16 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '</tbody>';
                         html += '</table>';
                         html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>';
+                        if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS && this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                            let graphParam = '';
+                            if (Array.isArray(this.events[mmdd][j][this.flowGraph])) {
+                                graphParam = this.events[mmdd][j][this.flowGraph].toString().replace(/ *\([^)]*\) */g, "");
+                            }
+                            else {
+                                graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
+                            }
+                            html += '<div class="d-flex"><div part="badge-filter-name" class="filtername mb-20">' + graphParam + '</div></div>';
+                        }
                         html += '</div>';
                     }
                     html += '</div>';
@@ -1599,23 +1700,23 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<div part="stream-event-chart-selection" class="mb-20">';
             html += '<div part="td-head" class="mb-5">Select Chart</div>';
             html += '<div class="mb-10 d-flex flex-wrap align-center">';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" checked>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') + '>';
             html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') + '>';
             html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') + '>';
             html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') + '>';
             html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') + '>';
             html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') + '>';
             html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') + '>';
             html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') + '>';
             html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') + '>';
             html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
             html += '</div>';
             html += '</div>';
@@ -1782,18 +1883,33 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "late-executed") {
                                 lateExecuted++;
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-late-executed">running_with_errors</span>';
+                                }
                                 csvValues += 'approved late-executed,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span></td>');
                             }
                             else if (lateStatus == "late-approved") {
                                 lateApproved++;
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-late-approved">running_with_errors</span>';
+                                }
                                 csvValues += 'approved late-approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-done">check_circle</span></td>');
                             }
@@ -1803,12 +1919,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
-                                html += '<span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                }
                                 csvValues += 'in-progress past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'in-progress,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span></td>');
                             }
@@ -1818,12 +1944,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
-                                html += '<span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                }
                                 csvValues += 'not started past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-icons color-not-started">schedule</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'not started,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span></td>');
                             }
@@ -1886,6 +2022,16 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '</tbody>';
                         html += '</table>';
                         html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>';
+                        if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS && this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                            let graphParam = '';
+                            if (Array.isArray(this.events[mmdd][j][this.flowGraph])) {
+                                graphParam = this.events[mmdd][j][this.flowGraph].toString().replace(/ *\([^)]*\) */g, "");
+                            }
+                            else {
+                                graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
+                            }
+                            html += '<div class="d-flex"><div part="badge-filter-name" class="filtername mb-20">' + graphParam + '</div></div>';
+                        }
                         html += '</div>';
                     }
                     html += '</div>';
@@ -1930,23 +2076,23 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<div part="stream-event-chart-selection" class="mb-20">';
             html += '<div part="td-head" class="mb-5">Select Chart</div>';
             html += '<div class="mb-10 d-flex flex-wrap align-center">';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" checked>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') + '>';
             html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') + '>';
             html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') + '>';
             html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') + '>';
             html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') + '>';
             html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') + '>';
             html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') + '>';
             html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') + '>';
             html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') + '>';
             html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
             html += '</div>';
             html += '</div>';
@@ -2115,18 +2261,33 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "late-executed") {
                                 lateExecuted++;
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-late-executed">running_with_errors</span>';
+                                }
                                 csvValues += 'approved late-executed,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span></td>');
                             }
                             else if (lateStatus == "late-approved") {
                                 lateApproved++;
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-late-approved">running_with_errors</span>';
+                                }
                                 csvValues += 'approved late-approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-done">check_circle</span></td>');
                             }
@@ -2136,12 +2297,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
-                                html += '<span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                }
                                 csvValues += 'in-progress past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'in-progress,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span></td>');
                             }
@@ -2151,12 +2322,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
-                                html += '<span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                }
                                 csvValues += 'not started past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-icons color-not-started">schedule</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'not started,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span></td>');
                             }
@@ -2219,6 +2400,16 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '</tbody>';
                         html += '</table>';
                         html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>';
+                        if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS && this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                            let graphParam = '';
+                            if (Array.isArray(this.events[mmdd][j][this.flowGraph])) {
+                                graphParam = this.events[mmdd][j][this.flowGraph].toString().replace(/ *\([^)]*\) */g, "");
+                            }
+                            else {
+                                graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
+                            }
+                            html += '<div class="d-flex"><div part="badge-filter-name" class="filtername mb-20">' + graphParam + '</div></div>';
+                        }
                         html += '</div>';
                     }
                     html += '</div>';
@@ -2263,23 +2454,23 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<div part="stream-event-chart-selection" class="mb-20">';
             html += '<div part="td-head" class="mb-5">Select Chart</div>';
             html += '<div class="mb-10 d-flex flex-wrap align-center">';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" checked>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') + '>';
             html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') + '>';
             html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') + '>';
             html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') + '>';
             html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') + '>';
             html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') + '>';
             html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') + '>';
             html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') + '>';
             html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" ' + ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') + '>';
             html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
             html += '</div>';
             html += '</div>';
@@ -2437,18 +2628,33 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "late-executed") {
                                 lateExecuted++;
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-late-executed">running_with_errors</span>';
+                                }
                                 csvValues += 'approved late-executed,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span></td>');
                             }
                             else if (lateStatus == "late-approved") {
                                 lateApproved++;
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-late-approved">running_with_errors</span>';
+                                }
                                 csvValues += 'approved late-approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-done">check_circle</span></td>');
                             }
@@ -2458,12 +2664,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
-                                html += '<span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                }
                                 csvValues += 'in-progress past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'in-progress,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span></td>');
                             }
@@ -2473,12 +2689,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                             html += '<td part="td-body">';
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
-                                html += '<span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                }
                                 csvValues += 'not started past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
                             }
                             else {
-                                html += '<span class="material-icons color-not-started">schedule</span>';
+                                if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                }
+                                if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
+                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                }
                                 csvValues += 'not started,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span></td>');
                             }
@@ -2541,6 +2767,16 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '</tbody>';
                         html += '</table>';
                         html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>';
+                        if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS && this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
+                            let graphParam = '';
+                            if (Array.isArray(this.events[mmdd][j][this.flowGraph])) {
+                                graphParam = this.events[mmdd][j][this.flowGraph].toString().replace(/ *\([^)]*\) */g, "");
+                            }
+                            else {
+                                graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
+                            }
+                            html += '<div class="d-flex"><div part="badge-filter-name" class="filtername mb-20">' + graphParam + '</div></div>';
+                        }
                         html += '</div>';
                     }
                     html += '</div>';
@@ -2613,6 +2849,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             }
         };
         this.processDateSelection = () => {
+            this.clearGraphData();
             var startDateCalendar = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
             var endDateCalendar = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + (parseInt(this.calendarStartYYYY) + 1));
             const valueStart = this._SfCustomContainer.querySelector('#stream-start-date').value;
@@ -2649,38 +2886,56 @@ let SfIEvents = class SfIEvents extends LitElement {
             console.log('rendering chart', this._SfCustomContainer.innerHTML);
             const radioCompleteness = this._SfCustomContainer.querySelector('#radio-completeness');
             radioCompleteness === null || radioCompleteness === void 0 ? void 0 : radioCompleteness.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                this.processDateSelection();
                 this.renderCompletenessGraph(this._SfCustomContainer);
             });
             const radioTimeliness = this._SfCustomContainer.querySelector('#radio-timeliness');
             radioTimeliness === null || radioTimeliness === void 0 ? void 0 : radioTimeliness.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_TIMELINESS;
+                this.processDateSelection();
                 this.renderTimelinessGraph(this._SfCustomContainer);
             });
             const radioRisk = this._SfCustomContainer.querySelector('#radio-risk');
             radioRisk === null || radioRisk === void 0 ? void 0 : radioRisk.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_RISKAREAS;
+                this.processDateSelection();
                 this.renderRiskGraph(this._SfCustomContainer);
             });
             const radioFunction = this._SfCustomContainer.querySelector('#radio-function');
             radioFunction === null || radioFunction === void 0 ? void 0 : radioFunction.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_FUNCTION;
+                this.processDateSelection();
                 this.renderFunctionGraph(this._SfCustomContainer);
             });
             const radioRiskSeverity = this._SfCustomContainer.querySelector('#radio-riskseverity');
             radioRiskSeverity === null || radioRiskSeverity === void 0 ? void 0 : radioRiskSeverity.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_RISKSEVERITY;
+                this.processDateSelection();
                 this.renderRiskSeverityGraph(this._SfCustomContainer);
             });
             const radioObligationType = this._SfCustomContainer.querySelector('#radio-obligationtype');
             radioObligationType === null || radioObligationType === void 0 ? void 0 : radioObligationType.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_OBLIGATIONTYPE;
+                this.processDateSelection();
                 this.renderObligationTypeGraph(this._SfCustomContainer);
             });
             const radioJurisdiction = this._SfCustomContainer.querySelector('#radio-jurisdiction');
             radioJurisdiction === null || radioJurisdiction === void 0 ? void 0 : radioJurisdiction.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_JURISDICTION;
+                this.processDateSelection();
                 this.renderJurisdictionGraph(this._SfCustomContainer);
             });
             const radioFrequency = this._SfCustomContainer.querySelector('#radio-frequency');
             radioFrequency === null || radioFrequency === void 0 ? void 0 : radioFrequency.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_FREQUENCY;
+                this.processDateSelection();
                 this.renderFrequencyGraph(this._SfCustomContainer);
             });
             const radioLocation = this._SfCustomContainer.querySelector('#radio-location');
             radioLocation === null || radioLocation === void 0 ? void 0 : radioLocation.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_LOCATION;
+                this.processDateSelection();
                 this.renderLocationGraph(this._SfCustomContainer);
             });
             const buttonStatusMore = this._SfCustomContainer.querySelector('#button-status-more');
@@ -3293,7 +3548,6 @@ let SfIEvents = class SfIEvents extends LitElement {
         };
         this.renderCustom = () => {
             var _a, _b;
-            this.clearGraphData();
             var html = '';
             html += '<div class="scroll-x w-100 mobile-only">';
             html += '<div class="title-item-date">';
@@ -3306,7 +3560,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '</div>';
             html += '</div>';
             html += '<div class="d-flex w-100">';
-            html += '<div class="calendar-left-col desktop-only flex-col justify-end align-end">';
+            html += '<div class="calendar-left-col desktop-only flex-col justify-start align-end">';
             html += '<div class="title-item-date">';
             html += '<label part="input-label">Start Date</label><br />';
             html += '<input id="stream-start-date" part="input" type="date" />';
@@ -3388,38 +3642,56 @@ let SfIEvents = class SfIEvents extends LitElement {
             this._SfPastContainer.innerHTML = html;
             const radioCompleteness = this._SfPastContainer.querySelector('#radio-completeness');
             radioCompleteness === null || radioCompleteness === void 0 ? void 0 : radioCompleteness.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                this.renderPast(index);
                 this.renderCompletenessGraph(this._SfPastContainer);
             });
             const radioTimeliness = this._SfPastContainer.querySelector('#radio-timeliness');
             radioTimeliness === null || radioTimeliness === void 0 ? void 0 : radioTimeliness.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_TIMELINESS;
+                this.renderPast(index);
                 this.renderTimelinessGraph(this._SfPastContainer);
             });
             const radioRisk = this._SfPastContainer.querySelector('#radio-risk');
             radioRisk === null || radioRisk === void 0 ? void 0 : radioRisk.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_RISKAREAS;
+                this.renderPast(index);
                 this.renderRiskGraph(this._SfPastContainer);
             });
             const radioRiskSeverity = this._SfPastContainer.querySelector('#radio-riskseverity');
             radioRiskSeverity === null || radioRiskSeverity === void 0 ? void 0 : radioRiskSeverity.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_RISKSEVERITY;
+                this.renderPast(index);
                 this.renderRiskSeverityGraph(this._SfPastContainer);
             });
             const radioFunction = this._SfPastContainer.querySelector('#radio-function');
             radioFunction === null || radioFunction === void 0 ? void 0 : radioFunction.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_FUNCTION;
+                this.renderPast(index);
                 this.renderFunctionGraph(this._SfPastContainer);
             });
             const radioObligationType = this._SfPastContainer.querySelector('#radio-obligationtype');
             radioObligationType === null || radioObligationType === void 0 ? void 0 : radioObligationType.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_OBLIGATIONTYPE;
+                this.renderPast(index);
                 this.renderObligationTypeGraph(this._SfPastContainer);
             });
             const radioJurisdiction = this._SfPastContainer.querySelector('#radio-jurisdiction');
             radioJurisdiction === null || radioJurisdiction === void 0 ? void 0 : radioJurisdiction.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_JURISDICTION;
+                this.renderPast(index);
                 this.renderJurisdictionGraph(this._SfPastContainer);
             });
             const radioFrequency = this._SfPastContainer.querySelector('#radio-frequency');
             radioFrequency === null || radioFrequency === void 0 ? void 0 : radioFrequency.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_FREQUENCY;
+                this.renderPast(index);
                 this.renderFrequencyGraph(this._SfPastContainer);
             });
             const radioLocation = this._SfPastContainer.querySelector('#radio-location');
             radioLocation === null || radioLocation === void 0 ? void 0 : radioLocation.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_LOCATION;
+                this.renderPast(index);
                 this.renderLocationGraph(this._SfPastContainer);
             });
             const buttonStatusMore = this._SfPastContainer.querySelector('#button-status-more');
@@ -3532,38 +3804,56 @@ let SfIEvents = class SfIEvents extends LitElement {
             this._SfUpcomingContainer.innerHTML = html;
             const radioCompleteness = this._SfUpcomingContainer.querySelector('#radio-completeness');
             radioCompleteness === null || radioCompleteness === void 0 ? void 0 : radioCompleteness.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                this.renderUpcoming(index);
                 this.renderCompletenessGraph(this._SfUpcomingContainer);
             });
             const radioTimeliness = this._SfUpcomingContainer.querySelector('#radio-timeliness');
             radioTimeliness === null || radioTimeliness === void 0 ? void 0 : radioTimeliness.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_TIMELINESS;
+                this.renderUpcoming(index);
                 this.renderTimelinessGraph(this._SfUpcomingContainer);
             });
             const radioRisk = this._SfUpcomingContainer.querySelector('#radio-risk');
             radioRisk === null || radioRisk === void 0 ? void 0 : radioRisk.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_RISKAREAS;
+                this.renderUpcoming(index);
                 this.renderRiskGraph(this._SfUpcomingContainer);
             });
             const radioFunction = this._SfUpcomingContainer.querySelector('#radio-function');
             radioFunction === null || radioFunction === void 0 ? void 0 : radioFunction.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_FUNCTION;
+                this.renderUpcoming(index);
                 this.renderFunctionGraph(this._SfUpcomingContainer);
             });
             const radioRiskSeverity = this._SfUpcomingContainer.querySelector('#radio-riskseverity');
             radioRiskSeverity === null || radioRiskSeverity === void 0 ? void 0 : radioRiskSeverity.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_RISKSEVERITY;
+                this.renderUpcoming(index);
                 this.renderRiskSeverityGraph(this._SfUpcomingContainer);
             });
             const radioObligationType = this._SfUpcomingContainer.querySelector('#radio-obligationtype');
             radioObligationType === null || radioObligationType === void 0 ? void 0 : radioObligationType.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_OBLIGATIONTYPE;
+                this.renderUpcoming(index);
                 this.renderObligationTypeGraph(this._SfUpcomingContainer);
             });
             const radioJurisdiction = this._SfUpcomingContainer.querySelector('#radio-jurisdiction');
             radioJurisdiction === null || radioJurisdiction === void 0 ? void 0 : radioJurisdiction.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_JURISDICTION;
+                this.renderUpcoming(index);
                 this.renderJurisdictionGraph(this._SfUpcomingContainer);
             });
             const radioFrequency = this._SfUpcomingContainer.querySelector('#radio-frequency');
             radioFrequency === null || radioFrequency === void 0 ? void 0 : radioFrequency.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_FREQUENCY;
+                this.renderUpcoming(index);
                 this.renderFrequencyGraph(this._SfUpcomingContainer);
             });
             const radioLocation = this._SfUpcomingContainer.querySelector('#radio-location');
             radioLocation === null || radioLocation === void 0 ? void 0 : radioLocation.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_LOCATION;
+                this.renderUpcoming(index);
                 this.renderLocationGraph(this._SfUpcomingContainer);
             });
             const buttonStatusMore = this._SfUpcomingContainer.querySelector('#button-status-more');
@@ -3650,38 +3940,56 @@ let SfIEvents = class SfIEvents extends LitElement {
             this._SfThisContainer.innerHTML = html;
             const radioCompleteness = this._SfThisContainer.querySelector('#radio-completeness');
             radioCompleteness === null || radioCompleteness === void 0 ? void 0 : radioCompleteness.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                this.renderThis(index);
                 this.renderCompletenessGraph(this._SfThisContainer);
             });
             const radioTimeliness = this._SfThisContainer.querySelector('#radio-timeliness');
             radioTimeliness === null || radioTimeliness === void 0 ? void 0 : radioTimeliness.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_TIMELINESS;
+                this.renderThis(index);
                 this.renderTimelinessGraph(this._SfThisContainer);
             });
             const radioRisk = this._SfThisContainer.querySelector('#radio-risk');
             radioRisk === null || radioRisk === void 0 ? void 0 : radioRisk.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_RISKAREAS;
+                this.renderThis(index);
                 this.renderRiskGraph(this._SfThisContainer);
             });
             const radioFunction = this._SfThisContainer.querySelector('#radio-function');
             radioFunction === null || radioFunction === void 0 ? void 0 : radioFunction.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_FUNCTION;
+                this.renderThis(index);
                 this.renderFunctionGraph(this._SfThisContainer);
             });
             const radioRiskSeverity = this._SfThisContainer.querySelector('#radio-riskseverity');
             radioRiskSeverity === null || radioRiskSeverity === void 0 ? void 0 : radioRiskSeverity.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_RISKSEVERITY;
+                this.renderThis(index);
                 this.renderRiskSeverityGraph(this._SfThisContainer);
             });
             const radioObligationType = this._SfThisContainer.querySelector('#radio-obligationtype');
             radioObligationType === null || radioObligationType === void 0 ? void 0 : radioObligationType.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_OBLIGATIONTYPE;
+                this.renderThis(index);
                 this.renderObligationTypeGraph(this._SfThisContainer);
             });
             const radioJurisdiction = this._SfThisContainer.querySelector('#radio-jurisdiction');
             radioJurisdiction === null || radioJurisdiction === void 0 ? void 0 : radioJurisdiction.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_JURISDICTION;
+                this.renderThis(index);
                 this.renderJurisdictionGraph(this._SfThisContainer);
             });
             const radioFrequency = this._SfThisContainer.querySelector('#radio-frequency');
             radioFrequency === null || radioFrequency === void 0 ? void 0 : radioFrequency.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_FREQUENCY;
+                this.renderThis(index);
                 this.renderFrequencyGraph(this._SfThisContainer);
             });
             const radioLocation = this._SfThisContainer.querySelector('#radio-location');
             radioLocation === null || radioLocation === void 0 ? void 0 : radioLocation.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_LOCATION;
+                this.renderThis(index);
                 this.renderLocationGraph(this._SfThisContainer);
             });
             const buttonStatusMore = this._SfThisContainer.querySelector('#button-status-more');
@@ -3764,38 +4072,56 @@ let SfIEvents = class SfIEvents extends LitElement {
             this._SfStreamContainer.innerHTML = html;
             const radioCompleteness = this._SfStreamContainer.querySelector('#radio-completeness');
             radioCompleteness === null || radioCompleteness === void 0 ? void 0 : radioCompleteness.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                this.renderStream(index);
                 this.renderCompletenessGraph(this._SfStreamContainer);
             });
             const radioTimeliness = this._SfStreamContainer.querySelector('#radio-timeliness');
             radioTimeliness === null || radioTimeliness === void 0 ? void 0 : radioTimeliness.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_TIMELINESS;
+                this.renderStream(index);
                 this.renderTimelinessGraph(this._SfStreamContainer);
             });
             const radioRisk = this._SfStreamContainer.querySelector('#radio-risk');
             radioRisk === null || radioRisk === void 0 ? void 0 : radioRisk.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_RISKAREAS;
+                this.renderStream(index);
                 this.renderRiskGraph(this._SfStreamContainer);
             });
             const radioRiskSeverity = this._SfStreamContainer.querySelector('#radio-riskseverity');
             radioRiskSeverity === null || radioRiskSeverity === void 0 ? void 0 : radioRiskSeverity.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_RISKSEVERITY;
+                this.renderStream(index);
                 this.renderRiskSeverityGraph(this._SfStreamContainer);
             });
             const radioFunction = this._SfStreamContainer.querySelector('#radio-function');
             radioFunction === null || radioFunction === void 0 ? void 0 : radioFunction.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_FUNCTION;
+                this.renderStream(index);
                 this.renderFunctionGraph(this._SfStreamContainer);
             });
             const radioObligationType = this._SfStreamContainer.querySelector('#radio-obligationtype');
             radioObligationType === null || radioObligationType === void 0 ? void 0 : radioObligationType.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_OBLIGATIONTYPE;
+                this.renderStream(index);
                 this.renderObligationTypeGraph(this._SfStreamContainer);
             });
             const radioJurisdiction = this._SfStreamContainer.querySelector('#radio-jurisdiction');
             radioJurisdiction === null || radioJurisdiction === void 0 ? void 0 : radioJurisdiction.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_JURISDICTION;
+                this.renderStream(index);
                 this.renderJurisdictionGraph(this._SfStreamContainer);
             });
             const radioFrequency = this._SfStreamContainer.querySelector('#radio-frequency');
             radioFrequency === null || radioFrequency === void 0 ? void 0 : radioFrequency.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_FREQUENCY;
+                this.renderStream(index);
                 this.renderFrequencyGraph(this._SfStreamContainer);
             });
             const radioLocation = this._SfStreamContainer.querySelector('#radio-location');
             radioLocation === null || radioLocation === void 0 ? void 0 : radioLocation.addEventListener('click', () => {
+                this.flowGraph = this.FLOW_GRAPH_LOCATION;
+                this.renderStream(index);
                 this.renderLocationGraph(this._SfStreamContainer);
             });
             const buttonStatusMore = this._SfStreamContainer.querySelector('#button-status-more');
@@ -8518,6 +8844,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this.initListenersAdmin();
             }
             else {
+                this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
                 this.enableCalendar();
                 this.initInputs();
                 this.initCalendar();
@@ -9702,6 +10029,9 @@ __decorate([
 __decorate([
     property()
 ], SfIEvents.prototype, "mode", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "flowGraph", void 0);
 __decorate([
     property()
 ], SfIEvents.prototype, "flow", void 0);

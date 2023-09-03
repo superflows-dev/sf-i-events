@@ -17,6 +17,15 @@ import { LitElement, PropertyValueMap } from 'lit';
  */
 export declare class SfIEvents extends LitElement {
     SEARCH_BLOCK_SIZE: number;
+    FLOW_GRAPH_COMPLETENESS: string;
+    FLOW_GRAPH_TIMELINESS: string;
+    FLOW_GRAPH_RISKAREAS: string;
+    FLOW_GRAPH_RISKSEVERITY: string;
+    FLOW_GRAPH_LOCATION: string;
+    FLOW_GRAPH_FUNCTION: string;
+    FLOW_GRAPH_OBLIGATIONTYPE: string;
+    FLOW_GRAPH_JURISDICTION: string;
+    FLOW_GRAPH_FREQUENCY: string;
     TAB_YEAR: string;
     TAB_STREAM: string;
     TAB_UPCOMING: string;
@@ -101,6 +110,7 @@ export declare class SfIEvents extends LitElement {
     htmlDataStats: string;
     period: string;
     mode: string;
+    flowGraph: string;
     flow: string;
     fill: string;
     filterTags: string[];
