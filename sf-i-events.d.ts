@@ -69,6 +69,7 @@ export declare class SfIEvents extends LitElement {
     apiBodyList: string;
     apiBodyDetail: string;
     userProfileId: string;
+    graphParam: string;
     entityId: string;
     locationId: string;
     countryId: string;
@@ -316,6 +317,7 @@ export declare class SfIEvents extends LitElement {
     renderChart3: (ctx: any, type: any, data: any, title: string) => void;
     renderChart2: (ctx: any, type: any, data: any, title: string) => void;
     renderChart: (ctx: any, type: any, data: any, title: string) => void;
+    clickOnPie: (event: any, array: any, data: any) => void;
     getCurrentTab: () => string;
     renderTabs: (selectedTab: string) => void;
     renderMappingTabs: (selectedTab: string) => void;

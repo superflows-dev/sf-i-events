@@ -273,6 +273,9 @@ export class SfIEvents extends LitElement {
   userProfileId!: string;
 
   @property()
+  graphParam: string = "";
+
+  @property()
   entityId: string = "";
 
   @property()
@@ -2689,7 +2692,21 @@ export class SfIEvents extends LitElement {
                 } else {
                   graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
                 }
-                html += '<div class="d-flex"><div part="badge-filter-name" class="filtername mb-20">' + graphParam + '</div></div>';
+                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + graphParam + '</div></div>';
+
+              } else {
+
+                if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) {
+
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + partStatus.replace('status-', '') + '</div></div>';
+
+                }
+
+                if(this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
+
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + lateStatus + '</div></div>';
+
+                }
 
               }
 
@@ -3082,7 +3099,21 @@ export class SfIEvents extends LitElement {
                 } else {
                   graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
                 }
-                html += '<div class="d-flex"><div part="badge-filter-name" class="filtername mb-20">' + graphParam + '</div></div>';
+                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + graphParam + '</div></div>';
+
+              } else {
+
+                if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) {
+
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + partStatus.replace('status-', '') + '</div></div>';
+
+                }
+
+                if(this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
+
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + lateStatus + '</div></div>';
+
+                }
 
               }
 
@@ -3501,7 +3532,21 @@ export class SfIEvents extends LitElement {
                 } else {
                   graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
                 }
-                html += '<div class="d-flex"><div part="badge-filter-name" class="filtername mb-20">' + graphParam + '</div></div>';
+                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + graphParam + '</div></div>';
+
+              } else {
+
+                if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) {
+
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + partStatus.replace('status-', '') + '</div></div>';
+
+                }
+
+                if(this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
+
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + lateStatus + '</div></div>';
+
+                }
 
               }
 
@@ -3919,7 +3964,21 @@ export class SfIEvents extends LitElement {
                 } else {
                   graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
                 }
-                html += '<div class="d-flex"><div part="badge-filter-name" class="filtername mb-20">' + graphParam + '</div></div>';
+                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + graphParam + '</div></div>';
+
+              } else {
+
+                if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) {
+
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + partStatus.replace('status-', '') + '</div></div>';
+
+                }
+
+                if(this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
+
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + lateStatus + '</div></div>';
+
+                }
 
               }
 
@@ -4315,7 +4374,21 @@ export class SfIEvents extends LitElement {
                 } else {
                   graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
                 }
-                html += '<div class="d-flex"><div part="badge-filter-name" class="filtername mb-20">' + graphParam + '</div></div>';
+                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + graphParam + '</div></div>';
+
+              } else {
+
+                if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) {
+
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + partStatus.replace('status-', '') + '</div></div>';
+
+                }
+
+                if(this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
+
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + lateStatus + '</div></div>';
+
+                }
 
               }
 
@@ -9398,11 +9471,20 @@ export class SfIEvents extends LitElement {
                       this.chart3.ctx.fillStyle = '#000';
                       //this.chart.ctx.fillText(str, this.chart.getDatasetMeta(i).data[j].x + x, this.chart.getDatasetMeta(i).data[j].y + y);
                       //const match = /(?<value>\d+\.?\d*)/;
-                      this.chart3.ctx.font = "bold 15pt Courier";
+                      let fillText = '';
+                      if((this.chart3.data.labels[j] + "").toLowerCase().replace(/ /g, "-") == this.graphParam) {
+                        this.chart3.ctx.font = "bold 20pt Courier";
+                        fillText = dataset.data[j] + '✓';
+                      } else {
+                        this.chart3.ctx.font = "bold 15pt Courier";
+                        fillText = dataset.data[j];
+                      }
                       this.chart3.ctx.fillStyle = '#fff';
                       this.chart3.ctx.textBaseline = "middle";
                       this.chart3.ctx.textAlign = "center";
-                      this.chart3.ctx.fillText(dataset.data[j], this.chart3.getDatasetMeta(i).data[j].x + x, this.chart3.getDatasetMeta(i).data[j].y + y);
+
+                      console.log('comparing labels', (this.chart3.data.labels[j] + "").toLowerCase().replace(/ /g, "-"), j, this.graphParam, this.chart3.getDatasetMeta(i).data[j]);
+                      this.chart3.ctx.fillText(fillText, this.chart3.getDatasetMeta(i).data[j].x + x, this.chart3.getDatasetMeta(i).data[j].y + y);
 
                     }
                     
@@ -9551,11 +9633,20 @@ export class SfIEvents extends LitElement {
                       this.chart2.ctx.fillStyle = '#000';
                       //this.chart.ctx.fillText(str, this.chart.getDatasetMeta(i).data[j].x + x, this.chart.getDatasetMeta(i).data[j].y + y);
                       //const match = /(?<value>\d+\.?\d*)/;
-                      this.chart2.ctx.font = "bold 15pt Courier";
+                      let fillText = '';
+                      if((this.chart2.data.labels[j] + "").toLowerCase().replace(/ /g, "-") == this.graphParam) {
+                        this.chart2.ctx.font = "bold 20pt Courier";
+                        fillText = dataset.data[j] + '✓';
+                      } else {
+                        this.chart2.ctx.font = "bold 15pt Courier";
+                        fillText = dataset.data[j];
+                      }
                       this.chart2.ctx.fillStyle = '#fff';
                       this.chart2.ctx.textBaseline = "middle";
                       this.chart2.ctx.textAlign = "center";
-                      this.chart2.ctx.fillText(dataset.data[j], this.chart2.getDatasetMeta(i).data[j].x + x, this.chart2.getDatasetMeta(i).data[j].y + y);
+
+                      console.log('comparing labels', (this.chart2.data.labels[j] + "").toLowerCase().replace(/ /g, "-"), j, this.graphParam, this.chart2.getDatasetMeta(i).data[j]);
+                      this.chart2.ctx.fillText(fillText, this.chart2.getDatasetMeta(i).data[j].x + x, this.chart2.getDatasetMeta(i).data[j].y + y);
 
                     }
                     
@@ -9706,11 +9797,24 @@ export class SfIEvents extends LitElement {
                       this.chart.ctx.fillStyle = '#000';
                       //this.chart.ctx.fillText(str, this.chart.getDatasetMeta(i).data[j].x + x, this.chart.getDatasetMeta(i).data[j].y + y);
                       //const match = /(?<value>\d+\.?\d*)/;
-                      this.chart.ctx.font = "bold 15pt Courier";
+                      let fillText = '';
+                      let replaceText = ' ';
+                      if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS || this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
+                        replaceText = '-';
+                      }
+                      if((this.chart.data.labels[j] + "").toLowerCase().replace(/ /g, replaceText) == this.graphParam) {
+                        this.chart.ctx.font = "bold 20pt Courier";
+                        fillText = dataset.data[j] + '✓';
+                      } else {
+                        this.chart.ctx.font = "bold 15pt Courier";
+                        fillText = dataset.data[j];
+                      }
                       this.chart.ctx.fillStyle = '#fff';
                       this.chart.ctx.textBaseline = "middle";
                       this.chart.ctx.textAlign = "center";
-                      this.chart.ctx.fillText(dataset.data[j], this.chart.getDatasetMeta(i).data[j].x + x, this.chart.getDatasetMeta(i).data[j].y + y);
+
+                      console.log('comparing labels', (this.chart.data.labels[j] + "").toLowerCase().replace(/ /g, "-"), j, this.graphParam, this.chart.getDatasetMeta(i).data[j]);
+                      this.chart.ctx.fillText(fillText, this.chart.getDatasetMeta(i).data[j].x + x, this.chart.getDatasetMeta(i).data[j].y + y);
 
                     }
                     
@@ -9781,6 +9885,9 @@ export class SfIEvents extends LitElement {
                 size: 16,
             }
           }
+        },
+        onClick: (event: any, array: any) => {
+          this.clickOnPie(event, array, data)
         }
       },
         
@@ -9788,6 +9895,79 @@ export class SfIEvents extends LitElement {
 
     this.chart.canvas.parentNode.style.height = '450px';
     
+  }
+
+  clickOnPie = (event: any, array: any, data: any) => {
+    console.log('graph onclick', event);
+    console.log('graph onclick', array);
+    console.log('graph onclick', data);
+    console.log('graph onclick element', array[0].element);
+    console.log('graph onclick index', array[0].index);
+    console.log('graph onclick label', (data.labels[array[0].index] + "").toLowerCase().replace(/ /g, "-"));
+    console.log('graph onclick data', data.datasets[0].data[array[0].index]);
+
+    let labelClicked = '';
+
+    if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS || this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
+      labelClicked = (data.labels[array[0].index] + "").toLowerCase().replace(/ /g, "-").replace('status-', '');  
+    } else {
+      labelClicked = (data.labels[array[0].index] + "").toLowerCase();
+    }
+    
+
+    let eventContainer = null;
+
+    if(this.getCurrentTab() == this.TAB_STREAM) {
+      eventContainer = (this._SfStreamContainer as HTMLDivElement);
+    }
+
+    if(this.getCurrentTab() == this.TAB_UPCOMING) {
+      eventContainer = (this._SfUpcomingContainer as HTMLDivElement);
+    }
+
+    if(this.getCurrentTab() == this.TAB_THIS) {
+      eventContainer = (this._SfThisContainer as HTMLDivElement);
+    }
+
+    if(this.getCurrentTab() == this.TAB_PAST) {
+      eventContainer = (this._SfPastContainer as HTMLDivElement);
+    }
+
+    if(this.getCurrentTab() == this.TAB_CUSTOM) {
+      eventContainer = (this._SfCustomContainer as HTMLDivElement);
+    }
+
+    const divs = eventContainer!.querySelectorAll('.stream-events-container') as NodeListOf<HTMLElement>;
+    const tables = eventContainer!.querySelectorAll('.stream-events-container-table') as NodeListOf<HTMLTableElement>;
+    const graphparamnames = eventContainer!.querySelectorAll('.graphparamname') as NodeListOf<HTMLTableCellElement>;
+    const streamEventSummary = eventContainer!.querySelector('#stream-event-summary') as HTMLDivElement;
+
+    if(this.graphParam == labelClicked) {
+
+      this.graphParam = "";
+      streamEventSummary.style.display = 'flex';
+
+    } else {
+
+      this.graphParam = labelClicked;
+      streamEventSummary.style.display = 'none';
+
+    }
+
+    for(var i = 0; i < divs.length; i++) {
+
+      console.log('comparing', (graphparamnames[i] as HTMLDivElement).innerHTML.toLowerCase().replace('&amp;', '&'), this.graphParam);
+      if((graphparamnames[i] as HTMLDivElement).innerHTML.toLowerCase().replace('&amp;', '&').indexOf(this.graphParam) >= 0) {
+        (tables[i] as HTMLDivElement).style.display = 'block';
+        //(hiddenFilternames[i] as HTMLDivElement).style.display = 'block';
+        (graphparamnames[i] as HTMLDivElement).style.display = 'block';
+      } else {
+        (tables[i] as HTMLDivElement).style.display = 'none';
+        //(hiddenFilternames[i] as HTMLDivElement).style.display = 'none';
+        (graphparamnames[i] as HTMLDivElement).style.display = 'none';
+      }
+
+    }
   }
 
   getCurrentTab = () => {
