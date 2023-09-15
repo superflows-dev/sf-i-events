@@ -55,6 +55,7 @@ export declare class SfIEvents extends LitElement {
     COLOR_LATE_EXECUTED: string;
     COLOR_LATE_APPROVED: string;
     CERTIFICATE_HTML: string;
+    COMPLIANCES_HTML: string;
     projectId: string;
     name: string;
     apiId: string;

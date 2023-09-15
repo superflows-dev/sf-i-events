@@ -227,6 +227,146 @@ let SfIEvents = class SfIEvents extends LitElement {
   </html>
   
   `;
+        this.COMPLIANCES_HTML = `
+  
+  <html>
+    <head>  
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">  
+      <link rel="preconnect" href="https://fonts.googleapis.com/">
+      <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+      <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@100;300;400;700;900&family=Oleo+Script&family=Oswald:wght@700&display=swap" rel="stylesheet">
+      <style>
+        body {
+          font-family: DM Sans;
+          margin: 2px;
+          padding: 20px;
+        }
+        .text-center {
+          text-align: center;
+        }
+        .d-flex {
+          display: flex;
+        }
+        .justify-center {
+          justify-content: center;
+        }
+        .justify-between {
+          justify-content: space-between;
+        }
+        .align-center {
+          align-items: center;
+        }
+        .mt-10 {
+          margin-top: 10px;
+        }
+        .w-25 {
+          width: 25%;
+        }
+        .w-16 {
+          width: 16%;
+        }
+        .w-14 {
+          width: 14%;
+        }
+        .w-12 {
+          width: 12%;
+        }
+        .w-100 {
+          width: 100%;
+        }
+        .text-center {
+          text-align: center;
+        }
+        table {
+          box-shadow: 1px 1px 10px 0 rgba(0, 0, 0, 0.25), -1px -1px 10px 0 rgba(255, 255, 255, 0.6);
+          border-top: solid 1px rgba(255, 255, 255, 0.8);
+          border-left: solid 1px rgba(255, 255, 255, 0.8);
+          border-bottom: solid 1px rgba(255, 255, 255, 0.8);
+          border-right: solid 1px rgba(255, 255, 255, 0.8);
+          overflow:hidden;
+        }
+        th {
+          background-color: #6a6a6a;
+          color: white;
+          padding: 5px;
+        }
+        td {
+          padding: 5px;
+          font-size: 70%;
+          vertical-align: top;
+        }
+        td span {
+          font-size: 130% !important;
+        }
+        .td-odd {
+          background-color: #efefef;
+          
+        }
+        .td-even {
+          background-color: #dedede;
+        }
+        .color-pending {
+          color: #ffe505;
+        }
+        .color-not-started {
+          color: #888888;
+        }
+        .color-done {
+          color: #50cf01;
+        }
+        .color-past-due-date {
+          color: #F79256;
+        }
+        .color-late-executed {
+          color: #840B0F;
+        }
+        .color-late-approved {
+          color: #EE2F36;
+        }
+        .h-100 {
+          height: 100vh;
+        }
+        .abs {
+          position: absolute;
+        }
+        .watermark {
+          background-image: url(https://flagggrc-images.s3.amazonaws.com/logo.png);
+          background-position: center;
+          background-repeat: no-repeat;
+          opacity: 5%;
+          width: 100%;
+          height: 100vh;
+          position: fixed;
+        }
+      </style>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.5/purify.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    </head>
+    <body>
+        <div>
+          <h1 class="text-center">Compliance Report</h1>
+          <div class="d-flex justify-between align-center">
+            <div>
+              <div>Report generated for PROJECT_NAME on REPORT_DATE</div>
+            </div>
+          </div>
+          <br />
+          <div class="watermark"></div>
+          <div class="report">
+            PERSON_COMPLIANCES
+          </div>
+        </div>
+        <script>
+
+        </script>
+      </body>
+
+  </html>
+  
+  `;
         this.graphParam = "";
         this.entityId = "";
         this.locationId = "";
@@ -1090,7 +1230,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += 'Status';
                         if (csvCols.indexOf('Status') < 0) {
                             csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate';
-                            htmlCols += '<tr><th>Id</th><th>Status</th><th>Obligation</th></tr>';
+                            htmlCols += '<tr><th>Id</th><th>Status</th><th>Statute</th><th>Reference</th><th>Obligation</th><th>Penalty</th><th>Risk Severity</th><th>Frequency</th></tr>';
                         }
                         html += '</th>';
                         html += '<th part="td-head">';
@@ -1154,7 +1294,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                                     html += '<span class="material-icons color-late-executed">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-executed,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span></td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">approved late-executed</td>');
                             }
                             else if (lateStatus == "late-approved") {
                                 lateApproved++;
@@ -1165,7 +1305,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                                     html += '<span class="material-icons color-late-approved">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-approved,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span></td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">approved late-approved</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
@@ -1175,7 +1315,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                                     html += '<span class="material-symbols-outlined color-not-started">timer</span>';
                                 }
                                 csvValues += 'approved,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-done">check_circle</span></td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">approved</td>');
                             }
                             html += '</td>';
                         }
@@ -1190,7 +1330,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
                                 }
                                 csvValues += 'in-progress past-due-date,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">in-progress past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
@@ -1200,7 +1340,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                                     html += '<span class="material-symbols-outlined color-not-started">timer</span>';
                                 }
                                 csvValues += 'in-progress,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-symbols-outlined color-pending">pending</span></td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">in-progress</td>');
                             }
                             html += '</td>';
                         }
@@ -1215,7 +1355,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
                                 }
                                 csvValues += 'not started past-due-date,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">not started past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
@@ -1225,7 +1365,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                                     html += '<span class="material-symbols-outlined color-not-started">timer</span>';
                                 }
                                 csvValues += 'not started,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center"><span class="material-icons color-not-started">schedule</span></td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">not started</td>');
                             }
                             html += '</td>';
                         }
@@ -1253,8 +1393,14 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 html += '</td>';
                             }
                         }
+                        console.log('statute = ', (this.events[mmdd][j]["statute"]));
                         csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["statute"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["reference"] + '</td>');
                         htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["obligation"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["penalty"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["risk"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["frequency"] + '</td>');
                         if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                             html += '<td part="td-body">';
                             html += '<span class="material-icons muted">description</span>';
@@ -1458,7 +1604,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += 'Status';
                         if (csvCols.indexOf('Status') < 0) {
                             csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate';
-                            htmlCols += '<tr><th>Id</th><th>Status</th><th>Obligation</th></tr>';
+                            htmlCols += '<tr><th>Id</th><th>Status</th><th>Statute</th><th>Reference</th><th>Obligation</th><th>Penalty</th><th>Risk Severity</th><th>Frequency</th></tr>';
                         }
                         html += '</th>';
                         html += '<th part="td-head">';
@@ -1622,7 +1768,12 @@ let SfIEvents = class SfIEvents extends LitElement {
                             }
                         }
                         csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["statute"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["reference"] + '</td>');
                         htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["obligation"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["penalty"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["risk"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["frequency"] + '</td>');
                         if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                             html += '<td part="td-body">';
                             html += '<span class="material-icons muted">description</span>';
@@ -1843,7 +1994,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += 'Status';
                         if (csvCols.indexOf('Status') < 0) {
                             csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate';
-                            htmlCols += '<tr><th>Id</th><th>Status</th><th>Obligation</th></tr>';
+                            htmlCols += '<tr><th>Id</th><th>Status</th><th>Statute</th><th>Reference</th><th>Obligation</th><th>Penalty</th><th>Risk Severity</th><th>Frequency</th></tr>';
                         }
                         html += '</th>';
                         html += '<th part="td-head">';
@@ -2007,7 +2158,12 @@ let SfIEvents = class SfIEvents extends LitElement {
                             }
                         }
                         csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["statute"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["reference"] + '</td>');
                         htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["obligation"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["penalty"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["risk"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["frequency"] + '</td>');
                         if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                             html += '<td part="td-body">';
                             html += '<span class="material-icons muted">description</span>';
@@ -2229,7 +2385,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += 'Status';
                         if (csvCols.indexOf('Status') < 0) {
                             csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate';
-                            htmlCols += '<tr><th>Id</th><th>Status</th><th>Obligation</th></tr>';
+                            htmlCols += '<tr><th>Id</th><th>Status</th><th>Statute</th><th>Reference</th><th>Obligation</th><th>Penalty</th><th>Risk Severity</th><th>Frequency</th></tr>';
                         }
                         html += '</th>';
                         html += '<th part="td-head">';
@@ -2393,7 +2549,12 @@ let SfIEvents = class SfIEvents extends LitElement {
                             }
                         }
                         csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["statute"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["reference"] + '</td>');
                         htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["obligation"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["penalty"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["risk"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["frequency"] + '</td>');
                         if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                             html += '<td part="td-body">';
                             html += '<span class="material-icons muted">description</span>';
@@ -2602,7 +2763,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += 'Status';
                         if (csvCols.indexOf('Status') < 0) {
                             csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate';
-                            htmlCols += '<tr><th>Id</th><th>Status</th><th>Obligation</th></tr>';
+                            htmlCols += '<tr><th>Id</th><th>Status</th><th>Statute</th><th>Reference</th><th>Obligation</th><th>Penalty</th><th>Risk Severity</th><th>Frequency</th></tr>';
                         }
                         html += '</th>';
                         html += '<th part="td-head">';
@@ -2768,7 +2929,12 @@ let SfIEvents = class SfIEvents extends LitElement {
                             }
                         }
                         csvValues += this.events[mmdd][j]["id"] + ',' + this.events[mmdd][j]["obligationtitle"] + ',' + this.events[mmdd][j]["obligation"] + ',' + this.events[mmdd][j]["duedate"];
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["statute"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["reference"] + '</td>');
                         htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["obligation"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["penalty"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["risk"] + '</td>');
+                        htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + '">' + this.events[mmdd][j]["frequency"] + '</td>');
                         if (this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                             html += '<td part="td-body">';
                             html += '<span class="material-icons muted">description</span>';
@@ -6374,7 +6540,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             <div part="td-head">Compliances</div>
             <div part="td-body" class="d-flex align-center mt-5">
               <input type="radio" id="radio-csv" class="switch-csv" value="Excel" checked part="radio-download"/>
-              <label for="radio-csv" part="label-radio-download">Csv</label>
+              <label for="radio-html" part="label-radio-download">Html</label>
             </div>
             <div class="d-flex">
               <button id="button-download-compliances" part="button" class="mt-5">Download</button>
@@ -6400,12 +6566,23 @@ let SfIEvents = class SfIEvents extends LitElement {
                 container.dispatchEvent(new CustomEvent('canceled', { bubbles: true }));
             });
             (_b = container.querySelector('#button-download-compliances')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
-                console.log('csvValues compliances', this.csvDataCompliances);
-                const blob = new Blob([this.csvDataCompliances], { type: 'text/csv' });
+                // console.log('csvValues compliances', this.csvDataCompliances);
+                // const blob = new Blob([this.csvDataCompliances], { type: 'text/csv' });
+                // const url = window.URL.createObjectURL(blob)
+                // const a = document.createElement('a')
+                // a.setAttribute('href', url)
+                // a.setAttribute('download', 'download.csv');
+                // a.click()
+                const ts = new Date().getTime();
+                var html = this.COMPLIANCES_HTML;
+                html = html.replace(/PROJECT_NAME/g, this.projectName);
+                html = html.replace(/REPORT_DATE/g, new Date().getDate() + "/" + new Date().getMonth() + "/" + new Date().getFullYear() + " " + new Date().getHours() + ":" + new Date().getMinutes());
+                html = html.replace(/PERSON_COMPLIANCES/g, this.htmlDataCompliances);
+                const blob = new Blob([html], { type: 'text/html' });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.setAttribute('href', url);
-                a.setAttribute('download', 'download.csv');
+                a.setAttribute('download', 'report_' + ts + '.html');
                 a.click();
             });
             (_c = container.querySelector('#button-download-stats')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', () => {
