@@ -35,6 +35,9 @@ export declare class SfIEvents extends LitElement {
     TAB_ADHOC: string;
     TAB_REPORTER: string;
     TAB_APPROVER: string;
+    TAB_FUNCTION_HEAD: string;
+    TAB_AUDITOR: string;
+    TAB_VIEWER: string;
     TAB_STATUTES: string;
     TAB_COMPLIANCES: string;
     TAB_ENTITIES: string;
@@ -42,6 +45,11 @@ export declare class SfIEvents extends LitElement {
     TAB_TAGS: string;
     TAB_REPORTERS: string;
     TAB_APPROVERS: string;
+    TAB_FUNCTION_HEADS: string;
+    TAB_MAKER_CHECKERS: string;
+    TAB_AUDITORS: string;
+    TAB_DOCS: string;
+    TAB_VIEWERS: string;
     TAB_DUEDATES: string;
     TAB_ALERTSCHEDULES: string;
     TAB_INTERNALCONTROLS: string;
@@ -56,6 +64,7 @@ export declare class SfIEvents extends LitElement {
     COLOR_LATE_APPROVED: string;
     CERTIFICATE_HTML: string;
     COMPLIANCES_HTML: string;
+    selectedCbs: Array<any>;
     projectId: string;
     name: string;
     apiId: string;
@@ -75,6 +84,7 @@ export declare class SfIEvents extends LitElement {
     locationId: string;
     countryId: string;
     functionId: string;
+    tagId: string;
     userName: string;
     projectName: string;
     apiResponseFieldList: string;
@@ -192,7 +202,17 @@ export declare class SfIEvents extends LitElement {
     _SfOnboardingReportersListContainer: any;
     _SfOnboardingReportersContainer: any;
     _SfOnboardingApproversContainer: any;
+    _SfOnboardingFunctionHeadsContainer: any;
+    _SfOnboardingMakerCheckersContainer: any;
+    _SfOnboardingDocsContainer: any;
+    _SfOnboardingAuditorsContainer: any;
+    _SfOnboardingViewersContainer: any;
     _SfOnboardingApproversListContainer: any;
+    _SfOnboardingMakerCheckersListContainer: any;
+    _SfOnboardingDocsListContainer: any;
+    _SfOnboardingFunctionHeadsListContainer: any;
+    _SfOnboardingAuditorsListContainer: any;
+    _SfOnboardingViewersListContainer: any;
     _SfOnboardingDuedatesListContainer: any;
     _SfOnboardingDuedatesContainer: any;
     _SfOnboardingAlertSchedulesListContainer: any;
@@ -247,7 +267,7 @@ export declare class SfIEvents extends LitElement {
     renderRangeEvents: (firstDate: Date, count: number) => void;
     checkStartDateEarliness: (value: string) => boolean;
     checkEndDateLateness: (value: string) => boolean;
-    processDateSelection: () => void;
+    processDateSelection: () => Promise<void>;
     initCustomRightCol: () => void;
     checkAndShowBulk: () => boolean;
     calculateAndShowSummary: () => void;
@@ -268,10 +288,31 @@ export declare class SfIEvents extends LitElement {
     loadOnboardingTags: () => Promise<void>;
     loadOnboardingReporters: () => Promise<void>;
     loadOnboardingApprovers: () => Promise<void>;
+    loadOnboardingFunctionHeads: () => Promise<void>;
+    loadOnboardingViewers: () => Promise<void>;
+    loadOnboardingDocs: () => Promise<void>;
+    loadOnboardingMakerCheckers: () => Promise<void>;
+    loadOnboardingAuditors: () => Promise<void>;
     loadOnboardingDuedates: () => Promise<void>;
     loadOnboardingAlertSchedules: () => Promise<void>;
     loadOnboardingInternalControls: () => Promise<void>;
     loadOnboardingCalendar: () => Promise<void>;
+    calculateStartAndEndDateOfPast: (index?: number) => {
+        startDate: string;
+        endDate: string;
+    };
+    calculateStartAndEndDateOfThis: (index?: number) => {
+        startDate: string;
+        endDate: string;
+    };
+    calculateStartAndEndDateOfUpcoming: (index?: number) => {
+        startDate: string;
+        endDate: string;
+    };
+    calculateStartAndEndDateOfStream: (index?: number) => {
+        startDate: string;
+        endDate: string;
+    } | null;
     renderAdhoc: (events?: Array<any> | null, triggers?: Array<any> | null) => void;
     renderCustom: () => void;
     renderPast: (index?: number) => void;
@@ -291,15 +332,20 @@ export declare class SfIEvents extends LitElement {
     renderRiskGraph: (divContainer: HTMLDivElement) => void;
     renderEventDetail: (event: any, mmddyyyy: any) => void;
     renderCalendar: () => void;
-    renderTaggingTable: (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any, mandatoryFields: any, jobs: any) => void;
+    renderTaggingTable: (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any, mandatoryFields: any, jobs: any, anotherProjection: any) => void;
     renderMappingTable: (divElement: any, jsonData: Array<any>, cursor: Array<any>, fetchFunction: any, searchString: string, mappedArray: any, found: number, uploadFunction: any, refreshFunction: any) => void;
     refreshCalendar: () => Promise<void>;
     renderOnboardingCalendar: (calendarJobs: any) => void;
     renderOnboardingInternalControls: (mappedInternalControls: any, mappedSerializedAlertSchedules: any, internalcontrolsJobs: any) => void;
     renderOnboardingAlertSchedules: (mappedAlertSchedules: any, mappedSerializedDuedates: any, alertschedulesJobs: any) => void;
-    renderOnboardingDuedates: (mappedDuedates: any, mappedSerializedApprovers: any, duedatesJobs: any) => void;
+    renderOnboardingDuedates: (mappedDuedates: any, mappedSerializedMakerCheckers: any, duedatesJobs: any) => void;
     renderOnboardingReporters: (mappedReporters: any, mappedSerializedTags: any, reportersJobs: any) => void;
     renderOnboardingApprovers: (mappedApprovers: any, mappedSerializedReporters: any, approversJobs: any) => void;
+    renderOnboardingFunctionHeads: (mappedFunctionHeads: any, mappedSerializedApprovers: any, functionHeadsJobs: any) => void;
+    renderOnboardingMakerCheckers: (mappedMakerCheckers: any, mappedSerializedDocs: any, makerCheckerJobs: any) => void;
+    renderOnboardingDocs: (mappedDocs: any, mappedSerializedViewers: any, docsJobs: any) => void;
+    renderOnboardingAuditors: (mappedAuditors: any, mappedSerializedFunctionheads: any, auditorsJobs: any) => void;
+    renderOnboardingViewers: (mappedViewers: any, mappedSerializedAuditors: any, viewersJobs: any) => void;
     renderOnboardingTags: (mappedTags: any, mappedSerializedFunctions: any, tagsJobs: any) => void;
     renderOnboardingFunctions: (mappedFunctions: any, mappedSerializedLocations: any, functionsJobs: any) => void;
     renderOnboardingLocations: (mappedLocations: any, mappedSerializedEntities: any, locationsJobs: any) => void;
@@ -309,6 +355,7 @@ export declare class SfIEvents extends LitElement {
     renderOnboardingStatutes: (mappedStatutes: any) => void;
     clickOnboardingTabs: () => void;
     renderOnboardingTabs: () => void;
+    proceedToCalendar: () => Promise<void>;
     renderRoleTabs: () => void;
     csvmaker: (data: any) => string;
     renderChartSettingsFilters: (container: HTMLDivElement, ctx: any) => void;
@@ -338,6 +385,11 @@ export declare class SfIEvents extends LitElement {
     uploadAlertSchedulesMapping: (data: any) => Promise<void>;
     uploadDuedatesMapping: (data: any) => Promise<void>;
     uploadApproversMapping: (data: any) => Promise<void>;
+    uploadFunctionHeadsMapping: (data: any) => Promise<void>;
+    uploadMakerCheckersMapping: (data: any) => Promise<void>;
+    uploadDocsMapping: (data: any) => Promise<void>;
+    uploadAuditorsMapping: (data: any) => Promise<void>;
+    uploadViewersMapping: (data: any) => Promise<void>;
     uploadReportersMapping: (data: any) => Promise<void>;
     uploadTagsMapping: (data: any) => Promise<void>;
     uploadFunctionsMapping: (data: any) => Promise<void>;
@@ -347,7 +399,8 @@ export declare class SfIEvents extends LitElement {
     uploadCompliancesMapping: (data: any) => Promise<void>;
     uploadStatutesMapping: (data: any) => Promise<void>;
     uploadUnTriggerEvent: (eventid: string, mmdd: string) => Promise<void>;
-    uploadTriggerEvent: (locationId: string, eventid: string, dateofoccurrence: string) => Promise<void>;
+    uploadTriggerEvent: (entityId: string, locationId: string, eventid: string, dateofoccurrence: string) => Promise<void>;
+    uploadAudit: (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => Promise<void>;
     uploadReview: (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => Promise<void>;
     uploadReport: (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, doc: string, docs: any) => Promise<void>;
     uploadMapping: () => Promise<void>;
@@ -363,6 +416,11 @@ export declare class SfIEvents extends LitElement {
     fetchMappedSerializedAlertSchedules: () => Promise<any>;
     fetchMappedSerializedDuedates: () => Promise<any>;
     fetchMappedSerializedApprovers: () => Promise<any>;
+    fetchMappedSerializedFunctionheads: () => Promise<any>;
+    fetchMappedSerializedMakerCheckers: () => Promise<any>;
+    fetchMappedSerializedDocs: () => Promise<any>;
+    fetchMappedSerializedAuditors: () => Promise<any>;
+    fetchMappedSerializedViewers: () => Promise<any>;
     fetchMappedSerializedReporters: () => Promise<any>;
     fetchMappedSerializedTags: () => Promise<any>;
     fetchMappedSerializedLocations: () => Promise<any>;
@@ -374,6 +432,11 @@ export declare class SfIEvents extends LitElement {
     fetchMappedDuedates: () => Promise<any>;
     fetchMappedReporters: () => Promise<any>;
     fetchMappedApprovers: () => Promise<any>;
+    fetchMappedFunctionHeads: () => Promise<any>;
+    fetchMappedMakerCheckers: () => Promise<any>;
+    fetchMappedDocs: () => Promise<any>;
+    fetchMappedAuditors: () => Promise<any>;
+    fetchMappedViewers: () => Promise<any>;
     fetchMappedTags: () => Promise<any>;
     fetchMappedCountries: () => Promise<any>;
     fetchMappedEntities: () => Promise<any>;
@@ -382,6 +445,11 @@ export declare class SfIEvents extends LitElement {
     fetchAlertSchedulesJobs: () => Promise<any>;
     fetchDueDatesJobs: () => Promise<any>;
     fetchApproversJobs: () => Promise<any>;
+    fetchFunctionHeadsJobs: () => Promise<any>;
+    fetchMakerCheckersJobs: () => Promise<any>;
+    fetchDocsJobs: () => Promise<any>;
+    fetchAuditorsJobs: () => Promise<any>;
+    fetchViewersJobs: () => Promise<any>;
     fetchReportersJobs: () => Promise<any>;
     fetchTagsJobs: () => Promise<any>;
     fetchLocationsJobs: () => Promise<any>;
@@ -391,10 +459,7 @@ export declare class SfIEvents extends LitElement {
     fetchCalendarJobs: () => Promise<any>;
     fetchDetail: (value: any) => Promise<void>;
     fetchGetMappedCalendar: () => Promise<void>;
-    foundCalendarInLocal: () => boolean;
-    getLocalKey: () => string;
-    cleanLocalStorage: () => void;
-    fetchUserCalendar_2: () => Promise<void>;
+    fetchUserCalendar_2: (startDate?: string, endDate?: string) => Promise<void>;
     fetchUserCalendar: () => Promise<void>;
     fetchCalendar: () => Promise<void>;
     fetchReprogramAdhoc: () => Promise<void>;

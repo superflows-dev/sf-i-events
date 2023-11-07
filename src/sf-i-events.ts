@@ -56,6 +56,9 @@ export class SfIEvents extends LitElement {
   TAB_ADHOC = "adhoc";
   TAB_REPORTER = "reporter";
   TAB_APPROVER = "approver";
+  TAB_FUNCTION_HEAD = "functionhead";
+  TAB_AUDITOR = "auditor";
+  TAB_VIEWER = "viewer";
   TAB_STATUTES = "statutes";
   TAB_COMPLIANCES = "compliances";
   TAB_ENTITIES = "entities";
@@ -63,6 +66,11 @@ export class SfIEvents extends LitElement {
   TAB_TAGS = "tags";
   TAB_REPORTERS = "reporters";
   TAB_APPROVERS = "approvers";
+  TAB_FUNCTION_HEADS = "functionheads";
+  TAB_MAKER_CHECKERS = "makercheckers";
+  TAB_AUDITORS = "auditors";
+  TAB_DOCS = "docs";
+  TAB_VIEWERS = "viewers";
   TAB_DUEDATES = "duedates";
   TAB_ALERTSCHEDULES = "alertschedules";
   TAB_INTERNALCONTROLS = "internalcontrols";
@@ -378,6 +386,9 @@ export class SfIEvents extends LitElement {
   `;
 
   @property()
+  selectedCbs: Array<any> = [];
+
+  @property()
   projectId!: string;
 
   @property()
@@ -435,6 +446,9 @@ export class SfIEvents extends LitElement {
   functionId: string = "";
 
   @property()
+  tagId: string = "";
+
+  @property()
   userName!: string;
   
   @property()
@@ -447,7 +461,7 @@ export class SfIEvents extends LitElement {
   myOnboardingTab: string = this.TAB_STATUTES;
 
   @property()
-  myRole: string = this.TAB_REPORTER;
+  myRole: string = "";
 
   @property()
   chart: any = null;
@@ -1509,8 +1523,38 @@ export class SfIEvents extends LitElement {
   @query('#approvers-container')
   _SfOnboardingApproversContainer: any;
 
+  @query('#functionheads-container')
+  _SfOnboardingFunctionHeadsContainer: any;
+
+  @query('#makercheckers-container')
+  _SfOnboardingMakerCheckersContainer: any;
+
+  @query('#docs-container')
+  _SfOnboardingDocsContainer: any;
+
+  @query('#auditors-container')
+  _SfOnboardingAuditorsContainer: any;
+
+  @query('#viewers-container')
+  _SfOnboardingViewersContainer: any;
+
   @query('#approvers-list-container')
   _SfOnboardingApproversListContainer: any;
+
+  @query('#makercheckers-list-container')
+  _SfOnboardingMakerCheckersListContainer: any;
+
+  @query('#docs-list-container')
+  _SfOnboardingDocsListContainer: any;
+
+  @query('#functionheads-list-container')
+  _SfOnboardingFunctionHeadsListContainer: any;
+
+  @query('#auditors-list-container')
+  _SfOnboardingAuditorsListContainer: any;
+
+  @query('#viewers-list-container')
+  _SfOnboardingViewersListContainer: any;
 
   @query('#duedates-list-container')
   _SfOnboardingDuedatesListContainer: any;
@@ -2615,7 +2659,7 @@ export class SfIEvents extends LitElement {
                   lateStatus = "late-approved"
                 }
               }
-            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
+            } else if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
               partStatus = "status-in-progress";
               if(this.getPastDueDate(mmdd)) {
                 lateStatus = "past-due-date"
@@ -2638,6 +2682,7 @@ export class SfIEvents extends LitElement {
             html += '<div class="stream-events-container flex-grow">';
               html += '<div class="hidden-tags hide">'+JSON.stringify(this.events[mmdd][j]['tags'])+'</div>'
               html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>'
+              html += '<div part="stream-events-event-title" class="pl-5 pb-5"><sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
               html += '<table class="stream-events-container-table" part="'+partStatus+'">';
               html += '<thead>';
               html += '<th part="td-head">';
@@ -2667,21 +2712,23 @@ export class SfIEvents extends LitElement {
                   html += Object.keys(this.events[mmdd][j])[k];
                 }
               }
+              
               console.log('listing docs',this.events[mmdd][j].documents )
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Docs'
                 html += '</th>';
               } else {
-                if(partStatus != "status-approved") {
-                  notStarted++;
-                }
+                
               }
               if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Comments'
                 html += '</th>';
               } else {
+                if(partStatus != "status-approved") {
+                  notStarted++;
+                }
               }
               if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<th part="td-head">';
@@ -2689,7 +2736,16 @@ export class SfIEvents extends LitElement {
                 html += '</th>';
               } else {
               }
-              
+              if(this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0) {
+                html += '<th part="td-head">';
+                html += ''
+                html += '</th>'
+              }
+              if(this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0) {
+                html += '<th part="td-head">';
+                html += ''
+                html += '</th>'
+              }
               html += '</thead>';
               html += '<tbody>';
               csvValues += (period + ',');
@@ -2815,6 +2871,7 @@ export class SfIEvents extends LitElement {
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["subfrequency"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["duedate"]+'</td>');
 
+              
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
@@ -2835,12 +2892,22 @@ export class SfIEvents extends LitElement {
                 html += '</td>';
               } else {
               }
+              if(this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0) {
+                html += '<td part="td-body">';
+                html += '<span class="material-symbols-outlined muted">done_all</span>'
+                html += '</td>';
+              }
+              if(this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0) {
+                html += '<th part="td-body">';
+                html += '<span class="material-symbols-outlined muted">scan_delete</span>'
+                html += '</th>'
+              }
               csvValues += '\n';
               htmlValues += ('</tr>');
               
               html += '</tbody>';
-              html += '</table></div>';
-              html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table>'
+              html += '</table>';
+              html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>'
 
               if(this.flowGraph != this.FLOW_GRAPH_COMPLETENESS && this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
 
@@ -3023,7 +3090,7 @@ export class SfIEvents extends LitElement {
                   lateStatus = "late-approved"
                 }
               }
-            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
+            } else if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
               partStatus = "status-in-progress";
               if(this.getPastDueDate(mmdd)) {
                 lateStatus = "past-due-date"
@@ -3046,6 +3113,7 @@ export class SfIEvents extends LitElement {
             html += '<div class="stream-events-container flex-grow">';
               html += '<div class="hidden-tags hide">'+JSON.stringify(this.events[mmdd][j]['tags'])+'</div>'
               html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>'
+              html += '<div part="stream-events-event-title" class="pl-5 pb-5"><sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
               html += '<table class="stream-events-container-table" >';
               html += '<thead>';
               html += '<th part="td-head">';
@@ -3070,6 +3138,7 @@ export class SfIEvents extends LitElement {
               html += 'Function'
               html += '</th>'
               
+              
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                   html += '<th part="td-head" class="bg-left-no-border">';
@@ -3077,23 +3146,36 @@ export class SfIEvents extends LitElement {
                   html += '</th>';
                 }
               }
+              
               console.log('listing docs',this.events[mmdd][j].documents )
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Docs'
                 html += '</th>';
-              } else {
-                notStarted++;
               }
               if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Comments'
                 html += '</th>';
+              } else {
+                if(partStatus != "status-approved") {
+                  notStarted++;
+                }
               }
               if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Updated'
                 html += '</th>';
+              }
+              if(this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0) {
+                html += '<th part="td-head">';
+                html += ''
+                html += '</th>'
+              }
+              if(this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0) {
+                html += '<th part="td-head">';
+                html += ''
+                html += '</th>'
               }
               // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
               //   html += '<th part="td-head">';
@@ -3225,6 +3307,7 @@ export class SfIEvents extends LitElement {
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["subfrequency"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["duedate"]+'</td>');
 
+              
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
@@ -3241,6 +3324,16 @@ export class SfIEvents extends LitElement {
                 html += '<td part="td-body">';
                 html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated).getTime())
                 html += '</td>';
+              }
+              if(this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0) {
+                html += '<td part="td-body">';
+                html += '<span class="material-symbols-outlined muted">done_all</span>'
+                html += '</td>';
+              }
+              if(this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0) {
+                html += '<th part="td-body">';
+                html += '<span class="material-symbols-outlined muted">scan_delete</span>'
+                html += '</th>'
               }
               csvValues += '\n';
               htmlValues += ('</tr>');
@@ -3387,8 +3480,10 @@ export class SfIEvents extends LitElement {
 
     if(index === 1) {
 
-      firstDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
-      count = this.getLastDayOfMonth(startDate.getFullYear(), startDate.getMonth());
+      
+      firstDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+      count = this.getLastDayOfMonth(startDate.getMonth(), startDate.getFullYear());
+      console.log('last day of month', count);
 
     }
 
@@ -3463,7 +3558,7 @@ export class SfIEvents extends LitElement {
                   lateStatus = "late-approved"
                 }
               }
-            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
+            } else if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
               partStatus = "status-in-progress";
               if(this.getPastDueDate(mmdd)) {
                 lateStatus = "past-due-date"
@@ -3487,6 +3582,7 @@ export class SfIEvents extends LitElement {
             html += '<div class="stream-events-container flex-grow">';
               html += '<div class="hidden-tags hide">'+JSON.stringify(this.events[mmdd][j]['tags'])+'</div>'
               html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>'
+              html += '<div part="stream-events-event-title" class="pl-5 pb-5"><sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
               html += '<table class="stream-events-container-table">';
               html += '<thead>';
               html += '<th part="td-head">';
@@ -3510,6 +3606,7 @@ export class SfIEvents extends LitElement {
               html += '<th part="td-head">';
               html += 'Function'
               html += '</th>'
+              
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                   html += '<th part="td-head" class="bg-left-no-border">';
@@ -3523,18 +3620,30 @@ export class SfIEvents extends LitElement {
                 html += '<th part="td-head">';
                 html += 'Docs'
                 html += '</th>';
-              } else {
-                notStarted++;
               }
               if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Comments'
                 html += '</th>';
+              } else {
+                if(partStatus != "status-approved") {
+                  notStarted++;
+                }
               }
               if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Updated'
                 html += '</th>';
+              }
+              if(this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0) {
+                html += '<th part="td-head">';
+                html += ''
+                html += '</th>'
+              }
+              if(this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0) {
+                html += '<th part="td-head">';
+                html += ''
+                html += '</th>'
               }
               // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
               //   html += '<th part="td-head">';
@@ -3667,6 +3776,7 @@ export class SfIEvents extends LitElement {
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["subfrequency"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["duedate"]+'</td>');
 
+              
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
@@ -3683,6 +3793,16 @@ export class SfIEvents extends LitElement {
                 html += '<td part="td-body">';
                 html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated).getTime())
                 html += '</td>';
+              }
+              if(this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0) {
+                html += '<td part="td-body">';
+                html += '<span class="material-symbols-outlined muted">done_all</span>'
+                html += '</td>';
+              }
+              if(this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0) {
+                html += '<th part="td-body">';
+                html += '<span class="material-symbols-outlined muted">scan_delete</span>'
+                html += '</th>'
               }
               csvValues += '\n';
               htmlValues += ('</tr>');
@@ -3906,7 +4026,7 @@ export class SfIEvents extends LitElement {
                   lateStatus = "late-approved"
                 }
               }
-            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
+            } else if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
               partStatus = "status-in-progress";
               if(this.getPastDueDate(mmdd)) {
                 lateStatus = "past-due-date"
@@ -3929,6 +4049,7 @@ export class SfIEvents extends LitElement {
             html += '<div class="stream-events-container flex-grow">';
               html += '<div class="hidden-tags hide">'+JSON.stringify(this.events[mmdd][j]['tags'])+'</div>'
               html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>'
+              html += '<div part="stream-events-event-title" class="pl-5 pb-5"><sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
               html += '<table class="stream-events-container-table">';
               html += '<thead>';
               html += '<th part="td-head">';
@@ -3952,6 +4073,7 @@ export class SfIEvents extends LitElement {
               html += '<th part="td-head">';
               html += 'Function'
               html += '</th>'
+              
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                   html += '<th part="td-head" class="bg-left-no-border">';
@@ -3960,23 +4082,36 @@ export class SfIEvents extends LitElement {
                 }
               }
               
+             
               console.log('listing docs',this.events[mmdd][j].documents )
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Docs'
                 html += '</th>';
-              } else {
-                notStarted++;
               }
               if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Comments'
                 html += '</th>';
+              } else {
+                if(partStatus != "status-approved") {
+                  notStarted++;
+                }
               }
               if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Updated'
                 html += '</th>';
+              }
+              if(this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0) {
+                html += '<th part="td-head">';
+                html += ''
+                html += '</th>'
+              }
+              if(this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0) {
+                html += '<th part="td-head">';
+                html += ''
+                html += '</th>'
               }
               // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
               //   html += '<th part="td-head">';
@@ -4107,7 +4242,7 @@ export class SfIEvents extends LitElement {
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["frequency"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["subfrequency"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["duedate"]+'</td>');
-
+              
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
@@ -4124,6 +4259,16 @@ export class SfIEvents extends LitElement {
                 html += '<td part="td-body">';
                 html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated).getTime())
                 html += '</td>';
+              }
+              if(this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0) {
+                html += '<td part="td-body">';
+                html += '<span class="material-symbols-outlined muted">done_all</span>'
+                html += '</td>';
+              }
+              if(this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0) {
+                html += '<th part="td-body">';
+                html += '<span class="material-symbols-outlined muted">scan_delete</span>'
+                html += '</th>'
               }
               csvValues += '\n';
               htmlValues += ('</tr>');
@@ -4324,7 +4469,7 @@ export class SfIEvents extends LitElement {
                   lateStatus = "late-approved"
                 }
               }
-            } else if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
+            } else if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
               partStatus = "status-in-progress";
               if(this.getPastDueDate(mmdd)) {
                 lateStatus = "past-due-date"
@@ -4347,6 +4492,7 @@ export class SfIEvents extends LitElement {
             html += '<div class="stream-events-container flex-grow">';
               html += '<div class="hidden-tags hide">'+JSON.stringify(this.events[mmdd][j]['tags'])+'</div>'
               html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>'
+              html += '<div part="stream-events-event-title" class="pl-5 pb-5"><sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
               html += '<table class="stream-events-container-table">';
               html += '<thead>';
               html += '<th part="td-head">';
@@ -4370,6 +4516,7 @@ export class SfIEvents extends LitElement {
               html += '<th part="td-head">';
               html += 'Function'
               html += '</th>'
+              
               for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
                 if(this.getEventPreviewFields().includes(Object.keys(this.events[mmdd][j])[k])) {
                   html += '<th part="td-head" class="bg-left-no-border">';
@@ -4377,26 +4524,38 @@ export class SfIEvents extends LitElement {
                   html += '</th>';
                 }
               }
-              html += '<th part="td-head">';
-              html += '</th>';
+              
               console.log('listing docs',this.events[mmdd][j].documents )
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Docs'
                 html += '</th>';
-              } else {
-                notStarted++;
               }
               if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Comments'
                 html += '</th>';
+              } else {
+                if(partStatus != "status-approved") {
+                  notStarted++;
+                }
               }
               if(this.events[mmdd][j].lastupdated != null && this.events[mmdd][j].lastupdated != null && (this.events[mmdd][j].lastupdated).length > 0) {
                 html += '<th part="td-head">';
                 html += 'Updated'
                 html += '</th>';
               }
+              if(this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0) {
+                html += '<th part="td-head">';
+                html += ''
+                html += '</th>'
+              }
+              if(this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0) {
+                html += '<th part="td-head">';
+                html += ''
+                html += '</th>'
+              }
+
               // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
               //   html += '<th part="td-head">';
               //   html += Object.keys(this.events[mmdd][j])[k];
@@ -4527,6 +4686,7 @@ export class SfIEvents extends LitElement {
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["subfrequency"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["duedate"]+'</td>');
 
+              
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
                 html += '<td part="td-body">';
                 html += '<span class="material-icons muted">description</span>'
@@ -4543,6 +4703,16 @@ export class SfIEvents extends LitElement {
                 html += '<td part="td-body">';
                 html += Util.timeSince(new Date(this.events[mmdd][j].lastupdated).getTime())
                 html += '</td>';
+              }
+              if(this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0) {
+                html += '<td part="td-body">';
+                html += '<span class="material-symbols-outlined muted">done_all</span>'
+                html += '</td>';
+              }
+              if(this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0) {
+                html += '<th part="td-body">';
+                html += '<span class="material-symbols-outlined muted">scan_delete</span>'
+                html += '</th>'
               }
               csvValues += '\n';
               htmlValues += ('</tr>');
@@ -4684,7 +4854,7 @@ export class SfIEvents extends LitElement {
     }
   }
 
-  processDateSelection = () => {
+  processDateSelection = async () => {
 
     this.clearGraphData();
 
@@ -4693,6 +4863,9 @@ export class SfIEvents extends LitElement {
 
     const valueStart = ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date') as HTMLInputElement).value;
     const valueEnd = ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date') as HTMLInputElement).value;
+
+    console.log('valuestart', valueStart);
+    console.log('valueend', valueEnd);
 
     if(valueStart != "" && valueEnd != "") {
       this.initCustomRightCol();
@@ -4712,6 +4885,7 @@ export class SfIEvents extends LitElement {
         (this._SfStreamEventStatus as HTMLDivElement).innerHTML = "Chosen time window cannot be greater than 400 days";
         return;
       }
+      await this.fetchUserCalendar_2(valueStart.split('-')[1] + "/" + valueStart.split('-')[2] + "/" + valueStart.split('-')[0], valueEnd.split('-')[1] + "/" + valueEnd.split('-')[2] + "/" + valueEnd.split('-')[0]);
       this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime())/(1000*60*60*24));
     } else if(valueStart != "" && valueEnd == "") {
       (this._SfStreamEventStatus as HTMLDivElement).innerHTML = "Please select End Date";
@@ -5126,6 +5300,11 @@ export class SfIEvents extends LitElement {
     (this._SfOnboardingTagsContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingReportersContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingApproversContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingFunctionHeadsContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingMakerCheckersContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingAuditorsContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingViewersContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingDocsContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingDuedatesContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingInternalControlsContainer as HTMLDivElement).style.display = 'none';
@@ -5140,6 +5319,11 @@ export class SfIEvents extends LitElement {
     (this._SfOnboardingTagsContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingReportersContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingApproversContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingFunctionHeadsContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingMakerCheckersContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingAuditorsContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingViewersContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingDocsContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingDuedatesContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingInternalControlsContainer as HTMLDivElement).innerHTML = '';
@@ -5244,15 +5428,70 @@ export class SfIEvents extends LitElement {
     this.renderOnboardingApprovers(mappedApprovers, mappedSerializedReporters, approversJobs);
   }
 
+  loadOnboardingFunctionHeads = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingFunctionHeadsContainer as HTMLDivElement).style.display = 'flex';
+    const functionHeadsJobs = await this.fetchFunctionHeadsJobs();
+    const mappedSerializedApprovers = await this.fetchMappedSerializedApprovers();
+    const mappedFunctionHeads = await this.fetchMappedFunctionHeads();
+    console.log('mappedserializedapprovers', mappedSerializedApprovers);
+    console.log('mappedfunctionheads', mappedFunctionHeads);
+    this.renderOnboardingFunctionHeads(mappedFunctionHeads, mappedSerializedApprovers, functionHeadsJobs);
+  }
+
+  loadOnboardingViewers = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingViewersContainer as HTMLDivElement).style.display = 'flex';
+    const makerViewersJobs = await this.fetchViewersJobs();
+    const mappedSerializedAuditors = await this.fetchMappedSerializedAuditors();
+    const mappedViewers = await this.fetchMappedViewers();
+    console.log('mappedSerializedAuditors', mappedSerializedAuditors);
+    console.log('mappedViewers', mappedViewers);
+    this.renderOnboardingViewers(mappedViewers, mappedSerializedAuditors, makerViewersJobs);
+  }
+
+  loadOnboardingDocs = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingDocsContainer as HTMLDivElement).style.display = 'flex';
+    const docsJobs = await this.fetchDocsJobs();
+    const mappedSerializedViewers = await this.fetchMappedSerializedViewers();
+    const mappedDocs = await this.fetchMappedDocs();
+    console.log('mappedSerializedViewers', mappedSerializedViewers);
+    console.log('mappedDocs', mappedDocs);
+    this.renderOnboardingDocs(mappedDocs, mappedSerializedViewers, docsJobs);
+  }
+
+  loadOnboardingMakerCheckers = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingMakerCheckersContainer as HTMLDivElement).style.display = 'flex';
+    const makerCheckersJobs = await this.fetchMakerCheckersJobs();
+    const mappedSerializedDocs = await this.fetchMappedSerializedDocs();
+    const mappedMakerCheckers = await this.fetchMappedMakerCheckers();
+    console.log('mappedSerializedDocs', mappedSerializedDocs);
+    console.log('mappedMakerCheckers', mappedMakerCheckers);
+    this.renderOnboardingMakerCheckers(mappedMakerCheckers, mappedSerializedDocs, makerCheckersJobs);
+  }
+
+  loadOnboardingAuditors = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingAuditorsContainer as HTMLDivElement).style.display = 'flex';
+    const auditorsJobs = await this.fetchAuditorsJobs();
+    const mappedSerializedFunctionheads = await this.fetchMappedSerializedFunctionheads();
+    const mappedAuditors = await this.fetchMappedAuditors();
+    console.log('mappedSerializedFunctionheads', mappedSerializedFunctionheads);
+    console.log('mappedAuditors', mappedAuditors);
+    this.renderOnboardingAuditors(mappedAuditors, mappedSerializedFunctionheads, auditorsJobs);
+  }
+
   loadOnboardingDuedates = async () => {
     this.hideTabContainers();
     (this._SfOnboardingDuedatesContainer as HTMLDivElement).style.display = 'flex';
     const duedatesJobs = await this.fetchDueDatesJobs();
-    const mappedSerializedApprovers = await this.fetchMappedSerializedApprovers();
+    const mappedSerializedMakerCheckers = await this.fetchMappedSerializedMakerCheckers();
     const mappedDuedates = await this.fetchMappedDuedates();
-    console.log('mappedserializedapprovers', mappedSerializedApprovers);
+    console.log('mappedSerializedMakerCheckers', mappedSerializedMakerCheckers);
     console.log('mappedduedates', mappedDuedates);
-    this.renderOnboardingDuedates(mappedDuedates, mappedSerializedApprovers, duedatesJobs);
+    this.renderOnboardingDuedates(mappedDuedates, mappedSerializedMakerCheckers, duedatesJobs);
   }
 
   loadOnboardingAlertSchedules = async () => {
@@ -5282,6 +5521,215 @@ export class SfIEvents extends LitElement {
     (this._SfOnboardingCalendarContainer as HTMLDivElement).style.display = 'flex';
     const calendarJobs = await this.fetchCalendarJobs();
     this.renderOnboardingCalendar(calendarJobs);
+  }
+
+  calculateStartAndEndDateOfPast = (index: number = 0) => {
+
+    console.log('calculating start and end of past');
+
+    let block = 10;
+
+    if(index === 0) {
+
+      block = 10;
+
+    } else {
+
+      block = 30;
+
+    }
+
+    let currDay = new Date();
+    for(var i = 0; i < block; i++) {
+      currDay.setDate(currDay.getDate() - 1);
+    }
+
+    const startDate = ("0" + (currDay.getMonth() + 1)).slice(-2) + "/" + ("0" + (currDay.getDate() + 1)).slice(-2) + "/" + currDay.getFullYear();
+
+    currDay = new Date();
+    for(var i = 0; i < block; i++) {
+      currDay.setDate(currDay.getDate() + 1);
+    }
+
+    const endDate = ("0" + (currDay.getMonth() + 1)).slice(-2) + "/" + ("0" + (currDay.getDate() + 1)).slice(-2) + "/" + currDay.getFullYear();
+
+    return {startDate: startDate, endDate: endDate}
+
+  }
+
+  calculateStartAndEndDateOfThis = (index: number = 0) => {
+
+    console.log('calculating start and end of upcoming');
+
+    let block = 10;
+    var firstDate = new Date();
+
+    if(index === 0) {
+
+      firstDate = (this.getFirstDateOfWeek(new Date()) as Date);
+      console.log('this first date', firstDate);
+      block = 10;
+
+    }
+
+    if(index === 1) {
+
+      firstDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+      console.log('this first date', firstDate);
+      block = 35;
+
+    }
+
+    const currentMonth = parseInt(("0" + (new Date().getMonth() + 1)).slice(-2));
+    let lastMonth = -1;
+    if(currentMonth <= 11 && currentMonth >= 2) {
+      lastMonth = parseInt(((currentMonth - 1) + "").slice(-2));
+    } else if(currentMonth === 12) {
+      lastMonth = 11;
+    } else if(currentMonth === 1) {
+      lastMonth = 12;
+    }
+
+    let lastMonthsYear = -1;
+    if((lastMonth) >= parseInt(this.calendarStartMM)) {
+      lastMonthsYear = parseInt(this.calendarStartYYYY);
+    } else {
+      lastMonthsYear = parseInt(this.calendarStartYYYY) + 1;
+    }
+
+    var incDate = new Date();
+    for(var j = 0; j < block; j++) {
+      incDate.setDate(incDate.getDate() + 1);
+    }
+
+    let incDateMonth = (incDate.getMonth() + 1);
+
+    let incDateYear = -1;
+    if((incDateMonth) >= parseInt(this.calendarStartMM)) {
+      incDateYear = parseInt(this.calendarStartYYYY);
+    } else {
+      incDateYear = parseInt(this.calendarStartYYYY) + 1;
+    }
+
+    let startDate = lastMonth + "/25/" + lastMonthsYear;        
+    let endDate = (incDate.getMonth() + 1) + "/" + incDate.getDate() + "/" + incDateYear;
+
+    console.log('calculating start and end of upcoming', {startDate: startDate, endDate: endDate});
+
+    return {startDate: startDate, endDate: endDate}
+
+  }
+
+  calculateStartAndEndDateOfUpcoming = (index: number = 0) => {
+
+    console.log('calculating start and end of upcoming');
+
+    let block = 10;
+    if(index === 0) {
+      block = 10;
+    } else if(index === 1) {
+      block = 35;
+    } else {
+      block = 95;
+    }
+
+    const currentMonth = parseInt(("0" + (new Date().getMonth() + 1)).slice(-2));
+    let lastMonth = -1;
+    if(currentMonth <= 11 && currentMonth >= 2) {
+      lastMonth = parseInt(((currentMonth - 1) + "").slice(-2));
+    } else if(currentMonth === 12) {
+      lastMonth = 11;
+    } else if(currentMonth === 1) {
+      lastMonth = 12;
+    }
+
+    let lastMonthsYear = -1;
+    if((lastMonth) >= parseInt(this.calendarStartMM)) {
+      lastMonthsYear = parseInt(this.calendarStartYYYY);
+    } else {
+      lastMonthsYear = parseInt(this.calendarStartYYYY) + 1;
+    }
+
+    var incDate = new Date();
+    for(var j = 0; j < block; j++) {
+      incDate.setDate(incDate.getDate() + 1);
+    }
+
+    let incDateMonth = (incDate.getMonth() + 1);
+
+    let incDateYear = -1;
+    if((incDateMonth) >= parseInt(this.calendarStartMM)) {
+      incDateYear = parseInt(this.calendarStartYYYY);
+    } else {
+      incDateYear = parseInt(this.calendarStartYYYY) + 1;
+    }
+
+    let startDate = lastMonth + "/25/" + lastMonthsYear;        
+    let endDate = (incDate.getMonth() + 1) + "/" + incDate.getDate() + "/" + incDateYear;
+
+    console.log('calculating start and end of upcoming', {startDate: startDate, endDate: endDate});
+
+    return {startDate: startDate, endDate: endDate}
+
+  }
+
+  calculateStartAndEndDateOfStream = (index: number = 0) => {
+
+    console.log('calculateStartAndEndDateOfStream', index);
+
+    let month = parseInt(this.calendarStartMM);
+    for(var j = 0; j < 12; j++) {
+      if(j === index) {
+
+        let currentMonth = month;
+        let lastMonth = -1;
+        let nextMonth = -1;
+
+        if(currentMonth <= 11 && currentMonth >= 2) {
+          lastMonth = parseInt(((currentMonth - 1) + "").slice(-2));
+          nextMonth = parseInt(((currentMonth + 1) + "").slice(-2));
+        } else if(currentMonth === 12) {
+          lastMonth = 11;
+          nextMonth = 1;
+        } else if(currentMonth === 1) {
+          lastMonth = 12;
+          nextMonth = 2;
+        }
+
+        let lastMonthsYear = -1;
+        let nextMonthsYear = -1;
+
+        if((lastMonth) >= parseInt(this.calendarStartMM)) {
+          lastMonthsYear = parseInt(this.calendarStartYYYY);
+        } else {
+          lastMonthsYear = parseInt(this.calendarStartYYYY) + 1;
+        }
+
+        if((nextMonth) >= parseInt(this.calendarStartMM)) {
+          nextMonthsYear = parseInt(this.calendarStartYYYY);
+        } else {
+          nextMonthsYear = parseInt(this.calendarStartYYYY) + 1;
+        }
+
+        let startDate = lastMonth + "/25/" + lastMonthsYear;
+        let endDate = nextMonth + "/01/" + nextMonthsYear;
+
+        return {startDate: startDate, endDate: endDate};
+        
+      } else {
+
+        if(month === 12) {
+          month = 1;
+        } else {
+          month++;
+        }
+
+      }
+
+    }
+
+    return null;
+
   }
 
   renderAdhoc = (events: Array<any>|null = null, triggers: Array<any>|null = null) => {
@@ -5437,6 +5885,8 @@ export class SfIEvents extends LitElement {
 
         }
 
+        console.log('events i', events[i]);
+
         html += '<div id="occurrence-'+i+'" class="hide">';
           html += '<div class="d-flex align-end mt-20">';
             html += '<div class="mr-20">';
@@ -5444,7 +5894,7 @@ export class SfIEvents extends LitElement {
               html += '<input id="dateofoccurrence_'+events[i].id+'" part="input" type="date" />'
             html += '</div>';
           html += '</div>';
-          html += '<button id="trigger_'+events[i].id+'_'+events[i].locationid+'" part="button" class="button-trigger mt-10 cursor">Trigger</button>'
+          html += '<button id="trigger_'+events[i].id+'_'+events[i].locationid+'_'+events[i].entityid+'" part="button" class="button-trigger mt-10 cursor">Trigger</button>'
         html += '</div>';
       html += '</div>';
 
@@ -5530,10 +5980,11 @@ export class SfIEvents extends LitElement {
         //const button = (ev.target as HTMLDivElement);
         const eventid = ev.target.id.split('_')[1];
         const locationid = ev.target.id.split('_')[2];
+        const entityid = ev.target.id.split('_')[3];
         if(((this._SfAdhocContainer as HTMLDivElement).querySelector('#dateofoccurrence_'+eventid) as HTMLInputElement).value.trim().length > 0) {
           const dateofoccurrence = new Date(((this._SfAdhocContainer as HTMLDivElement).querySelector('#dateofoccurrence_'+eventid) as HTMLInputElement).value).getTime();
-          console.log('eventid', eventid, dateofoccurrence);
-          this.uploadTriggerEvent(locationid, eventid, dateofoccurrence + "")  
+          console.log('eventid', eventid, locationid, entityid, dateofoccurrence);
+          this.uploadTriggerEvent(entityid, locationid, eventid, dateofoccurrence + "")  
         }
         
       });
@@ -5805,13 +6256,17 @@ export class SfIEvents extends LitElement {
     });
 
     for(var i = 0; i < 3; i++) {
-      (this._SfPastContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', (ev: any)=> {
+      (this._SfPastContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
+        const dateResult = this.calculateStartAndEndDateOfPast(target);
+        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
         console.log('clicked ', target);
         this.renderPast(target);
       });
-      (this._SfPastContainer as HTMLDivElement).querySelector('#stream-month-' + i + '-mobile')?.addEventListener('click', (ev: any)=> {
+      (this._SfPastContainer as HTMLDivElement).querySelector('#stream-month-' + i + '-mobile')?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
+        const dateResult = this.calculateStartAndEndDateOfPast(target);
+        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
         console.log('clicked ', target);
         this.renderPast(target);
       })
@@ -6024,14 +6479,23 @@ export class SfIEvents extends LitElement {
     });
 
     for(var i = 0; i < 3; i++) {
-      (this._SfUpcomingContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', (ev: any)=> {
+      (this._SfUpcomingContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
+
+        const dateResult = this.calculateStartAndEndDateOfUpcoming(target);
+        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+
         console.log('clicked ', target);
         this.renderUpcoming(target);
+
       });
 
-      (this._SfUpcomingContainer as HTMLDivElement).querySelector('#stream-month-' + i + '-mobile')?.addEventListener('click', (ev: any)=> {
+      (this._SfUpcomingContainer as HTMLDivElement).querySelector('#stream-month-' + i + '-mobile')?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
+
+        const dateResult = this.calculateStartAndEndDateOfUpcoming(target);
+        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+
         console.log('clicked ', target);
         this.renderUpcoming(target);
 
@@ -6215,15 +6679,19 @@ export class SfIEvents extends LitElement {
     });
 
     for(var i = 0; i < 3; i++) {
-      (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', (ev: any)=> {
+      (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
         console.log('clicked ', target);
+        const dateResult = this.calculateStartAndEndDateOfThis(target);
+        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
         this.renderThis(target);
       });
 
-      (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-' + i + '-mobile')?.addEventListener('click', (ev: any)=> {
+      (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-' + i + '-mobile')?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
         console.log('clicked ', target);
+        const dateResult = this.calculateStartAndEndDateOfThis(target);
+        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
         this.renderThis(target);
       })
     }
@@ -6407,15 +6875,25 @@ export class SfIEvents extends LitElement {
     });
 
     for(var i = 0; i < 12; i++) {
-      (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', (ev: any)=> {
+      (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', async (ev: any)=> {
 
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
+        const dateResult = this.calculateStartAndEndDateOfStream(target);
+        if(dateResult != null) {
+          await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+        }
         this.renderStream(target);
 
+
       });
-      (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-' + i+'-mobile')?.addEventListener('click', (ev: any)=> {
+
+      (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-' + i+'-mobile')?.addEventListener('click', async (ev: any)=> {
 
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
+        const dateResult = this.calculateStartAndEndDateOfStream(target);
+        if(dateResult != null) {
+          await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+        }
         this.renderStream(target);
 
       })
@@ -7660,7 +8138,7 @@ export class SfIEvents extends LitElement {
 
   renderEventDetail = (event: any, mmddyyyy: any) => {
 
-    let comments, docs, approved, dateOfCompletion;
+    let comments, docs, approved, dateOfCompletion, makercheckers, docsOptional;
     let entityId: string = "";
     let locationId: string = "";
 
@@ -7670,7 +8148,8 @@ export class SfIEvents extends LitElement {
     docs = event['documents'] == null ? [] : event['documents'] == null ? [] :  (event['documents']);
     approved = event['approved'] == null ? false : event['approved'] == null ? false : event['approved'];
     dateOfCompletion = event['dateofcompletion'] == null ? '' : event['dateofcompletion'] == null ? '' : event['dateofcompletion'];
-
+    makercheckers = event['makercheckers'] == null ? [] : event['makercheckers'] == null ? [] : event['makercheckers']; 
+    docsOptional = event['docs'] == null ? [] : event['docs'] == null ? [] : event['docs']; 
 
     console.log('event detail', event);
     console.log('event dateofcompletion', dateOfCompletion);
@@ -7689,7 +8168,17 @@ export class SfIEvents extends LitElement {
     
     `;
 
+    
+
     html += '<div class="accordian-container m-20 pb-20" part="accordian-container">';
+
+    html += '<div part="detail-summary">';
+    html += ('<div part="detail-summary-title" class="pl-20 pr-20"><h1>'+event['obligationtitle']+'</h1></div>');
+    html += ('<div part="detail-summary-subtitle" class="pl-20 pr-20"><h3>'+event['obligation']+'</h3></div>');
+    html += ('<div part="detail-summary-content" class="pl-20 pr-20">'+('<sf-i-elastic-text text="'+(event['internalcontrols'] + "").replace(/"/g, "").replace(/\n/g,'<br />')+'" minLength="80"></sf-i-elastic-text>')+'</div>');
+    html += '</div>';
+
+    html += '<br />';
 
     html += '<div class="accordian-section section-basic pl-20 pr-20" part="accordian-section">';
       html += '<div class="d-flex justify-between accordian-head head-basic cursor" part="accordian-head">';
@@ -7793,14 +8282,31 @@ export class SfIEvents extends LitElement {
     
           if(!this.getEventHideFields().includes(complianceFields[i])) {
 
-            html += '<div class="m-20">';
-            html += '<div part="detail-head"><strong>'+complianceFields[i]+'</strong></div>'
-            if((event[complianceFields[i]] + "").indexOf("[") >= 0) {
-              html += this.getEventTexts(complianceFields[i], JSON.parse(event[complianceFields[i]]), event);
+            if(event[complianceFields[i]].indexOf('http://') >= 0) {
+
+              let res = event[complianceFields[i]].split(" ").find((word:any) => word.startsWith("http")); 
+              html += '<div class="m-20">';
+              html += '<div part="detail-head"><strong>'+complianceFields[i]+'</strong></div>'
+              if((event[complianceFields[i]] + "").indexOf("[") >= 0) {
+                html += this.getEventTexts(complianceFields[i], JSON.parse(event[complianceFields[i]]), event) + "&nbsp;<a href=\""+res+"\" target=\"_blank\">Open</a>";
+              } else {
+                html += '<sf-i-elastic-text text="'+(event[complianceFields[i]] + "").replace(/"/g, "").replace(/\n/g,'<br />')+'" minLength="80"></sf-i-elastic-text>' + "&nbsp;<a href=\""+res+"\" target=\"_blank\">Open</a>";
+              }
+              html += '</div>';
+
             } else {
-              html += '<sf-i-elastic-text text="'+(event[complianceFields[i]] + "").replace(/"/g, "")+'" minLength="80"></sf-i-elastic-text>';
+
+              html += '<div class="m-20">';
+              html += '<div part="detail-head"><strong>'+complianceFields[i]+'</strong></div>'
+              if((event[complianceFields[i]] + "").indexOf("[") >= 0) {
+                html += this.getEventTexts(complianceFields[i], JSON.parse(event[complianceFields[i]]), event);
+              } else {
+                html += '<sf-i-elastic-text text="'+(event[complianceFields[i]] + "").replace(/"/g, "").replace(/\n/g,'<br />')+'" minLength="80"></sf-i-elastic-text>';
+              }
+              html += '</div>';
+
             }
-            html += '</div>';
+
 
           }
         }
@@ -7819,6 +8325,7 @@ export class SfIEvents extends LitElement {
       
       for(var i = 0; i < grcFields.length; i++) {
 
+        console.log(grcFields[i]);
         if(!this.getEventPreviewFields().includes(grcFields[i])) {
     
           if(!this.getEventHideFields().includes(grcFields[i])) {
@@ -7828,7 +8335,8 @@ export class SfIEvents extends LitElement {
             if((event[grcFields[i]] + "").indexOf("[") >= 0) {
               html += this.getEventTexts(grcFields[i], JSON.parse(event[grcFields[i]]), event);
             } else {
-              html += '<sf-i-elastic-text text="'+(event[grcFields[i]] + "").replace(/"/g, "")+'" minLength="80"></sf-i-elastic-text>';
+              console.log('grcfield', event[grcFields[i]]);
+              html += '<sf-i-elastic-text text="'+(event[grcFields[i]] + "").replace(/"/g, "").replace(/\n/g,'<br />')+'" minLength="80"></sf-i-elastic-text>';
             }
             html += '</div>';
 
@@ -7868,75 +8376,140 @@ export class SfIEvents extends LitElement {
       console.log('docs received', event['documents']);
       console.log('docs received', comments);
       console.log('docs received', approved);
-
-       //html += '</div>';      
         
-        if(this.myRole == this.TAB_APPROVER) {
+      if(this.myRole == this.TAB_APPROVER || this.myRole == this.TAB_FUNCTION_HEAD) {
 
-          if(docs.length > 0) {
-
-            html += '<div class="d-flex justify-between m-20">';
-            html += '<h3 part="results-title" class="m-0"><br />Approve Compliance</h3>';
-            html += '</div>';
-            html += '<div class="m-20" part="report-container">';
-            html += '<div class="d-flex justify-between align-center">'
-              html += '<button class="invisible" part="button">Save</button>'
-              html += '<button id="button-uploader-submit-approve" class="button-submit" part="button">Save</button>'
-            html += '</div>'
-
-            html += '<div class="m-20">';
-            html += '<label part="input-label">Supporting Documents</label>';
-            html += '<slot name="uploader"></slot>';
-            html += '</div>';
-
-            html += '<div class="d-flex m-20 flex-col">';
-              html += '<label part="input-label">Approver Comments</label>';
-              html += '<input id="input-approver-comments" type="text" part="input" value=""/><br />';
-              html += '<label part="input-label">Date of Completion</label>';
-              html += '<input id="input-reporter-doc" part="input" type="date" value="'+(dateOfCompletion == "" ? dateOfCompletion : new Date(parseInt(dateOfCompletion)).toISOString().substring(0,10))+'" disabled/><br />';
-              html += '<div>'
-                html += '<label part="input-label">Approve?</label><br />';
-                html += '<div class="mt-5">'
-                html += '<input id="input-approve-yes" name="radio-approved" type="radio"/> Yes';
-                html += '<input id="input-approve-no" name="radio-approved" type="radio" checked/> No';
-                html += '</div>'
-              html += '</div>';
-            html += '</div>';
-            html += '</div>';
-
-          }
-
-
-        } else {
+        if(docs.length > 0) {
 
           html += '<div class="d-flex justify-between m-20">';
-          html += '<h3 part="results-title" class="m-0"><br />Report Compliance</h3>';
+          html += '<h3 part="results-title" class="m-0"><br />Approve Compliance</h3>';
           html += '</div>';
           html += '<div class="m-20" part="report-container">';
           html += '<div class="d-flex justify-between align-center">'
             html += '<button class="invisible" part="button">Save</button>'
-            html += '<button id="button-uploader-submit-report" class="button-submit" part="button">Save</button>'
+            html += '<button id="button-uploader-submit-approve" class="button-submit" part="button">Save</button>'
           html += '</div>'
 
-          html += '<div class="d-flex m-20 flex-col">';
-            html += '<label part="input-label">Reporter Comments</label>';
-            html += '<input id="input-reporter-comments" type="text" part="input" value=""/><br />';
-            html += '<label part="input-label">Date of Completion</label>';
-            html += '<input id="input-reporter-doc" part="input" type="date" value="'+(dateOfCompletion == "" ? dateOfCompletion : new Date(parseInt(dateOfCompletion)).toISOString().substring(0,10))+'" max="'+(new Date().toISOString().substring(0, 10))+'"/><br />';
+          if(this.myRole != this.TAB_FUNCTION_HEAD && docsOptional.length === 0) {
+            html += '<div class="m-20">';
             html += '<label part="input-label">Supporting Documents</label>';
             html += '<slot name="uploader"></slot>';
+            html += '</div>';  
+          }
+
+          html += '<div class="d-flex m-20 flex-col">';
+            html += '<label part="input-label">Approver Comments</label>';
+            html += '<input id="input-approver-comments" type="text" part="input" value=""/><br />';
+            html += '<label part="input-label">Date of Completion</label>';
+            html += '<input id="input-reporter-doc" part="input" type="date" value="'+(dateOfCompletion == "" ? dateOfCompletion : new Date(parseInt(dateOfCompletion)).toISOString().substring(0,10))+'" disabled/><br />';
+            html += '<div>'
+              html += '<label part="input-label">Approve?</label><br />';
+              html += '<div class="mt-5">'
+              html += '<input id="input-approve-yes" name="radio-approved" type="radio"/> Yes';
+              html += '<input id="input-approve-no" name="radio-approved" type="radio" checked/> No';
+              html += '</div>'
+            html += '</div>';
           html += '</div>';
           html += '</div>';
 
         }
+
+      } 
       
+      if(this.myRole == this.TAB_REPORTER || this.myRole == this.TAB_FUNCTION_HEAD) {
+
+        html += '<div class="d-flex justify-between m-20">';
+        html += '<h3 part="results-title" class="m-0"><br />Report Compliance</h3>';
+        html += '</div>';
+        html += '<div class="m-20" part="report-container">';
+        html += '<div class="d-flex justify-between align-center">'
+          html += '<button class="invisible" part="button">Save</button>'
+          html += '<button id="button-uploader-submit-report" class="button-submit" part="button">Save</button>'
+        html += '</div>'
+
+        html += '<div class="d-flex m-20 flex-col">';
+          html += '<label part="input-label">Reporter Comments</label>';
+          html += '<input id="input-reporter-comments" type="text" part="input" value=""/><br />';
+          html += '<label part="input-label">Date of Completion</label>';
+          html += '<input id="input-reporter-doc" part="input" type="date" value="'+(dateOfCompletion == "" ? dateOfCompletion : new Date(parseInt(dateOfCompletion)).toISOString().substring(0,10))+'" max="'+(new Date().toISOString().substring(0, 10))+'"/><br />';
+          if(docsOptional.length === 0) {
+            html += '<label part="input-label">Supporting Documents</label>';
+            html += '<slot name="uploader"></slot>';
+          }
+          html += '<br />';
+          if(makercheckers.length > 0) {
+            html += '<div part="td-head" class="td-head d-flex justify-center align-center"><span class="material-symbols-outlined">check_small</span><div>&nbsp;Auto-approve Enabled</div></div>';
+          }
+        html += '</div>';
+        html += '</div>';
+
+      }
+
+      if(this.myRole == this.TAB_AUDITOR) {
+
+        html += '<div class="d-flex justify-between m-20">';
+        html += '<h3 part="results-title" class="m-0"><br />Audit Compliance</h3>';
+        html += '</div>';
+        html += '<div class="m-20" part="report-container">';
+        html += '<div class="d-flex justify-between align-center">'
+          html += '<button class="invisible" part="button">Save</button>'
+          html += '<button id="button-uploader-submit-audit" class="button-submit" part="button">Save</button>'
+        html += '</div>'
+
+        html += '<div class="d-flex m-20 flex-col">';
+          html += '<label part="input-label">Auditor Comments</label>';
+          html += '<input id="input-auditor-comments" type="text" part="input" value=""/><br />';
+          html += '<label part="input-label">Date of Completion</label>';
+          html += '<input id="input-auditor-doc" part="input" type="date" value="'+(dateOfCompletion == "" ? dateOfCompletion : new Date(parseInt(dateOfCompletion)).toISOString().substring(0,10))+'" max="'+(new Date().toISOString().substring(0, 10))+'" readonly/><br />';
+          html += '<div>'
+              html += '<label part="input-label">Approve?</label><br />';
+              html += '<div class="mt-5">'
+              html += '<input id="input-approve-yes" name="radio-approved" type="radio" checked/> Yes';
+              html += '<input id="input-approve-no" name="radio-approved" type="radio"/> No';
+              html += '</div>'
+            html += '</div>';
+          html += '<br />';
+          if(docsOptional.length === 0) {
+            html += '<label part="input-label">Supporting Documents</label>';
+            html += '<slot name="uploader"></slot>';
+          }
+        html += '</div>';
+        html += '</div>';
+
+      }
       
+      if(this.myRole == this.TAB_VIEWER) {
+
+        html += '<div class="d-flex justify-between m-20">';
+        html += '<h3 part="results-title" class="m-0"><br />View Compliance</h3>';
+        html += '</div>';
+        html += '<div class="m-20" part="report-container">';
+
+        html += '<div class="d-flex m-20 flex-col">';
+          html += '<div>'
+              html += '<label part="input-label">Approve?</label><br />';
+              html += '<div class="mt-5">'
+              html += '<input id="input-approve-yes" name="radio-approved" type="radio" checked/> Yes';
+              html += '<input id="input-approve-no" name="radio-approved" type="radio"/> No';
+              html += '</div>'
+            html += '</div>';
+          html += '<br />';
+          if(docsOptional.length === 0) {
+            html += '<label part="input-label">Supporting Documents</label>';
+            html += '<slot name="uploader"></slot>';
+          }
+        html += '</div>';
+        html += '</div>';
+
+      }
+
       html += '<div class="d-flex justify-between m-20">';
       html += '<h3 part="results-title" class="m-0"><br />Comments</h3>';
       html += '</div>';
       html += '<div class="m-20">';
 
         html += '<div class="d-flex flex-col">';
+
           for(var i = 0; i < comments.length; i++) {
             html += '<div part="commentbox" class="d-flex commentbox '+(comments[i].author + "").toLowerCase()+'box">';
             html += '<div class="mr-20"><strong>'+comments[i].author+'</strong></div>';
@@ -7946,6 +8519,7 @@ export class SfIEvents extends LitElement {
           if(comments.length === 0) {
             html += '<div><strong>No comments yet!</strong></div>';
           }
+
         html += '</div>';
 
       html += '<div>';
@@ -8029,7 +8603,27 @@ export class SfIEvents extends LitElement {
           this.renderTabs(this.TAB_STREAM);
           this.renderStream();
         }
+
+      });
+
+      (this._SfDetailContainer as HTMLDivElement).querySelector('#button-uploader-submit-audit')?.addEventListener('click', async () => {
+
+        const comments = ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-auditor-comments') as HTMLInputElement).value;
+        const approved = ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approve-yes') as HTMLInputElement).checked;
+
+        await this.uploadAudit(entityId, locationId, mmddyyyy, event["id"], comments, approved)
         
+        var clickEvent = new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        });
+        ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
+        await this.fetchUserCalendar_2();
+        if(this.getCurrentTab() == this.TAB_STREAM) {
+          this.renderTabs(this.TAB_STREAM);
+          this.renderStream();
+        }
 
       });
 
@@ -8047,9 +8641,13 @@ export class SfIEvents extends LitElement {
 
             const reportercomments = ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-reporter-comments') as HTMLInputElement).value;
             const reporterdoc = ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-reporter-doc') as HTMLInputElement).value.length > 0 ? (new Date(((this._SfDetailContainer as HTMLDivElement).querySelector('#input-reporter-doc') as HTMLInputElement).value).getTime() + "") : "";
-            const docs = (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.selectedValues();
+            let docs:any[] = [];
+            
+            if(docsOptional.length === 0) {
+              docs = (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.selectedValues();
+            }
     
-            if(docs.length === 0) {
+            if(docs.length === 0 && docsOptional.length === 0) {
 
               this.setError('No documents uploaded!');
               setTimeout(() => {
@@ -8073,6 +8671,13 @@ export class SfIEvents extends LitElement {
                     "bubbles": true,
                     "cancelable": false
                 });
+
+                if(makercheckers.length > 0) {
+
+                  await this.uploadReview(entityId, locationId, mmddyyyy, event["id"], "Auto approved", true);
+
+                }
+
                 ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
                 await this.fetchUserCalendar_2();
                 if(this.getCurrentTab() == this.TAB_STREAM) {
@@ -8115,13 +8720,24 @@ export class SfIEvents extends LitElement {
         }
 
       }
+
+      
       
       console.log('approved 1', event["approved"], this.myRole, this.TAB_APPROVER);
-      if(this.myRole == this.TAB_APPROVER) {
+      if(this.myRole == this.TAB_APPROVER || this.myRole == this.TAB_VIEWER || this.myRole == this.TAB_AUDITOR) {
         console.log('approved 1', event["approved"], this.myRole, this.TAB_APPROVER);
-        if(event["approved"] === true) {
-          console.log('approved 2', event["approved"], this.myRole, this.TAB_APPROVER);
-          ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approve-yes') as HTMLInputElement).checked = true;
+        if(event["approved"] != null) {
+          if(event["approved"] === true) {
+            console.log('approved 2', event["approved"], this.myRole, this.TAB_APPROVER);
+            ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approve-yes') as HTMLInputElement).checked = true;
+            ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approve-no') as HTMLInputElement).checked = false;
+          } else {
+            ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approve-yes') as HTMLInputElement).checked = false;
+            ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approve-no') as HTMLInputElement).checked = true;
+          }
+        } else {
+          ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approve-yes') as HTMLInputElement).checked = false;
+          ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approve-no') as HTMLInputElement).checked = true;
         }
       }
 
@@ -8173,12 +8789,14 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderTaggingTable = (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any, mandatoryFields: any, jobs: any) => {
+  renderTaggingTable = (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any, mandatoryFields: any, jobs: any, anotherProjection: any) => {
 
     console.log('divelement', divElement);
     console.log('sourcearray', sourceArray);
     console.log('taggingarray', taggingArray);
     console.log('uniqcols', uniqCols);
+
+    this.selectedCbs = [];
 
     if(taggingArray.length === 0 || sourceArray.length === 0) return;
 
@@ -8292,6 +8910,8 @@ export class SfIEvents extends LitElement {
 
       html += '<thead>';
       html += '<th part="td-head" class="td-head">'
+      html += '</th>'
+      html += '<th part="td-head" class="td-head">'
       html += colName;
       html += '</th>'
       for(i = 0; i < uniqCols.length; i++) {
@@ -8305,11 +8925,11 @@ export class SfIEvents extends LitElement {
         html += '</th>'
       }
       
-      for(i = 0; i < JSON.parse(sourceArray.data.mappings.mappings[0].cols).length; i++) {
-        html += '<th part="td-head" class="td-head">'
-        html += JSON.parse(sourceArray.data.mappings.mappings[0].cols)[i];
-        html += '</th>'
-      }
+      // for(i = 0; i < JSON.parse(sourceArray.data.mappings.mappings[0].cols).length; i++) {
+      //   html += '<th part="td-head" class="td-head">'
+      //   html += JSON.parse(sourceArray.data.mappings.mappings[0].cols)[i];
+      //   html += '</th>'
+      // }
       html += '</thead>';
       html += '<tbody>';
 
@@ -8325,9 +8945,16 @@ export class SfIEvents extends LitElement {
 
         html += '<tr>';
 
+        html += '<td class="td-body '+classBg+'" ><input id="cb-'+i+'" type="checkbox" class="cb-select"/></td>';
+
         html += '<td class="td-body '+classBg+'" part="td-key">'
         if(apiIdDropdown.length > 0) {
-          html += '<sf-i-form id="tags-'+i+'" class="tags-input tags-'+i+'" name="Tags" label="Select '+colName+'" apiId="'+apiIdDropdown+'" mode="multiselect-dropdown" searchPhrase="'+this.projectName+((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "")+'" selectProjection="name" mandatory></sf-i-form>';
+          if(anotherProjection != null) {
+            html += '<sf-i-form id="tags-'+i+'" class="tags-input tags-'+i+'" name="Tags" label="Select '+colName+'" apiId="'+apiIdDropdown+'" mode="multiselect-dropdown" searchPhrase="'+this.projectName+((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "")+'" selectProjection="name" selectAnotherProjection="'+anotherProjection+'" mandatory></sf-i-form>';
+          } else {
+            html += '<sf-i-form id="tags-'+i+'" class="tags-input tags-'+i+'" name="Tags" label="Select '+colName+'" apiId="'+apiIdDropdown+'" mode="multiselect-dropdown" searchPhrase="'+this.projectName+((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "")+'" selectProjection="name" mandatory></sf-i-form>';
+          }
+          
         } else {
           html += '<input id="tags-'+i+'" type="text" part="input" class="tags-input"/>';
         }
@@ -8366,26 +8993,6 @@ export class SfIEvents extends LitElement {
           }
 
         }
-
-        for(var j = 0; j < JSON.parse(sourceArray.data.mappings.mappings[0].cols).length; j++) {
-            
-            html += '<td class="td-body '+classBg+'" part="td-body">';
-
-            if(Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j])) {
-
-              for(var k = 0; k < JSON.parse(sourceArray.data.mappings.mappings[i].data)[j].length; k++) {
-                html +=  ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j][k]+'" minLength="80"></sf-i-elastic-text>');
-                
-              }
-      
-            } else {
-              html += ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j]+'" minLength="80"></sf-i-elastic-text>')
-            }
-
-            html += '</td>';
-    
-          }
-
 
         html += '</tr>';
         console.log('i=', i);
@@ -8434,17 +9041,26 @@ export class SfIEvents extends LitElement {
 
         console.log('preselect', multiArr[i]);
 
-        multiArr[i].addEventListener('valueChanged', (  ) => {
+        multiArr[i].addEventListener('valueChanged', ( e: any  ) => {
+
+          const selectedIndex = e.currentTarget.id.split('-')[1];
 
           taggingArray.data.mappings.mappings = [];
 
           for(var count = 0; count < sourceArray.data.mappings.mappings.length; count++) {
+
             taggingArray.data.mappings.mappings[count] = sourceArray.data.mappings.mappings[count];
-            taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as SfIForm).selectedValues();
+            console.log('selectedindexchecking', this.selectedCbs, count, this.selectedCbs.includes(selectedIndex), this.selectedCbs.includes(count));
+            if(this.selectedCbs.includes(selectedIndex) && this.selectedCbs.includes(count + '')) {
+              taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + selectedIndex) as SfIForm).selectedValues();
+            } else {
+              taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as SfIForm).selectedValues();
+            }
+
           }
 
           
-          this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs)
+          this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection)
   
         });
 
@@ -8456,17 +9072,23 @@ export class SfIEvents extends LitElement {
 
         multiArr[i].addEventListener('keyup', (e: any) => {
 
+          const selectedIndex = e.currentTarget.id.split('-')[1];
+
           if(e.key == "Enter") {
 
             taggingArray.data.mappings.mappings = [];
 
             for(var count = 0; count < sourceArray.data.mappings.mappings.length; count++) {
               taggingArray.data.mappings.mappings[count] = sourceArray.data.mappings.mappings[count];
-              taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as HTMLInputElement).value;
+              if(this.selectedCbs.includes(selectedIndex) && this.selectedCbs.includes(count + '')) {
+                taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + selectedIndex) as HTMLInputElement).value;
+              } else {
+                taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as HTMLInputElement).value;
+              }
+              
             }
-
             
-            this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs)
+            this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection)
     
           }
 
@@ -8482,6 +9104,21 @@ export class SfIEvents extends LitElement {
       await uploadFunction(taggingArray.data.mappings);
       refreshFunction();
     });
+
+    const cbArr = (divElement as HTMLDivElement).querySelectorAll('.cb-select') as NodeListOf<HTMLInputElement>;
+    for(i = 0; i < cbArr.length; i++) {
+      cbArr[i].addEventListener('change', (ev: any) => {
+        const cbSelectId = ev.currentTarget.id;
+        const cbSelectIndex = cbSelectId.split('-')[1];
+
+        if(!this.selectedCbs.includes(cbSelectIndex)) {
+          this.selectedCbs.push(cbSelectIndex);
+        } else {
+          this.selectedCbs.splice(this.selectedCbs.indexOf(cbSelectIndex), 1);
+        }
+        console.log(this.selectedCbs);
+      })
+    }
 
   }
 
@@ -8725,7 +9362,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingInternalControlsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingInternalControlsListContainer as HTMLDivElement),mappedSerializedAlertSchedules, mappedInternalControls, ["obligation", "country", "statute"], this.uploadInternalControlsMapping, this.loadMode, "internalcontrols", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "duedates", "alertschedules", "internalcontrols"], internalcontrolsJobs);
+    this.renderTaggingTable((this._SfOnboardingInternalControlsListContainer as HTMLDivElement),mappedSerializedAlertSchedules, mappedInternalControls, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadInternalControlsMapping, this.loadMode, "internalcontrols", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "functionheads", "auditors", "viewers", "docs", "makercheckers", "duedates", "alertschedules", "internalcontrols"], internalcontrolsJobs, null);
 
   }
 
@@ -8738,11 +9375,11 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingAlertSchedulesListContainer as HTMLDivElement),mappedSerializedDuedates, mappedAlertSchedules, ["obligation", "country", "statute"], this.uploadAlertSchedulesMapping, this.loadMode, "alertschedules", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "duedates", "alertschedules"], alertschedulesJobs);
+    this.renderTaggingTable((this._SfOnboardingAlertSchedulesListContainer as HTMLDivElement),mappedSerializedDuedates, mappedAlertSchedules, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadAlertSchedulesMapping, this.loadMode, "alertschedules", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "functionheads", "auditors", "viewers", "docs", "makercheckers", "duedates", "alertschedules"], alertschedulesJobs, null);
 
   }
 
-  renderOnboardingDuedates = (mappedDuedates: any, mappedSerializedApprovers: any, duedatesJobs: any) => {
+  renderOnboardingDuedates = (mappedDuedates: any, mappedSerializedMakerCheckers: any, duedatesJobs: any) => {
 
     var html = '';
 
@@ -8751,7 +9388,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingDuedatesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingDuedatesListContainer as HTMLDivElement),mappedSerializedApprovers, mappedDuedates, ["obligation", "country", "statute"], this.uploadDuedatesMapping, this.loadMode, "duedates", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "duedates"], duedatesJobs);
+    this.renderTaggingTable((this._SfOnboardingDuedatesListContainer as HTMLDivElement),mappedSerializedMakerCheckers, mappedDuedates, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadDuedatesMapping, this.loadMode, "duedates", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "functionheads", "auditors", "viewers", "docs", "makercheckers", "duedates"], duedatesJobs, null);
 
   }
 
@@ -8764,7 +9401,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingReportersContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingReportersListContainer as HTMLDivElement),mappedSerializedTags, mappedReporters, ["obligation", "country", "statute"], this.uploadReportersMapping, this.loadMode, "reporters", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["reporters", "functions", "tags"], reportersJobs);
+    this.renderTaggingTable((this._SfOnboardingReportersListContainer as HTMLDivElement),mappedSerializedTags, mappedReporters, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadReportersMapping, this.loadMode, "reporters", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["reporters", "functions", "tags"], reportersJobs, null);
 
   }
 
@@ -8777,7 +9414,76 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingApproversContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingApproversListContainer as HTMLDivElement),mappedSerializedReporters, mappedApprovers, ["obligation", "country", "statute"], this.uploadApproversMapping, this.loadMode, "approvers", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters"], approversJobs);
+    this.renderTaggingTable((this._SfOnboardingApproversListContainer as HTMLDivElement),mappedSerializedReporters, mappedApprovers, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadApproversMapping, this.loadMode, "approvers", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters"], approversJobs, null);
+
+  }
+
+  renderOnboardingFunctionHeads = (mappedFunctionHeads: any, mappedSerializedApprovers: any, functionHeadsJobs: any) => {
+
+    var html = '';
+
+    html += '<div id="functionheads-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingFunctionHeadsContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingFunctionHeadsListContainer as HTMLDivElement),mappedSerializedApprovers, mappedFunctionHeads, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadFunctionHeadsMapping, this.loadMode, "functionheads", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters", "functionheads"], functionHeadsJobs, null);
+
+  }
+
+  renderOnboardingMakerCheckers = (mappedMakerCheckers: any, mappedSerializedDocs: any, makerCheckerJobs: any) => {
+
+    var html = '';
+
+    html += '<div id="makercheckers-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingMakerCheckersContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingMakerCheckersListContainer as HTMLDivElement),mappedSerializedDocs, mappedMakerCheckers, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadMakerCheckersMapping, this.loadMode, "makercheckers", ["id", "entityname", "locationname"], this.apiIdTags, "&MakerChecker", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors", "viewers", "docs", "makercheckers"], makerCheckerJobs, null);
+
+  }
+
+  renderOnboardingDocs = (mappedDocs: any, mappedSerializedViewers: any, docsJobs: any) => {
+
+    var html = '';
+
+    html += '<div id="docs-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingDocsContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingDocsListContainer as HTMLDivElement),mappedSerializedViewers, mappedDocs, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadDocsMapping, this.loadMode, "docs", ["id", "entityname", "locationname"], this.apiIdTags, "&MakerChecker", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors", "viewers", "docs"], docsJobs, null);
+
+  }
+
+  renderOnboardingAuditors = (mappedAuditors: any, mappedSerializedFunctionheads: any, auditorsJobs: any) => {
+
+    console.log('inside rendering auditors..');
+
+    var html = '';
+
+    html += '<div id="auditors-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingAuditorsContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingAuditorsListContainer as HTMLDivElement),mappedSerializedFunctionheads, mappedAuditors, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadAuditorsMapping, this.loadMode, "auditors", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors"], auditorsJobs, null);
+
+  }
+
+  renderOnboardingViewers = (mappedViewers: any, mappedSerializedAuditors: any, viewersJobs: any) => {
+
+    console.log('inside rendering viewers..');
+
+    var html = '';
+
+    html += '<div id="viewers-list-container" class="d-flex flex-col w-100 scroll-x">';
+    html += '</div>';
+
+    (this._SfOnboardingViewersContainer as HTMLDivElement).innerHTML = html;
+
+    this.renderTaggingTable((this._SfOnboardingViewersListContainer as HTMLDivElement),mappedSerializedAuditors, mappedViewers, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadViewersMapping, this.loadMode, "viewers", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors", "viewers"], viewersJobs, null);
 
   }
 
@@ -8790,7 +9496,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingTagsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingTagsListContainer as HTMLDivElement),mappedSerializedFunctions, mappedTags, ["obligation", "country", "statute"], this.uploadTagsMapping, this.loadMode, "tags", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Tag", ["tags", "functions"], tagsJobs);
+    this.renderTaggingTable((this._SfOnboardingTagsListContainer as HTMLDivElement),mappedSerializedFunctions, mappedTags, ["firstlineofdefence", "obligationtype", "obligation", "reference", "country", "statute"], this.uploadTagsMapping, this.loadMode, "tags", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Tag", ["tags", "functions"], tagsJobs, "tagtype");
 
   }
 
@@ -8803,7 +9509,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingFunctionsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingFunctionsListContainer as HTMLDivElement),mappedSerializedLocations, mappedFunctions, ["obligation", "country", "statute"], this.uploadFunctionsMapping, this.loadMode, "functions", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Function", ["functions"], functionsJobs);
+    this.renderTaggingTable((this._SfOnboardingFunctionsListContainer as HTMLDivElement),mappedSerializedLocations, mappedFunctions, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadFunctionsMapping, this.loadMode, "functions", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Function", ["functions"], functionsJobs, null);
 
   }
 
@@ -8816,7 +9522,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingLocationsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingLocationsListContainer as HTMLDivElement),mappedSerializedEntities, mappedLocations, ["obligation", "country", "statute"], this.uploadLocationsMapping, this.loadMode, "locations", ["id", "countryname", "entityname"], this.apiIdTags, "&Location", ["locations"], locationsJobs);
+    this.renderTaggingTable((this._SfOnboardingLocationsListContainer as HTMLDivElement),mappedSerializedEntities, mappedLocations, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadLocationsMapping, this.loadMode, "locations", ["id", "countryname", "entityname"], this.apiIdTags, "&Location", ["locations"], locationsJobs, null);
 
   }
 
@@ -8903,7 +9609,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingEntitiesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingEntitiesListContainer as HTMLDivElement),mappedSerializedCountries, mappedEntities, ["obligation", "country", "statute"], this.uploadEntitiesMapping, this.loadMode, "entities", ["id", "countryname"], this.apiIdTags, "&Entity", ["entities"], entitiesJobs);
+    this.renderTaggingTable((this._SfOnboardingEntitiesListContainer as HTMLDivElement),mappedSerializedCountries, mappedEntities, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadEntitiesMapping, this.loadMode, "entities", ["id", "countryname"], this.apiIdTags, "&Entity", ["entities"], entitiesJobs, null);
 
   }
 
@@ -8935,7 +9641,7 @@ export class SfIEvents extends LitElement {
 
     // mappedCountries.data.mappings.mappings = arr2;
 
-    this.renderTaggingTable((this._SfOnboardingCountriesListContainer as HTMLDivElement), mappedCompliances, mappedCountries, ["obligation", "country", "statute"], this.uploadCountriesMapping, this.loadMode, "countries", ["id"], this.apiIdTags, "-Country", ["countries"], countriesJobs);
+    this.renderTaggingTable((this._SfOnboardingCountriesListContainer as HTMLDivElement), mappedCompliances, mappedCountries, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadCountriesMapping, this.loadMode, "countries", ["id"], this.apiIdTags, "-Country", ["countries"], countriesJobs, null);
 
   }
 
@@ -9027,6 +9733,21 @@ export class SfIEvents extends LitElement {
     if(this.myOnboardingTab == this.TAB_APPROVERS) {
       ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-approvers') as HTMLButtonElement).click();
     }
+    if(this.myOnboardingTab == this.TAB_FUNCTION_HEADS) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-functionheads') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_AUDITORS) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-auditors') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_VIEWERS) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-viewers') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_DOCS) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-docs') as HTMLButtonElement).click();
+    }
+    if(this.myOnboardingTab == this.TAB_MAKER_CHECKERS) {
+      ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-makercheckers') as HTMLButtonElement).click();
+    }
     if(this.myOnboardingTab == this.TAB_DUEDATES) {
       ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-duedates') as HTMLButtonElement).click();
     }
@@ -9059,6 +9780,11 @@ export class SfIEvents extends LitElement {
     html += '<button class="tab-button mb-10" id="onboarding-tab-tags" part="'+(this.myOnboardingTab == this.TAB_TAGS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Tags</button>';
     html += '<button class="tab-button mb-10" id="onboarding-tab-reporters" part="'+(this.myOnboardingTab == this.TAB_REPORTERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Reporters</button>';
     html += '<button class="tab-button mb-10" id="onboarding-tab-approvers" part="'+(this.myOnboardingTab == this.TAB_APPROVERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Approvers</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-functionheads" part="'+(this.myOnboardingTab == this.TAB_FUNCTION_HEADS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Function Heads</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-auditors" part="'+(this.myOnboardingTab == this.TAB_AUDITORS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Auditors</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-viewers" part="'+(this.myOnboardingTab == this.TAB_VIEWERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Viewers</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-docs" part="'+(this.myOnboardingTab == this.TAB_DOCS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Docs</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-makercheckers" part="'+(this.myOnboardingTab == this.TAB_MAKER_CHECKERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Maker Checkers</button>';
     html += '<button class="tab-button mb-10" id="onboarding-tab-duedates" part="'+(this.myOnboardingTab == this.TAB_DUEDATES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Duedates</button>';
     html += '<button class="tab-button mb-10" id="onboarding-tab-alertschedules" part="'+(this.myOnboardingTab == this.TAB_ALERTSCHEDULES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Alert Schedules</button>';
     html += '<button class="tab-button mb-10" id="onboarding-tab-internalcontrols" part="'+(this.myOnboardingTab == this.TAB_INTERNALCONTROLS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Internal Controls</button>';
@@ -9138,6 +9864,46 @@ export class SfIEvents extends LitElement {
 
     });
 
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-functionheads')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_FUNCTION_HEADS;
+      this.renderOnboardingTabs();
+      this.loadOnboardingFunctionHeads();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-auditors')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_AUDITORS;
+      this.renderOnboardingTabs();
+      this.loadOnboardingAuditors();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-viewers')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_VIEWERS;
+      this.renderOnboardingTabs();
+      this.loadOnboardingViewers();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-makercheckers')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_MAKER_CHECKERS;
+      this.renderOnboardingTabs();
+      this.loadOnboardingMakerCheckers();
+
+    });
+
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-docs')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_DOCS;
+      this.renderOnboardingTabs();
+      this.loadOnboardingDocs();
+
+    });
+
     (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-duedates')?.addEventListener('click', async () => {
 
       this.myOnboardingTab = this.TAB_DUEDATES;
@@ -9173,6 +9939,16 @@ export class SfIEvents extends LitElement {
     
   }
 
+  proceedToCalendar = async () => {
+    this.renderRoleTabs();
+    await this.fetchUserCalendar_2();
+    this.enableCalendar();
+    if(this.events != null) {
+      this.renderTabs(this.TAB_YEAR);
+      this.renderCalendar();
+    }
+  }
+
   renderRoleTabs = () => {
 
     console.log('render role tabs');
@@ -9183,34 +9959,47 @@ export class SfIEvents extends LitElement {
 
     html += '<button class="tab-button" id="consumer-tab-reporter" part="'+(this.myRole == this.TAB_REPORTER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Reporter</button>';
     html += '<button class="tab-button" id="consumer-tab-approver" part="'+(this.myRole == this.TAB_APPROVER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Approver</button>';
+    html += '<button class="tab-button" id="consumer-tab-functionhead" part="'+(this.myRole == this.TAB_FUNCTION_HEAD ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Function Head</button>';
+    html += '<button class="tab-button" id="consumer-tab-auditor" part="'+(this.myRole == this.TAB_AUDITOR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Auditor</button>';
+    html += '<button class="tab-button" id="consumer-tab-auditor" part="'+(this.myRole == this.TAB_VIEWER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Viewer</button>';
 
     (this._SfRoleTabContainer as HTMLDivElement).innerHTML = html;
 
     (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-reporter')?.addEventListener('click', async () => {
 
       this.myRole = this.TAB_REPORTER;
-      this.renderRoleTabs();
-      await this.fetchUserCalendar_2();
-      this.enableCalendar();
-      if(this.events != null) {
-        this.renderTabs(this.TAB_YEAR);
-        this.renderCalendar();
-      }
+      this.proceedToCalendar();
 
     });
 
     (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-approver')?.addEventListener('click', async () => {
 
       this.myRole = this.TAB_APPROVER;
-      this.renderRoleTabs();
-      await this.fetchUserCalendar_2();
-      this.enableCalendar();
-      if(this.events != null) {
-        this.renderTabs(this.TAB_YEAR);
-        this.renderCalendar();
-      }
+      this.proceedToCalendar();
 
-    })
+    });
+
+    (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-functionhead')?.addEventListener('click', async () => {
+
+      this.myRole = this.TAB_FUNCTION_HEAD;
+      this.proceedToCalendar();
+
+    });
+
+    (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-auditor')?.addEventListener('click', async () => {
+
+      this.myRole = this.TAB_AUDITOR;
+      this.proceedToCalendar();
+
+    });
+
+
+    (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-viewer')?.addEventListener('click', async () => {
+
+      this.myRole = this.TAB_VIEWER;
+      this.proceedToCalendar();
+
+    });
 
   }
 
@@ -10246,46 +11035,76 @@ export class SfIEvents extends LitElement {
 
     var html = '';
 
-    html += '<button class="tab-button mb-10" id="calendar-tab-year" part="'+(selectedTab == this.TAB_YEAR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Year</button>';
     html += '<button class="tab-button mb-10" id="calendar-tab-month" part="'+(selectedTab == this.TAB_STREAM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Month</button>';
     html += '<button class="tab-button mb-10" id="calendar-tab-upcoming" part="'+(selectedTab == this.TAB_UPCOMING ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Upcoming</button>';
     html += '<button class="tab-button mb-10" id="calendar-tab-this" part="'+(selectedTab == this.TAB_THIS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Current</button>';
     html += '<button class="tab-button mb-10" id="calendar-tab-past" part="'+(selectedTab == this.TAB_PAST ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Past</button>';
     html += '<button class="tab-button mb-10" id="calendar-tab-custom" part="'+(selectedTab == this.TAB_CUSTOM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Range</button>';
+    html += '<button class="tab-button mb-10" id="calendar-tab-year" part="'+(selectedTab == this.TAB_YEAR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Year</button>';
     html += '<button class="tab-button mb-10" id="calendar-tab-adhoc" part="'+(selectedTab == this.TAB_ADHOC ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Adhoc</button>';
 
     (this._SfTabContainer as HTMLDivElement).innerHTML = html;
 
-    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-year')?.addEventListener('click', () => {
+    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-year')?.addEventListener('click', async () => {
+
+      console.log('calclicked', this.mode);
+
       if(this.mode == "consumer") {
-        this.loadMode();
+        this.renderTabs(this.TAB_YEAR);
+        this.enableCalendar();
+        await this.fetchUserCalendar_2();
+        this.renderCalendar();
+        // this.loadMode();
+        
       } else {
         this.enableCalendar();
         this.renderTabs(this.TAB_YEAR);
       }
     });
 
-    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-month')?.addEventListener('click', () => {
+    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-month')?.addEventListener('click', async () => {
       this.enableStream();
       this.renderTabs(this.TAB_STREAM);
-      this.renderStream();
+
+      const currMonth = ("0" + (new Date().getMonth() + 1)).slice(-2);
+      let idx = 0;
+      for(var i = 0; i < 12; i++) {
+        if(parseInt(currMonth) === (parseInt(this.calendarStartMM) + i)) {
+          idx = i;
+          break;
+        }
+      }
+      const dateResult = this.calculateStartAndEndDateOfStream(idx);
+      if(dateResult != null) {
+        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+      }
+      this.renderStream(idx);
     });
 
-    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-upcoming')?.addEventListener('click', () => {
+    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-upcoming')?.addEventListener('click', async () => {
       this.enableUpcoming();
       this.renderTabs(this.TAB_UPCOMING);
+      const dateResult = this.calculateStartAndEndDateOfUpcoming(0);
+      console.log('dateresult', dateResult)
+      await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
       this.renderUpcoming();
     });
 
-    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-this')?.addEventListener('click', () => {
+    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-this')?.addEventListener('click', async () => {
       this.enableThis();
       this.renderTabs(this.TAB_THIS);
+      const dateResult = this.calculateStartAndEndDateOfThis(0);
+      console.log('dateresult', dateResult)
+      await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
       this.renderThis();
     });
 
-    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-past')?.addEventListener('click', () => {
+    (this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-past')?.addEventListener('click', async () => {
       this.enablePast();
       this.renderTabs(this.TAB_PAST);
+      const dateResult = this.calculateStartAndEndDateOfPast(0);
+      console.log('dateresult', dateResult)
+      await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
       this.renderPast();
     });
 
@@ -11056,6 +11875,142 @@ export class SfIEvents extends LitElement {
 
   }
 
+  uploadFunctionHeadsMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedfunctionheads";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadMakerCheckersMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedmakercheckers";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadDocsMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappeddocs";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadAuditorsMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedauditors";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+  uploadViewersMapping = async (data: any) => {
+    console.log('uploading..', data);
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedviewers";
+
+    const body = { 
+      "projectid": this.projectId, 
+      "data": JSON.stringify(data)
+    }
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages()
+      }, 2000);
+    }
+
+  }
+
+
   uploadReportersMapping = async (data: any) => {
     console.log('uploading..', data);
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedreporters";
@@ -11323,7 +12278,7 @@ export class SfIEvents extends LitElement {
 
   }
 
-  uploadTriggerEvent = async (locationId: string, eventid: string, dateofoccurrence: string) => {
+  uploadTriggerEvent = async (entityId: string, locationId: string, eventid: string, dateofoccurrence: string) => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/triggermyevent";
 
@@ -11331,7 +12286,7 @@ export class SfIEvents extends LitElement {
       "dateofoccurrence": dateofoccurrence,
       "projectid": this.projectId, 
       "eventid": eventid,
-      "entityid": this.entityId,
+      "entityid": entityId,
       "locationid": locationId
     } 
 
@@ -11360,6 +12315,44 @@ export class SfIEvents extends LitElement {
       }, 2000);
     }
 
+  }
+
+  uploadAudit = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => {
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/uploadaudit";
+
+    const body = { 
+      "mmddyyyy": mmddyyyy,
+      "projectid": this.projectId, 
+      "type": "audit",
+      "eventid": eventid,
+      "comments": comments,
+      "approved": approved,
+      "entityid": entityId,
+      "locationid": locationId
+    } 
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonResponse sync', jsonRespose);
+      this.setSuccess("Audit report uploaded successfully!");
+      setTimeout(() => {
+        this.clearMessages()
+        // this.showChosenMapping();
+        // this.fetchEventMap();
+        // if(this.myRole == this.TAB_REPORTER) {
+        //   this.renderMappingTabs(this.TAB_REPORTER);
+        // } else {
+        //   this.renderMappingTabs(this.TAB_APPROVER);
+        // }
+      }, 2000);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+    }
   }
 
   uploadReview = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => {
@@ -11412,7 +12405,7 @@ export class SfIEvents extends LitElement {
       "dateofcompletion": doc,
       "entityid": entityId,
       "locationid": locationId,
-      "docs": JSON.stringify(docs)
+      "docs": JSON.stringify(docs),
     } 
 
     console.log(body);
@@ -11808,6 +12801,113 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchMappedSerializedFunctionheads = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedfunctionheads";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+
+  fetchMappedSerializedMakerCheckers = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedmakercheckers";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedSerializedDocs = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializeddocs";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+
+  fetchMappedSerializedAuditors = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedauditors";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedSerializedViewers = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedviewers";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
   fetchMappedSerializedReporters = async () => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedreporters";
@@ -12039,6 +13139,112 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchMappedFunctionHeads = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedfunctionheads";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedMakerCheckers = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedmakercheckers";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedDocs = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappeddocs";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+
+  fetchMappedAuditors = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedauditors";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedViewers = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedviewers";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
   fetchMappedTags = async () => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedtags";
@@ -12206,6 +13412,113 @@ export class SfIEvents extends LitElement {
     }
 
   }
+
+  fetchFunctionHeadsJobs = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getfunctionheadsjobs";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+
+  fetchMakerCheckersJobs = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmakercheckersjobs";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchDocsJobs = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getdocsjobs";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchAuditorsJobs = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getauditorsjobs";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchViewersJobs = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getviewersjobs";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
 
   fetchReportersJobs = async () => {
 
@@ -12394,53 +13707,41 @@ export class SfIEvents extends LitElement {
 
   }
 
-  foundCalendarInLocal = () => {
-    const localKey = this.projectId + ';' + this.userProfileId + ';' + this.entityId + ';' + this.locationId;
-    var foundInLocal = false;
-    if(localStorage.getItem(localKey) != null) {
-      if(localStorage.getItem(localKey) != "") {
-        foundInLocal = true;
-      }
-    }
-    return foundInLocal;
-  }
+  // foundCalendarInLocal = (body: any) => {
+  //   var foundInLocal = false;
+  //   if(localStorage.getItem(JSON.stringify(body)) != null) {
+  //     if(localStorage.getItem(JSON.stringify(body)) != "") {
+  //       foundInLocal = true;
+  //     }
+  //   }
+  //   return foundInLocal;
+  // }
 
-  getLocalKey = () => {
-    const localKey = this.projectId + ';' + this.userProfileId + ';' + this.entityId + ';' + this.locationId;
-    return localKey;
-  }
+  // // getLocalKey = () => {
+  // //   const localKey = this.projectId + ';' + this.userProfileId + ';' + this.entityId + ';' + this.locationId;
+  // //   return localKey;
+  // // }
 
-  cleanLocalStorage = () => {
+  // cleanLocalStorage = (body: any) => {
     
-    const delKeys = [];
-    for(var i = 0; i < localStorage.length; i++) {
-      if(localStorage.key(i) != this.getLocalKey()) {
-        delKeys.push(localStorage.key(i));
-      }
-    }
-    for( var i = 0; i < delKeys.length; i++) {
-      localStorage.removeItem(delKeys[i] || "");
-    }
-  }
+  //   const delKeys = [];
+  //   for(var i = 0; i < localStorage.length; i++) {
+  //     if(localStorage.key(i) != JSON.stringify(body)) {
+  //       delKeys.push(localStorage.key(i));
+  //     }
+  //   }
+  //   for( var i = 0; i < delKeys.length; i++) {
+  //     localStorage.removeItem(delKeys[i] || "");
+  //   }
+  // }
 
-  fetchUserCalendar_2 = async() => {
-
-    if(this.foundCalendarInLocal()) {
-      const jsonRespose = JSON.parse(localStorage.getItem(this.getLocalKey()) || "");
-      this.showChosenProject();
-      console.log(jsonRespose);
-      this.events = (jsonRespose.data.events)
-      if(this.events != null) {
-        this.renderTabs(this.TAB_YEAR);
-        this.renderCalendar();
-      }
-    }
-
-    this.cleanLocalStorage();
+  fetchUserCalendar_2 = async(startDate: string = "", endDate: string = "") => {
 
     let path = "";
 
-    if(this.functionId != null && this.functionId != "") {
+    if(this.tagId != null && this.tagId != "") {
+      path = "getallmytagevents";
+    } else if(this.functionId != null && this.functionId != "") {
       path = "getallfunctionevents";
     } else if(this.countryId != null && this.countryId != "") {
       path = "getallcountryevents";
@@ -12450,31 +13751,95 @@ export class SfIEvents extends LitElement {
       path = "getallmyevents";
     }
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/"+ path;
+    let sDate = "";
+    let eDate = "";
+    let paginate = false;
 
+    console.log('currenttab', this.getCurrentTab());
+
+    if(this.getCurrentTab() == this.TAB_YEAR) {
+      sDate = "03/31/" + this.calendarStartYYYY;
+      eDate = "04/01/" + (this.calendarStartYYYY + 1);
+      paginate = true;
+    } else {
+      sDate = startDate;
+      eDate = endDate;
+    }
+
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/"+ path;
     console.log('fetch calendar url', url);
+    let urlBody = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": "", "sdate": sDate, "edate": eDate, "paginate": paginate};
+
+    console.log('urlbody', urlBody);
+
+    // if(this.foundCalendarInLocal(urlBody)) {
+    //   //const jsonRespose = JSON.parse(localStorage.getItem(JSON.stringify(urlBody)) || "");
+    //   this.showChosenProject();
+    //   //console.log(jsonRespose);
+    //   this.events = JSON.parse(localStorage.getItem(JSON.stringify(urlBody)) || "");
+    //   if(this.events != null) {
+    //     this.renderTabs(this.TAB_YEAR);
+    //     this.renderCalendar();
+    //   }
+    // }
+
+    // this.cleanLocalStorage(urlBody);
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "adhoc": "false"}, url, this._SfLoader, authorization)) as any;
+    const xhr : any = (await this.prepareXhr(urlBody, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
     if(xhr.status == 200) {
 
       const jsonRespose = JSON.parse(xhr.responseText);
-      console.log('foundinlocal', this.foundCalendarInLocal());
+      // console.log('foundinlocal', this.foundCalendarInLocal(urlBody));
 
-      if(this.foundCalendarInLocal()) {
-        this.events = (jsonRespose.data.events)
-      } else {
+      // if(this.foundCalendarInLocal(urlBody)) {
+      //   this.events = (jsonRespose.data.events)
+      // } else {
         this.showChosenProject();
         console.log(jsonRespose);
         this.events = (jsonRespose.data.events)
-        if(this.events != null) {
-          this.renderTabs(this.TAB_YEAR);
-          this.renderCalendar();
-        }
-      }
 
-      localStorage.setItem(this.getLocalKey(), xhr.responseText);
+        let lastEvaluatedKey = jsonRespose.lastEvaluatedKey;
+
+        console.log('lastevaluatedkey0', lastEvaluatedKey);
+
+        do {
+
+          if(lastEvaluatedKey != null) {
+
+            const xhr2 : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": lastEvaluatedKey, "sdate": sDate, "edate": eDate, "paginate": paginate}, url, this._SfLoader, authorization)) as any;
+            this._SfLoader.innerHTML = '';
+
+            if(xhr2.status == 200) {
+
+              const jsonRespose2 = JSON.parse(xhr2.responseText);
+              this.events = {...this.events, ...jsonRespose2.data.events}
+
+              lastEvaluatedKey = jsonRespose2.lastEvaluatedKey;
+              console.log('lastevaluatedkey1', lastEvaluatedKey);
+
+            } else {
+              console.log('calendar fetching error breaking');
+              break;
+            }
+
+          } else {
+            console.log('calendar fetching breaking');
+            break;
+          }
+
+        } while(1)
+
+        if(this.events != null) {
+          // this.renderTabs(this.TAB_YEAR);
+          //this.renderCalendar();
+        }
+      
+      // }
+
+      //localStorage.setItem(JSON.stringify(urlBody), JSON.stringify(this.events));
       
     } else {
 
@@ -12596,7 +13961,9 @@ export class SfIEvents extends LitElement {
 
     let path = "";
     
-    if(this.functionId != null && this.functionId != "") {
+    if(this.tagId != null && this.tagId != "") {
+      path = "getallmytagevents";
+    } else if(this.functionId != null && this.functionId != "") {
       path = "getallfunctionevents";
     } else if(this.countryId != null && this.countryId != "") {
       path = "getallcountryevents";
@@ -12608,7 +13975,7 @@ export class SfIEvents extends LitElement {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/"+ path;
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "adhoc": "true"}, url, this._SfLoader, authorization)) as any;
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "true", "exclusivestartkey": ""}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
     if(xhr.status == 200) {
 
@@ -12617,6 +13984,38 @@ export class SfIEvents extends LitElement {
       this.unmappedEvents = jsonRespose.data.unmappedEvents;
       this.mappings = jsonRespose.data.mappings;
       this.triggers = jsonRespose.data.triggers;
+
+      let lastEvaluatedKey = jsonRespose.lastEvaluatedKey;
+
+      do {
+
+        if(lastEvaluatedKey != null) {
+
+          const xhr2 : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "true", "exclusivestartkey": lastEvaluatedKey}, url, this._SfLoader, authorization)) as any;
+          this._SfLoader.innerHTML = '';
+
+          if(xhr2.status == 200) {
+
+            const jsonRespose2 = JSON.parse(xhr2.responseText);
+            this.unmappedEvents = {...this.unmappedEvents, ...jsonRespose.data.unmappedEvents};
+            this.mappings = {...this.mappings, ...jsonRespose.data.mappings};
+            this.triggers = {...this.triggers, ...jsonRespose.data.triggers};
+
+            lastEvaluatedKey = jsonRespose2.lastEvaluatedKey;
+            console.log('lastevaluatedkey1', lastEvaluatedKey);
+
+          } else {
+            console.log('calendar fetching error breaking');
+            break;
+          }
+
+        } else {
+          console.log('calendar fetching breaking');
+          break;
+        }
+
+      } while(1)
+
       if(!reprogramTriggers) {
         this.renderAdhoc(this.unmappedEvents, this.triggers);
       } else {
@@ -12916,14 +14315,21 @@ export class SfIEvents extends LitElement {
       this.enableCalendar();
       this.initInputs();
       this.initCalendar();
-      this.myRole = this.TAB_REPORTER;
-      this.renderRoleTabs();
-      await this.fetchUserCalendar_2();
-      
-      if(this.events != null && !this.foundCalendarInLocal()) {
-        this.renderTabs(this.TAB_YEAR);
-        this.renderCalendar();
+      if(this.myRole == "") {
+        this.myRole = this.TAB_REPORTER;
       }
+      this.renderRoleTabs();
+      if(this.myRole != "") {
+        this._SfRoleTabContainer.innerHTML = '';
+      }
+      this.renderTabs(this.TAB_STREAM);
+      //await this.fetchUserCalendar_2();
+      ((this._SfTabContainer as HTMLDivElement).querySelector('#calendar-tab-month') as HTMLButtonElement)?.click();
+      
+      // if(this.events != null && !this.foundCalendarInLocal()) {
+      //   this.renderTabs(this.TAB_YEAR);
+      //   this.renderCalendar();
+      // }
       
     }
 
@@ -12988,6 +14394,21 @@ export class SfIEvents extends LitElement {
               
             </div>
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="approvers-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="functionheads-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="auditors-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="viewers-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="docs-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="makercheckers-container">
               
             </div>
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="duedates-container">
@@ -13158,9 +14579,6 @@ export class SfIEvents extends LitElement {
 
           </div>
           <div class="d-flex justify-center">
-            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="calendar-container">
-              
-            </div>
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="stream-container">
               
             </div>
@@ -13174,6 +14592,9 @@ export class SfIEvents extends LitElement {
               
             </div>
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="custom-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="calendar-container">
               
             </div>
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="adhoc-container">
