@@ -456,12 +456,16 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.jurisdictionData = null;
         this.jurisdictionPartStatusData = null;
         this.jurisdictionLateStatusData = null;
+        this.currentColumnIndex = "";
         this.frequencyData = null;
         this.frequencyPartStatusData = null;
         this.frequencyLateStatusData = null;
         this.locationData = null;
         this.locationPartStatusData = null;
         this.locationLateStatusData = null;
+        this.selectedItems = [];
+        this.selectedStatus = "";
+        this.stream = this.TAB_STREAM;
         this.getEventField = (field) => {
             for (var i = 0; i < this.getEventFields().length; i++) {
                 if (this.getEventFields()[i].field == field) {
@@ -531,9 +535,10 @@ let SfIEvents = class SfIEvents extends LitElement {
             this._SfCustomContainer.style.display = 'none';
             this._SfAdhocContainer.style.display = 'none';
         };
-        this.prepareXhr = async (data, url, loaderElement, authorization) => {
+        this.prepareXhr = async (data, url, loaderElement, authorization, loaderText = '') => {
             if (loaderElement != null) {
                 loaderElement.innerHTML = '<div class="lds-dual-ring"></div>';
+                loaderElement.innerHTML += ('<div class="lds-text"><div class="lds-text-c">' + loaderText + '</div></div>');
             }
             return await Util.callApi(url, data, authorization);
         };
@@ -1127,6 +1132,8 @@ let SfIEvents = class SfIEvents extends LitElement {
             }
         };
         this.renderStreamEvents = (index, month, year) => {
+            this.selectedItems = [];
+            this.selectedStatus = "";
             const lastDay = this.getLastDayOfMonth(month, year);
             var html = '';
             html += '<div class="mb-20 stream-event-list" part="stream-event-list-charts">';
@@ -1241,17 +1248,17 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '<div class="stream-events-container flex-grow">';
                         html += '<div class="hidden-tags hide">' + JSON.stringify(this.events[mmdd][j]['tags']) + '</div>';
                         html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>';
-                        html += '<div part="stream-events-event-title" class="pl-5 pb-5"><sf-i-elastic-text text="' + this.events[mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text></div>';
+                        html += '<div part="stream-events-event-title" class="d-flex align-center pl-5 pb-5">' + ('<input id="button-select-' + mmdd.replace('/', '-') + '-' + j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') + '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g, '_') + '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="' + this.events[mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text></div>';
                         html += '<table class="stream-events-container-table" part="' + partStatus + '">';
                         html += '<thead>';
+                        html += '<th part="td-head">';
+                        html += '</th>';
                         html += '<th part="td-head">';
                         html += 'Status';
                         if (csvCols.indexOf('Status') < 0) {
                             csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate';
                             htmlCols += '<tr><th>Id</th><th>Status</th><th class="w-200px">Statute</th><th>Reference</th><th class="w-200px">Applicability</th><th class="w-200px">Obligation</th><th>ObligationType</th><th class="w-200px">Penalty</th><th>RiskSeverity</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th></tr>';
                         }
-                        html += '</th>';
-                        html += '<th part="td-head">';
                         html += '</th>';
                         html += '<th part="td-head">';
                         html += 'Location';
@@ -1527,6 +1534,8 @@ let SfIEvents = class SfIEvents extends LitElement {
             return html;
         };
         this.renderUpcomingEvents = (index, startDate, count) => {
+            this.selectedItems = [];
+            this.selectedStatus = "";
             var html = '';
             html += '<div class="mb-20 stream-event-list" part="stream-event-list-charts">';
             html += '<div part="stream-event-chart-selection" class="mb-20">';
@@ -1640,7 +1649,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '<div class="stream-events-container flex-grow">';
                         html += '<div class="hidden-tags hide">' + JSON.stringify(this.events[mmdd][j]['tags']) + '</div>';
                         html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>';
-                        html += '<div part="stream-events-event-title" class="pl-5 pb-5"><sf-i-elastic-text text="' + this.events[mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text></div>';
+                        html += '<div part="stream-events-event-title" class="d-flex align-center pl-5 pb-5">' + ('<input id="button-select-' + mmdd.replace('/', '-') + '-' + j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') + '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g, '_') + '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="' + this.events[mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text></div>';
                         html += '<table class="stream-events-container-table" >';
                         html += '<thead>';
                         html += '<th part="td-head">';
@@ -1932,6 +1941,8 @@ let SfIEvents = class SfIEvents extends LitElement {
             return html;
         };
         this.renderThisEvents = (index, startDate) => {
+            this.selectedItems = [];
+            this.selectedStatus = "";
             var html = '';
             html += '<div class="mb-20 stream-event-list" part="stream-event-list-charts">';
             html += '<div part="stream-event-chart-selection" class="mb-20">';
@@ -2058,7 +2069,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '<div class="stream-events-container flex-grow">';
                         html += '<div class="hidden-tags hide">' + JSON.stringify(this.events[mmdd][j]['tags']) + '</div>';
                         html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>';
-                        html += '<div part="stream-events-event-title" class="pl-5 pb-5"><sf-i-elastic-text text="' + this.events[mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text></div>';
+                        html += '<div part="stream-events-event-title" class="d-flex align-center pl-5 pb-5">' + ('<input id="button-select-' + mmdd.replace('/', '-') + '-' + j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') + '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g, '_') + '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="' + this.events[mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text></div>';
                         html += '<table class="stream-events-container-table">';
                         html += '<thead>';
                         html += '<th part="td-head">';
@@ -2349,6 +2360,8 @@ let SfIEvents = class SfIEvents extends LitElement {
             return html;
         };
         this.renderPastEvents = (index, startDate) => {
+            this.selectedItems = [];
+            this.selectedStatus = "";
             var html = '';
             html += '<div class="mb-20 stream-event-list" part="stream-event-list-charts">';
             html += '<div part="stream-event-chart-selection" class="mb-20">';
@@ -2476,7 +2489,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '<div class="stream-events-container flex-grow">';
                         html += '<div class="hidden-tags hide">' + JSON.stringify(this.events[mmdd][j]['tags']) + '</div>';
                         html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>';
-                        html += '<div part="stream-events-event-title" class="pl-5 pb-5"><sf-i-elastic-text text="' + this.events[mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text></div>';
+                        html += '<div part="stream-events-event-title" class="d-flex align-center pl-5 pb-5">' + ('<input id="button-select-' + mmdd.replace('/', '-') + '-' + j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') + '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g, '_') + '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="' + this.events[mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text></div>';
                         html += '<table class="stream-events-container-table">';
                         html += '<thead>';
                         html += '<th part="td-head">';
@@ -2767,6 +2780,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             return html;
         };
         this.renderRangeEvents = (firstDate, count) => {
+            this.selectedItems = [];
             var html = '';
             html += '<div class="mb-20 stream-event-list" part="stream-event-list-charts">';
             html += '<div part="stream-event-chart-selection" class="mb-20">';
@@ -2881,7 +2895,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         html += '<div class="stream-events-container flex-grow">';
                         html += '<div class="hidden-tags hide">' + JSON.stringify(this.events[mmdd][j]['tags']) + '</div>';
                         html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>';
-                        html += '<div part="stream-events-event-title" class="pl-5 pb-5"><sf-i-elastic-text text="' + this.events[mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text></div>';
+                        html += '<div part="stream-events-event-title" class="d-flex align-center pl-5 pb-5">' + ('<input id="button-select-' + mmdd.replace('/', '-') + '-' + j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') + '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g, '_') + '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="' + this.events[mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text></div>';
                         html += '<table class="stream-events-container-table">';
                         html += '<thead>';
                         html += '<th part="td-head">';
@@ -3177,8 +3191,65 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const idArr = id.split("-");
                     const mmdd = idArr[3] + "/" + idArr[4];
                     const j = idArr[5];
+                    let found = false;
+                    for (var k = 0; k < this.selectedItems.length; k++) {
+                        if (this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        this.selectedItems = [];
+                        this.clearButtonSelection();
+                    }
                     this._SfDetailContainer.style.display = 'block';
-                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
+                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""), null);
+                });
+            }
+            const streamEventsContainer = this._SfCustomContainer.querySelectorAll('.stream-events-container');
+            const buttonSelect = this._SfCustomContainer.querySelectorAll('.button-select');
+            for (i = 0; i < buttonSelect.length; i++) {
+                buttonSelect[i].addEventListener('click', (ev) => {
+                    console.log('eventscontainer', streamEventsContainer.length, buttonSelect.length);
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    // const mmdd = idArr[2] + "/" + idArr[3];
+                    // const j = idArr[4];
+                    // const makercheckers = idArr[5];
+                    const docs = idArr[6];
+                    if (ev.target.checked) {
+                        this.selectedItems.push(id);
+                    }
+                    else {
+                        this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+                    }
+                    if (this.selectedItems.length === 0) {
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            buttonSelect[k].style.display = 'block';
+                            streamEventsContainer[k].style.display = 'block';
+                        }
+                    }
+                    else {
+                        if (this.selectedItems.length === 1) {
+                            const id1 = id;
+                            const idArr1 = id1.split("-");
+                            const status = idArr1[13].replace(/_/g, '-');
+                            this.selectedStatus = status;
+                        }
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            const id1 = buttonSelect[k].id;
+                            const idArr1 = id1.split("-");
+                            const docs1 = idArr1[6];
+                            const status = idArr1[13].replace(/_/g, '-');
+                            if (docs == docs1 && status == this.selectedStatus) {
+                            }
+                            else {
+                                buttonSelect[k].style.display = 'none';
+                                streamEventsContainer[k].style.display = 'none';
+                            }
+                        }
+                    }
+                    // (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+                    // this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
                 });
             }
         };
@@ -3242,69 +3313,83 @@ let SfIEvents = class SfIEvents extends LitElement {
             else {
                 this._SfStreamEventStatus.innerHTML = "Please select Start Date and End Date";
             }
-            console.log('rendering chart', this._SfCustomContainer.innerHTML);
-            const radioCompleteness = this._SfCustomContainer.querySelector('#radio-completeness');
-            radioCompleteness === null || radioCompleteness === void 0 ? void 0 : radioCompleteness.addEventListener('click', () => {
-                this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
-                this.processDateSelection();
-                this.renderCompletenessGraph(this._SfCustomContainer);
-            });
-            const radioTimeliness = this._SfCustomContainer.querySelector('#radio-timeliness');
-            radioTimeliness === null || radioTimeliness === void 0 ? void 0 : radioTimeliness.addEventListener('click', () => {
-                this.flowGraph = this.FLOW_GRAPH_TIMELINESS;
-                this.processDateSelection();
-                this.renderTimelinessGraph(this._SfCustomContainer);
-            });
-            const radioRisk = this._SfCustomContainer.querySelector('#radio-risk');
-            radioRisk === null || radioRisk === void 0 ? void 0 : radioRisk.addEventListener('click', () => {
-                this.flowGraph = this.FLOW_GRAPH_RISKAREAS;
-                this.processDateSelection();
-                this.renderRiskGraph(this._SfCustomContainer);
-            });
-            const radioFunction = this._SfCustomContainer.querySelector('#radio-function');
-            radioFunction === null || radioFunction === void 0 ? void 0 : radioFunction.addEventListener('click', () => {
-                this.flowGraph = this.FLOW_GRAPH_FUNCTION;
-                this.processDateSelection();
-                this.renderFunctionGraph(this._SfCustomContainer);
-            });
-            const radioRiskSeverity = this._SfCustomContainer.querySelector('#radio-riskseverity');
-            radioRiskSeverity === null || radioRiskSeverity === void 0 ? void 0 : radioRiskSeverity.addEventListener('click', () => {
-                this.flowGraph = this.FLOW_GRAPH_RISKSEVERITY;
-                this.processDateSelection();
-                this.renderRiskSeverityGraph(this._SfCustomContainer);
-            });
-            const radioObligationType = this._SfCustomContainer.querySelector('#radio-obligationtype');
-            radioObligationType === null || radioObligationType === void 0 ? void 0 : radioObligationType.addEventListener('click', () => {
-                this.flowGraph = this.FLOW_GRAPH_OBLIGATIONTYPE;
-                this.processDateSelection();
-                this.renderObligationTypeGraph(this._SfCustomContainer);
-            });
-            const radioJurisdiction = this._SfCustomContainer.querySelector('#radio-jurisdiction');
-            radioJurisdiction === null || radioJurisdiction === void 0 ? void 0 : radioJurisdiction.addEventListener('click', () => {
-                this.flowGraph = this.FLOW_GRAPH_JURISDICTION;
-                this.processDateSelection();
-                this.renderJurisdictionGraph(this._SfCustomContainer);
-            });
-            const radioFrequency = this._SfCustomContainer.querySelector('#radio-frequency');
-            radioFrequency === null || radioFrequency === void 0 ? void 0 : radioFrequency.addEventListener('click', () => {
-                this.flowGraph = this.FLOW_GRAPH_FREQUENCY;
-                this.processDateSelection();
-                this.renderFrequencyGraph(this._SfCustomContainer);
-            });
-            const radioLocation = this._SfCustomContainer.querySelector('#radio-location');
-            radioLocation === null || radioLocation === void 0 ? void 0 : radioLocation.addEventListener('click', () => {
-                this.flowGraph = this.FLOW_GRAPH_LOCATION;
-                this.processDateSelection();
-                this.renderLocationGraph(this._SfCustomContainer);
-            });
-            const buttonStatusMore = this._SfCustomContainer.querySelector('#button-status-more');
-            buttonStatusMore === null || buttonStatusMore === void 0 ? void 0 : buttonStatusMore.addEventListener('click', () => {
-                const divStatusList = this._SfCustomContainer.querySelectorAll('.late-statuses');
-                for (var i = 0; i < divStatusList.length; i++) {
-                    divStatusList[i].style.display = 'flex';
-                }
-                buttonStatusMore.style.display = 'none';
-            });
+            const attachHandlers = () => {
+                console.log('rendering chart', this._SfCustomContainer.innerHTML);
+                const radioCompleteness = this._SfCustomContainer.querySelector('#radio-completeness');
+                radioCompleteness === null || radioCompleteness === void 0 ? void 0 : radioCompleteness.addEventListener('click', () => {
+                    this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                    this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24));
+                    this.renderCompletenessGraph(this._SfCustomContainer);
+                    attachHandlers();
+                });
+                const radioTimeliness = this._SfCustomContainer.querySelector('#radio-timeliness');
+                radioTimeliness === null || radioTimeliness === void 0 ? void 0 : radioTimeliness.addEventListener('click', () => {
+                    this.flowGraph = this.FLOW_GRAPH_TIMELINESS;
+                    console.log('setting flow graph to ', this.flowGraph);
+                    this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24));
+                    this.renderTimelinessGraph(this._SfCustomContainer);
+                    attachHandlers();
+                });
+                const radioRisk = this._SfCustomContainer.querySelector('#radio-risk');
+                radioRisk === null || radioRisk === void 0 ? void 0 : radioRisk.addEventListener('click', () => {
+                    this.flowGraph = this.FLOW_GRAPH_RISKAREAS;
+                    console.log('setting flow graph to ', this.flowGraph);
+                    this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24));
+                    this.renderRiskGraph(this._SfCustomContainer);
+                    attachHandlers();
+                });
+                const radioFunction = this._SfCustomContainer.querySelector('#radio-function');
+                radioFunction === null || radioFunction === void 0 ? void 0 : radioFunction.addEventListener('click', () => {
+                    this.flowGraph = this.FLOW_GRAPH_FUNCTION;
+                    this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24));
+                    this.renderFunctionGraph(this._SfCustomContainer);
+                    attachHandlers();
+                });
+                const radioRiskSeverity = this._SfCustomContainer.querySelector('#radio-riskseverity');
+                radioRiskSeverity === null || radioRiskSeverity === void 0 ? void 0 : radioRiskSeverity.addEventListener('click', () => {
+                    this.flowGraph = this.FLOW_GRAPH_RISKSEVERITY;
+                    this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24));
+                    this.renderRiskSeverityGraph(this._SfCustomContainer);
+                    attachHandlers();
+                });
+                const radioObligationType = this._SfCustomContainer.querySelector('#radio-obligationtype');
+                radioObligationType === null || radioObligationType === void 0 ? void 0 : radioObligationType.addEventListener('click', () => {
+                    this.flowGraph = this.FLOW_GRAPH_OBLIGATIONTYPE;
+                    this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24));
+                    this.renderObligationTypeGraph(this._SfCustomContainer);
+                    attachHandlers();
+                });
+                const radioJurisdiction = this._SfCustomContainer.querySelector('#radio-jurisdiction');
+                radioJurisdiction === null || radioJurisdiction === void 0 ? void 0 : radioJurisdiction.addEventListener('click', () => {
+                    this.flowGraph = this.FLOW_GRAPH_JURISDICTION;
+                    this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24));
+                    this.renderJurisdictionGraph(this._SfCustomContainer);
+                    attachHandlers();
+                });
+                const radioFrequency = this._SfCustomContainer.querySelector('#radio-frequency');
+                radioFrequency === null || radioFrequency === void 0 ? void 0 : radioFrequency.addEventListener('click', () => {
+                    this.flowGraph = this.FLOW_GRAPH_FREQUENCY;
+                    this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24));
+                    this.renderFrequencyGraph(this._SfCustomContainer);
+                    attachHandlers();
+                });
+                const radioLocation = this._SfCustomContainer.querySelector('#radio-location');
+                radioLocation === null || radioLocation === void 0 ? void 0 : radioLocation.addEventListener('click', () => {
+                    this.flowGraph = this.FLOW_GRAPH_LOCATION;
+                    this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime()) / (1000 * 60 * 60 * 24));
+                    this.renderLocationGraph(this._SfCustomContainer);
+                    attachHandlers();
+                });
+                const buttonStatusMore = this._SfCustomContainer.querySelector('#button-status-more');
+                buttonStatusMore === null || buttonStatusMore === void 0 ? void 0 : buttonStatusMore.addEventListener('click', () => {
+                    const divStatusList = this._SfCustomContainer.querySelectorAll('.late-statuses');
+                    for (var i = 0; i < divStatusList.length; i++) {
+                        divStatusList[i].style.display = 'flex';
+                    }
+                    buttonStatusMore.style.display = 'none';
+                });
+            };
+            attachHandlers();
             if (this._SfCustomContainer.innerHTML.indexOf('myChart') >= 0) {
                 this.renderCompletenessGraph(this._SfCustomContainer);
             }
@@ -3455,7 +3540,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         if ((event.tags[l] + "").toLowerCase().indexOf((tags[i] + "").toLowerCase().split(';')[1]) >= 0) {
                             console.log('plot approved', event.approved);
                             //if(event.documents == null || event.documents[event.mmdd + '/' + new Date().getFullYear()] == null || JSON.parse(event.documents[event.mmdd + '/' + new Date().getFullYear()]) == null) {
-                            if (event.documents == null || event.documents.length === 0) {
+                            if (event.comments == null || event.comments.length === 0) {
                                 countNotStarted++;
                             }
                             else if (event.approved == null) {
@@ -3467,6 +3552,15 @@ let SfIEvents = class SfIEvents extends LitElement {
                             else if (event.approved) {
                                 countApproved++;
                             }
+                            // if(event.documents == null || event.documents.length === 0) {
+                            //   countNotStarted++;
+                            // } else if (event.approved == null) {
+                            //   countInProgress++;
+                            // } else if(!event.approved) {
+                            //   countInProgress++;
+                            // } else if(event.approved) {
+                            //   countApproved++;
+                            // }
                         }
                     }
                 }
@@ -3888,13 +3982,19 @@ let SfIEvents = class SfIEvents extends LitElement {
                         lastMonth = 12;
                         nextMonth = 2;
                     }
+                    console.log('last month', lastMonth);
                     let lastMonthsYear = -1;
                     let nextMonthsYear = -1;
                     if ((lastMonth) >= parseInt(this.calendarStartMM)) {
                         lastMonthsYear = parseInt(this.calendarStartYYYY);
                     }
                     else {
-                        lastMonthsYear = parseInt(this.calendarStartYYYY) + 1;
+                        if (j === 0) {
+                            lastMonthsYear = parseInt(this.calendarStartYYYY);
+                        }
+                        else {
+                            lastMonthsYear = parseInt(this.calendarStartYYYY) + 1;
+                        }
                     }
                     if ((nextMonth) >= parseInt(this.calendarStartMM)) {
                         nextMonthsYear = parseInt(this.calendarStartYYYY);
@@ -4100,7 +4200,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const indexK = ev.target.id.split('-')[3];
                     const dEvent = this.events[triggers[events[indexI].id][indexJ].newduedate][indexK];
                     this._SfDetailContainer.style.display = 'block';
-                    this.renderEventDetail(dEvent, triggers[events[indexI].id][indexJ].newduedate + "/" + ((new Date()).getFullYear() + ""));
+                    this.renderEventDetail(dEvent, triggers[events[indexI].id][indexJ].newduedate + "/" + ((new Date()).getFullYear() + ""), null);
                 });
             }
             const triggerBs = this._SfAdhocContainer.querySelectorAll('.button-trigger');
@@ -4176,10 +4276,12 @@ let SfIEvents = class SfIEvents extends LitElement {
             this.initCustomRightCol();
             (_a = this._SfCustomContainer.querySelector('#stream-start-date')) === null || _a === void 0 ? void 0 : _a.addEventListener('change', (ev) => {
                 console.log('start-date', ev);
+                this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
                 this.processDateSelection();
             });
             (_b = this._SfCustomContainer.querySelector('#stream-end-date')) === null || _b === void 0 ? void 0 : _b.addEventListener('change', (ev) => {
                 console.log('end-date', ev);
+                this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
                 this.processDateSelection();
             });
             // for(var i = 0; i < 3; i++) {
@@ -4307,6 +4409,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const dateResult = this.calculateStartAndEndDateOfPast(target);
                     await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
                     console.log('clicked ', target);
+                    this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                    this.currentColumnIndex = target + "";
                     this.renderPast(target);
                 });
                 (_b = this._SfPastContainer.querySelector('#stream-month-' + i + '-mobile')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', async (ev) => {
@@ -4314,6 +4418,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const dateResult = this.calculateStartAndEndDateOfPast(target);
                     await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
                     console.log('clicked ', target);
+                    this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                    this.currentColumnIndex = target + "";
                     this.renderPast(target);
                 });
             }
@@ -4324,8 +4430,65 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const idArr = id.split("-");
                     const mmdd = idArr[3] + "/" + idArr[4];
                     const j = idArr[5];
+                    let found = false;
+                    for (var k = 0; k < this.selectedItems.length; k++) {
+                        if (this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        this.selectedItems = [];
+                        this.clearButtonSelection();
+                    }
                     this._SfDetailContainer.style.display = 'block';
-                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
+                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""), this._SfPastContainer.querySelector('#stream-month-' + this.currentColumnIndex));
+                });
+            }
+            const streamEventsContainer = this._SfPastContainer.querySelectorAll('.stream-events-container');
+            const buttonSelect = this._SfPastContainer.querySelectorAll('.button-select');
+            for (i = 0; i < buttonSelect.length; i++) {
+                buttonSelect[i].addEventListener('click', (ev) => {
+                    console.log('eventscontainer', streamEventsContainer.length, buttonSelect.length);
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    // const mmdd = idArr[2] + "/" + idArr[3];
+                    // const j = idArr[4];
+                    // const makercheckers = idArr[5];
+                    const docs = idArr[6];
+                    if (ev.target.checked) {
+                        this.selectedItems.push(id);
+                    }
+                    else {
+                        this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+                    }
+                    if (this.selectedItems.length === 0) {
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            buttonSelect[k].style.display = 'block';
+                            streamEventsContainer[k].style.display = 'block';
+                        }
+                    }
+                    else {
+                        if (this.selectedItems.length === 1) {
+                            const id1 = id;
+                            const idArr1 = id1.split("-");
+                            const status = idArr1[13].replace(/_/g, '-');
+                            this.selectedStatus = status;
+                        }
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            const id1 = buttonSelect[k].id;
+                            const idArr1 = id1.split("-");
+                            const docs1 = idArr1[6];
+                            const status = idArr1[13].replace(/_/g, '-');
+                            if (docs == docs1 && status == this.selectedStatus) {
+                            }
+                            else {
+                                buttonSelect[k].style.display = 'none';
+                                streamEventsContainer[k].style.display = 'none';
+                            }
+                        }
+                    }
+                    // (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+                    // this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
                 });
             }
             this.renderCompletenessGraph(this._SfPastContainer);
@@ -4473,6 +4636,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const dateResult = this.calculateStartAndEndDateOfUpcoming(target);
                     await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
                     console.log('clicked ', target);
+                    this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                    this.currentColumnIndex = target + "";
                     this.renderUpcoming(target);
                 });
                 (_b = this._SfUpcomingContainer.querySelector('#stream-month-' + i + '-mobile')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', async (ev) => {
@@ -4480,6 +4645,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const dateResult = this.calculateStartAndEndDateOfUpcoming(target);
                     await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
                     console.log('clicked ', target);
+                    this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                    this.currentColumnIndex = target + "";
                     this.renderUpcoming(target);
                 });
             }
@@ -4490,8 +4657,65 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const idArr = id.split("-");
                     const mmdd = idArr[3] + "/" + idArr[4];
                     const j = idArr[5];
+                    let found = false;
+                    for (var k = 0; k < this.selectedItems.length; k++) {
+                        if (this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        this.selectedItems = [];
+                        this.clearButtonSelection();
+                    }
                     this._SfDetailContainer.style.display = 'block';
-                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
+                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""), this._SfUpcomingContainer.querySelector('#stream-month-' + this.currentColumnIndex));
+                });
+            }
+            const streamEventsContainer = this._SfUpcomingContainer.querySelectorAll('.stream-events-container');
+            const buttonSelect = this._SfUpcomingContainer.querySelectorAll('.button-select');
+            for (i = 0; i < buttonSelect.length; i++) {
+                buttonSelect[i].addEventListener('click', (ev) => {
+                    console.log('eventscontainer', streamEventsContainer.length, buttonSelect.length);
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    // const mmdd = idArr[2] + "/" + idArr[3];
+                    // const j = idArr[4];
+                    // const makercheckers = idArr[5];
+                    const docs = idArr[6];
+                    if (ev.target.checked) {
+                        this.selectedItems.push(id);
+                    }
+                    else {
+                        this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+                    }
+                    if (this.selectedItems.length === 0) {
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            buttonSelect[k].style.display = 'block';
+                            streamEventsContainer[k].style.display = 'block';
+                        }
+                    }
+                    else {
+                        if (this.selectedItems.length === 1) {
+                            const id1 = id;
+                            const idArr1 = id1.split("-");
+                            const status = idArr1[13].replace(/_/g, '-');
+                            this.selectedStatus = status;
+                        }
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            const id1 = buttonSelect[k].id;
+                            const idArr1 = id1.split("-");
+                            const docs1 = idArr1[6];
+                            const status = idArr1[13].replace(/_/g, '-');
+                            if (docs == docs1 && status == this.selectedStatus) {
+                            }
+                            else {
+                                buttonSelect[k].style.display = 'none';
+                                streamEventsContainer[k].style.display = 'none';
+                            }
+                        }
+                    }
+                    // (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+                    // this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
                 });
             }
             this.renderCompletenessGraph(this._SfUpcomingContainer);
@@ -4613,6 +4837,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                     console.log('clicked ', target);
                     const dateResult = this.calculateStartAndEndDateOfThis(target);
                     await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+                    this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                    this.currentColumnIndex = target + "";
                     this.renderThis(target);
                 });
                 (_b = this._SfThisContainer.querySelector('#stream-month-' + i + '-mobile')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', async (ev) => {
@@ -4620,6 +4846,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                     console.log('clicked ', target);
                     const dateResult = this.calculateStartAndEndDateOfThis(target);
                     await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+                    this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                    this.currentColumnIndex = target + "";
                     this.renderThis(target);
                 });
             }
@@ -4630,8 +4858,65 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const idArr = id.split("-");
                     const mmdd = idArr[3] + "/" + idArr[4];
                     const j = idArr[5];
+                    let found = false;
+                    for (var k = 0; k < this.selectedItems.length; k++) {
+                        if (this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        this.selectedItems = [];
+                        this.clearButtonSelection();
+                    }
                     this._SfDetailContainer.style.display = 'block';
-                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
+                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""), this._SfThisContainer.querySelector('#stream-month-' + this.currentColumnIndex));
+                });
+            }
+            const streamEventsContainer = this._SfThisContainer.querySelectorAll('.stream-events-container');
+            const buttonSelect = this._SfThisContainer.querySelectorAll('.button-select');
+            for (i = 0; i < buttonSelect.length; i++) {
+                buttonSelect[i].addEventListener('click', (ev) => {
+                    console.log('eventscontainer', streamEventsContainer.length, buttonSelect.length);
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    // const mmdd = idArr[2] + "/" + idArr[3];
+                    // const j = idArr[4];
+                    // const makercheckers = idArr[5];
+                    const docs = idArr[6];
+                    if (ev.target.checked) {
+                        this.selectedItems.push(id);
+                    }
+                    else {
+                        this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+                    }
+                    if (this.selectedItems.length === 0) {
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            buttonSelect[k].style.display = 'block';
+                            streamEventsContainer[k].style.display = 'block';
+                        }
+                    }
+                    else {
+                        if (this.selectedItems.length === 1) {
+                            const id1 = id;
+                            const idArr1 = id1.split("-");
+                            const status = idArr1[13].replace(/_/g, '-');
+                            this.selectedStatus = status;
+                        }
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            const id1 = buttonSelect[k].id;
+                            const idArr1 = id1.split("-");
+                            const docs1 = idArr1[6];
+                            const status = idArr1[13].replace(/_/g, '-');
+                            if (docs == docs1 && status == this.selectedStatus) {
+                            }
+                            else {
+                                buttonSelect[k].style.display = 'none';
+                                streamEventsContainer[k].style.display = 'none';
+                            }
+                        }
+                    }
+                    // (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+                    // this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
                 });
             }
             this.renderCompletenessGraph(this._SfThisContainer);
@@ -4747,9 +5032,12 @@ let SfIEvents = class SfIEvents extends LitElement {
                 (_a = this._SfStreamContainer.querySelector('#stream-month-' + i)) === null || _a === void 0 ? void 0 : _a.addEventListener('click', async (ev) => {
                     const target = parseInt(ev.target.id.split('-')[2]);
                     const dateResult = this.calculateStartAndEndDateOfStream(target);
+                    console.log('dateresult', dateResult);
                     if (dateResult != null) {
                         await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
                     }
+                    this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                    this.currentColumnIndex = target + "";
                     this.renderStream(target);
                 });
                 (_b = this._SfStreamContainer.querySelector('#stream-month-' + i + '-mobile')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', async (ev) => {
@@ -4758,6 +5046,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                     if (dateResult != null) {
                         await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
                     }
+                    this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+                    this.currentColumnIndex = target + "";
                     this.renderStream(target);
                 });
             }
@@ -4768,11 +5058,74 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const idArr = id.split("-");
                     const mmdd = idArr[3] + "/" + idArr[4];
                     const j = idArr[5];
+                    let found = false;
+                    for (var k = 0; k < this.selectedItems.length; k++) {
+                        if (this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        this.selectedItems = [];
+                        this.clearButtonSelection();
+                    }
                     this._SfDetailContainer.style.display = 'block';
-                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
+                    this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""), this._SfStreamContainer.querySelector('#stream-month-' + this.currentColumnIndex));
+                });
+            }
+            const streamEventsContainer = this._SfStreamContainer.querySelectorAll('.stream-events-container');
+            const buttonSelect = this._SfStreamContainer.querySelectorAll('.button-select');
+            for (i = 0; i < buttonSelect.length; i++) {
+                buttonSelect[i].addEventListener('click', (ev) => {
+                    console.log('eventscontainer', streamEventsContainer.length, buttonSelect.length);
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    // const mmdd = idArr[2] + "/" + idArr[3];
+                    // const j = idArr[4];
+                    // const makercheckers = idArr[5];
+                    const docs = idArr[6];
+                    if (ev.target.checked) {
+                        this.selectedItems.push(id);
+                    }
+                    else {
+                        this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+                    }
+                    if (this.selectedItems.length === 0) {
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            buttonSelect[k].style.display = 'block';
+                            streamEventsContainer[k].style.display = 'block';
+                        }
+                    }
+                    else {
+                        if (this.selectedItems.length === 1) {
+                            const id1 = id;
+                            const idArr1 = id1.split("-");
+                            const status = idArr1[13].replace(/_/g, '-');
+                            this.selectedStatus = status;
+                        }
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            const id1 = buttonSelect[k].id;
+                            const idArr1 = id1.split("-");
+                            const docs1 = idArr1[6];
+                            const status = idArr1[13].replace(/_/g, '-');
+                            if (docs == docs1 && status == this.selectedStatus) {
+                            }
+                            else {
+                                buttonSelect[k].style.display = 'none';
+                                streamEventsContainer[k].style.display = 'none';
+                            }
+                        }
+                    }
+                    // (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+                    // this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""));
                 });
             }
             this.renderCompletenessGraph(this._SfStreamContainer);
+        };
+        this.clearButtonSelection = () => {
+            const buttonSelect = this._SfStreamContainer.querySelectorAll('.button-select');
+            for (var i = 0; i < buttonSelect.length; i++) {
+                buttonSelect[i].checked = false;
+            }
         };
         this.clearGraphData = () => {
             this.chart = null;
@@ -5698,7 +6051,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this.renderChart3(ctx3, 'bar', dataBar2, "Risk Area vs Timeliness");
             }
         };
-        this.renderEventDetail = (event, mmddyyyy) => {
+        this.renderEventDetail = (event, mmddyyyy, currentColumnButton) => {
             var _a, _b, _c, _d, _e, _f, _g, _h;
             let comments, docs, approved, dateOfCompletion, makercheckers, docsOptional;
             let entityId = "";
@@ -5726,6 +6079,15 @@ let SfIEvents = class SfIEvents extends LitElement {
       </div>
     
     `;
+            if (this.selectedItems.length > 1) {
+                html += `
+    
+        <div class="d-flex justify-between m-20">
+          <h4 class="m-0">${this.selectedItems.length - 1} other ` + (this.selectedItems.length === 1 ? `item` : `items`) + ` also selected</h4>
+        </div>
+    
+      `;
+            }
             html += '<div class="accordian-container m-20 pb-20" part="accordian-container">';
             html += '<div part="detail-summary">';
             html += ('<div part="detail-summary-title" class="pl-20 pr-20"><h1>' + event['obligationtitle'] + '</h1></div>');
@@ -5887,7 +6249,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 console.log('docs received', comments);
                 console.log('docs received', approved);
                 if (this.myRole == this.TAB_APPROVER || this.myRole == this.TAB_FUNCTION_HEAD) {
-                    if (docs.length > 0) {
+                    if (comments.length > 0) {
                         html += '<div class="d-flex justify-between m-20">';
                         html += '<h3 part="results-title" class="m-0"><br />Approve Compliance</h3>';
                         html += '</div>';
@@ -5922,26 +6284,41 @@ let SfIEvents = class SfIEvents extends LitElement {
                     html += '<div class="d-flex justify-between m-20">';
                     html += '<h3 part="results-title" class="m-0"><br />Report Compliance</h3>';
                     html += '</div>';
-                    html += '<div class="m-20" part="report-container">';
-                    html += '<div class="d-flex justify-between align-center">';
-                    html += '<button class="invisible" part="button">Save</button>';
-                    html += '<button id="button-uploader-submit-report" class="button-submit" part="button">Save</button>';
-                    html += '</div>';
-                    html += '<div class="d-flex m-20 flex-col">';
-                    html += '<label part="input-label">Reporter Comments</label>';
-                    html += '<input id="input-reporter-comments" type="text" part="input" value=""/><br />';
-                    html += '<label part="input-label">Date of Completion</label>';
-                    html += '<input id="input-reporter-doc" part="input" type="date" value="' + (dateOfCompletion == "" ? dateOfCompletion : new Date(parseInt(dateOfCompletion)).toISOString().substring(0, 10)) + '" max="' + (new Date().toISOString().substring(0, 10)) + '"/><br />';
-                    if (docsOptional.length === 0) {
-                        html += '<label part="input-label">Supporting Documents</label>';
-                        html += '<slot name="uploader"></slot>';
+                    var showSubmissionSection = true;
+                    var showGoogleFormLink = false;
+                    if (event['form'].length > 5) {
+                        if (event['form'].indexOf('docs.google.com/forms') >= 0) {
+                            showSubmissionSection = false;
+                            if (!approved) {
+                                showGoogleFormLink = true;
+                            }
+                        }
                     }
-                    html += '<br />';
-                    if (makercheckers.length > 0) {
-                        html += '<div part="td-head" class="td-head d-flex justify-center align-center"><span class="material-symbols-outlined">check_small</span><div>&nbsp;Auto-approve Enabled</div></div>';
+                    if (showGoogleFormLink) {
+                        html += ('<div part="detail-summary-form" class="mt-20 pl-20 pr-20"><button part="button" onclick="window.open(\'' + event['form'] + (this.projectId + '_' + entityId + '_' + locationId + '_' + event['id'] + '_' + mmddyyyy) + '\',\'_blank\')">Submit Via Link</button></div>');
                     }
-                    html += '</div>';
-                    html += '</div>';
+                    if (showSubmissionSection) {
+                        html += '<div class="m-20" part="report-container">';
+                        html += '<div class="d-flex justify-between align-center">';
+                        html += '<button class="invisible" part="button">Save</button>';
+                        html += '<button id="button-uploader-submit-report" class="button-submit" part="button">Save</button>';
+                        html += '</div>';
+                        html += '<div class="d-flex m-20 flex-col">';
+                        html += '<label part="input-label">Reporter Comments</label>';
+                        html += '<input id="input-reporter-comments" type="text" part="input" value=""/><br />';
+                        html += '<label part="input-label">Date of Completion</label>';
+                        html += '<input id="input-reporter-doc" part="input" type="date" value="' + (dateOfCompletion == "" ? dateOfCompletion : new Date(parseInt(dateOfCompletion)).toISOString().substring(0, 10)) + '" max="' + (new Date().toISOString().substring(0, 10)) + '"/><br />';
+                        if (docsOptional.length === 0) {
+                            html += '<label part="input-label">Supporting Documents</label>';
+                            html += '<slot name="uploader"></slot>';
+                        }
+                        html += '<br />';
+                        if (makercheckers.length > 0) {
+                            html += '<div part="td-head" class="td-head d-flex justify-center align-center"><span class="material-symbols-outlined">check_small</span><div>&nbsp;Auto-approve Enabled</div></div>';
+                        }
+                        html += '</div>';
+                        html += '</div>';
+                    }
                 }
                 if (this.myRole == this.TAB_AUDITOR) {
                     html += '<div class="d-flex justify-between m-20">';
@@ -6001,7 +6378,21 @@ let SfIEvents = class SfIEvents extends LitElement {
                 for (var i = 0; i < comments.length; i++) {
                     html += '<div part="commentbox" class="d-flex commentbox ' + (comments[i].author + "").toLowerCase() + 'box">';
                     html += '<div class="mr-20"><strong>' + comments[i].author + '</strong></div>';
-                    html += '<div class="">' + comments[i].comment + '<br /><small><span class="muted">' + comments[i].timestamp + '</span></small></div>';
+                    const onlyCommentText = comments[i].comment.replace(/ *\([^)]*\) */g, "").trim();
+                    try {
+                        const jsonComments = JSON.parse(onlyCommentText);
+                        var htmlTable = '';
+                        for (var j = 0; j < Object.keys(jsonComments).length; j++) {
+                            htmlTable += '<div class="mb-20">';
+                            htmlTable += ('<div part="detail-head">' + Object.keys(jsonComments)[j] + '</div>');
+                            htmlTable += ('<sf-i-elastic-text text="' + jsonComments[Object.keys(jsonComments)[j]] + '" minLength="20"></sf-i-elastic-text>');
+                            htmlTable += '</div>';
+                        }
+                        html += '<div class="">' + htmlTable + '<small><span class="muted">' + comments[i].timestamp + '</span></small></div>';
+                    }
+                    catch (e) {
+                        html += '<div class="">' + comments[i].comment + '<br /><small><span class="muted">' + comments[i].timestamp + '</span></small></div>';
+                    }
                     html += '</div>';
                 }
                 if (comments.length === 0) {
@@ -6069,73 +6460,124 @@ let SfIEvents = class SfIEvents extends LitElement {
                         "cancelable": false
                     });
                     this._SfDetailContainer.querySelector('#button-detail-close').dispatchEvent(clickEvent);
-                    await this.fetchUserCalendar_2();
-                    if (this.getCurrentTab() == this.TAB_STREAM) {
-                        this.renderTabs(this.TAB_STREAM);
-                        this.renderStream();
+                    if (this.getCurrentTab() == this.TAB_CUSTOM) {
+                        this.processDateSelection();
+                    }
+                    else {
+                        if (currentColumnButton != null) {
+                            currentColumnButton.click();
+                        }
                     }
                 });
                 (_g = this._SfDetailContainer.querySelector('#button-uploader-submit-audit')) === null || _g === void 0 ? void 0 : _g.addEventListener('click', async () => {
                     const comments = this._SfDetailContainer.querySelector('#input-auditor-comments').value;
                     const approved = this._SfDetailContainer.querySelector('#input-approve-yes').checked;
-                    await this.uploadAudit(entityId, locationId, mmddyyyy, event["id"], comments, approved);
+                    if (this.selectedItems.length === 0) {
+                        await this.uploadAudit(entityId, locationId, mmddyyyy, event["id"], comments, approved);
+                    }
+                    else {
+                        for (var k = 0; k < this.selectedItems.length; k++) {
+                            const selectedId = this.selectedItems[k];
+                            console.log('selectedid', selectedId);
+                            entityId = selectedId.split('-')[7].replace(/_/g, '-');
+                            locationId = selectedId.split('-')[8].replace(/_/g, '-');
+                            const eventId = selectedId.split('-')[9].replace(/_/g, '-');
+                            mmddyyyy = selectedId.split('-')[10] + '/' + selectedId.split('-')[11] + '/' + selectedId.split('-')[12];
+                            console.log(entityId, locationId, eventId, mmddyyyy);
+                            await this.uploadAudit(entityId, locationId, mmddyyyy, eventId, comments, approved);
+                        }
+                    }
                     var clickEvent = new MouseEvent("click", {
                         "view": window,
                         "bubbles": true,
                         "cancelable": false
                     });
                     this._SfDetailContainer.querySelector('#button-detail-close').dispatchEvent(clickEvent);
-                    await this.fetchUserCalendar_2();
-                    if (this.getCurrentTab() == this.TAB_STREAM) {
-                        this.renderTabs(this.TAB_STREAM);
-                        this.renderStream();
-                    }
-                });
-                if (this.myRole == this.TAB_REPORTER) {
-                    if (approved) {
-                        this._SfDetailContainer.querySelector('#button-uploader-submit-report').style.visibility = 'hidden';
+                    if (this.getCurrentTab() == this.TAB_CUSTOM) {
+                        this.processDateSelection();
                     }
                     else {
-                        this._SfDetailContainer.querySelector('#button-uploader-submit-report').style.visibility = 'visible';
-                        (_h = this._SfDetailContainer.querySelector('#button-uploader-submit-report')) === null || _h === void 0 ? void 0 : _h.addEventListener('click', async () => {
-                            const reportercomments = this._SfDetailContainer.querySelector('#input-reporter-comments').value;
-                            const reporterdoc = this._SfDetailContainer.querySelector('#input-reporter-doc').value.length > 0 ? (new Date(this._SfDetailContainer.querySelector('#input-reporter-doc').value).getTime() + "") : "";
-                            let docs = [];
-                            if (docsOptional.length === 0) {
-                                docs = this._SfUploader[0].querySelector('#uploader').selectedValues();
-                            }
-                            if (docs.length === 0 && docsOptional.length === 0) {
-                                this.setError('No documents uploaded!');
-                                setTimeout(() => {
-                                    this.clearMessages();
-                                }, 3000);
-                            }
-                            else {
-                                if (reporterdoc.length === 0) {
-                                    this.setError('Date of completion not selected!');
+                        if (currentColumnButton != null) {
+                            currentColumnButton.click();
+                        }
+                    }
+                });
+                if (this.myRole == this.TAB_REPORTER || this.myRole == this.TAB_FUNCTION_HEAD) {
+                    if (approved) {
+                        if (this._SfDetailContainer.querySelector('#button-uploader-submit-report') != null) {
+                            this._SfDetailContainer.querySelector('#button-uploader-submit-report').style.visibility = 'hidden';
+                        }
+                    }
+                    else {
+                        if (this._SfDetailContainer.querySelector('#button-uploader-submit-report') != null) {
+                            this._SfDetailContainer.querySelector('#button-uploader-submit-report').style.visibility = 'visible';
+                            (_h = this._SfDetailContainer.querySelector('#button-uploader-submit-report')) === null || _h === void 0 ? void 0 : _h.addEventListener('click', async () => {
+                                const reportercomments = this._SfDetailContainer.querySelector('#input-reporter-comments').value;
+                                const reporterdoc = this._SfDetailContainer.querySelector('#input-reporter-doc').value.length > 0 ? (new Date(this._SfDetailContainer.querySelector('#input-reporter-doc').value).getTime() + "") : "";
+                                let docs = [];
+                                if (docsOptional.length === 0) {
+                                    docs = this._SfUploader[0].querySelector('#uploader').selectedValues();
+                                }
+                                if (docs.length === 0 && docsOptional.length === 0) {
+                                    this.setError('No documents uploaded!');
                                     setTimeout(() => {
                                         this.clearMessages();
                                     }, 3000);
                                 }
                                 else {
-                                    await this.uploadReport(entityId, locationId, mmddyyyy, event["id"], reportercomments, reporterdoc, docs);
-                                    var clickEvent = new MouseEvent("click", {
-                                        "view": window,
-                                        "bubbles": true,
-                                        "cancelable": false
-                                    });
-                                    if (makercheckers.length > 0) {
-                                        await this.uploadReview(entityId, locationId, mmddyyyy, event["id"], "Auto approved", true);
+                                    if (reporterdoc.length === 0) {
+                                        this.setError('Date of completion not selected!');
+                                        setTimeout(() => {
+                                            this.clearMessages();
+                                        }, 3000);
                                     }
-                                    this._SfDetailContainer.querySelector('#button-detail-close').dispatchEvent(clickEvent);
-                                    await this.fetchUserCalendar_2();
-                                    if (this.getCurrentTab() == this.TAB_STREAM) {
-                                        this.renderTabs(this.TAB_STREAM);
-                                        this.renderStream();
+                                    else {
+                                        if (this.selectedItems.length === 0) {
+                                            console.log('makerscheckers', makercheckers);
+                                            await this.uploadReport(entityId, locationId, mmddyyyy, event["id"], reportercomments, reporterdoc, docs);
+                                            if (makercheckers.length > 0) {
+                                                await this.uploadReview(entityId, locationId, mmddyyyy, event["id"], "Auto approved", true);
+                                            }
+                                        }
+                                        else {
+                                            for (var k = 0; k < this.selectedItems.length; k++) {
+                                                const selectedId = this.selectedItems[k];
+                                                console.log('selectedid', selectedId);
+                                                const makercheckersL = selectedId.split('-')[5];
+                                                entityId = selectedId.split('-')[7].replace(/_/g, '-');
+                                                locationId = selectedId.split('-')[8].replace(/_/g, '-');
+                                                const eventId = selectedId.split('-')[9].replace(/_/g, '-');
+                                                mmddyyyy = selectedId.split('-')[10] + '/' + selectedId.split('-')[11] + '/' + selectedId.split('-')[12];
+                                                console.log(entityId, locationId, eventId, mmddyyyy);
+                                                await this.uploadReport(entityId, locationId, mmddyyyy, eventId, reportercomments, reporterdoc, docs);
+                                                if (parseInt(makercheckersL) > 0) {
+                                                    await this.uploadReview(entityId, locationId, mmddyyyy, eventId, "Auto approved", true);
+                                                }
+                                            }
+                                        }
+                                        var clickEvent = new MouseEvent("click", {
+                                            "view": window,
+                                            "bubbles": true,
+                                            "cancelable": false
+                                        });
+                                        this._SfDetailContainer.querySelector('#button-detail-close').dispatchEvent(clickEvent);
+                                        // await this.fetchUserCalendar_2();
+                                        // if(this.getCurrentTab() == this.TAB_STREAM) {
+                                        //   this.renderTabs(this.TAB_STREAM);
+                                        //   this.renderStream();
+                                        // }
+                                        if (this.getCurrentTab() == this.TAB_CUSTOM) {
+                                            this.processDateSelection();
+                                        }
+                                        else {
+                                            if (currentColumnButton != null) {
+                                                currentColumnButton.click();
+                                            }
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
                 }
                 if (this._SfUploader[0] != null) {
@@ -6158,17 +6600,25 @@ let SfIEvents = class SfIEvents extends LitElement {
                     }
                 }
                 console.log('approved 1', event["approved"], this.myRole, this.TAB_APPROVER);
-                if (this.myRole == this.TAB_APPROVER || this.myRole == this.TAB_VIEWER || this.myRole == this.TAB_AUDITOR) {
+                if (this.myRole == this.TAB_APPROVER || this.myRole == this.TAB_VIEWER || this.myRole == this.TAB_AUDITOR || this.myRole == this.TAB_FUNCTION_HEAD) {
                     console.log('approved 1', event["approved"], this.myRole, this.TAB_APPROVER);
                     if (event["approved"] != null) {
                         if (event["approved"] === true) {
                             console.log('approved 2', event["approved"], this.myRole, this.TAB_APPROVER);
-                            this._SfDetailContainer.querySelector('#input-approve-yes').checked = true;
-                            this._SfDetailContainer.querySelector('#input-approve-no').checked = false;
+                            if (this._SfDetailContainer.querySelector('#input-approve-yes') != null) {
+                                this._SfDetailContainer.querySelector('#input-approve-yes').checked = true;
+                            }
+                            if (this._SfDetailContainer.querySelector('#input-approve-no') != null) {
+                                this._SfDetailContainer.querySelector('#input-approve-no').checked = false;
+                            }
                         }
                         else {
-                            this._SfDetailContainer.querySelector('#input-approve-yes').checked = false;
-                            this._SfDetailContainer.querySelector('#input-approve-no').checked = true;
+                            if (this._SfDetailContainer.querySelector('#input-approve-yes') != null) {
+                                this._SfDetailContainer.querySelector('#input-approve-yes').checked = false;
+                            }
+                            if (this._SfDetailContainer.querySelector('#input-approve-no') != null) {
+                                this._SfDetailContainer.querySelector('#input-approve-no').checked = true;
+                            }
                         }
                     }
                     else {
@@ -6513,15 +6963,15 @@ let SfIEvents = class SfIEvents extends LitElement {
             }
             html += '</tbody>';
             html += '</table>';
-            html += '<div class="mt-10 mb-10 d-flex justify-center align-center left-sticky">';
-            if (cursor[cursor.length - 1].prev != "") {
-                html += '<button part="button-icon" class="material-icons ml-10 mr-10 button-prev">navigate_before</button>';
-            }
-            html += '<label part="input-label" class="ml-10 mr-10">' + cursor.length + ' of ' + Math.ceil(found / this.SEARCH_BLOCK_SIZE) + '</label>';
-            if (jsonData.length === this.SEARCH_BLOCK_SIZE) {
-                html += '<button part="button-icon" class="material-icons ml-10 mr-10 button-next">navigate_next</button>';
-            }
-            html += '</div>';
+            // html += '<div class="mt-10 mb-10 d-flex justify-center align-center left-sticky">';
+            //   if(cursor[cursor.length - 1].prev != "") {
+            //     html += '<button part="button-icon" class="material-icons ml-10 mr-10 button-prev">navigate_before</button>'
+            //   }
+            //   html += '<label part="input-label" class="ml-10 mr-10">'+cursor.length+' of '+Math.ceil(found/this.SEARCH_BLOCK_SIZE)+'</label>'
+            //   if(jsonData.length === this.SEARCH_BLOCK_SIZE) {
+            //     html += '<button part="button-icon" class="material-icons ml-10 mr-10 button-next">navigate_next</button>'
+            //   }
+            // html += '</div>';
             divElement.innerHTML = html;
             (_a = this._SfButtonNext) === null || _a === void 0 ? void 0 : _a.addEventListener('click', async () => {
                 const resultFunction = await fetchFunction(searchString, cursor[cursor.length - 1].next);
@@ -7050,24 +7500,39 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<button class="tab-button" id="consumer-tab-auditor" part="' + (this.myRole == this.TAB_VIEWER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Viewer</button>';
             this._SfRoleTabContainer.innerHTML = html;
             (_a = this._SfRoleTabContainer.querySelector('#consumer-tab-reporter')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', async () => {
+                var _a;
                 this.myRole = this.TAB_REPORTER;
-                this.proceedToCalendar();
+                this.renderRoleTabs();
+                // this.proceedToCalendar();
+                (_a = this._SfTabContainer.querySelector('#calendar-tab-month')) === null || _a === void 0 ? void 0 : _a.click();
             });
             (_b = this._SfRoleTabContainer.querySelector('#consumer-tab-approver')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', async () => {
+                var _a;
                 this.myRole = this.TAB_APPROVER;
-                this.proceedToCalendar();
+                this.renderRoleTabs();
+                // this.proceedToCalendar();
+                (_a = this._SfTabContainer.querySelector('#calendar-tab-month')) === null || _a === void 0 ? void 0 : _a.click();
             });
             (_c = this._SfRoleTabContainer.querySelector('#consumer-tab-functionhead')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', async () => {
+                var _a;
                 this.myRole = this.TAB_FUNCTION_HEAD;
-                this.proceedToCalendar();
+                this.renderRoleTabs();
+                // this.proceedToCalendar();
+                (_a = this._SfTabContainer.querySelector('#calendar-tab-month')) === null || _a === void 0 ? void 0 : _a.click();
             });
             (_d = this._SfRoleTabContainer.querySelector('#consumer-tab-auditor')) === null || _d === void 0 ? void 0 : _d.addEventListener('click', async () => {
+                var _a;
                 this.myRole = this.TAB_AUDITOR;
-                this.proceedToCalendar();
+                this.renderRoleTabs();
+                // this.proceedToCalendar();
+                (_a = this._SfTabContainer.querySelector('#calendar-tab-month')) === null || _a === void 0 ? void 0 : _a.click();
             });
             (_e = this._SfRoleTabContainer.querySelector('#consumer-tab-viewer')) === null || _e === void 0 ? void 0 : _e.addEventListener('click', async () => {
+                var _a;
                 this.myRole = this.TAB_VIEWER;
-                this.proceedToCalendar();
+                this.renderRoleTabs();
+                // this.proceedToCalendar();
+                (_a = this._SfTabContainer.querySelector('#calendar-tab-month')) === null || _a === void 0 ? void 0 : _a.click();
             });
         };
         this.csvmaker = (data) => {
@@ -7330,9 +7795,13 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this.renderChartSettings(container, 0, ctx);
             });
             if (selectedTab === 0) {
+                const radioCompleteness = container.querySelector('#radio-completeness');
+                radioCompleteness.click();
                 this.renderChartSettingsFilters(container.querySelector('#chart-settings'), ctx);
             }
             if (selectedTab === 1) {
+                const radioCompleteness = container.querySelector('#radio-completeness');
+                radioCompleteness.click();
                 this.renderChartSettingsSettings(container.querySelector('#chart-settings'));
             }
             container.querySelector('#chart-settings').addEventListener('canceled', () => {
@@ -7903,6 +8372,7 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.renderTabs = (selectedTab) => {
             var _a, _b, _c, _d, _e, _f, _g;
             this.clearAllCalendars();
+            this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
             var html = '';
             html += '<button class="tab-button mb-10" id="calendar-tab-month" part="' + (selectedTab == this.TAB_STREAM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Month</button>';
             html += '<button class="tab-button mb-10" id="calendar-tab-upcoming" part="' + (selectedTab == this.TAB_UPCOMING ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Upcoming</button>';
@@ -9183,12 +9653,33 @@ let SfIEvents = class SfIEvents extends LitElement {
         };
         this.fetchSearchStatutes = async (searchString, cursor = "") => {
             let url = "https://" + this.apiIdStatutes + ".execute-api.us-east-1.amazonaws.com/test/list";
-            const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-            const xhr = (await this.prepareXhr({ "searchstring": searchString, "cursor": cursor }, url, this._SfLoader, authorization));
+            let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+            let xhr = (await this.prepareXhr({ "searchstring": searchString, "cursor": cursor }, url, this._SfLoader, authorization));
             this._SfLoader.innerHTML = '';
             if (xhr.status == 200) {
                 const jsonRespose = JSON.parse(xhr.responseText);
-                console.log(jsonRespose);
+                console.log('searchstatutes', jsonRespose);
+                let newCursor = jsonRespose.cursor;
+                let i = 0;
+                while (true) {
+                    url = "https://" + this.apiIdStatutes + ".execute-api.us-east-1.amazonaws.com/test/list";
+                    authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+                    xhr = (await this.prepareXhr({ "searchstring": searchString, "cursor": newCursor }, url, this._SfLoader, authorization, "" + parseInt(((i) * 10 * 100 / jsonRespose.found) + "") + "%"));
+                    this._SfLoader.innerHTML = '';
+                    if (xhr.status == 200) {
+                        const jsonRespose1 = JSON.parse(xhr.responseText);
+                        jsonRespose.values.push(...jsonRespose1.values);
+                        if (newCursor == jsonRespose1.cursor) {
+                            break;
+                        }
+                        newCursor = jsonRespose1.cursor;
+                        console.log('newcursor', i, jsonRespose1.cursor);
+                    }
+                    else {
+                        break;
+                    }
+                    i++;
+                }
                 return jsonRespose;
             }
             else {
@@ -9198,12 +9689,35 @@ let SfIEvents = class SfIEvents extends LitElement {
         };
         this.fetchSearchCompliances = async (searchString, cursor = "") => {
             let url = "https://" + this.apiIdCompliances + ".execute-api.us-east-1.amazonaws.com/test/list";
-            const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-            const xhr = (await this.prepareXhr({ "searchstring": searchString, "cursor": cursor }, url, this._SfLoader, authorization));
+            let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+            let xhr = (await this.prepareXhr({ "searchstring": searchString, "cursor": cursor }, url, this._SfLoader, authorization));
             this._SfLoader.innerHTML = '';
             if (xhr.status == 200) {
                 const jsonRespose = JSON.parse(xhr.responseText);
                 console.log(jsonRespose);
+                let newCursor = jsonRespose.cursor;
+                console.log('newcursor', newCursor);
+                let i = 0;
+                while (true) {
+                    url = "https://" + this.apiIdCompliances + ".execute-api.us-east-1.amazonaws.com/test/list";
+                    authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+                    xhr = (await this.prepareXhr({ "searchstring": searchString, "cursor": newCursor }, url, this._SfLoader, authorization, "" + parseInt(((i) * 10 * 100 / jsonRespose.found) + "") + "%"));
+                    this._SfLoader.innerHTML = '';
+                    if (xhr.status == 200) {
+                        const jsonRespose1 = JSON.parse(xhr.responseText);
+                        console.log('newcursor response', jsonRespose1);
+                        jsonRespose.values.push(...jsonRespose1.values);
+                        if (newCursor == jsonRespose1.cursor) {
+                            break;
+                        }
+                        newCursor = jsonRespose1.cursor;
+                        console.log('newcursor', i, jsonRespose1.cursor);
+                    }
+                    else {
+                        break;
+                    }
+                    i++;
+                }
                 return jsonRespose;
             }
             else {
@@ -10144,7 +10658,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 }, 3000);
             }
         };
-        this.fetchAdhoc = async (reprogramTriggers = false) => {
+        this.fetchAdhoc = async (reprogramTriggers = false, startDate = "", endDate = "") => {
             let path = "";
             if (this.tagId != null && this.tagId != "") {
                 path = "getallmytagevents";
@@ -10161,9 +10675,24 @@ let SfIEvents = class SfIEvents extends LitElement {
             else {
                 path = "getallmyevents";
             }
+            let sDate = "";
+            let eDate = "";
+            let paginate = false;
+            console.log('currenttab', this.getCurrentTab());
+            if (this.getCurrentTab() == this.TAB_YEAR) {
+                sDate = "03/31/" + this.calendarStartYYYY;
+                eDate = "04/01/" + (this.calendarStartYYYY + 1);
+                paginate = true;
+            }
+            else {
+                sDate = startDate;
+                eDate = endDate;
+            }
             let url = "https://" + this.apiId + ".execute-api.us-east-1.amazonaws.com/test/" + path;
+            let urlBody = { "projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "true", "exclusivestartkey": "", "sdate": sDate, "edate": eDate, "paginate": paginate };
+            console.log('urlbody', urlBody);
             const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-            const xhr = (await this.prepareXhr({ "projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "true", "exclusivestartkey": "" }, url, this._SfLoader, authorization));
+            const xhr = (await this.prepareXhr(urlBody, url, this._SfLoader, authorization));
             this._SfLoader.innerHTML = '';
             if (xhr.status == 200) {
                 const jsonRespose = JSON.parse(xhr.responseText);
@@ -10174,7 +10703,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 let lastEvaluatedKey = jsonRespose.lastEvaluatedKey;
                 do {
                     if (lastEvaluatedKey != null) {
-                        const xhr2 = (await this.prepareXhr({ "projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "true", "exclusivestartkey": lastEvaluatedKey }, url, this._SfLoader, authorization));
+                        const xhr2 = (await this.prepareXhr({ "projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "true", "exclusivestartkey": lastEvaluatedKey, "sdate": sDate, "edate": eDate, "paginate": paginate }, url, this._SfLoader, authorization));
                         this._SfLoader.innerHTML = '';
                         if (xhr2.status == 200) {
                             const jsonRespose2 = JSON.parse(xhr2.responseText);
@@ -10407,13 +10936,13 @@ let SfIEvents = class SfIEvents extends LitElement {
             });
         };
         this.loadMode = async () => {
-            var _a;
+            var _a, _b;
             Chart.register(...registerables);
             //Chart.register(Colors);
             if (this.mode == "onboarding") {
                 //this.myOnboardingTab = this.TAB_STATUTES;
                 this.renderOnboardingTabs();
-                this.clickOnboardingTabs();
+                // this.clickOnboardingTabs();
                 //this.loadOnboardingStatutes();
                 //((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-compliances') as HTMLButtonElement).click();
             }
@@ -10426,16 +10955,25 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this.enableCalendar();
                 this.initInputs();
                 this.initCalendar();
-                if (this.myRole == "") {
+                let tempRole = this.myRole;
+                if (tempRole == "") {
                     this.myRole = this.TAB_REPORTER;
                 }
                 this.renderRoleTabs();
-                if (this.myRole != "") {
+                if (tempRole != "") {
                     this._SfRoleTabContainer.innerHTML = '';
                 }
-                this.renderTabs(this.TAB_STREAM);
+                console.log('stream received', this.stream, this.TAB_STREAM, this.TAB_YEAR);
+                if (this.stream == this.TAB_YEAR) {
+                    this.renderTabs(this.TAB_YEAR);
+                    (_a = this._SfTabContainer.querySelector('#calendar-tab-year')) === null || _a === void 0 ? void 0 : _a.click();
+                }
+                else {
+                    console.log('stream received rendering year', this.stream);
+                    this.renderTabs(this.TAB_STREAM);
+                    (_b = this._SfTabContainer.querySelector('#calendar-tab-month')) === null || _b === void 0 ? void 0 : _b.click();
+                }
                 //await this.fetchUserCalendar_2();
-                (_a = this._SfTabContainer.querySelector('#calendar-tab-month')) === null || _a === void 0 ? void 0 : _a.click();
                 // if(this.events != null && !this.foundCalendarInLocal()) {
                 //   this.renderTabs(this.TAB_YEAR);
                 //   this.renderCalendar();
@@ -11333,6 +11871,28 @@ SfIEvents.styles = css `
       align-items: center;
     }
     
+    .lds-text {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      margin-top: 2px;
+      margin-left: 2px;
+      width: 50px;
+      height: 50px;
+      color: gray;
+    }
+
+    .lds-text-c {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .lds-text-c-i {
+    }
+
     .lds-dual-ring {
       display: inline-block;
       width: 50px;
@@ -11697,6 +12257,9 @@ __decorate([
 ], SfIEvents.prototype, "jurisdictionLateStatusData", void 0);
 __decorate([
     property()
+], SfIEvents.prototype, "currentColumnIndex", void 0);
+__decorate([
+    property()
 ], SfIEvents.prototype, "frequencyData", void 0);
 __decorate([
     property()
@@ -11713,6 +12276,15 @@ __decorate([
 __decorate([
     property()
 ], SfIEvents.prototype, "locationLateStatusData", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "selectedItems", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "selectedStatus", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "stream", void 0);
 __decorate([
     query('.SfIEventsC')
 ], SfIEvents.prototype, "_SfIEventsC", void 0);

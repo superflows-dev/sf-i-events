@@ -141,12 +141,16 @@ export declare class SfIEvents extends LitElement {
     jurisdictionData: any;
     jurisdictionPartStatusData: any;
     jurisdictionLateStatusData: any;
+    currentColumnIndex: string;
     frequencyData: any;
     frequencyPartStatusData: any;
     frequencyLateStatusData: any;
     locationData: any;
     locationPartStatusData: any;
     locationLateStatusData: any;
+    selectedItems: Array<string>;
+    selectedStatus: string;
+    stream: string;
     static styles: import("lit").CSSResult;
     _SfIEventsC: any;
     _SfRowError: any;
@@ -233,7 +237,7 @@ export declare class SfIEvents extends LitElement {
     enablePast(): void;
     enableCustom(): void;
     enableAdhoc(): void;
-    prepareXhr: (data: any, url: string, loaderElement: any, authorization: any) => Promise<unknown>;
+    prepareXhr: (data: any, url: string, loaderElement: any, authorization: any, loaderText?: string) => Promise<unknown>;
     clearMessages: () => void;
     setError: (msg: string) => void;
     setSuccess: (msg: string) => void;
@@ -319,6 +323,7 @@ export declare class SfIEvents extends LitElement {
     renderUpcoming: (index?: number) => void;
     renderThis: (index?: number) => void;
     renderStream: (index?: number) => void;
+    clearButtonSelection: () => void;
     clearGraphData: () => void;
     clearGraph: (divContainer: HTMLDivElement, index: number) => void;
     renderCompletenessGraph: (divContainer: HTMLDivElement) => void;
@@ -330,7 +335,7 @@ export declare class SfIEvents extends LitElement {
     renderJurisdictionGraph: (divContainer: HTMLDivElement) => void;
     renderFrequencyGraph: (divContainer: HTMLDivElement) => void;
     renderRiskGraph: (divContainer: HTMLDivElement) => void;
-    renderEventDetail: (event: any, mmddyyyy: any) => void;
+    renderEventDetail: (event: any, mmddyyyy: any, currentColumnButton: HTMLButtonElement | null) => void;
     renderCalendar: () => void;
     renderTaggingTable: (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any, mandatoryFields: any, jobs: any, anotherProjection: any) => void;
     renderMappingTable: (divElement: any, jsonData: Array<any>, cursor: Array<any>, fetchFunction: any, searchString: string, mappedArray: any, found: number, uploadFunction: any, refreshFunction: any) => void;
@@ -463,7 +468,7 @@ export declare class SfIEvents extends LitElement {
     fetchUserCalendar: () => Promise<void>;
     fetchCalendar: () => Promise<void>;
     fetchReprogramAdhoc: () => Promise<void>;
-    fetchAdhoc: (reprogramTriggers?: boolean) => Promise<void>;
+    fetchAdhoc: (reprogramTriggers?: boolean, startDate?: string, endDate?: string) => Promise<void>;
     fetchEventMap: () => Promise<void>;
     fetchList: () => Promise<void>;
     initCalendar: () => Promise<void>;
