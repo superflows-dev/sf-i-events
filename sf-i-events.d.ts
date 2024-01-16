@@ -56,6 +56,11 @@ export declare class SfIEvents extends LitElement {
     TAB_FUNCTIONS: string;
     TAB_COUNTRIES: string;
     TAB_CALENDAR: string;
+    TAB_RCM_COMPLIANCES: string;
+    TAB_RCM_PROJECTS: string;
+    TAB_RCM_DATE: string;
+    TAB_RCM_CONFIRM: string;
+    TAB_RCM_JOBS: string;
     COLOR_APPROVED: string;
     COLOR_NOT_STARTED: string;
     COLOR_IN_PROGRESS: string;
@@ -69,6 +74,7 @@ export declare class SfIEvents extends LitElement {
     name: string;
     apiId: string;
     apiIdStatutes: string;
+    apiIdProjects: string;
     apiIdCompliances: string;
     apiIdList: string;
     apiIdDetail: string;
@@ -88,7 +94,12 @@ export declare class SfIEvents extends LitElement {
     userName: string;
     projectName: string;
     apiResponseFieldList: string;
+    rcmSelectedCompliance: any;
+    rcmSelectedProjects: any;
+    rcmSelectedDate: any;
+    rcmSelectedMessage: any;
     myOnboardingTab: string;
+    myRcmTab: string;
     myRole: string;
     chart: any;
     chart2: any;
@@ -122,6 +133,7 @@ export declare class SfIEvents extends LitElement {
     htmlDataStats: string;
     period: string;
     mode: string;
+    flowRcmNotification: number;
     flowGraph: string;
     flow: string;
     fill: string;
@@ -130,6 +142,8 @@ export declare class SfIEvents extends LitElement {
     riskAreasPartStatusData: any;
     riskAreasLateStatusData: any;
     riskSeverityData: any;
+    arrCols: Array<string>;
+    arrRcmProjectCols: Array<string>;
     riskSeverityPartStatusData: any;
     riskSeverityLateStatusData: any;
     functionData: any;
@@ -189,7 +203,15 @@ export declare class SfIEvents extends LitElement {
     _SfMappingTabContainer: any;
     _SfRoleTabContainer: any;
     _SfOnboardingTabContainer: any;
+    _SfRcmContainer: any;
+    _SfRcmContainerList: any;
+    _SfRcmTabContainer: any;
     _SfOnboardingStatutesListContainer: any;
+    _SfRcmComplianceContainer: any;
+    _SfRcmProjectsContainer: any;
+    _SfRcmDateContainer: any;
+    _SfRcmConfirmContainer: any;
+    _SfRcmJobsContainer: any;
     _SfOnboardingStatutesContainer: any;
     _SfOnboardingCompliancesListContainer: any;
     _SfOnboardingCompliancesContainer: any;
@@ -283,6 +305,12 @@ export declare class SfIEvents extends LitElement {
     filterEventsInWindow: (tags: Array<string>, ctx: any, divContainer: HTMLDivElement | null) => void;
     sleep: (ms: number) => Promise<unknown>;
     hideTabContainers: () => Promise<void>;
+    hideRcmTabContainers: () => Promise<void>;
+    loadRcmNotifications: () => Promise<void>;
+    loadRcmCompliances: () => Promise<void>;
+    loadRcmProjects: () => Promise<void>;
+    loadRcmDate: () => Promise<void>;
+    loadRcmJobs: () => Promise<void>;
     loadOnboardingStatutes: () => Promise<void>;
     loadOnboardingCompliances: () => Promise<void>;
     loadOnboardingCountries: () => Promise<void>;
@@ -360,6 +388,18 @@ export declare class SfIEvents extends LitElement {
     renderOnboardingStatutes: (mappedStatutes: any) => void;
     clickOnboardingTabs: () => void;
     renderOnboardingTabs: () => void;
+    renderRcmProceed: (div: HTMLDivElement, button: HTMLButtonElement | null) => void;
+    renderRcmSelectedComplianceInProject: (div: HTMLDivElement) => void;
+    renderRcmCompliances: (updatedCompliances: any) => void;
+    renderRcmLockedCompliances: (lockedCompliances: any) => void;
+    renderRcmUnlockedCompliances: (lockedCompliances: any) => void;
+    renderRcmProjects: (div: HTMLDivElement, projects: any) => void;
+    renderRcmSelectedDate: (div: HTMLDivElement) => void;
+    renderRcmDate: (div: HTMLDivElement) => void;
+    renderRcmJobs: (div: HTMLDivElement) => void;
+    renderRcmSelectedJobs: (div: HTMLDivElement, jobs: any) => void;
+    renderRcmNotifications: (notifs: any) => void;
+    renderRcmTabs: () => void;
     proceedToCalendar: () => Promise<void>;
     renderRoleTabs: () => void;
     csvmaker: (data: any) => string;
@@ -413,10 +453,14 @@ export declare class SfIEvents extends LitElement {
     uploadReprogramTrigger: (eventid: string, timestamp: string) => Promise<void>;
     processEvent: (value: any) => void;
     renderChosenProject: (events?: any) => void;
+    fetchRcmLockedCompliances: (lockedCompliances: Array<string>) => Promise<any>;
+    fetchUpdateRcmLock: (complianceId: string) => Promise<any>;
+    fetchDetailProject: (projectId: string) => Promise<any>;
     fetchSearchStatutes: (searchString: string, cursor?: string) => Promise<any>;
     fetchSearchCompliances: (searchString: string, cursor?: string) => Promise<any>;
     fetchMappedLocations: () => Promise<any>;
     fetchMappedFunctions: () => Promise<any>;
+    fetchMappedProjects: () => Promise<any>;
     fetchMappedCompliances: () => Promise<any>;
     fetchMappedSerializedAlertSchedules: () => Promise<any>;
     fetchMappedSerializedDuedates: () => Promise<any>;
@@ -445,7 +489,11 @@ export declare class SfIEvents extends LitElement {
     fetchMappedTags: () => Promise<any>;
     fetchMappedCountries: () => Promise<any>;
     fetchMappedEntities: () => Promise<any>;
+    fetchUpdatedCompliances: (nextBackwardToken?: string) => Promise<any>;
     fetchMappedStatutes: () => Promise<any>;
+    fetchCreateRcmJob: (complianceid: string, data: any, triggerDate: string, triggerMessage: string, projects: any) => Promise<any>;
+    fetchRcmNotifications: (projectid: string) => Promise<any>;
+    fetchRcmJobs: (complianceid: string) => Promise<any>;
     fetchInternalControlsJobs: () => Promise<any>;
     fetchAlertSchedulesJobs: () => Promise<any>;
     fetchDueDatesJobs: () => Promise<any>;
@@ -482,7 +530,7 @@ export declare class SfIEvents extends LitElement {
     constructor();
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void;
     connectedCallback(): void;
-    render(): import("lit-html").TemplateResult<1>;
+    render(): import("lit").TemplateResult<1>;
 }
 declare global {
     interface HTMLElementTagNameMap {

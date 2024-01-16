@@ -239,8 +239,11 @@ function getRandomColor() {
     }
     return color;
 }
+function isInteger(value) {
+    return /^-?\d+$/.test(value);
+}
 const exportFunctions = {
-    callApi, validateName, readCookie, timeSince, createDiagonalPattern1, createDiagonalPattern2, createDiagonalPattern3, getRandomColor
+    isInteger, callApi, validateName, readCookie, timeSince, createDiagonalPattern1, createDiagonalPattern2, createDiagonalPattern3, getRandomColor
 };
 export default exportFunctions;
 //# sourceMappingURL=util.js.map

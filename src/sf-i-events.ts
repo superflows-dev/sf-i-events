@@ -77,6 +77,11 @@ export class SfIEvents extends LitElement {
   TAB_FUNCTIONS = "functions";
   TAB_COUNTRIES = "countries";
   TAB_CALENDAR = "calendar";
+  TAB_RCM_COMPLIANCES = "compliances";
+  TAB_RCM_PROJECTS = "projects";
+  TAB_RCM_DATE = "date";
+  TAB_RCM_CONFIRM = "confirm";
+  TAB_RCM_JOBS = "jobs";
   COLOR_APPROVED = "#50cf01";
   COLOR_NOT_STARTED = "#A4A9AD";
   COLOR_IN_PROGRESS = "#ffe505"
@@ -401,6 +406,9 @@ export class SfIEvents extends LitElement {
   apiIdStatutes!: string;
 
   @property()
+  apiIdProjects!: string;
+
+  @property()
   apiIdCompliances!: string;
 
   @property()
@@ -458,7 +466,22 @@ export class SfIEvents extends LitElement {
   apiResponseFieldList!: string;
 
   @property()
+  rcmSelectedCompliance!: any;
+
+  @property()
+  rcmSelectedProjects!: any;
+
+  @property()
+  rcmSelectedDate!: any;
+
+  @property()
+  rcmSelectedMessage!: any;
+
+  @property()
   myOnboardingTab: string = this.TAB_STATUTES;
+
+  @property()
+  myRcmTab: string = this.TAB_RCM_COMPLIANCES;
 
   @property()
   myRole: string = "";
@@ -571,6 +594,9 @@ export class SfIEvents extends LitElement {
   mode!: string;
 
   @property()
+  flowRcmNotification: number = 0;
+
+  @property()
   flowGraph: string = "";
 
   @property()
@@ -593,6 +619,12 @@ export class SfIEvents extends LitElement {
 
   @property()
   riskSeverityData: any = null;
+
+  @property()
+  arrCols: Array<string> = ["country", "ctate", "obligationtitle", "statute", "category"];
+
+  @property()
+  arrRcmProjectCols: Array<string> = ["name"];
 
   @property()
   riskSeverityPartStatusData: any = null;
@@ -686,6 +718,26 @@ export class SfIEvents extends LitElement {
       .chart-item {
         width: 100%;
       }
+
+    }
+
+
+    @media (orientation: portrait) {
+
+      #tab-container {
+        position: fixed;
+        bottom: 0px;
+        left: 0px;
+        background-color: #efefef;
+        padding-left: 10px;
+        padding-right: 10px;
+        padding-top: 10px;
+        overflow-x: auto;
+        max-width: 100%;
+        justify-content: start;
+        box-shadow: 1px 1px 10px 0 rgba(0, 0, 0, 0.25), -1px -1px 10px 0 rgba(255, 255, 255, 0.6);
+      }
+      
 
     }
 
@@ -1506,8 +1558,32 @@ export class SfIEvents extends LitElement {
   @query('#onboarding-tab-container')
   _SfOnboardingTabContainer: any;
 
+  @query('#rcm-container')
+  _SfRcmContainer: any;
+
+  @query('#rcm-container-list')
+  _SfRcmContainerList: any;
+
+  @query('#rcm-tab-container')
+  _SfRcmTabContainer: any;
+
   @query('#statutes-list-container')
   _SfOnboardingStatutesListContainer: any;
+
+  @query('#rcm-compliance-container')
+  _SfRcmComplianceContainer: any;
+  
+  @query('#rcm-projects-container')
+  _SfRcmProjectsContainer: any;
+  
+  @query('#rcm-date-container')
+  _SfRcmDateContainer: any;
+  
+  @query('#rcm-confirm-container')
+  _SfRcmConfirmContainer: any;
+  
+  @query('#rcm-jobs-container')
+  _SfRcmJobsContainer: any;
 
   @query('#statutes-container')
   _SfOnboardingStatutesContainer: any;
@@ -2051,9 +2127,25 @@ export class SfIEvents extends LitElement {
 
     console.log('getpastduedate', mmdd, dd, mm);
 
+    var yyyy = "";
+
+    var currMonth = new Date().getMonth() + 1;
+
+    if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+      yyyy = new Date().getFullYear() + "";
+    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+      yyyy = (new Date().getFullYear() - 1) + "";
+    } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+      yyyy = (new Date().getFullYear() + 1) + "";
+    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+      yyyy = (new Date().getFullYear() + 1) + "";
+    }
+
+
     var date = new Date();
     date.setMonth(parseInt(mm) - 1);
     date.setDate(parseInt(dd));
+    date.setFullYear(parseInt(yyyy));
 
     var currDate = new Date();
 
@@ -2067,13 +2159,31 @@ export class SfIEvents extends LitElement {
 
   getLateExecuted = (mmdd: string, event: any) => {
 
-    const tsDoc = new Date(parseInt(event.dateofcompletion[mmdd + "/" + new Date().getFullYear()])).getTime();
+    console.log('late executed', mmdd, event.dateofcompletion)
+
+    const tsDoc = new Date(parseInt(event.dateofcompletion)).getTime();
 
     const dd = mmdd.substring(3, 5);
     const mm = mmdd.substring(0, 2);
+
+    var yyyy = "";
+
+    var currMonth = new Date().getMonth() + 1;
+
+    if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+      yyyy = new Date().getFullYear() + "";
+    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+      yyyy = (new Date().getFullYear() - 1) + "";
+    } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+      yyyy = (new Date().getFullYear() + 1) + "";
+    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+      yyyy = (new Date().getFullYear() + 1) + "";
+    }
+
     var date = new Date();
     date.setMonth(parseInt(mm) - 1);
     date.setDate(parseInt(dd));
+    date.setFullYear(parseInt(yyyy));
 
     const tsCurr = date.getTime();
 
@@ -2090,7 +2200,7 @@ export class SfIEvents extends LitElement {
 
   getLateApproved = (mmdd: string, event: any) => {
 
-    console.log('get late approved', event.lastupdated, mmdd, event.lastupdated);
+    console.log('get late approved', event.obligationtitle, event.lastupdated, mmdd, event.lastupdated);
 
     const tsLastUpdated = new Date((event.lastupdated)).getTime();
 
@@ -2098,9 +2208,25 @@ export class SfIEvents extends LitElement {
 
     const dd = mmdd.substring(3, 5);
     const mm = mmdd.substring(0, 2);
+
+    var yyyy = "";
+
+    var currMonth = new Date().getMonth() + 1;
+
+    if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+      yyyy = new Date().getFullYear() + "";
+    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+      yyyy = (new Date().getFullYear() - 1) + "";
+    } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+      yyyy = (new Date().getFullYear() + 1) + "";
+    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+      yyyy = (new Date().getFullYear() + 1) + "";
+    }
+
     var date = new Date();
     date.setMonth(parseInt(mm) - 1);
     date.setDate(parseInt(dd));
+    date.setFullYear(parseInt(yyyy));
 
     const tsCurr = date.getTime();
 
@@ -2585,10 +2711,12 @@ export class SfIEvents extends LitElement {
 
   }
 
+
   renderStreamEvents = (index: number, month: number, year: number) => {
 
     this.selectedItems = [];
     this.selectedStatus = "";
+    
 
     const lastDay = this.getLastDayOfMonth(month, year);
 
@@ -2689,6 +2817,7 @@ export class SfIEvents extends LitElement {
             var lateStatus = "in-time";
 
             if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved) != null && (this.events[mmdd][j].approved)) {
+              console.log('lateness', this.events[mmdd][j]['obligationtitle'],this.getLateExecuted(mmdd, this.events[mmdd][j]));
               partStatus = "status-approved";
               if(this.getLateExecuted(mmdd, this.events[mmdd][j])) {
                 lateStatus = "late-executed"
@@ -4413,6 +4542,8 @@ export class SfIEvents extends LitElement {
 
   renderRangeEvents = (firstDate: Date, count: number) => {
 
+    this.clearGraphData();
+
     this.selectedItems = [];
 
     var html = '';
@@ -4510,6 +4641,7 @@ export class SfIEvents extends LitElement {
             var lateStatus = "in-time";
 
             if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved) != null && (this.events[mmdd][j].approved)) {
+              
               partStatus = "status-approved";
               if(this.getLateExecuted(mmdd, this.events[mmdd][j])) {
                 lateStatus = "late-executed"
@@ -4879,7 +5011,21 @@ export class SfIEvents extends LitElement {
 
         (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
 
-        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""), null);
+        var yyyy = "";
+
+        var currMonth = new Date().getMonth() + 1;
+
+        if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+          yyyy = new Date().getFullYear() + "";
+        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() - 1) + "";
+        } else if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() + 1) + "";
+        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() + 1) + "";
+        }
+
+        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, null);
   
       })
 
@@ -4984,16 +5130,21 @@ export class SfIEvents extends LitElement {
 
   processDateSelection = async () => {
 
-    this.clearGraphData();
-
     var startDateCalendar = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
     var endDateCalendar = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + (parseInt(this.calendarStartYYYY) + 1));
 
-    const valueStart = ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date') as HTMLInputElement).value;
-    const valueEnd = ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date') as HTMLInputElement).value;
+    var valueStart = ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date') as HTMLInputElement).value;
+    if(valueStart == "") {
+      valueStart = ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date-mobile') as HTMLInputElement).value;
+    }
+    var valueEnd = ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date') as HTMLInputElement).value;
+    if(valueEnd == "") {
+      valueEnd = ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date-mobile') as HTMLInputElement).value;
+    }
 
     console.log('valuestart', valueStart);
     console.log('valueend', valueEnd);
+
 
     if(valueStart != "" && valueEnd != "") {
       this.initCustomRightCol();
@@ -5485,6 +5636,224 @@ export class SfIEvents extends LitElement {
 
   }
 
+  hideRcmTabContainers = async () => {
+
+    (this._SfRcmComplianceContainer as HTMLDivElement).style.display = 'none';
+    (this._SfRcmProjectsContainer as HTMLDivElement).style.display = 'none';
+    (this._SfRcmDateContainer as HTMLDivElement).style.display = 'none';
+    (this._SfRcmConfirmContainer as HTMLDivElement).style.display = 'none';
+    (this._SfRcmJobsContainer as HTMLDivElement).style.display = 'none';
+    
+    (this._SfRcmComplianceContainer as HTMLDivElement).innerHTML = '';
+    (this._SfRcmProjectsContainer as HTMLDivElement).innerHTML = '';
+    (this._SfRcmDateContainer as HTMLDivElement).innerHTML = '';
+    (this._SfRcmConfirmContainer as HTMLDivElement).innerHTML = '';
+    (this._SfRcmJobsContainer as HTMLDivElement).innerHTML = '';
+    
+
+  }
+
+  loadRcmNotifications = async () => {
+
+    const notifs = await this.fetchRcmNotifications(this.projectId);
+    console.log('notifs', notifs);
+    this.renderRcmNotifications(notifs);
+
+  }
+
+  loadRcmCompliances = async () => {
+
+    this.hideRcmTabContainers();
+    (this._SfRcmComplianceContainer as HTMLDivElement).style.display = 'flex';
+
+    const compliances: Array<any> = [];
+
+    var nextBackwardTokenOrig = '';
+
+    const tempCompliances: Array<string> = [];
+
+    while(true) {
+
+      const updatedCompliances = await this.fetchUpdatedCompliances(nextBackwardTokenOrig);
+      console.log('updatedCompliances', updatedCompliances.data.length);
+
+      const nextBackwardTokenNew = updatedCompliances.nextBackwardToken;
+
+      console.log('comparison', nextBackwardTokenNew, nextBackwardTokenOrig);
+  
+      if(nextBackwardTokenOrig == nextBackwardTokenNew) {
+        console.log('breaking...');
+        break;
+      } else {
+        nextBackwardTokenOrig = nextBackwardTokenNew;
+      }
+
+      for(var i = 0; i < updatedCompliances.data.length; i++) {
+        const event = JSON.parse(updatedCompliances.data[i].message);
+        console.log(i, 'event op', JSON.parse(event.req.body).id);
+        if(event.op == "update") {
+          if(!tempCompliances.includes(JSON.parse(event.req.body).id)) {
+            compliances.push(JSON.parse(event.req.body));
+            tempCompliances.push(JSON.parse(event.req.body).id);
+          }
+          
+        }
+      }
+
+      console.log('compliances', compliances);
+
+    }
+
+    if(compliances.length > 0) {
+      this.renderRcmCompliances(compliances);
+      const arrCompliances = [];
+      for(var i = 0; i < compliances.length; i++) {
+        arrCompliances.push(compliances[i].id);
+      }
+      console.log('compliances 2', arrCompliances);
+      const lockedCompliances = await this.fetchRcmLockedCompliances(arrCompliances);
+      console.log('compliances 2 locked', lockedCompliances);
+      this.renderRcmLockedCompliances(lockedCompliances);
+
+      (this._SfRcmComplianceContainer as HTMLDivElement).querySelector('#cb-completed')?.addEventListener('change', (e: any) => {
+
+        const cb = (e.currentTarget as HTMLInputElement);
+        if(cb.checked) {
+          this.renderRcmUnlockedCompliances(lockedCompliances);
+        } else {
+          this.renderRcmLockedCompliances(lockedCompliances);
+        }
+  
+      });
+  
+      const arrButtons = (this._SfRcmComplianceContainer as HTMLDivElement).querySelectorAll('.buttonselect-icon') as NodeListOf<HTMLButtonElement>;
+      for(i = 0; i < arrButtons.length; i++) {
+  
+        arrButtons[i].addEventListener('click', (e: any) => {
+  
+          const id = e.currentTarget.id.replace('button-', '');
+          var index = -1;
+          for(var j = 0; j < compliances.length; j++) {
+            if(compliances[j].id == id) {
+              index = j;
+            }
+          }
+          console.log(id, index, compliances[index]);
+          this.rcmSelectedCompliance = compliances[index];
+          ((this._SfRcmTabContainer as HTMLDivElement).querySelector('#rcm-tab-projects') as HTMLButtonElement).click();
+  
+        })
+  
+      }
+  
+      const arrLockButtons = (this._SfRcmComplianceContainer as HTMLDivElement).querySelectorAll('.button-lock-icon') as NodeListOf<HTMLButtonElement>;
+      for(i = 0; i < arrLockButtons.length; i++) {
+  
+        arrLockButtons[i].addEventListener('click', async (e: any) => {
+  
+          const index = e.currentTarget.id.replace('button-lock-', '');
+          await this.fetchUpdateRcmLock(index);
+          this.loadRcmCompliances();
+          
+        })
+  
+      }
+
+    }
+
+  }
+
+  loadRcmProjects = async () => {
+
+    console.log('loadRcmProjects');
+    this.hideRcmTabContainers();
+    (this._SfRcmProjectsContainer as HTMLDivElement).style.display = 'flex';
+    this.renderRcmSelectedComplianceInProject((this._SfRcmProjectsContainer as HTMLDivElement));
+
+    var mappedProjects;
+    if(this.rcmSelectedCompliance != null) {
+      mappedProjects = await this.fetchMappedProjects();
+      console.log('mappedProjects', mappedProjects.data);
+    }
+
+    const projects = [];
+
+    if(mappedProjects != null) {
+      for(var i = 0; i < mappedProjects.data.length; i++) {
+
+        const projectDetail = await this.fetchDetailProject(mappedProjects.data[i]['projectid']['S']);
+        projects.push(projectDetail.data.value);
+  
+      }
+  
+    }
+    
+    this.rcmSelectedProjects = projects;
+
+    this.renderRcmProjects((this._SfRcmProjectsContainer as HTMLDivElement), this.rcmSelectedProjects);
+
+    if(this.rcmSelectedProjects != null && this.rcmSelectedProjects.length > 0) {
+      this.renderRcmProceed((this._SfRcmProjectsContainer as HTMLDivElement), (this._SfRcmTabContainer as HTMLDivElement).querySelector('#rcm-tab-date'));
+    }
+  }
+
+  loadRcmDate = async () => {
+
+    console.log('loadRcmDate');
+    this.hideRcmTabContainers();
+    (this._SfRcmDateContainer as HTMLDivElement).style.display = 'flex';
+    this.renderRcmDate((this._SfRcmDateContainer as HTMLDivElement));
+    this.renderRcmSelectedComplianceInProject((this._SfRcmDateContainer as HTMLDivElement));
+    console.log('projects', this.rcmSelectedProjects);
+    this.renderRcmProjects((this._SfRcmDateContainer as HTMLDivElement), this.rcmSelectedProjects);
+
+    if(this.rcmSelectedProjects != null && this.rcmSelectedProjects.length > 0) {
+      this.renderRcmProceed((this._SfRcmDateContainer as HTMLDivElement), (this._SfRcmTabContainer as HTMLDivElement).querySelector('#rcm-tab-jobs'));
+    }
+
+    ((this._SfRcmDateContainer as HTMLDivElement).querySelector('#rcm-date') as HTMLInputElement)?.addEventListener('change', (e: any) => {
+      this.rcmSelectedDate = (e.currentTarget as HTMLInputElement).value;
+      console.log(this.rcmSelectedDate);
+    });
+
+    ((this._SfRcmDateContainer as HTMLDivElement).querySelector('#rcm-message') as HTMLInputElement)?.addEventListener('change', (e: any) => {
+      this.rcmSelectedMessage = (e.currentTarget as HTMLInputElement).value;
+      console.log(this.rcmSelectedMessage);
+    });
+
+
+  }
+
+  loadRcmJobs = async () => {
+
+    console.log('loadRcmJobs');
+    this.hideRcmTabContainers();
+    (this._SfRcmJobsContainer as HTMLDivElement).style.display = 'flex';
+
+    if(this.rcmSelectedCompliance != null) {
+      const jobs = await this.fetchRcmJobs(this.rcmSelectedCompliance.id);
+      console.log('jobs', jobs, this.rcmSelectedDate, this.rcmSelectedMessage); 
+      if(this.rcmSelectedDate != null && this.rcmSelectedMessage != null) {
+        this.renderRcmJobs((this._SfRcmJobsContainer as HTMLDivElement));
+        this.renderRcmSelectedDate((this._SfRcmJobsContainer as HTMLDivElement));
+      }
+      this.renderRcmSelectedComplianceInProject((this._SfRcmJobsContainer as HTMLDivElement));
+      this.renderRcmProjects((this._SfRcmJobsContainer as HTMLDivElement), this.rcmSelectedProjects);
+      this.renderRcmSelectedJobs((this._SfRcmJobsContainer as HTMLDivElement), jobs);
+      
+      console.log('projects', this.rcmSelectedProjects);
+      ((this._SfRcmJobsContainer as HTMLDivElement).querySelector('#button-submit') as HTMLButtonElement)?.addEventListener('click', async () => {
+        console.log(this.rcmSelectedCompliance);
+        await this.fetchCreateRcmJob(this.rcmSelectedCompliance.id, this.rcmSelectedCompliance, this.rcmSelectedDate, this.rcmSelectedMessage, this.rcmSelectedProjects);
+        this.loadRcmJobs();
+      });
+    } else {
+
+    }
+     
+    
+  }
+  
   loadOnboardingStatutes = async () => {
     this.hideTabContainers();
     (this._SfOnboardingStatutesContainer as HTMLDivElement).style.display = 'flex';
@@ -6251,6 +6620,18 @@ export class SfIEvents extends LitElement {
       this.processDateSelection();
     });
 
+    (this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date-mobile')?.addEventListener('change', (ev: any) => {
+      console.log('start-date', ev);
+      this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+      this.processDateSelection();
+    });
+
+    (this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date-mobile')?.addEventListener('change', (ev: any) => {
+      console.log('end-date', ev);
+      this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
+      this.processDateSelection();
+    });
+
     
 
     
@@ -6463,7 +6844,21 @@ export class SfIEvents extends LitElement {
 
         (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
 
-        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""), (this._SfPastContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
+        var yyyy = "";
+
+        var currMonth = new Date().getMonth() + 1;
+
+        if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+          yyyy = new Date().getFullYear() + "";
+        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() - 1) + "";
+        } else if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() + 1) + "";
+        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() + 1) + "";
+        }
+
+        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfPastContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
   
       })
 
@@ -6776,7 +7171,21 @@ export class SfIEvents extends LitElement {
 
         (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
 
-        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""), (this._SfUpcomingContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
+        var yyyy = "";
+
+        var currMonth = new Date().getMonth() + 1;
+
+        if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+          yyyy = new Date().getFullYear() + "";
+        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() - 1) + "";
+        } else if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() + 1) + "";
+        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() + 1) + "";
+        }
+
+        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfUpcomingContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
   
       })
 
@@ -7053,7 +7462,21 @@ export class SfIEvents extends LitElement {
 
         (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
 
-        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""), (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
+        var yyyy = "";
+
+        var currMonth = new Date().getMonth() + 1;
+
+        if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+          yyyy = new Date().getFullYear() + "";
+        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() - 1) + "";
+        } else if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() + 1) + "";
+        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() + 1) + "";
+        }
+
+        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
   
       })
 
@@ -7339,10 +7762,25 @@ export class SfIEvents extends LitElement {
           this.clearButtonSelection();
         }
 
-        (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+        (this._SfDetailContainer as HTMLDivElement).style.display = 'block';
 
-        ;
-        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + ((new Date()).getFullYear() + ""), (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
+        console.log('current column index', (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
+
+        var yyyy = "";
+
+        var currMonth = new Date().getMonth() + 1;
+
+        if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+          yyyy = new Date().getFullYear() + "";
+        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() - 1) + "";
+        } else if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() + 1) + "";
+        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+          yyyy = (new Date().getFullYear() + 1) + "";
+        }
+
+        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
   
       })
 
@@ -7445,6 +7883,9 @@ export class SfIEvents extends LitElement {
     this.functionData = null;
     this.functionLateStatusData = null;
     this.functionPartStatusData = null;
+    this.locationData = null;
+    this.locationLateStatusData = null;
+    this.locationPartStatusData = null;
     this.obligationTypeData = null;
     this.obligationTypeLateStatusData = null;
     this.obligationTypePartStatusData = null;
@@ -8648,6 +9089,10 @@ export class SfIEvents extends LitElement {
 
   renderEventDetail = (event: any, mmddyyyy: any, currentColumnButton: HTMLButtonElement | null) => {
 
+    console.log('renderEventDetail', mmddyyyy);
+    
+    console.log('currentColumnButton', currentColumnButton);
+
     let comments, docs, approved, dateOfCompletion, makercheckers: Array<string>, docsOptional;
     let entityId: string = "";
     let locationId: string = "";
@@ -9062,16 +9507,25 @@ export class SfIEvents extends LitElement {
             html += '<div class="mr-20"><strong>'+comments[i].author+'</strong></div>';
             const onlyCommentText = comments[i].comment.replace(/ *\([^)]*\) */g, "").trim();
             try {
+
               const jsonComments = JSON.parse(onlyCommentText);
-              var htmlTable = '';
-              for(var j = 0; j < Object.keys(jsonComments).length; j++) {
-                htmlTable += '<div class="mb-20">';
-                  htmlTable += ('<div part="detail-head">' + Object.keys(jsonComments)[j] + '</div>');
-                  htmlTable += ('<sf-i-elastic-text text="'+jsonComments[Object.keys(jsonComments)[j]]+'" minLength="20"></sf-i-elastic-text>');
-                  htmlTable += '</div>';
+
+              if(Util.isInteger(jsonComments)) {
+                html += '<div class="">'+comments[i].comment+'<br /><small><span class="muted">'+comments[i].timestamp+'</span></small></div>';
+              } else {
+                console.log('json comments', jsonComments);
+                var htmlTable = '';
+                for(var j = 0; j < Object.keys(jsonComments).length; j++) {
+                  htmlTable += '<div class="mb-20">';
+                    htmlTable += ('<div part="detail-head">' + Object.keys(jsonComments)[j] + '</div>');
+                    htmlTable += ('<sf-i-elastic-text text="'+jsonComments[Object.keys(jsonComments)[j]]+'" minLength="20"></sf-i-elastic-text>');
+                    htmlTable += '</div>';
+                }
+                html += '<div class="">'+htmlTable+'<small><span class="muted">'+comments[i].timestamp+'</span></small></div>';
               }
-              html += '<div class="">'+htmlTable+'<small><span class="muted">'+comments[i].timestamp+'</span></small></div>';
+              
             } catch (e: any) {
+              console.log('json comments exception', comments[i]);
               html += '<div class="">'+comments[i].comment+'<br /><small><span class="muted">'+comments[i].timestamp+'</span></small></div>';
             }
             
@@ -9232,16 +9686,24 @@ export class SfIEvents extends LitElement {
 
             (this._SfDetailContainer as HTMLDivElement).querySelector('#button-uploader-submit-report')?.addEventListener('click', async () => {
 
-
               const reportercomments = ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-reporter-comments') as HTMLInputElement).value;
+
+              console.log('reporter comments 1', reportercomments);
+
               const reporterdoc = ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-reporter-doc') as HTMLInputElement).value.length > 0 ? (new Date(((this._SfDetailContainer as HTMLDivElement).querySelector('#input-reporter-doc') as HTMLInputElement).value).getTime() + "") : "";
               let docs:any[] = [];
+
+              console.log('reporter comments 2', reportercomments);
               
               if(docsOptional.length === 0) {
                 docs = (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.selectedValues();
               }
       
+              console.log('docs', docs);
+
               if(docs.length === 0 && docsOptional.length === 0) {
+
+                console.log('reporter comments 3', reportercomments);
 
                 this.setError('No documents uploaded!');
                 setTimeout(() => {
@@ -9259,9 +9721,11 @@ export class SfIEvents extends LitElement {
 
                 } else {
 
+                  console.log('makerscheckers 1', reportercomments);
+
                   if(this.selectedItems.length === 0) {
 
-                    console.log('makerscheckers', makercheckers);
+                    console.log('makerscheckers', makercheckers, reportercomments);
 
                     await this.uploadReport(entityId, locationId, mmddyyyy, event["id"], reportercomments, reporterdoc, docs)
                     if(makercheckers.length > 0) {
@@ -9308,6 +9772,7 @@ export class SfIEvents extends LitElement {
                   //   this.renderTabs(this.TAB_STREAM);
                   //   this.renderStream();
                   // }
+                  console.log('currentColumnButton', currentColumnButton);
                   if(this.getCurrentTab() == this.TAB_CUSTOM) {
                     this.processDateSelection();
                   } else {
@@ -9318,17 +9783,12 @@ export class SfIEvents extends LitElement {
 
                 }
               }
-              
       
             });
 
-
           }
-
           
         }
-
-        
 
       }
       
@@ -9341,7 +9801,7 @@ export class SfIEvents extends LitElement {
         (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.prepopulatedInputArr = JSON.stringify([]);
         (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.loadMode();
 
-        if(docs.length) {
+        if(docs.length > 0) {
           (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.prepopulatedInputArr = JSON.stringify(docs);
           (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.loadMode();
         }
@@ -9353,6 +9813,24 @@ export class SfIEvents extends LitElement {
           (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.readOnly = false;
           (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.loadMode();
         }
+
+        const dataPassthrough = {
+          projectId: this.projectId,
+          countryId: this.countryId,
+          entityId: entityId,
+          locationId: locationId,
+          mmddyyyy: mmddyyyy,
+          complianceId: event['id'],
+          path: "uploadextract"
+        };
+
+        const callbackUrlHost = "8icpy39ru0.execute-api.us-east-1.amazonaws.com";
+        const callbackUrlPath = "test/uploadextract";
+
+        (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.dataPassthrough = JSON.stringify(dataPassthrough);
+        (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.callbackUrlHost = callbackUrlHost;
+        (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.callbackUrlPath = callbackUrlPath;
+        (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.loadMode();
 
       }
 
@@ -10582,6 +11060,543 @@ export class SfIEvents extends LitElement {
     
   }
 
+  renderRcmProceed = (div: HTMLDivElement, button: HTMLButtonElement | null) => {
+
+    var html = '';
+
+    html += '<div class="mb-20 mt-20">';
+    html += '<button id="button-proceed" part="button">Proceed</button>';
+    html += '</div>';
+
+    div.innerHTML += html;
+
+    div.querySelector('#button-proceed')?.addEventListener('click', () => {
+      button?.click();
+    });
+
+  }
+
+  renderRcmSelectedComplianceInProject = (div: HTMLDivElement) => {
+
+    var html  = '<div class="w-100" part="rcm-section">';
+
+    html += '<div part="rcm-section-title" class="mb-10">Selected Compliance</div>';
+
+    if(this.rcmSelectedCompliance == null || this.rcmSelectedCompliance.values == null || this.rcmSelectedCompliance.values.length === 0) {
+      html += '<p part="rcm-section-error-message" class="mt-20 mb-10">No compliances found</p></div>';
+      div.innerHTML += html;
+      return;
+    }
+
+    html += '<table>';
+
+    html += '<thead>';
+    html += '<th part="td-head" class="td-head">'
+    html += 'Id';
+    html += '</th>'
+    for(var i = 0; i < Object.keys(this.rcmSelectedCompliance.values).length; i++) {
+      if(this.arrCols.includes(Object.keys(this.rcmSelectedCompliance.values)[i])) {
+        html += '<th part="td-head" class="td-head">'
+        html += Object.keys(this.rcmSelectedCompliance.values)[i]
+        html += '</th>'
+      }
+    }
+    html += '</thead>';
+
+    html += '<tbody>';
+
+    var classBg = "";
+    classBg = 'td-light';
+
+    html += '<tr>';
+    html += '<td part="td-body" class="'+classBg+'">';
+    html += '<sf-i-elastic-text class="statute id-'+i+'" text="'+(this.rcmSelectedCompliance.id)+'" minLength="80"></sf-i-elastic-text>';
+    html += '</td>';
+    //let data = JSON.parse(jsonData[i].fields.data);
+    for(var j = 0; j < Object.keys(this.rcmSelectedCompliance.values).length; j++) {
+
+      const objectKey = Object.keys(this.rcmSelectedCompliance.values)[j];
+      if(this.arrCols.includes(objectKey)) {
+        html += '<td part="td-body" class="td-body '+classBg+'">';
+        if(Array.isArray(this.rcmSelectedCompliance.values[objectKey].value)) {
+
+          for(var k = 0; k < this.rcmSelectedCompliance.values[objectKey].value.length; k++) {
+            if(this.rcmSelectedCompliance.values[objectKey].text != null) {
+              html +=  ('<sf-i-elastic-text text="'+this.rcmSelectedCompliance.values[objectKey].text[k]+'" minLength="80"></sf-i-elastic-text>');
+            } else {
+              html +=  ('<sf-i-elastic-text text="'+this.rcmSelectedCompliance.values[objectKey].value[k]+'" minLength="80"></sf-i-elastic-text>');
+            }
+            
+            if(k < (this.rcmSelectedCompliance.values[objectKey].value.length - 1)) {
+              html += "; ";
+            }
+          }
+
+        } else {
+          if(this.rcmSelectedCompliance.values[objectKey].text != null) {
+            html += ('<sf-i-elastic-text text="'+this.rcmSelectedCompliance.values[objectKey].value+'" minLength="80"></sf-i-elastic-text>')
+          } else {
+            html += ('<sf-i-elastic-text text="'+this.rcmSelectedCompliance.values[objectKey].value+'" minLength="80"></sf-i-elastic-text>')
+          }
+        }
+        html += '</td>';
+      }
+
+    }
+    html += '</tr>';
+    html += '</tbody>'
+    html += '</table>';
+    html += '</div>';
+    
+    div.innerHTML += html;
+
+  }
+
+  renderRcmCompliances = (updatedCompliances: any) => {
+
+    var html = '<div class="w-100" part="rcm-section">';
+
+    html += '<div part="rcm-section-title" class="mb-10">Recently Updated Compliances</div>';
+
+    html += '<div part="rcm-setting" class="d-flex mt-20 mb-20 align-center"><div class="mr-10">Show Completed</div><input id="cb-completed" type="checkbox" /></div>';
+
+    html += '<table>';
+
+    html += '<thead>';
+    html += '<th part="td-head" class="td-head left-sticky">'
+    html += 'Select';
+    html += '</th>'
+    html += '<th part="td-head" class="td-head left-sticky">'
+    html += 'Complete';
+    html += '</th>'
+    html += '<th part="td-head" class="td-head">'
+    html += 'Id';
+    html += '</th>'
+    for(var i = 0; i < Object.keys(updatedCompliances[0].values).length; i++) {
+      if(this.arrCols.includes(Object.keys(updatedCompliances[0].values)[i])) {
+        html += '<th part="td-head" class="td-head">'
+        html += Object.keys(updatedCompliances[0].values)[i]
+        html += '</th>'
+      }
+    }
+    html += '</thead>'
+
+    html += '<tbody>'
+    for(var i = 0; i < updatedCompliances.length; i++) {
+
+      var classBg = "";
+
+      if(i%2 === 0) {
+        classBg = 'td-light';
+      } else {
+        classBg = 'td-dark';
+      }
+
+      html += '<tr id="row-'+(updatedCompliances[i].id)+'">';
+      html += '<td part="td-body" class="'+classBg+' left-sticky">';
+      html += '<div id="select-'+i+'"><button id="button-'+(updatedCompliances[i].id)+'" class="buttonselect-icon button-'+i+'" part="button-icon-small"><span class="material-symbols-outlined">navigate_next</span></button></div>';
+      html += '</td>';
+      html += '<td part="td-body" class="'+classBg+'">';
+      html += '<div class="d-flex"><button id="button-lock-'+(updatedCompliances[i].id)+'" class="mr-10 button-lock-icon button-lock-'+i+'" part="button-icon-small"><span class="material-symbols-outlined">done</span></button></div>';
+      html += '</td>';
+      html += '<td part="td-body" class="'+classBg+'">';
+      html += '<sf-i-elastic-text class="statute id-'+i+'" text="'+(updatedCompliances[i].id)+'" minLength="80"></sf-i-elastic-text>';
+      html += '</td>';
+      //let data = JSON.parse(jsonData[i].fields.data);
+      for(var j = 0; j < Object.keys(updatedCompliances[i].values).length; j++) {
+
+        const objectKey = Object.keys(updatedCompliances[i].values)[j];
+        if(this.arrCols.includes(objectKey)) {
+          html += '<td part="td-body" class="td-body '+classBg+'">';
+          if(Array.isArray(updatedCompliances[i].values[objectKey].value)) {
+
+            for(var k = 0; k < updatedCompliances[i].values[objectKey].value.length; k++) {
+              if(updatedCompliances[i].values[objectKey].text != null) {
+                html +=  ('<sf-i-elastic-text text="'+updatedCompliances[i].values[objectKey].text[k]+'" minLength="80"></sf-i-elastic-text>');
+              } else {
+                html +=  ('<sf-i-elastic-text text="'+updatedCompliances[i].values[objectKey].value[k]+'" minLength="80"></sf-i-elastic-text>');
+              }
+              
+              if(k < (updatedCompliances[i].values[objectKey].value.length - 1)) {
+                html += "; ";
+              }
+            }
+
+          } else {
+            if(updatedCompliances[i].values[objectKey].text != null) {
+              html += ('<sf-i-elastic-text text="'+updatedCompliances[i].values[objectKey].value+'" minLength="80"></sf-i-elastic-text>')
+            } else {
+              html += ('<sf-i-elastic-text text="'+updatedCompliances[i].values[objectKey].value+'" minLength="80"></sf-i-elastic-text>')
+            }
+          }
+          html += '</td>';
+        }
+
+      }
+      html += '</tr>';
+    }
+    html += '</tbody>'
+    html += '</table>';
+    html += '</div>';
+
+    (this._SfRcmComplianceContainer as HTMLDivElement).innerHTML = html;
+
+    
+
+  }
+
+  renderRcmLockedCompliances = (lockedCompliances: any) => {
+
+    console.log('rendering locked', lockedCompliances);
+
+    for(var i = 0; i < lockedCompliances.data.length; i++) {
+
+      // console.log(lockedCompliances.data[i].complianceid);
+      // console.log(((this._SfRcmComplianceContainer as HTMLDivElement).querySelector('#button-lock-' + lockedCompliances.data[i].complianceid.S) as HTMLButtonElement));
+      // ((this._SfRcmComplianceContainer as HTMLDivElement).querySelector('#button-lock-' + lockedCompliances.data[i].complianceid.S) as HTMLButtonElement).style.display = 'none';
+      ((this._SfRcmComplianceContainer as HTMLDivElement).querySelector('#row-' + lockedCompliances.data[i].complianceid.S) as HTMLButtonElement).style.display = 'none';
+      ((this._SfRcmComplianceContainer as HTMLDivElement).querySelector('#button-lock-' + lockedCompliances.data[i].complianceid.S) as HTMLButtonElement).classList.add('gone');
+      
+    }
+
+  }
+
+  renderRcmUnlockedCompliances = (lockedCompliances: any) => {
+
+    console.log('rendering unlocked', lockedCompliances);
+
+    for(var i = 0; i < lockedCompliances.data.length; i++) {
+
+      console.log('#row-' + lockedCompliances.data[i].complianceid.S);
+      ((this._SfRcmComplianceContainer as HTMLDivElement).querySelector('#row-' + lockedCompliances.data[i].complianceid.S) as HTMLButtonElement).style.display = 'table-row';
+      
+      
+    }
+
+  }
+
+  renderRcmProjects = (div: HTMLDivElement, projects: any) => {
+
+    console.log('projects', projects);
+    
+    var html  = '<div class="w-100" part="rcm-section">';
+
+    html += '<div part="rcm-section-title" class="mt-20 mb-10">Affected Projects</div>';
+
+    if(projects == null || projects.length === 0) {
+      html += '<p part="rcm-section-error-message" class="mt-20 mb-10">No projects found</p></div>';
+      div.innerHTML += html;
+      return;
+    }
+
+    // console.log(updatedCompliances);
+    html += '<table>';
+
+    html += '<thead>';
+    // html += '<th part="td-head" class="td-head left-sticky">'
+    // html += 'Select';
+    // html += '</th>'
+    html += '<th part="td-head" class="td-head">';
+    html += 'Id';
+    html += '</th>';
+    for(var i = 0; i < Object.keys(projects[0]).length; i++) {
+      if(this.arrRcmProjectCols.includes(Object.keys(projects[0])[i])) {
+        html += '<th part="td-head" class="td-head">'
+        html += Object.keys(projects[0])[i]
+        html += '</th>'
+      }
+    }
+    html += '</thead>';
+
+    html += '<tbody>';
+    for(var i = 0; i < projects.length; i++) {
+
+      var classBg = "";
+
+      if(i%2 === 0) {
+        classBg = 'td-light';
+      } else {
+        classBg = 'td-dark';
+      }
+
+      html += '<tr>';
+    //   html += '<td part="td-action" class="left-sticky">';
+    //   html += '<div id="select-'+i+'"><button id="button-'+i+'" class="button-icon button-'+i+'"><span class="material-symbols-outlined">navigate_next</span></button></div>';
+    //   html += '</td>';
+      html += '<td part="td-body" class="'+classBg+'">';
+      html += '<sf-i-elastic-text class="statute id-'+i+'" text="'+(projects[i].id)+'" minLength="80"></sf-i-elastic-text>';
+      html += '</td>';
+    //   //let data = JSON.parse(jsonData[i].fields.data);
+      for(var j = 0; j < Object.keys(projects[i]).length; j++) {
+
+        const objectKey = Object.keys(projects[i])[j];
+        
+        if(this.arrRcmProjectCols.includes(objectKey)) {
+          html += '<td part="td-body" class="td-body '+classBg+'">';
+          console.log('value',projects[i][objectKey]);
+          if(Array.isArray(projects[i][objectKey])) {
+
+            for(var k = 0; k < projects[i][objectKey].value.length; k++) {
+              html +=  ('<sf-i-elastic-text text="'+projects[i][objectKey][0]+'" minLength="80"></sf-i-elastic-text>');
+            }
+
+          } else {
+            console.log('not array');
+            html += ('<sf-i-elastic-text text="'+projects[i][objectKey].replace(/"/g, '')+'" minLength="80"></sf-i-elastic-text>')
+          }
+          html += '</td>';
+        }
+
+      }
+      html += '</tr>';
+    }
+    html += '</tbody>'
+    html += '</table>';
+    html += '</div>';
+
+    div.innerHTML += html;
+
+    // const arrButtons = (this._SfRcmComplianceContainer as HTMLDivElement).querySelectorAll('.button-icon') as NodeListOf<HTMLButtonElement>;
+    // for(i = 0; i < arrButtons.length; i++) {
+
+    //   arrButtons[i].addEventListener('click', (e: any) => {
+
+    //     const index = e.currentTarget.id.split('-')[1];
+    //     this.rcmSelectedCompliance = updatedCompliances[index];
+    //     ((this._SfRcmTabContainer as HTMLDivElement).querySelector('#rcm-tab-projects') as HTMLButtonElement).click();
+
+    //   })
+
+    // }
+
+  }
+
+  renderRcmSelectedDate = (div: HTMLDivElement) => {
+
+    var html = "";
+
+    html  = '<div class="w-100" part="rcm-section">';
+
+    html += '<div part="rcm-section-title" class="mt-20 mb-20">Trigger Information</div>';
+
+    if(this.rcmSelectedDate == null || this.rcmSelectedMessage == null) {
+      html += '<p part="rcm-section-error-message" class="mt-20 mb-10">No trigger information found</p></div>';
+      div.innerHTML += html;
+      return;
+    }
+
+    
+    html += '<label part="input-label" class="mt-5">Date of Trigger</label><br />';
+    html += '<p>'+this.rcmSelectedDate+'</p>'
+    html += '<label part="input-label" class="mt-5">Notification Message</label><br />';
+    html += '<p>'+this.rcmSelectedMessage+'</p>'
+
+    html += '<div class="mt-20 mb-10"></div></div>';
+
+    div.innerHTML += html;
+
+   
+  }
+
+  renderRcmDate = (div: HTMLDivElement) => {
+
+    var html  = '<div class="w-100" part="rcm-section">';
+
+    html += '<div part="rcm-section-title" class="mt-20 mb-20">Trigger Information</div>';
+    html += '<label part="input-label" class="mt-5">Date of Trigger</label><br />';
+    html += '<input id="rcm-date" part="input" type="date" /><br /><br />'
+    html += '<label part="input-label" class="mt-5">Notification Message</label><br />';
+    html += '<textarea id="rcm-message" class="w-100" part="input" ></textarea>'
+
+    html += '<div class="mt-20 mb-10"></div></div>';
+
+    div.innerHTML += html;
+
+   
+  }
+
+  renderRcmJobs = (div: HTMLDivElement) => {
+
+    var html  = '<div class="w-100" part="rcm-section">';
+
+    html += '<div part="rcm-section-title" class="mb-20">New RCM Update Job</div>';
+    html += '<button id="button-submit"part="button-icon-small" class="material-icons button-expand mt-5">add_circle</button><br />';
+    html += '</div>';
+
+    div.innerHTML += html;
+   
+  }
+
+  renderRcmSelectedJobs = (div: HTMLDivElement, jobs: any) => {
+
+    var html  = '<div class="w-100" part="rcm-section">';
+
+    html += '<div part="rcm-section-title" class="mb-10">Previous Jobs For The Selected Compliance</div>';
+
+    if(jobs.data.length === 0) {
+      html += '<p part="rcm-section-error-message" class="mt-20 mb-10">No jobs found</p></div>';
+      div.innerHTML += html;
+      return;
+    }
+
+    html += '<table>';
+
+    html += '<thead>';
+    html += '<th part="td-head" class="td-head">'
+    html += 'Id';
+    html += '</th>'
+    html += '<th part="td-head" class="td-head">'
+    html += 'Creation Time';
+    html += '</th>'
+    html += '<th part="td-head" class="td-head">'
+    html += 'Status';
+    html += '</th>'
+    html += '<th part="td-head" class="td-head">'
+    html += '';
+    html += '</th>'
+
+    html += '</thead>';
+
+    html += '<tbody>';
+
+    for(var i = 0; i < jobs.data.length; i++) {
+
+      var classBg = "";
+      if(i%2 === 0) {
+        classBg = 'td-light';
+      } else {
+        classBg = 'td-dark';
+      }
+      
+      html += '<tr>';
+      html += '<td part="td-body" class="td-body '+classBg+'">';
+      html += jobs.data[i].id.S;
+      html += '</td>'
+      html += '<td part="td-body" class="td-body '+classBg+'">';
+      html += jobs.data[i].lastupdated.S;
+      html += '</td>'
+      html += '<td part="td-body" class="td-body '+classBg+'">';
+      html += jobs.data[i].status.S == "0" ? "created" : jobs.data[i].status.S == "1" ? "in-progress" : jobs.data[i].status.S == "2" ? "completed" : "notified";
+      html += '</td>'
+      html += '<td part="td-body" class="td-body '+classBg+'">';
+      html += jobs.data[i].status.S == "0" ? "<span class=\"color-not-started material-icons\">schedule</span>" : jobs.data[i].status.S == "1" ? "<span class=\"color-pending material-icons\">pending</span>" : jobs.data[i].status.S == "2" ? "<span class=\"color-done material-icons\">check_circle</span>" : "<span class=\"color-done material-icons\">notifications</span>";
+      html += '</td>'
+      html += '</tr>';
+
+    }
+
+    html += '</thead>';
+
+    html += '</tbody>';
+    html += '</table></div>';
+
+    div.innerHTML += html;
+   
+  }
+
+  renderRcmNotifications = (notifs: any) => {
+
+    var html = '';
+
+    console.log('inside rcm notifications', notifs);
+
+    if(notifs.data.length > 0) {
+
+      if(this.flowRcmNotification === 0) {
+        html += '<div class="d-flex align-center">';
+        html += '<span part="rcm-section-title-icon" class="material-symbols-outlined mr-10">notifications</span>';
+        html += '<div part="rcm-section-title" class="mr-10">Regulatory Alerts</div>';
+        html += ('<div part="notif-icon-badge" class="mr-20" >'+notifs.data.length+'</div>');
+        html += '<button id="button-expand" part="icon-button-small" class="material-symbols-outlined">keyboard_arrow_down</button>'
+        html += '</div>';
+      } else {
+        html += '<div class="w-100" part="rcm-section-notification">';
+        html += '<div class="d-flex align-center mb-20">';
+        html += '<span part="rcm-section-title-icon" class="material-symbols-outlined mr-10">notifications</span>';
+        html += '<div part="rcm-section-title">Regulatory Alerts</div>';
+        html += '</div>';
+        html += '<div id="rcm-container-list" class="mb-10">';
+        for(var i = 0; i < notifs.data.length; i++) {
+          html += '<div part="rcm-container-list-item">';
+          html += notifs.data[i].message;
+          html += '</div>';
+        }
+        html += '</div>';
+        html += '</div>';
+      }
+
+    } else {
+
+    }
+
+    (this._SfRcmContainer as HTMLDivElement).innerHTML = html;
+
+    if(notifs.data.length > 0) {
+
+      if(this.flowRcmNotification === 0) {
+        ((this._SfRcmContainer as HTMLDivElement).querySelector('#button-expand') as HTMLButtonElement).addEventListener('click', () => {
+          this.flowRcmNotification = 1;
+          this.renderRcmNotifications(notifs);
+        })
+      }
+
+    }
+  
+  }
+
+  renderRcmTabs = () => {
+
+    console.log('render rcm tabs');
+
+    (this._SfRcmTabContainer as HTMLDivElement).innerHTML = '';
+
+    var html = '';
+
+    html += '<button class="tab-button mb-10" id="rcm-tab-compliances" part="'+(this.myRcmTab == this.TAB_RCM_COMPLIANCES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Compliances</button>';
+    html += '<button class="tab-button mb-10" id="rcm-tab-projects" part="'+(this.myRcmTab == this.TAB_RCM_PROJECTS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Projects</button>';
+    html += '<button class="tab-button mb-10" id="rcm-tab-date" part="'+(this.myRcmTab == this.TAB_RCM_DATE ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Trigger</button>';
+    html += '<button class="tab-button mb-10" id="rcm-tab-jobs" part="'+(this.myRcmTab == this.TAB_RCM_JOBS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Jobs</button>';
+
+
+    (this._SfRcmTabContainer as HTMLDivElement).innerHTML = html;
+
+    (this._SfRcmTabContainer as HTMLDivElement).querySelector('#rcm-tab-compliances')?.addEventListener('click', async () => {
+
+      this.myRcmTab = this.TAB_RCM_COMPLIANCES;
+      this.renderRcmTabs();
+      await this.loadRcmCompliances();
+
+    });
+
+    (this._SfRcmTabContainer as HTMLDivElement).querySelector('#rcm-tab-projects')?.addEventListener('click', async () => {
+
+      this.myRcmTab = this.TAB_RCM_PROJECTS;
+      this.renderRcmTabs();
+      await this.loadRcmProjects();
+      //await this.loadOnboardingStatutes();
+
+    });
+
+    (this._SfRcmTabContainer as HTMLDivElement).querySelector('#rcm-tab-date')?.addEventListener('click', async () => {
+
+      this.myRcmTab = this.TAB_RCM_DATE;
+      this.renderRcmTabs();
+      await this.loadRcmDate();
+      //await this.loadOnboardingStatutes();
+
+    });
+
+    (this._SfRcmTabContainer as HTMLDivElement).querySelector('#rcm-tab-jobs')?.addEventListener('click', async () => {
+
+      this.myRcmTab = this.TAB_RCM_JOBS;
+      this.renderRcmTabs();
+      await this.loadRcmJobs();
+      //await this.loadOnboardingStatutes();
+
+    });
+
+  }
+
   proceedToCalendar = async () => {
     this.renderRoleTabs();
     await this.fetchUserCalendar_2();
@@ -10989,8 +12004,8 @@ export class SfIEvents extends LitElement {
     }
 
     if(selectedTab === 1) {
-      const radioCompleteness = container.querySelector('#radio-completeness') as HTMLButtonElement;
-      radioCompleteness.click();
+      // const radioCompleteness = container.querySelector('#radio-completeness') as HTMLButtonElement;
+      // radioCompleteness.click();
       this.renderChartSettingsSettings((container.querySelector('#chart-settings') as HTMLDivElement));
     }
 
@@ -11727,9 +12742,13 @@ export class SfIEvents extends LitElement {
       this.renderTabs(this.TAB_STREAM);
 
       const currMonth = ("0" + (new Date().getMonth() + 1)).slice(-2);
+
+      console.log('currMonth', currMonth);
+
       let idx = 0;
       for(var i = 0; i < 12; i++) {
-        if(parseInt(currMonth) === (parseInt(this.calendarStartMM) + i)) {
+        console.log('currMonth compare', currMonth, (parseInt(this.calendarStartMM) + i)%12);
+        if((parseInt(currMonth) === 12 && (parseInt(this.calendarStartMM) + i)%12 === 0) || parseInt(currMonth) === (parseInt(this.calendarStartMM) + i)%12) {
           idx = i;
           break;
         }
@@ -11738,6 +12757,7 @@ export class SfIEvents extends LitElement {
       if(dateResult != null) {
         await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
       }
+      this.currentColumnIndex =  idx + "";
       this.renderStream(idx);
     });
 
@@ -11747,6 +12767,7 @@ export class SfIEvents extends LitElement {
       const dateResult = this.calculateStartAndEndDateOfUpcoming(0);
       console.log('dateresult', dateResult)
       await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+      this.currentColumnIndex =  0 + ""
       this.renderUpcoming();
     });
 
@@ -11756,6 +12777,7 @@ export class SfIEvents extends LitElement {
       const dateResult = this.calculateStartAndEndDateOfThis(0);
       console.log('dateresult', dateResult)
       await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+      this.currentColumnIndex =  0 + ""
       this.renderThis();
     });
 
@@ -11765,6 +12787,7 @@ export class SfIEvents extends LitElement {
       const dateResult = this.calculateStartAndEndDateOfPast(0);
       console.log('dateresult', dateResult)
       await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+      this.currentColumnIndex =  0 + ""
       this.renderPast();
     });
 
@@ -12670,7 +13693,6 @@ export class SfIEvents extends LitElement {
 
   }
 
-
   uploadReportersMapping = async (data: any) => {
     console.log('uploading..', data);
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedreporters";
@@ -13293,6 +14315,75 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchRcmLockedCompliances = async (lockedCompliances: Array<string>) => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getrcmlockedcompliances";
+    let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    let xhr : any = (await this.prepareXhr({data: lockedCompliances}, url, this._SfLoader, authorization)) as any;
+
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('lockedcompliances', jsonRespose);
+
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchUpdateRcmLock = async (complianceId: string) => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatercmlock";
+    let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    let xhr : any = (await this.prepareXhr({"complianceid": complianceId, "locked": true}, url, this._SfLoader, authorization)) as any;
+
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('fetchUpdateRcmLock', jsonRespose);
+
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchDetailProject = async (projectId: string) => {
+
+    let url = "https://"+this.apiIdProjects+".execute-api.us-east-1.amazonaws.com/test/detail";
+    let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    let xhr : any = (await this.prepareXhr({"id": projectId}, url, this._SfLoader, authorization)) as any;
+
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('searchprojects', jsonRespose);
+
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
   fetchSearchStatutes = async (searchString: string, cursor: string = "") => {
 
     let url = "https://"+this.apiIdStatutes+".execute-api.us-east-1.amazonaws.com/test/list";
@@ -13432,6 +14523,27 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchMappedProjects = async () => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedprojects";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"complianceid": this.rcmSelectedCompliance.id}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
   fetchMappedCompliances = async () => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedcompliances";
@@ -13537,7 +14649,6 @@ export class SfIEvents extends LitElement {
 
   }
 
-
   fetchMappedSerializedMakerCheckers = async () => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedmakercheckers";
@@ -13579,7 +14690,6 @@ export class SfIEvents extends LitElement {
     }
 
   }
-
 
   fetchMappedSerializedAuditors = async () => {
 
@@ -13917,7 +15027,6 @@ export class SfIEvents extends LitElement {
 
   }
 
-
   fetchMappedAuditors = async () => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedauditors";
@@ -14023,11 +15132,101 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchUpdatedCompliances = async (nextBackwardToken: string = "") => {
+
+    let url = "https://"+this.apiIdCompliances+".execute-api.us-east-1.amazonaws.com/test/logs";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"nextBackwardToken": nextBackwardToken}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
   fetchMappedStatutes = async () => {
 
     let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedstatutes";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchCreateRcmJob = async (complianceid: string, data: any, triggerDate: string, triggerMessage: string, projects: any) => {
+
+    data.trigger = {};
+    data.trigger.date = triggerDate;
+    data.trigger.message = triggerMessage;
+    data.projects = [];
+    data.projects.push(...projects)
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/creatercmjob";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"complianceid": complianceid, "data": data}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchRcmNotifications = async (projectid: string) => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getrcmnotifications";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": projectid}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchRcmJobs = async (complianceid: string) => {
+
+    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getrcmjobs";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"complianceid": complianceid}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
     if(xhr.status == 200) {
 
@@ -15029,7 +16228,17 @@ export class SfIEvents extends LitElement {
     Chart.register(...registerables);
     //Chart.register(Colors);
 
-    if(this.mode == "onboarding") {
+    if(this.mode == "rcmnotifications") {
+
+      this.loadRcmNotifications();
+      
+
+    } else if(this.mode == "rcm") {
+
+      this.renderRcmTabs();
+      ((this._SfRcmTabContainer as HTMLDivElement).querySelector('#rcm-tab-compliances') as HTMLButtonElement).click();
+
+    } else if(this.mode == "onboarding") {
 
       //this.myOnboardingTab = this.TAB_STATUTES;
       this.renderOnboardingTabs();
@@ -15095,7 +16304,92 @@ export class SfIEvents extends LitElement {
   
   override render() {
 
-    if(this.mode == "onboarding") {
+    if(this.mode == "rcmnotifications") {
+
+      return html`
+          
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <div class="SfIEventsC">
+          
+          <div class="d-flex justify-center">
+              <div class="loader-element"></div>
+          </div>
+          
+          <div class="d-flex justify-center mb-20 flex-wrap" part="rcm-container" id="rcm-container">
+
+          </div>
+          
+          
+          <div class="d-flex justify-between">
+              <div class="lb"></div>
+              <div>
+                <div class="div-row-error div-row-submit gone">
+                  <div part="errormsg" class="div-row-error-message"></div>
+                </div>
+                <div class="div-row-success div-row-submit gone">
+                  <div part="successmsg" class="div-row-success-message"></div>
+                </div>
+              </div>
+              <div class="rb"></div>
+          </div>
+        </div>
+
+      `;
+
+    } else if(this.mode == "rcm") {
+
+      return html`
+          
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <div class="SfIEventsC">
+          
+          <div class="d-flex justify-center">
+              <div class="loader-element"></div>
+          </div>
+          
+          <div class="d-flex justify-center mb-20 flex-wrap" id="rcm-tab-container">
+
+          </div>
+          
+          <div class="d-flex justify-center">
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="rcm-compliance-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="rcm-projects-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="rcm-date-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="rcm-confirm-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch w-100" id="rcm-jobs-container">
+              
+            </div>
+          </div>
+          
+          <div class="d-flex justify-between">
+              <div class="lb"></div>
+              <div>
+                <div class="div-row-error div-row-submit gone">
+                  <div part="errormsg" class="div-row-error-message"></div>
+                </div>
+                <div class="div-row-success div-row-submit gone">
+                  <div part="successmsg" class="div-row-success-message"></div>
+                </div>
+              </div>
+              <div class="rb"></div>
+          </div>
+        </div>
+
+      `;
+
+    } else if(this.mode == "onboarding") {
 
       return html`
           
@@ -15319,7 +16613,7 @@ export class SfIEvents extends LitElement {
 
           </div>
           
-          <div class="d-flex justify-center flex-wrap" id="tab-container">
+          <div class="d-flex justify-center" id="tab-container">
 
           </div>
           <div class="d-flex justify-center">
