@@ -242,8 +242,14 @@ function getRandomColor() {
 function isInteger(value) {
     return /^-?\d+$/.test(value);
 }
+function clearListeners(old_element) {
+    var _a;
+    var new_element = old_element.cloneNode(true);
+    (_a = old_element.parentNode) === null || _a === void 0 ? void 0 : _a.replaceChild(new_element, old_element);
+    return new_element;
+}
 const exportFunctions = {
-    isInteger, callApi, validateName, readCookie, timeSince, createDiagonalPattern1, createDiagonalPattern2, createDiagonalPattern3, getRandomColor
+    clearListeners, isInteger, callApi, validateName, readCookie, timeSince, createDiagonalPattern1, createDiagonalPattern2, createDiagonalPattern3, getRandomColor
 };
 export default exportFunctions;
 //# sourceMappingURL=util.js.map

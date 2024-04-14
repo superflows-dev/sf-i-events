@@ -282,8 +282,14 @@ function isInteger(value: string) {
   return /^-?\d+$/.test(value);
 }
 
+function clearListeners(old_element: HTMLElement) {
+  var new_element = old_element.cloneNode(true);
+  old_element.parentNode?.replaceChild(new_element, old_element);
+  return new_element;
+}
+
 const exportFunctions = {
-  isInteger, callApi, validateName, readCookie, timeSince, createDiagonalPattern1, createDiagonalPattern2, createDiagonalPattern3, getRandomColor
+  clearListeners, isInteger, callApi, validateName, readCookie, timeSince, createDiagonalPattern1, createDiagonalPattern2, createDiagonalPattern3, getRandomColor
 };
 
 export default exportFunctions;

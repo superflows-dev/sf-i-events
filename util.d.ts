@@ -5,7 +5,9 @@ declare function readCookie(key: string): string;
 declare function callApi(url: string, data: string, authorization: any): Promise<unknown>;
 declare function getRandomColor(): string;
 declare function isInteger(value: string): boolean;
+declare function clearListeners(old_element: HTMLElement): Node;
 declare const exportFunctions: {
+    clearListeners: typeof clearListeners;
     isInteger: typeof isInteger;
     callApi: typeof callApi;
     validateName: (name: string) => boolean;

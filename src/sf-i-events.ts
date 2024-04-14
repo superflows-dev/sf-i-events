@@ -74,6 +74,7 @@ export class SfIEvents extends LitElement {
   TAB_DUEDATES = "duedates";
   TAB_ALERTSCHEDULES = "alertschedules";
   TAB_INTERNALCONTROLS = "internalcontrols";
+  TAB_SIGNOFF = "signoff";
   TAB_FUNCTIONS = "functions";
   TAB_COUNTRIES = "countries";
   TAB_CALENDAR = "calendar";
@@ -127,6 +128,12 @@ export class SfIEvents extends LitElement {
           font-family: Belanosima;
           font-weight: 600;
         }
+        .person-designation {
+          text-transform: capitalize;
+        }
+        .status-format {
+          text-transform: uppercase;
+        }
         .text-center {
           text-align: center;
         }
@@ -142,6 +149,7 @@ export class SfIEvents extends LitElement {
         .align-center {
           align-items: center;
         }
+        
         .w-25 {
           width: 25%;
         }
@@ -211,7 +219,7 @@ export class SfIEvents extends LitElement {
     <body>
       <div class="certificate-section">
         <h1 class="text-center">Certificate</h1>
-        <p>I, PERSON_NAME, working as PERSON_DESIGNATION in PERSON_COMPANY, hereby declare that I am entrusted with the responsibility of ensuring compliance with various laws applicable to the company in the administration of business and the affairs of the company</p>
+        <p>I, PERSON_NAME, working as <span class="person-designation">PERSON_DESIGNATION</span> in PERSON_COMPANY, hereby declare that I am entrusted with the responsibility of ensuring compliance with various laws applicable to the company in the administration of business and the affairs of the company</p>
         <p>After having examined and considered all relevant information and based on the information furnished by the concerned officers, I, do hereby certify that the Finance / Technical / Administration / Legal wings / department of PERSON_COMPANY for the period PERSON_PERIOD, has in the conduct of business:</p>
         <ol>
           <li>Complied with all applicable laws, enactments, orders, rules, regulations, and other statutory requirements of the Central, State and other Statutory and local authorities concerning the business and affairs of the company;</li>
@@ -227,7 +235,7 @@ export class SfIEvents extends LitElement {
           </div>
           <div>
             <div>Name: PERSON_NAME</div>
-            <div>Role: PERSON_DESIGNATION</div>
+            <div class="person-designation">Role: PERSON_DESIGNATION</div>
           </div>
         </div>
       </div>
@@ -256,6 +264,9 @@ export class SfIEvents extends LitElement {
           font-family: DM Sans;
           margin: 2px;
           padding: 20px;
+        }
+        .status-format {
+          text-transform: uppercase;
         }
         .text-center {
           text-align: center;
@@ -390,6 +401,81 @@ export class SfIEvents extends LitElement {
   
   `;
 
+  AUTOSAVE_FLAG = true;
+
+  chartSelectedLegend: Array<number>= [];
+
+  selectedFilter: any = null;
+
+  barCharDataSet2: Array<any> = [];
+
+  barCharDataSet2Arr: Array<any> = [];
+
+  barCharDataSet3: Array<any> = [];
+
+  barCharDataSet3Arr: Array<any> = [];
+
+  @property()
+  filteronboarding: string = '[]';
+
+  getfilterOnboarding = () => {
+    return JSON.parse(this.filteronboarding);
+  }
+
+  getFilterOnboardingString = () => {
+
+    const jsonFilterOnboarding = JSON.parse(this.filteronboarding);
+
+    var html = '';
+
+    html += '<table>';
+
+    html += '<tr>';
+      html += '<th part="td-head">';
+      html += 'Country'
+      html += '</th>';
+      html += '<th part="td-head">';
+      html += 'State'
+      html += '</th>';
+      html += '<th part="td-head">';
+      html += 'Subcategory'
+      html += '</th>';
+    html += '</tr>';
+
+    for(var i = 0; i < jsonFilterOnboarding.length; i++) {
+
+      var classBg = '';
+
+      if(i%2 === 0) {
+        classBg = 'td-light';
+      } else {
+        classBg = 'td-dark';
+      }
+
+      html += '<tr>';
+        html += '<td part="td-body1" class="'+classBg+'">';
+          html += jsonFilterOnboarding[i].country;
+        html += '</td>';
+        html += '<td part="td-body1" class="'+classBg+'">';
+          for(var j = 0; j < jsonFilterOnboarding[i].states.length; j++) {
+            html += ('<div>'+jsonFilterOnboarding[i].states[j]+'</div>');
+          }
+        html += '</td>';
+        html += '<td part="td-body1" class="'+classBg+'">';
+        for(var j = 0; j < jsonFilterOnboarding[i].subcategories.length; j++) {
+          html += ('<div>'+jsonFilterOnboarding[i].subcategories[j]+'</div>');
+        }
+        html += '</td>';
+      html += '</tr>';
+
+    }
+
+    html += '</table>';
+
+    return html;
+
+  }
+
   @property()
   selectedCbs: Array<any> = [];
 
@@ -398,6 +484,15 @@ export class SfIEvents extends LitElement {
 
   @property()
   name!: string;
+
+  @property()
+  disableflagggrcresponse: string = "";
+
+  @property()
+  disableclientresponse: string = "";
+
+  @property()
+  disablesignoff: string = "";
 
   @property()
   apiId!: string;
@@ -496,6 +591,9 @@ export class SfIEvents extends LitElement {
   chart3: any = null;
 
   @property()
+  chart4: any = null;
+
+  @property()
   calendarStartDD!: string;
 
   @property()
@@ -530,6 +628,9 @@ export class SfIEvents extends LitElement {
 
   @property()
   events: any = null;
+
+  @property()
+  streamIndex: any = null;
 
   @property()
   eventsInWindow: any = null;
@@ -582,6 +683,15 @@ export class SfIEvents extends LitElement {
   csvDataStats: string = "";
 
   @property()
+  csvGraphStats: string = "";
+
+  @property()
+  csvCompletenessStats: string = "";
+
+  @property()
+  csvTimelinessStats: string = "";
+
+  @property()
   htmlDataCompliances: string = "";
 
   @property()
@@ -608,6 +718,11 @@ export class SfIEvents extends LitElement {
   @property()
   filterTags: string [] = [];
 
+
+  @property()
+  subfilter: string = "";
+
+
   @property()
   riskAreasData: any = null;
 
@@ -621,7 +736,7 @@ export class SfIEvents extends LitElement {
   riskSeverityData: any = null;
 
   @property()
-  arrCols: Array<string> = ["country", "ctate", "obligationtitle", "statute", "category"];
+  arrCols: Array<string> = ["country", "state", "obligationtitle", "statute", "category"];
 
   @property()
   arrRcmProjectCols: Array<string> = ["name"];
@@ -687,6 +802,15 @@ export class SfIEvents extends LitElement {
   selectedStatus: string = "";
 
   @property()
+  selectedTab: string = "";
+
+  @property()
+  restrictToMapping: string = "";
+
+  @property()
+  enableDeleteLatestReport: string = "";
+
+  @property()
   stream: string = this.TAB_STREAM;
 
   static override styles = css`
@@ -694,6 +818,84 @@ export class SfIEvents extends LitElement {
     .bg-white {
       background-color: white;
     }
+
+    .pos-fixed {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      min-height: 100%;
+      z-index: 101;
+    }
+
+    .pos-fixed-scroll {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: fixed;
+      bottom: 50px;
+      right: 50px;
+      z-index: 99;
+    }
+
+    .cover-slide {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      width: 100%;
+      height: 100%;
+      background-color: black;
+      opacity: 0.4;
+    }
+
+    .detail-container {
+      width: 60%;
+      height: 400px;
+      background-color: #efefef;
+      overflow-y: auto;
+      border-radius: 10px;
+      z-index: 102;
+    }
+
+    @media (orientation: portrait) {
+
+      .detail-container {
+        width: 80%;
+        height: 400px;
+        background-color: #efefef;
+        overflow-y: auto;
+        border-radius: 10px;
+      }
+
+    }
+
+    .box {
+      margin-top: 20px;
+      height: 10px;
+      width: 100%;
+      background: linear-gradient(-45deg, transparent 10%, #ccc 5%, transparent 60%);
+      background-size: 300%;
+      background-position-x: 100%;
+      animation: shimmer 1.5s infinite linear;
+      margin-bottom: 20px;
+    }
+
+    .chosen {
+      background-color: #E5FAD4 !important;
+    }
+  
+    @keyframes shimmer {
+      to {
+         background-position-x: 0%
+      }
+   }  
+
+   .truncate {
+    display: none
+   }
 
     @media (orientation: landscape) {
 
@@ -1007,6 +1209,7 @@ export class SfIEvents extends LitElement {
     .left-sticky {
       left: 0px;
       position: sticky;
+      z-index: 100;
     }
 
     .link {
@@ -1237,6 +1440,10 @@ export class SfIEvents extends LitElement {
 
     .w-100 {
       width: 100%;
+    }
+
+    .w-90 {
+      width: 90%;
     }
 
     .fw-100 {
@@ -1558,6 +1765,9 @@ export class SfIEvents extends LitElement {
   @query('#onboarding-tab-container')
   _SfOnboardingTabContainer: any;
 
+  @query('#onboarding-status-container')
+  _SfOnboardingStatusContainer: any;
+
   @query('#rcm-container')
   _SfRcmContainer: any;
 
@@ -1684,6 +1894,9 @@ export class SfIEvents extends LitElement {
   @query('#internalcontrols-container')
   _SfOnboardingInternalControlsContainer: any;
 
+  @query('#signoff-container')
+  _SfOnboardingSignoffContainer: any;
+
   @query('#calendar-list-container')
   _SfOnboardingCalendarListContainer: any;
 
@@ -1695,6 +1908,67 @@ export class SfIEvents extends LitElement {
 
   @queryAssignedElements({slot: 'uploader'})
   _SfUploader: any;
+
+  isSelectedLegend = (value: number) : any => {
+    return this.chartSelectedLegend.includes(value);
+  }
+  removeFromSelectedLegend = (value: number) => {
+    const index = this.chartSelectedLegend.indexOf(value);
+    if (index > -1) { // only splice array when item is found
+      this.chartSelectedLegend.splice(index, 1); // 2nd parameter means remove one item only
+    }
+  }
+
+  clearSelectedLegend = () => {
+    this.chartSelectedLegend = [];
+    if(this.chart != null) {
+      this.chart.data.datasets[0].data.forEach((d: any, i: any) => {
+        console.log(d);
+        this.chart.getDatasetMeta(0).data[i].hidden = false;
+        this.chart.update();
+      })
+    }
+    if(this.chart2 != null && this.chart3 != null) {
+      if(this.barCharDataSet2Arr.length > 0 && this.barCharDataSet3Arr.length > 0) {
+        do {
+          this.chart2.data.datasets = this.barCharDataSet2Arr.pop();
+          this.chart3.data.datasets = this.barCharDataSet3Arr.pop();
+        } while(this.barCharDataSet2Arr.length > 0)
+        
+      } else {
+        if(this.barCharDataSet2.length > 0 && this.barCharDataSet3.length > 0) {
+          this.barCharDataSet2.pop();
+          this.barCharDataSet3.pop();
+        }
+      }
+    }
+    this.selectedFilter = null;
+  }
+
+  clearSelectedGraphParam = () => {
+
+    console.log('clickonbar clearing graph param', this.chart, this.chart2, this.chart3);
+
+    this.graphParam = "";
+    if(this.chart != null) {
+      this.chart.update();
+    }
+
+    if(this.chart2 != null && this.chart3 != null) {
+      if(this.barCharDataSet2.length > 0 && this.barCharDataSet3.length > 0) {
+        this.chart2.data.datasets = this.barCharDataSet2.pop();
+        this.chart3.data.datasets = this.barCharDataSet3.pop();
+      }
+    } else {
+      if(this.barCharDataSet2.length > 0 && this.barCharDataSet3.length > 0) {
+        this.barCharDataSet2.pop();
+        this.barCharDataSet3.pop();
+      }
+    }
+
+    this.processGraphFilter("");
+    this.selectedFilter = null;
+  }
 
   getEventField = (field: string) => {
 
@@ -1944,17 +2218,24 @@ export class SfIEvents extends LitElement {
 
       const mmdd = ("0" + (month+1)).slice(-2) + "/" + ("0" + (i+1)).slice(-2);
 
+      if(month === 1 && i === (this.getLastDayOfMonth(month, year) - 1) ) {
+        console.log('getLastDayOfMonth', month, this.getLastDayOfMonth(month, year), mmdd);
+      }
+
       if(this.events[mmdd] != null) {
 
           for(var j = 0; j < this.events[mmdd].length; j++) {
+
             total++;
-            if(this.events[mmdd][j].documents == null || this.events[mmdd][j].documents == null || (this.events[mmdd][j].documents).length === 0) {
-              notStarted++;
-            } else if(this.events[mmdd][j].approved != null && this.events[mmdd][j].approved){
+
+            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved) != null && (this.events[mmdd][j].approved)) {
               approved++;
-            } else {
+            } else if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
               inProgress++;
+            } else {
+              notStarted++;
             }
+
           }
 
       } 
@@ -2022,12 +2303,13 @@ export class SfIEvents extends LitElement {
 
           for(var j = 0; j < this.events[mmdd].length; j++) {
             total++;
-            if(this.events[mmdd][j].documents == null || this.events[mmdd][j].documents == null || (this.events[mmdd][j].documents).length === 0) {
-              notStarted++;
-            } else if(this.events[mmdd][j].approved != null && this.events[mmdd][j].approved){
+
+            if(this.events[mmdd][j].approved != null && (this.events[mmdd][j].approved) != null && (this.events[mmdd][j].approved)) {
               approved++;
-            } else {
+            } else if(this.events[mmdd][j].comments != null && this.events[mmdd][j].comments != null && (this.events[mmdd][j].comments).length > 0) {
               inProgress++;
+            } else {
+              notStarted++;
             }
           }
 
@@ -2120,6 +2402,30 @@ export class SfIEvents extends LitElement {
 
   }
 
+  getYearFromMonthAndCalendarStart = (mm: string) => {
+
+    var yyyy = "";
+
+    var currMonth = new Date().getMonth() + 1;
+
+    if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+      console.log('getpastduedate returning', 0);
+      yyyy = parseInt(this.calendarStartYYYY) + "";
+    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+      console.log('getpastduedate returning', 1);
+      yyyy = (parseInt(this.calendarStartYYYY) - 1) + "";
+    } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+      console.log('getpastduedate returning', 2);
+      yyyy = (parseInt(this.calendarStartYYYY) + 1) + "";
+    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+      console.log('getpastduedate returning', 3);
+      yyyy = (parseInt(this.calendarStartYYYY)) + "";
+    }
+
+    return yyyy;
+
+  }
+
   getPastDueDate = (mmdd: string) => {
 
     const dd = mmdd.substring(3, 5);
@@ -2127,20 +2433,23 @@ export class SfIEvents extends LitElement {
 
     console.log('getpastduedate', mmdd, dd, mm);
 
-    var yyyy = "";
+    // var yyyy = "";
 
-    var currMonth = new Date().getMonth() + 1;
+    // if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+    //   console.log('getpastduedate returning', 0);
+    //   yyyy = parseInt(this.calendarStartYYYY) + "";
+    // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+    //   console.log('getpastduedate returning', 1);
+    //   yyyy = (parseInt(this.calendarStartYYYY) - 1) + "";
+    // } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    //   console.log('getpastduedate returning', 2);
+    //   yyyy = (parseInt(this.calendarStartYYYY) + 1) + "";
+    // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    //   console.log('getpastduedate returning', 3);
+    //   yyyy = (parseInt(this.calendarStartYYYY)) + "";
+    // }
 
-    if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
-      yyyy = new Date().getFullYear() + "";
-    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
-      yyyy = (new Date().getFullYear() - 1) + "";
-    } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-      yyyy = (new Date().getFullYear() + 1) + "";
-    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-      yyyy = (new Date().getFullYear() + 1) + "";
-    }
-
+    var yyyy = this.getYearFromMonthAndCalendarStart(mm);
 
     var date = new Date();
     date.setMonth(parseInt(mm) - 1);
@@ -2150,6 +2459,8 @@ export class SfIEvents extends LitElement {
     var currDate = new Date();
 
     if(currDate.getTime() > date.getTime()) {
+
+      console.log('getpastduedate returning true', yyyy);
       return true;
     }
 
@@ -2166,19 +2477,31 @@ export class SfIEvents extends LitElement {
     const dd = mmdd.substring(3, 5);
     const mm = mmdd.substring(0, 2);
 
-    var yyyy = "";
+    // var yyyy = "";
 
-    var currMonth = new Date().getMonth() + 1;
+    // var currMonth = new Date().getMonth() + 1;
 
-    if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
-      yyyy = new Date().getFullYear() + "";
-    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
-      yyyy = (new Date().getFullYear() - 1) + "";
-    } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-      yyyy = (new Date().getFullYear() + 1) + "";
-    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-      yyyy = (new Date().getFullYear() + 1) + "";
-    }
+    // // if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+    // //   yyyy = new Date().getFullYear() + "";
+    // // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+    // //   yyyy = (new Date().getFullYear() - 1) + "";
+    // // } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    // //   yyyy = (new Date().getFullYear() + 1) + "";
+    // // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    // //   yyyy = (new Date().getFullYear() + 1) + "";
+    // // }
+
+    // if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+    //   yyyy = parseInt(this.calendarStartYYYY) + "";
+    // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+    //   yyyy = (parseInt(this.calendarStartYYYY) - 1) + "";
+    // } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    //   yyyy = (parseInt(this.calendarStartYYYY) + 1) + "";
+    // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    //   yyyy = (parseInt(this.calendarStartYYYY) + 1) + "";
+    // }
+
+    var yyyy = this.getYearFromMonthAndCalendarStart(mm);
 
     var date = new Date();
     date.setMonth(parseInt(mm) - 1);
@@ -2209,19 +2532,21 @@ export class SfIEvents extends LitElement {
     const dd = mmdd.substring(3, 5);
     const mm = mmdd.substring(0, 2);
 
-    var yyyy = "";
+    // var yyyy = "";
 
-    var currMonth = new Date().getMonth() + 1;
+    // var currMonth = new Date().getMonth() + 1;
 
-    if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
-      yyyy = new Date().getFullYear() + "";
-    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
-      yyyy = (new Date().getFullYear() - 1) + "";
-    } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-      yyyy = (new Date().getFullYear() + 1) + "";
-    } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-      yyyy = (new Date().getFullYear() + 1) + "";
-    }
+    // if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+    //   yyyy = parseInt(this.calendarStartYYYY) + "";
+    // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+    //   yyyy = (parseInt(this.calendarStartYYYY) - 1) + "";
+    // } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    //   yyyy = (parseInt(this.calendarStartYYYY) + 1) + "";
+    // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    //   yyyy = (parseInt(this.calendarStartYYYY) + 1) + "";
+    // }
+
+    var yyyy = this.getYearFromMonthAndCalendarStart(mm);
 
     var date = new Date();
     date.setMonth(parseInt(mm) - 1);
@@ -2711,44 +3036,110 @@ export class SfIEvents extends LitElement {
 
   }
 
+  getReporterStringFromEvent = (event: any) => {
+    let reporterStr = '';
+    for(var k = 0; k < event.reporters.length; k++) {
+      reporterStr += '<div part="badge-reporter-name" class="graphparamname graphparamname2 mb-20 ml-10">' + (event.reporters[k].split(';')[0]) + '</div>';
+    }
+    return reporterStr;
+  }
 
-  renderStreamEvents = (index: number, month: number, year: number) => {
+  getReporterDetailStringFromEvent = (event: any) => {
+    let reporterStr = '';
+    for(var k = 0; k < event.reporters.length; k++) {
+      reporterStr += '<div part="detail-reporter-name" class="graphparamname mb-20 mr-10">' + (event.reporters[k].split(';')[0]) + '</div>';
+    }
+    return reporterStr;
+  }
+
+  getApproverStringFromEvent = (event: any) => {
+    let approverStr = '';
+    for(var k = 0; k < event.approvers.length; k++) {
+      approverStr += '<div part="badge-approver-name" class="graphparamname graphparamname3 mb-20 ml-10">' + (event.approvers[k].split(';')[0]) + '</div>';
+    }
+    return approverStr;
+  }
+
+  getApproverDetailStringFromEvent = (event: any) => {
+    let approverStr = '';
+    for(var k = 0; k < event.approvers.length; k++) {
+      approverStr += '<div part="detail-approver-name" class="graphparamname mb-20 mr-10">' + (event.approvers[k].split(';')[0]) + '</div>';
+    }
+    return approverStr;
+  }
+
+  renderLatestCompliance = (mmddyyyy: string, event: any) => {
+
+    var lastMax = 0;
+    for(var k = 0; k < event.compliances.length; k++) {
+
+      const tsOfEvent = new Date(mmddyyyy).getTime();
+      const tsOfCompliance = parseInt(event.compliances[k].complianceid.S);
+      if(tsOfCompliance > lastMax && tsOfCompliance <= tsOfEvent) {
+
+        event['specificity'] = JSON.parse(event.compliances[k].data.S)['specificity'];
+        event['reference'] = JSON.parse(event.compliances[k].data.S)['reference'];
+        event['obligation'] = JSON.parse(event.compliances[k].data.S)['obligation'];
+        event['penalty'] = JSON.parse(event.compliances[k].data.S)['penalty'];
+        event['authority'] = JSON.parse(event.compliances[k].data.S)['authority'];
+        event['frequency'] = JSON.parse(event.compliances[k].data.S)['frequency'];
+        event['obligationtype'] = JSON.parse(event.compliances[k].data.S)['obligationtype'];
+        event['duedate'] = JSON.parse(event.compliances[k].data.S)['duedate'];
+        event['applicability'] = JSON.parse(event.compliances[k].data.S)['applicability'];
+        event['form'] = JSON.parse(event.compliances[k].data.S)['form'];
+        event['internalcontrols'] = JSON.parse(event.compliances[k].data.S)['internalcontrols'];
+        event['firstlineofdefence'] = JSON.parse(event.compliances[k].data.S)['firstlineofdefence'];
+        event['risk'] = JSON.parse(event.compliances[k].data.S)['risk'];
+        event['riskarea'] = JSON.parse(event.compliances[k].data.S)['riskarea'];
+
+      }
+
+    }
+    return event;
+  }
+
+  renderStreamEvents = (index: number, month: number, year: number, showGraph: boolean = true) => {
+
+    this.clearSelectedLegend();
 
     this.selectedItems = [];
     this.selectedStatus = "";
-    
 
     const lastDay = this.getLastDayOfMonth(month, year);
 
     var html = '';
 
     html += '<div class="mb-20 stream-event-list" part="stream-event-list-charts">';
-      html += '<div part="stream-event-chart-selection" class="mb-20">';
-        html += '<div part="td-head" class="mb-5">Select Chart</div>';
-        html += '<div class="mb-10 d-flex flex-wrap align-center">';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') +'>';
-          html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') +'>';
-          html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') +'>';
-          html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') +'>';
-          html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') +'>';
-          html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') +'>';
-          html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') +'>';
-          html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') +'>';
-          html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') +'>';
-          html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
+      if(showGraph) {
+        html += '<div part="stream-event-chart-selection" class="mb-20">';
+          html += '<div part="td-head" class="mb-5">Select Chart</div>';
+          html += '<div class="mb-10 d-flex flex-wrap align-center">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') +'>';
+            html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') +'>';
+            html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') +'>';
+            html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') +'>';
+            html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') +'>';
+            html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') +'>';
+            html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') +'>';
+            html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') +'>';
+            html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') +'>';
+            html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
+          html += '</div>';
         html += '</div>';
-      html += '</div>';
-      html += '<div class="chart-container d-flex scroll-x align-center"><div part="chart-item" class="chart-item"><canvas id="myChart"></div></canvas><div part="chart-item chart-item-middle" class="chart-item"><canvas id="myChart2" class="gone"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart3" class="gone"></div></div>';
-      html += '<div id="chart-settings-controls" class="mt-20"></div>'
-      html += '<div id="chart-settings"></div>'
+        html += '<div class="chart-container d-flex scroll-x align-center"><div part="chart-item" class="chart-item"><canvas id="myChart"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart4" class="gone"></canvas></div><div part="chart-item chart-item-middle" class="chart-item"><canvas id="myChart2" class="gone"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart3" class="gone"></canvas></div></div>';
+        html += '<div id="chart-settings-controls" class="mt-20"></div>'
+        html += '<div id="chart-settings"></div>'
+      } else {
+        html += '<div part="box" class="box"></div>';
+      }
     html += '</div>';
 
     var total = 0, notStarted = 0, approved = 0, inProgress = 0, pastDueDate = 0, lateExecuted = 0, lateApproved = 0;
@@ -2757,24 +3148,34 @@ export class SfIEvents extends LitElement {
     
     html += '<div id="stream-event-summary" part="stream-event-total" class="d-flex flex-wrap">';
     html += '<div part="badge-dashboard" class="mr-10 mb-10 no-shrink"><span>Total:</span> <span id="graph-total">DASHBOARD_TOTAL</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-icons color-not-started">schedule</span>&nbsp;&nbsp;<span>Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-pending">pending</span>&nbsp;&nbsp;<span>In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-done">check_circle</span>&nbsp;&nbsp;<span>Approved:</span><span id="graph-approved">DASHBOARD_APPROVED</span></div>';
-    html += '<div part="calendar-tab-button-not-selected" class="d-flex justify-center align-center mr-10 mb-10 no-shrink cursor" id="button-status-more"><span class="material-symbols-outlined">navigate_next</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-past-due-date">running_with_errors</span>&nbsp;&nbsp;<span>Past Due Date:</span> <span id="graph-past-due-date">DASHBOARD_PAST_DUE_DATE</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-late-approved">running_with_errors</span>&nbsp;&nbsp;<span>Late Approved:</span> <span id="graph-late-approved">DASHBOARD_LATE_APPROVED</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-late-executed">running_with_errors</span>&nbsp;&nbsp;<span>Late Executed:</span> <span id="graph-late-executed">DASHBOARD_LATE_EXECUTED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-icons color-not-started">schedule</span>&nbsp;&nbsp;<span>Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-pending">pending</span>&nbsp;&nbsp;<span>In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-done">check_circle</span>&nbsp;&nbsp;<span>Approved:</span><span id="graph-approved">DASHBOARD_APPROVED</span></div>';
+    // html += '<div part="calendar-tab-button-not-selected" class="gone d-flex justify-center align-center mr-10 mb-10 no-shrink cursor" id="button-status-more"><span class="material-symbols-outlined">navigate_next</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-not-started">timer</span>&nbsp;&nbsp;<span>In Time:</span> <span id="graph-in-time">DASHBOARD_IN_TIME</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-past-due-date">running_with_errors</span>&nbsp;&nbsp;<span>Past Due Date:</span> <span id="graph-past-due-date">DASHBOARD_PAST_DUE_DATE</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-late-approved">running_with_errors</span>&nbsp;&nbsp;<span>Late Approved:</span> <span id="graph-late-approved">DASHBOARD_LATE_APPROVED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-late-executed">running_with_errors</span>&nbsp;&nbsp;<span>Late Executed:</span> <span id="graph-late-executed">DASHBOARD_LATE_EXECUTED</span></div>';
     html += '</div>';
+    html += '<div id="stream-event-filter" part="stream-event-total" class="d-flex flex-wrap"></div>';
 
     this.eventsInWindow = [];
 
     var csvCols = "", htmlCols = "";
     var csvValues = "", htmlValues = "";
     var period = ("0" + (month+1)).slice(-2) + "/" + ("0" + 1).slice(-2) + '/' + new Date().getFullYear() + ' - ' + ("0" + (month+1)).slice(-2) + "/" + ("0" + lastDay).slice(-2) + '/' + new Date().getFullYear()
-
-    this.period = period;
+    
+    let firstDay: Date | null = null;
+    let endDay = null;
 
     for(var i = 1; i <= lastDay; i++) {
+
+      if(i === 1) {
+        firstDay = new Date(year, month, i);
+        endDay = new Date(year, month, i);
+      } else {
+        endDay?.setDate(endDay.getDate() + 1);
+      }
 
       const mmdd = ("0" + (month+1)).slice(-2) + "/" + ("0" + i).slice(-2);
 
@@ -2813,6 +3214,8 @@ export class SfIEvents extends LitElement {
             this.events[mmdd][j]['mmdd'] = mmdd
             this.eventsInWindow.push(this.events[mmdd][j]);
 
+            this.events[mmdd][j] = this.renderLatestCompliance(mmdd+'/'+this.getCurrentYear(("0" + (month+1)).slice(-2)), this.events[mmdd][j]);
+
             var partStatus = "";
             var lateStatus = "in-time";
 
@@ -2849,7 +3252,7 @@ export class SfIEvents extends LitElement {
             html += '<div class="stream-events-container flex-grow">';
               html += '<div class="hidden-tags hide">'+JSON.stringify(this.events[mmdd][j]['tags'])+'</div>'
               html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>'
-              html += '<div part="stream-events-event-title" class="d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') +  '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
+              html += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') +  '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
               html += '<table class="stream-events-container-table" part="'+partStatus+'">';
               html += '<thead>';
               html += '<th part="td-head">';
@@ -2858,7 +3261,7 @@ export class SfIEvents extends LitElement {
               html += 'Status'
               if(csvCols.indexOf('Status') < 0) {
                 csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate' 
-                htmlCols += '<tr><th>Id</th><th>Status</th><th class="w-200px">Statute</th><th>Reference</th><th class="w-200px">Applicability</th><th class="w-200px">Obligation</th><th>ObligationType</th><th class="w-200px">Penalty</th><th>RiskSeverity</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th></tr>'
+                htmlCols += '<tr><th>Id</th><th>Status</th><th>Statute</th><th>Reference</th><th class="w-200px">Applicability</th><th>ObligationType</th><th class="w-200px">Obligation</th><th class="w-200px">InternalControls</th><th class="w-200px">Penalty</th><th>RiskSeverity</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th><th>ReportParameter</th></tr>'
               }
               html += '</th>';
               html += '<th part="td-head">';
@@ -2929,7 +3332,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-late-executed">running_with_errors</span>';
                   }
                   csvValues += 'approved late-executed,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">approved late-executed</td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved late-executed</td>');
                 } else if(lateStatus == "late-approved") {
                   lateApproved++;
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
@@ -2939,7 +3342,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-late-approved">running_with_errors</span>'
                   }
                   csvValues += 'approved late-approved,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">approved late-approved</td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved late-approved</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-symbols-outlined color-done">check_circle</span>'
@@ -2948,7 +3351,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'approved,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">approved</td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved</td>');
                 }
                 html += '</td>';
               } else if(partStatus == "status-in-progress") {
@@ -2962,7 +3365,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>'
                   }
                   csvValues += 'in-progress past-due-date,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">in-progress past-due-date</td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">in-progress past-due-date</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-symbols-outlined color-pending">pending</span>'
@@ -2971,7 +3374,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'in-progress,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">in-progress</td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">in-progress</td>');
                 }
                 
                 html += '</td>';
@@ -2986,7 +3389,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>'
                   }
                   csvValues += 'not started past-due-date,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">not started past-due-date</td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">not-started past-due-date</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-icons color-not-started">schedule</span>'
@@ -2995,7 +3398,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'not started,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">not started</td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">not-started</td>');
                 }
                 
                 html += '</td>';
@@ -3030,8 +3433,9 @@ export class SfIEvents extends LitElement {
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["statute"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["reference"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["applicability"]+'</td>');
-              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligationtype"]+'</td>');
+              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
+              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["internalcontrols"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["penalty"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["risk"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["frequency"]+'</td>');
@@ -3070,37 +3474,47 @@ export class SfIEvents extends LitElement {
                 html += '</th>'
               }
               csvValues += '\n';
-              htmlValues += ('</tr>');
               
               html += '</tbody>';
               html += '</table>';
               html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>'
 
+              // console.log('Reporters', );
+
+              let reporterStr = this.getReporterStringFromEvent(this.events[mmdd][j]);
+              let approverStr = this.getApproverStringFromEvent(this.events[mmdd][j]);
+
               if(this.flowGraph != this.FLOW_GRAPH_COMPLETENESS && this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
 
                 let graphParam = '';
                 if(Array.isArray(this.events[mmdd][j][this.flowGraph])) {
-                  graphParam = this.events[mmdd][j][this.flowGraph].toString().replace(/ *\([^)]*\) */g, "");
+                  graphParam = this.events[mmdd][j][this.flowGraph].toString().replace(/ *\([^)]*\) */g, "").replace(/,/g,' • ');
                 } else {
-                  graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
+                  graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "").replace(/,/g,' • ');
                 }
-                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + graphParam + '</div></div>';
+                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + graphParam + '</div>' + reporterStr + approverStr + '</div>';
+                htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">'+graphParam+'</td>');
 
               } else {
 
                 if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) {
 
-                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + partStatus.replace('status-', '') + '</div></div>';
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + partStatus.replace('status-', '') + '</div>' +reporterStr+ approverStr+'</div>';
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">'+partStatus.replace('status-', '')+'</td>');
 
                 }
 
                 if(this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
 
-                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + lateStatus + '</div></div>';
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + lateStatus + '</div></div>';
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">'+lateStatus+'</td>');
+
 
                 }
 
               }
+
+              htmlValues += ('</tr>');
 
 
             html += '</div>';
@@ -3124,32 +3538,42 @@ export class SfIEvents extends LitElement {
 
     html += '</div>'
 
+    this.period = firstDay?.getDate() + '/' + (firstDay!.getMonth()+1) + '/' + firstDay?.getFullYear() + " - " + endDay?.getDate() + '/' + (endDay!.getMonth()+1) + '/' + endDay?.getFullYear();
+
+
     this.csvDataCompliances = csvCols + "\n" + csvValues;
     this.htmlDataCompliances = '<table>' + htmlCols + htmlValues + '</table>';
 
     inProgress = total - notStarted - approved;
 
-    console.log('progress', total, notStarted, approved)
+    console.log('progress', this.period, total, notStarted, approved)
 
     html = html.replace("DASHBOARD_TOTAL", total+"");
     html = html.replace("DASHBOARD_NOT_STARTED", notStarted+"");
     html = html.replace("DASHBOARD_APPROVED", approved+"");
     html = html.replace("DASHBOARD_IN_PROGRESS", inProgress+"");
+    html = html.replace("DASHBOARD_IN_TIME", (total - pastDueDate - lateApproved - lateExecuted)+"");
     html = html.replace("DASHBOARD_PAST_DUE_DATE", pastDueDate+"");
     html = html.replace("DASHBOARD_LATE_EXECUTED", lateExecuted+"");
     html = html.replace("DASHBOARD_LATE_APPROVED", lateApproved+"");
 
     this.csvDataStats = 'Period,Total,Not Started,Approved,In Progress,Past Due Date,Late Executed,Late Approved\n';
-    this.csvDataStats += period + "," + total + "," + notStarted + "," + approved + "," + inProgress + "," + pastDueDate + "," + lateExecuted + "," + lateApproved;
+    this.csvDataStats += this.period + "," + total + "," + notStarted + "," + approved + "," + inProgress + "," + pastDueDate + "," + lateExecuted + "," + lateApproved;
 
-    this.htmlDataStats = '<table class="w-100"><tr><th class="w-14">Total</th><th class="w-14">Not Started</th><th class="w-14">Approved</th><th class="w-14">In Progress</th><th class="w-14">Past Due Date</th><th class="w-14">Late Executed</th><th class="w-14">Late Approved</th><tr>'
-    this.htmlDataStats += '<tr><td class="w-14 text-center td-odd">'+total+'</td><td class="w-14 text-center td-odd">'+notStarted+'</td><td class="w-14 text-center td-odd">'+approved+'</td><td class="w-14 text-center td-odd">'+inProgress+'</td><td class="w-14 text-center td-odd">'+pastDueDate+'</td><td class="w-14 text-center td-odd">'+lateExecuted+'</td><td class="w-14 text-center td-odd">'+lateApproved+'</td><tr></table>'
+    this.htmlDataStats = 'Completeness<br /><br /><table class="w-100"><tr><th class="w-14">Total</th><th class="w-14">Not Started</th><th class="w-14">Approved</th><th class="w-14">In Progress</th><tr>';
+    this.htmlDataStats += '<tr><td class="w-14 text-center td-odd">'+total+'</td><td class="w-14 text-center td-odd">'+notStarted+'</td><td class="w-14 text-center td-odd">'+approved+'</td><td class="w-14 text-center td-odd">'+inProgress+'</td></table>'
+
+    this.htmlDataStats += '<br /><br />Timeliness<br /><br /><table class="mt-20 w-100"><tr><th class="w-14">Total</th><th class="w-14">In Time</th><th class="w-14">Past Due Date</th><th class="w-14">Late Executed</th><th class="w-14">Late Approved</th><tr>';
+
+    this.htmlDataStats += '<tr><td class="w-14 text-center td-odd">'+total+'</td><td class="w-14 text-center td-odd">'+(total-(pastDueDate+lateApproved+lateExecuted))+'</td><td class="w-14 text-center td-odd">'+pastDueDate+'</td><td class="w-14 text-center td-odd">'+lateExecuted+'</td><td class="w-14 text-center td-odd">'+lateApproved+'</td><tr></table>'
 
     return html;
 
   }
 
-  renderUpcomingEvents = (index:number, startDate: Date, count: number) => {
+  renderUpcomingEvents = (index:number, startDate: Date, count: number, showGraph: boolean = true) => {
+
+    this.clearSelectedLegend();
 
     this.selectedItems = [];
     this.selectedStatus = "";
@@ -3157,32 +3581,37 @@ export class SfIEvents extends LitElement {
     var html = '';
 
     html += '<div class="mb-20 stream-event-list" part="stream-event-list-charts">';
-      html += '<div part="stream-event-chart-selection" class="mb-20">';
-        html += '<div part="td-head" class="mb-5">Select Chart</div>';
-        html += '<div class="mb-10 d-flex flex-wrap align-center">';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') +'>';
-          html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') +'>';
-          html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') +'>';
-          html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') +'>';
-          html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') +'>';
-          html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') +'>';
-          html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') +'>';
-          html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') +'>';
-          html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') +'>';
-          html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
+      if(showGraph) {
+        html += '<div part="stream-event-chart-selection" class="mb-20">';
+          html += '<div part="td-head" class="mb-5">Select Chart</div>';
+          html += '<div class="mb-10 d-flex flex-wrap align-center">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') +'>';
+            html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') +'>';
+            html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') +'>';
+            html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') +'>';
+            html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') +'>';
+            html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') +'>';
+            html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') +'>';
+            html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') +'>';
+            html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') +'>';
+            html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
+          html += '</div>';
         html += '</div>';
-      html += '</div>';
-      html += '<div class="chart-container d-flex scroll-x align-center"><div part="chart-item" class="chart-item"><canvas id="myChart"></div></canvas><div part="chart-item chart-item-middle" class="chart-item"><canvas id="myChart2" class="gone"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart3" class="gone"></div></div>';
-      html += '<div id="chart-settings-controls" class="mt-20"></div>'
-      html += '<div id="chart-settings"></div>'
+        html += '<div class="chart-container d-flex scroll-x align-center"><div part="chart-item" class="chart-item"><canvas id="myChart"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart4" class="gone"></canvas></div><div part="chart-item chart-item-middle" class="chart-item"><canvas id="myChart2" class="gone"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart3" class="gone"></canvas></div></div>';
+        html += '<div id="chart-settings-controls" class="mt-20"></div>'
+        html += '<div id="chart-settings"></div>'
+      } else {
+        html += '<div part="box" class="box"></div>';
+      }
+      
     html += '</div>';
 
 
@@ -3192,14 +3621,16 @@ export class SfIEvents extends LitElement {
 
     html += '<div id="stream-event-summary" part="stream-event-total" class="d-flex flex-wrap">';
     html += '<div part="badge-dashboard" class="mr-10 mb-10 no-shrink"><span>Total:</span> <span id="graph-total">DASHBOARD_TOTAL</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-icons color-not-started">schedule</span>&nbsp;&nbsp;<span>Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-pending">pending</span>&nbsp;&nbsp;<span>In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-done">check_circle</span>&nbsp;&nbsp;<span>Approved:</span><span id="graph-approved">DASHBOARD_APPROVED</span></div>';
-    html += '<div part="calendar-tab-button-not-selected" class="d-flex justify-center align-center mr-10 mb-10 no-shrink cursor" id="button-status-more"><span class="material-symbols-outlined">navigate_next</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-past-due-date">running_with_errors</span>&nbsp;&nbsp;<span>Past Due Date:</span> <span id="graph-past-due-date">DASHBOARD_PAST_DUE_DATE</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-late-approved">running_with_errors</span>&nbsp;&nbsp;<span>Late Approved:</span> <span id="graph-late-approved">DASHBOARD_LATE_APPROVED</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-late-executed">running_with_errors</span>&nbsp;&nbsp;<span>Late Executed:</span> <span id="graph-late-executed">DASHBOARD_LATE_EXECUTED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-icons color-not-started">schedule</span>&nbsp;&nbsp;<span>Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-pending">pending</span>&nbsp;&nbsp;<span>In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-done">check_circle</span>&nbsp;&nbsp;<span>Approved:</span><span id="graph-approved">DASHBOARD_APPROVED</span></div>';
+    // html += '<div part="calendar-tab-button-not-selected" class="gone d-flex justify-center align-center mr-10 mb-10 no-shrink cursor" id="button-status-more"><span class="material-symbols-outlined">navigate_next</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-not-started">timer</span>&nbsp;&nbsp;<span>In Time:</span> <span id="graph-in-time">DASHBOARD_IN_TIME</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-past-due-date">running_with_errors</span>&nbsp;&nbsp;<span>Past Due Date:</span> <span id="graph-past-due-date">DASHBOARD_PAST_DUE_DATE</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-late-approved">running_with_errors</span>&nbsp;&nbsp;<span>Late Approved:</span> <span id="graph-late-approved">DASHBOARD_LATE_APPROVED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-late-executed">running_with_errors</span>&nbsp;&nbsp;<span>Late Executed:</span> <span id="graph-late-executed">DASHBOARD_LATE_EXECUTED</span></div>';
     html += '</div>';
+    html += '<div id="stream-event-filter" part="stream-event-total" class="d-flex flex-wrap"></div>';
 
     this.eventsInWindow = [];
 
@@ -3208,9 +3639,17 @@ export class SfIEvents extends LitElement {
     var csvValues = "", htmlValues = "";
     var period = ("0" + (startDate.getMonth()+1)).slice(-2) + "/" + ("0" + 1).slice(-2) + ' - ' + ("0" + (startDate.getMonth()+1)).slice(-2) + "/" + ("0" + count).slice(-2)
 
-    this.period = period;
+    let firstDay: Date | null = null;
+    let endDay = null;
 
     for(var i = 1; i <= count; i++) {
+
+      if(i === 1) {
+        firstDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+        endDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      } else {
+        endDay?.setDate(endDay.getDate() + 1);
+      }
 
       const mmdd = ("0" + (startDate.getMonth()+1)).slice(-2) + "/" + ("0" + startDate.getDate()).slice(-2);
 
@@ -3248,6 +3687,9 @@ export class SfIEvents extends LitElement {
             this.events[mmdd][j]['mmdd'] = mmdd
             this.eventsInWindow.push(this.events[mmdd][j]);
 
+            
+            this.events[mmdd][j] = this.renderLatestCompliance(mmdd+'/'+this.getCurrentYear(("0" + (startDate.getMonth()+1)).slice(-2)), this.events[mmdd][j]);
+
             var partStatus = "";
             var lateStatus = "in-time";
 
@@ -3283,14 +3725,14 @@ export class SfIEvents extends LitElement {
             html += '<div class="stream-events-container flex-grow">';
               html += '<div class="hidden-tags hide">'+JSON.stringify(this.events[mmdd][j]['tags'])+'</div>'
               html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>'
-              html += '<div part="stream-events-event-title" class="d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') +  '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
+              html += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') +  '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
               html += '<table class="stream-events-container-table" >';
               html += '<thead>';
               html += '<th part="td-head">';
               html += 'Status'
               if(csvCols.indexOf('Status') < 0) {
                 csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate'
-                htmlCols += '<tr><th>Id</th><th>Status</th><th class="w-200px">Statute</th><th>Reference</th><th class="w-200px">Applicability</th><th class="w-200px">Obligation</th><th>ObligationType</th><th class="w-200px">Penalty</th><th>RiskSeverity</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th></tr>'
+                htmlCols += '<tr><th>Id</th><th>Status</th><th>Statute</th><th>Reference</th><th class="w-200px">Applicability</th><th>ObligationType</th><th class="w-200px">Obligation</th><th class="w-200px">InternalControls</th><th class="w-200px">Penalty</th><th>RiskSeverity</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th><th>ReportParameter</th></tr>'
               }
               html += '</th>';
               html += '<th part="td-head">';
@@ -3368,7 +3810,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-late-executed">running_with_errors</span>';
                   }
                   csvValues += 'approved late-executed,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved late-executed</td>');
                 } else if(lateStatus == "late-approved") {
                   lateApproved++;
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
@@ -3378,7 +3820,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-late-approved">running_with_errors</span>'
                   }
                   csvValues += 'approved late-approved,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved late-approved</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-symbols-outlined color-done">check_circle</span>'
@@ -3387,7 +3829,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'approved,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-done">check_circle</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved</td>');
                 }
                 html += '</td>';
               } else if(partStatus == "status-in-progress") {
@@ -3401,7 +3843,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>'
                   }
                   csvValues += 'in-progress past-due-date,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">in-progress past-due-date</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-symbols-outlined color-pending">pending</span>'
@@ -3410,7 +3852,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'in-progress,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-pending">pending</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">in-progress</td>');
                 }
                 
                 html += '</td>';
@@ -3425,7 +3867,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>'
                   }
                   csvValues += 'not started past-due-date,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">not-started past-due-date</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-icons color-not-started">schedule</span>'
@@ -3434,7 +3876,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'not started,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-not-started">schedule</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">not-started</td>');
                 }
                 
                 html += '</td>';
@@ -3469,8 +3911,9 @@ export class SfIEvents extends LitElement {
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["statute"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["reference"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["applicability"]+'</td>');
-              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligationtype"]+'</td>');
+              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
+              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["internalcontrols"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["penalty"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["risk"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["frequency"]+'</td>');
@@ -3506,7 +3949,7 @@ export class SfIEvents extends LitElement {
                 html += '</th>'
               }
               csvValues += '\n';
-              htmlValues += ('</tr>');
+
               // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
               //   html += '<th part="td-body">';
               //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
@@ -3521,6 +3964,9 @@ export class SfIEvents extends LitElement {
               html += '</table>';
               html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>'
 
+              let reporterStr = this.getReporterStringFromEvent(this.events[mmdd][j]);
+              let approverStr = this.getApproverStringFromEvent(this.events[mmdd][j]);
+
               if(this.flowGraph != this.FLOW_GRAPH_COMPLETENESS && this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
 
                 let graphParam = '';
@@ -3529,23 +3975,28 @@ export class SfIEvents extends LitElement {
                 } else {
                   graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
                 }
-                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + graphParam + '</div></div>';
+                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + graphParam + '</div>'+reporterStr + approverStr+'</div>';
+                htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">'+graphParam+'</td>');
 
               } else {
 
                 if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) {
 
-                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + partStatus.replace('status-', '') + '</div></div>';
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + partStatus.replace('status-', '') + '</div>'+reporterStr + approverStr+'</div>';
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">'+partStatus.replace('status-', '')+'</td>');
 
                 }
 
                 if(this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
 
-                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + lateStatus + '</div></div>';
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + lateStatus + '</div>'+reporterStr + approverStr+'</div>';
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">'+lateStatus+'</td>');
 
                 }
 
               }
+
+              htmlValues += ('</tr>');
 
             html += '</div>';
           }
@@ -3573,6 +4024,8 @@ export class SfIEvents extends LitElement {
 
     html += '</div>'
 
+    this.period = firstDay?.getDate() + '/' + (firstDay!.getMonth()+1) + '/' + firstDay?.getFullYear() + " - " + endDay?.getDate() + '/' + (endDay!.getMonth()+1) + '/' + endDay?.getFullYear();
+
     console.log('csvValues', csvValues);
 
     this.csvDataCompliances = csvCols + "\n" + csvValues;
@@ -3586,12 +4039,13 @@ export class SfIEvents extends LitElement {
     html = html.replace("DASHBOARD_NOT_STARTED", notStarted+"");
     html = html.replace("DASHBOARD_APPROVED", approved+"");
     html = html.replace("DASHBOARD_IN_PROGRESS", inProgress+"");
+    html = html.replace("DASHBOARD_IN_TIME", (total - pastDueDate - lateApproved - lateExecuted)+"");
     html = html.replace("DASHBOARD_PAST_DUE_DATE", pastDueDate+"");
     html = html.replace("DASHBOARD_LATE_EXECUTED", lateExecuted+"");
     html = html.replace("DASHBOARD_LATE_APPROVED", lateApproved+"");
 
     this.csvDataStats = 'Period,Total,Not Started,Approved,In Progress,Past Due Date,Late Executed,Late Approved\n';
-    this.csvDataStats += period + "," + total + "," + notStarted + "," + approved + "," + inProgress + "," + pastDueDate + "," + lateExecuted + "," + lateApproved;
+    this.csvDataStats += this.period + "," + total + "," + notStarted + "," + approved + "," + inProgress + "," + pastDueDate + "," + lateExecuted + "," + lateApproved;
 
     this.htmlDataStats = '<table class="w-100"><tr><th class="w-14">Total</th><th class="w-14">Not Started</th><th class="w-14">Approved</th><th class="w-14">In Progress</th><th class="w-14">Past Due Date</th><th class="w-14">Late Executed</th><th class="w-14">Late Approved</th><tr>'
     this.htmlDataStats += '<tr><td class="w-14 text-center td-odd">'+total+'</td><td class="w-14 text-center td-odd">'+notStarted+'</td><td class="w-14 text-center td-odd">'+approved+'</td><td class="w-14 text-center td-odd">'+inProgress+'</td><td class="w-14 text-center td-odd">'+pastDueDate+'</td><td class="w-14 text-center td-odd">'+lateExecuted+'</td><td class="w-14 text-center td-odd">'+lateApproved+'</td><tr></table>'
@@ -3600,40 +4054,48 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderThisEvents = (index: number, startDate: Date) => {
+  renderThisEvents = (index: number, startDate: Date, showGraph: boolean = true) => {
 
+    this.clearSelectedLegend();
     this.selectedItems = [];
     this.selectedStatus = "";
 
     var html = '';
 
     html += '<div class="mb-20 stream-event-list" part="stream-event-list-charts">';
-      html += '<div part="stream-event-chart-selection" class="mb-20">';
-        html += '<div part="td-head" class="mb-5">Select Chart</div>';
-        html += '<div class="mb-10 d-flex flex-wrap align-center">';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') +'>';
-          html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') +'>';
-          html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') +'>';
-          html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') +'>';
-          html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') +'>';
-          html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') +'>';
-          html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') +'>';
-          html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') +'>';
-          html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') +'>';
-          html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
+
+      if(showGraph) {
+        html += '<div part="stream-event-chart-selection" class="mb-20">';
+          html += '<div part="td-head" class="mb-5">Select Chart</div>';
+          html += '<div class="mb-10 d-flex flex-wrap align-center">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') +'>';
+            html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') +'>';
+            html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') +'>';
+            html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') +'>';
+            html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') +'>';
+            html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') +'>';
+            html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') +'>';
+            html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') +'>';
+            html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') +'>';
+            html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
+          html += '</div>';
         html += '</div>';
-      html += '</div>';
-      html += '<div class="chart-container d-flex scroll-x align-center"><div part="chart-item" class="chart-item"><canvas id="myChart"></div></canvas><div part="chart-item chart-item-middle" class="chart-item"><canvas id="myChart2" class="gone"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart3" class="gone"></div></div>';
-      html += '<div id="chart-settings-controls" class="mt-20"></div>'
-      html += '<div id="chart-settings"></div>'
+        html += '<div class="chart-container d-flex scroll-x align-center"><div part="chart-item" class="chart-item"><canvas id="myChart"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart4" class="gone"></canvas></div><div part="chart-item chart-item-middle" class="chart-item"><canvas id="myChart2" class="gone"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart3" class="gone"></canvas></div></div>';
+        html += '<div id="chart-settings-controls" class="mt-20"></div>'
+        html += '<div id="chart-settings"></div>'
+      } else {
+        html += '<div part="box" class="box"></div>';
+      }
+
+      
     html += '</div>';
 
     html += '<div id="stream-event-'+index+'" part="stream-event-list" class="stream-event-list">';
@@ -3665,23 +4127,33 @@ export class SfIEvents extends LitElement {
 
     html += '<div id="stream-event-summary" part="stream-event-total" class="d-flex flex-wrap">';
     html += '<div part="badge-dashboard" class="mr-10 mb-10 no-shrink"><span>Total:</span> <span id="graph-total">DASHBOARD_TOTAL</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-icons color-not-started">schedule</span>&nbsp;&nbsp;<span>Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-pending">pending</span>&nbsp;&nbsp;<span>In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-done">check_circle</span>&nbsp;&nbsp;<span>Approved:</span><span id="graph-approved">DASHBOARD_APPROVED</span></div>';
-    html += '<div part="calendar-tab-button-not-selected" class="d-flex justify-center align-center mr-10 mb-10 no-shrink cursor" id="button-status-more"><span class="material-symbols-outlined">navigate_next</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-past-due-date">running_with_errors</span>&nbsp;&nbsp;<span>Past Due Date:</span> <span id="graph-past-due-date">DASHBOARD_PAST_DUE_DATE</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-late-approved">running_with_errors</span>&nbsp;&nbsp;<span>Late Approved:</span> <span id="graph-late-approved">DASHBOARD_LATE_APPROVED</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-late-executed">running_with_errors</span>&nbsp;&nbsp;<span>Late Executed:</span> <span id="graph-late-executed">DASHBOARD_LATE_EXECUTED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-icons color-not-started">schedule</span>&nbsp;&nbsp;<span>Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-pending">pending</span>&nbsp;&nbsp;<span>In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-done">check_circle</span>&nbsp;&nbsp;<span>Approved:</span><span id="graph-approved">DASHBOARD_APPROVED</span></div>';
+    // html += '<div part="calendar-tab-button-not-selected" class="gone d-flex justify-center align-center mr-10 mb-10 no-shrink cursor" id="button-status-more"><span class="material-symbols-outlined">navigate_next</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-not-started">timer</span>&nbsp;&nbsp;<span>In Time:</span> <span id="graph-in-time">DASHBOARD_IN_TIME</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-past-due-date">running_with_errors</span>&nbsp;&nbsp;<span>Past Due Date:</span> <span id="graph-past-due-date">DASHBOARD_PAST_DUE_DATE</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-late-approved">running_with_errors</span>&nbsp;&nbsp;<span>Late Approved:</span> <span id="graph-late-approved">DASHBOARD_LATE_APPROVED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-late-executed">running_with_errors</span>&nbsp;&nbsp;<span>Late Executed:</span> <span id="graph-late-executed">DASHBOARD_LATE_EXECUTED</span></div>';
     html += '</div>';
+    html += '<div id="stream-event-filter" part="stream-event-total" class="d-flex flex-wrap"></div>';
 
     this.eventsInWindow = [];
     var csvCols = "", htmlCols = "";
     var csvValues = "", htmlValues = "";
     var period = ("0" + (firstDate.getMonth()+1)).slice(-2) + "/" + ("0" + 1).slice(-2) + ' - ' + ("0" + (firstDate.getMonth()+1)).slice(-2) + "/" + ("0" + count).slice(-2)
 
-    this.period = period;
+    let firstDay: Date | null = null;
+    let endDay = null;
 
     for(var i = 1; i <= count; i++) {
+
+      if(i === 1) {
+        firstDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+        endDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+      } else {
+        endDay?.setDate(endDay.getDate() + 1);
+      }
 
       const mmdd = ("0" + (firstDate.getMonth()+1)).slice(-2) + "/" + ("0" + firstDate.getDate()).slice(-2);
 
@@ -3719,6 +4191,8 @@ export class SfIEvents extends LitElement {
             this.events[mmdd][j]['mmdd'] = mmdd
             this.eventsInWindow.push(this.events[mmdd][j]);
 
+            this.events[mmdd][j] = this.renderLatestCompliance(("0" + (firstDate.getMonth()+1)).slice(-2), this.events[mmdd][j]);
+
             var partStatus = "";
             var lateStatus = "in-time";
 
@@ -3755,14 +4229,14 @@ export class SfIEvents extends LitElement {
             html += '<div class="stream-events-container flex-grow">';
               html += '<div class="hidden-tags hide">'+JSON.stringify(this.events[mmdd][j]['tags'])+'</div>'
               html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>'
-              html += '<div part="stream-events-event-title" class="d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') +  '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
+              html += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') +  '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
               html += '<table class="stream-events-container-table">';
               html += '<thead>';
               html += '<th part="td-head">';
               html += 'Status'
               if(csvCols.indexOf('Status') < 0) {
                 csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate' 
-                htmlCols += '<tr><th>Id</th><th>Status</th><th class="w-200px">Statute</th><th>Reference</th><th class="w-200px">Applicability</th><th class="w-200px">Obligation</th><th>ObligationType</th><th class="w-200px">Penalty</th><th>RiskSeverity</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th></tr>'
+                htmlCols += '<tr><th>Id</th><th>Status</th><th>Statute</th><th>Reference</th><th class="w-200px">Applicability</th><th>ObligationType</th><th class="w-200px">Obligation</th><th class="w-200px">InternalControls</th><th class="w-200px">Penalty</th><th>RiskSeverity</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th><th>ReportParameter</th></tr>'
               }
               html += '</th>';
               html += '<th part="td-head">';
@@ -3840,7 +4314,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-late-executed">running_with_errors</span>';
                   }
                   csvValues += 'approved late-executed,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved late-executed</td>');
                 } else if(lateStatus == "late-approved") {
                   lateApproved++;
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
@@ -3850,7 +4324,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-late-approved">running_with_errors</span>'
                   }
                   csvValues += 'approved late-approved,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved late-approved</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-symbols-outlined color-done">check_circle</span>'
@@ -3859,7 +4333,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'approved,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-done">check_circle</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved</td>');
                 }
                 html += '</td>';
               } else if(partStatus == "status-in-progress") {
@@ -3873,7 +4347,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>'
                   }
                   csvValues += 'in-progress past-due-date,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">in-progress past-due-date</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-symbols-outlined color-pending">pending</span>'
@@ -3882,7 +4356,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'in-progress,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-pending">pending</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">in-progress</td>');
                 }
                 
                 html += '</td>';
@@ -3897,7 +4371,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>'
                   }
                   csvValues += 'not started past-due-date,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">not-started past-due-date</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-icons color-not-started">schedule</span>'
@@ -3906,7 +4380,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'not started,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-not-started">schedule</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">not-started</td>');
                 }
                 
                 html += '</td>';
@@ -3941,8 +4415,9 @@ export class SfIEvents extends LitElement {
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["statute"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["reference"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["applicability"]+'</td>');
-              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligationtype"]+'</td>');
+              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
+              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["internalcontrols"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["penalty"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["risk"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["frequency"]+'</td>');
@@ -3978,7 +4453,6 @@ export class SfIEvents extends LitElement {
                 html += '</th>'
               }
               csvValues += '\n';
-              htmlValues += ('</tr>');
               // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
               //   html += '<th part="td-body">';
               //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
@@ -3993,6 +4467,10 @@ export class SfIEvents extends LitElement {
               html += '</table>';
               html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>'
 
+
+              let reporterStr = this.getReporterStringFromEvent(this.events[mmdd][j]);
+              let approverStr = this.getApproverStringFromEvent(this.events[mmdd][j]);
+
               if(this.flowGraph != this.FLOW_GRAPH_COMPLETENESS && this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
 
                 let graphParam = '';
@@ -4001,24 +4479,30 @@ export class SfIEvents extends LitElement {
                 } else {
                   graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
                 }
-                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + graphParam + '</div></div>';
+                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + graphParam + '</div>'+reporterStr + approverStr+'</div>';
+                htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">'+graphParam+'</td>');
+                
 
               } else {
 
                 if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) {
 
-                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + partStatus.replace('status-', '') + '</div></div>';
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + partStatus.replace('status-', '') + '</div>'+reporterStr + approverStr+'</div>';
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">' + partStatus.replace('status-', '') + '</td>');
 
                 }
 
                 if(this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
 
-                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + lateStatus + '</div></div>';
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + lateStatus + '</div>'+reporterStr + approverStr+'</div>';
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">' + lateStatus + '</td>');
+
 
                 }
 
               }
 
+              htmlValues += ('</tr>');
             html += '</div>';
           }
           html += '</div>';
@@ -4045,6 +4529,8 @@ export class SfIEvents extends LitElement {
 
     html += '</div>'
 
+    this.period = firstDay?.getDate() + '/' + (firstDay!.getMonth()+1) + '/' + firstDay?.getFullYear() + " - " + endDay?.getDate() + '/' + (endDay!.getMonth()+1) + '/' + endDay?.getFullYear();
+
     this.csvDataCompliances = csvCols + "\n" + csvValues;
     this.htmlDataCompliances = '<table>' + htmlCols + htmlValues + '</table>';
 
@@ -4056,12 +4542,13 @@ export class SfIEvents extends LitElement {
     html = html.replace("DASHBOARD_NOT_STARTED", notStarted+"");
     html = html.replace("DASHBOARD_APPROVED", approved+"");
     html = html.replace("DASHBOARD_IN_PROGRESS", inProgress+"");
+    html = html.replace("DASHBOARD_IN_TIME", (total - pastDueDate - lateApproved - lateExecuted)+"");
     html = html.replace("DASHBOARD_PAST_DUE_DATE", pastDueDate+"");
     html = html.replace("DASHBOARD_LATE_EXECUTED", lateExecuted+"");
     html = html.replace("DASHBOARD_LATE_APPROVED", lateApproved+"");
 
     this.csvDataStats = 'Period,Total,Not Started,Approved,In Progress,Past Due Date,Late Executed,Late Approved\n';
-    this.csvDataStats += period + "," + total + "," + notStarted + "," + approved + "," + inProgress + "," + pastDueDate + "," + lateExecuted + "," + lateApproved;
+    this.csvDataStats += this.period + "," + total + "," + notStarted + "," + approved + "," + inProgress + "," + pastDueDate + "," + lateExecuted + "," + lateApproved;
 
     this.htmlDataStats = '<table class="w-100"><tr><th class="w-14">Total</th><th class="w-14">Not Started</th><th class="w-14">Approved</th><th class="w-14">In Progress</th><th class="w-14">Past Due Date</th><th class="w-14">Late Executed</th><th class="w-14">Late Approved</th><tr>'
     this.htmlDataStats += '<tr><td class="w-14 text-center td-odd">'+total+'</td><td class="w-14 text-center td-odd">'+notStarted+'</td><td class="w-14 text-center td-odd">'+approved+'</td><td class="w-14 text-center td-odd">'+inProgress+'</td><td class="w-14 text-center td-odd">'+pastDueDate+'</td><td class="w-14 text-center td-odd">'+lateExecuted+'</td><td class="w-14 text-center td-odd">'+lateApproved+'</td><tr></table>'
@@ -4070,7 +4557,9 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderPastEvents = (index: number, startDate: Date) => {
+  renderPastEvents = (index: number, startDate: Date, showGraph: boolean = true) => {
+
+    this.clearSelectedLegend();
 
     this.selectedItems = [];
     this.selectedStatus = "";
@@ -4078,32 +4567,37 @@ export class SfIEvents extends LitElement {
     var html = '';
 
     html += '<div class="mb-20 stream-event-list" part="stream-event-list-charts">';
-      html += '<div part="stream-event-chart-selection" class="mb-20">';
-        html += '<div part="td-head" class="mb-5">Select Chart</div>';
-        html += '<div class="mb-10 d-flex flex-wrap align-center">';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') +'>';
-          html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') +'>';
-          html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') +'>';
-          html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') +'>';
-          html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') +'>';
-          html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') +'>';
-          html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') +'>';
-          html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') +'>';
-          html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
-          html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') +'>';
-          html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
+      if(showGraph) {
+        html += '<div part="stream-event-chart-selection" class="mb-20">';
+          html += '<div part="td-head" class="mb-5">Select Chart</div>';
+          html += '<div class="mb-10 d-flex flex-wrap align-center">';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') +'>';
+            html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') +'>';
+            html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') +'>';
+            html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-riskseverity" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKSEVERITY) ? 'checked' : '') +'>';
+            html += '<label for="radio-riskseverity" part="input-label" class="mr-10">Risk Severity</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-location" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_LOCATION) ? 'checked' : '') +'>';
+            html += '<label for="radio-location" part="input-label" class="mr-10">Location</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-function" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FUNCTION) ? 'checked' : '') +'>';
+            html += '<label for="radio-function" part="input-label" class="mr-10">Function</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-obligationtype" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_OBLIGATIONTYPE) ? 'checked' : '') +'>';
+            html += '<label for="radio-obligationtype" part="input-label" class="mr-10">Obligation Type</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-jurisdiction" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_JURISDICTION) ? 'checked' : '') +'>';
+            html += '<label for="radio-jurisdiction" part="input-label" class="mr-10">Jurisdiction</label></div>';
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-frequency" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_FREQUENCY) ? 'checked' : '') +'>';
+            html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
+          html += '</div>';
         html += '</div>';
-      html += '</div>';
-      html += '<div class="chart-container d-flex scroll-x align-center"><div part="chart-item" class="chart-item"><canvas id="myChart"></div></canvas><div part="chart-item chart-item-middle" class="chart-item"><canvas id="myChart2" class="gone"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart3" class="gone"></div></div>';
-      html += '<div id="chart-settings-controls" class="mt-20"></div>'
-      html += '<div id="chart-settings"></div>'
+        html += '<div class="chart-container d-flex scroll-x align-center"><div part="chart-item" class="chart-item"><canvas id="myChart"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart4" class="gone"></canvas></div><div part="chart-item chart-item-middle" class="chart-item"><canvas id="myChart2" class="gone"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart3" class="gone"></canvas></div></div>';
+        html += '<div id="chart-settings-controls" class="mt-20"></div>'
+        html += '<div id="chart-settings"></div>'
+      } else {
+        html += '<div part="box" class="box"></div>';
+      }
+      
     html += '</div>';
 
 
@@ -4136,23 +4630,33 @@ export class SfIEvents extends LitElement {
 
     html += '<div id="stream-event-summary" part="stream-event-total" class="d-flex flex-wrap">';
     html += '<div part="badge-dashboard" class="mr-10 mb-10 no-shrink"><span>Total:</span> <span id="graph-total">DASHBOARD_TOTAL</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-icons color-not-started">schedule</span>&nbsp;&nbsp;<span>Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-pending">pending</span>&nbsp;&nbsp;<span>In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-done">check_circle</span>&nbsp;&nbsp;<span>Approved:</span><span id="graph-approved">DASHBOARD_APPROVED</span></div>';
-    html += '<div part="calendar-tab-button-not-selected" class="d-flex justify-center align-center mr-10 mb-10 no-shrink cursor" id="button-status-more"><span class="material-symbols-outlined">navigate_next</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-past-due-date">running_with_errors</span>&nbsp;&nbsp;<span>Past Due Date:</span> <span id="graph-past-due-date">DASHBOARD_PAST_DUE_DATE</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-late-approved">running_with_errors</span>&nbsp;&nbsp;<span>Late Approved:</span> <span id="graph-late-approved">DASHBOARD_LATE_APPROVED</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-late-executed">running_with_errors</span>&nbsp;&nbsp;<span>Late Executed:</span> <span id="graph-late-executed">DASHBOARD_LATE_EXECUTED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-icons color-not-started">schedule</span>&nbsp;&nbsp;<span>Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-pending">pending</span>&nbsp;&nbsp;<span>In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-done">check_circle</span>&nbsp;&nbsp;<span>Approved:</span><span id="graph-approved">DASHBOARD_APPROVED</span></div>';
+    // html += '<div part="calendar-tab-button-not-selected" class="gone d-flex justify-center align-center mr-10 mb-10 no-shrink cursor" id="button-status-more"><span class="material-symbols-outlined">navigate_next</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-not-started">timer</span>&nbsp;&nbsp;<span>In Time:</span> <span id="graph-in-time">DASHBOARD_IN_TIME</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-past-due-date">running_with_errors</span>&nbsp;&nbsp;<span>Past Due Date:</span> <span id="graph-past-due-date">DASHBOARD_PAST_DUE_DATE</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-late-approved">running_with_errors</span>&nbsp;&nbsp;<span>Late Approved:</span> <span id="graph-late-approved">DASHBOARD_LATE_APPROVED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-late-executed">running_with_errors</span>&nbsp;&nbsp;<span>Late Executed:</span> <span id="graph-late-executed">DASHBOARD_LATE_EXECUTED</span></div>';
     html += '</div>';
+    html += '<div id="stream-event-filter" part="stream-event-total" class="d-flex flex-wrap"></div>';
 
     this.eventsInWindow = [];
     var csvCols = "", htmlCols = "";
     var csvValues = "", htmlValues = "";
     var period = ("0" + (firstDate.getMonth()+1)).slice(-2) + "/" + ("0" + 1).slice(-2) + ' - ' + ("0" + (firstDate.getMonth()+1)).slice(-2) + "/" + ("0" + count).slice(-2)
 
-    this.period = period;
+    let firstDay: Date | null = null;
+    let endDay = null;
 
     for(var i = 1; i <= count; i++) {
+
+      if(i === 1) {
+        firstDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+        endDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+      } else {
+        endDay?.setDate(endDay.getDate() + 1);
+      }
 
       const mmdd = ("0" + (firstDate.getMonth()+1)).slice(-2) + "/" + ("0" + firstDate.getDate()).slice(-2);
 
@@ -4190,6 +4694,8 @@ export class SfIEvents extends LitElement {
             this.events[mmdd][j]['mmdd'] = mmdd
             this.eventsInWindow.push(this.events[mmdd][j]);
 
+            this.events[mmdd][j] = this.renderLatestCompliance(("0" + (firstDate.getMonth()+1)).slice(-2), this.events[mmdd][j]);
+
             var partStatus = "";
             var lateStatus = "in-time";
 
@@ -4225,14 +4731,14 @@ export class SfIEvents extends LitElement {
             html += '<div class="stream-events-container flex-grow">';
               html += '<div class="hidden-tags hide">'+JSON.stringify(this.events[mmdd][j]['tags'])+'</div>'
               html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>'
-              html += '<div part="stream-events-event-title" class="d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') +  '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
+              html += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') +  '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
               html += '<table class="stream-events-container-table">';
               html += '<thead>';
               html += '<th part="td-head">';
               html += 'Status'
               if(csvCols.indexOf('Status') < 0) {
                 csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate' 
-                htmlCols += '<tr><th>Id</th><th>Status</th><th class="w-200px">Statute</th><th>Reference</th><th class="w-200px">Applicability</th><th class="w-200px">Obligation</th><th>ObligationType</th><th class="w-200px">Penalty</th><th>RiskSeverity</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th></tr>'
+                htmlCols += '<tr><th>Id</th><th>Status</th><th>Statute</th><th>Reference</th><th class="w-200px">Applicability</th><th>ObligationType</th><th class="w-200px">Obligation</th><th class="w-200px">InternalControls</th><th class="w-200px">Penalty</th><th>RiskSeverity</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th><th>ReportParameter</th></tr>'
               }
               html += '</th>';
               html += '<th part="td-head">';
@@ -4310,7 +4816,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-late-executed">running_with_errors</span>';
                   }
                   csvValues += 'approved late-executed,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved late-executed</td>');
                 } else if(lateStatus == "late-approved") {
                   lateApproved++;
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
@@ -4320,7 +4826,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-late-approved">running_with_errors</span>'
                   }
                   csvValues += 'approved late-approved,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved late-approved</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-symbols-outlined color-done">check_circle</span>'
@@ -4329,7 +4835,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'approved,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-done">check_circle</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">approved</td>');
                 }
                 html += '</td>';
               } else if(partStatus == "status-in-progress") {
@@ -4343,7 +4849,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>'
                   }
                   csvValues += 'in-progress past-due-date,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">in-progress past-due-date</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-symbols-outlined color-pending">pending</span>'
@@ -4352,7 +4858,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'in-progress,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-pending">pending</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">in-progress</td>');
                 }
                 
                 html += '</td>';
@@ -4367,7 +4873,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>'
                   }
                   csvValues += 'not started past-due-date,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">not-started past-due-date</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-icons color-not-started">schedule</span>'
@@ -4376,7 +4882,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'not started,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-not-started">schedule</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center status-format">not-started</td>');
                 }
                 
                 html += '</td>';
@@ -4411,12 +4917,14 @@ export class SfIEvents extends LitElement {
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["statute"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["reference"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["applicability"]+'</td>');
-              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligationtype"]+'</td>');
+              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
+              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["internalcontrols"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["penalty"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["risk"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["frequency"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["subfrequency"]+'</td>');
+              
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["duedate"]+'</td>');
               
               if(this.events[mmdd][j].documents != null && this.events[mmdd][j].documents != null && (this.events[mmdd][j].documents).length > 0) {
@@ -4447,7 +4955,6 @@ export class SfIEvents extends LitElement {
                 html += '</th>'
               }
               csvValues += '\n';
-              htmlValues += ('</tr>');
               // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
               //   html += '<th part="td-body">';
               //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
@@ -4462,6 +4969,10 @@ export class SfIEvents extends LitElement {
               html += '</table>';
               html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>'
 
+
+              let reporterStr = this.getReporterStringFromEvent(this.events[mmdd][j]);
+              let approverStr = this.getApproverStringFromEvent(this.events[mmdd][j]);
+
               if(this.flowGraph != this.FLOW_GRAPH_COMPLETENESS && this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
 
                 let graphParam = '';
@@ -4470,24 +4981,27 @@ export class SfIEvents extends LitElement {
                 } else {
                   graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
                 }
-                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + graphParam + '</div></div>';
+                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + graphParam + '</div>'+reporterStr+approverStr+'</div>';
+                htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">'+graphParam+'</td>');
 
               } else {
 
                 if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) {
 
-                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + partStatus.replace('status-', '') + '</div></div>';
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + partStatus.replace('status-', '') + '</div>'+reporterStr+approverStr+'</div>';
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">'+partStatus.replace('status-', '')+'</td>');
 
                 }
 
                 if(this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
 
-                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + lateStatus + '</div></div>';
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + lateStatus + '</div>'+reporterStr+approverStr+'</div>';
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' status-format">'+lateStatus+'</td>');
 
                 }
 
               }
-
+              htmlValues += ('</tr>');
             html += '</div>';
           }
           html += '</div>';
@@ -4514,6 +5028,8 @@ export class SfIEvents extends LitElement {
 
     html += '</div>'
 
+    this.period = firstDay?.getDate() + '/' + (firstDay!.getMonth()+1) + '/' + firstDay?.getFullYear() + " - " + endDay?.getDate() + '/' + (endDay!.getMonth()+1) + '/' + endDay?.getFullYear();
+
     this.csvDataCompliances = csvCols + "\n" + csvValues;
     this.htmlDataCompliances = '<table>' + htmlCols + htmlValues + '</table>';
 
@@ -4525,12 +5041,13 @@ export class SfIEvents extends LitElement {
     html = html.replace("DASHBOARD_NOT_STARTED", notStarted+"");
     html = html.replace("DASHBOARD_APPROVED", approved+"");
     html = html.replace("DASHBOARD_IN_PROGRESS", inProgress+"");
+    html = html.replace("DASHBOARD_IN_TIME", (total - pastDueDate - lateApproved - lateExecuted)+"");
     html = html.replace("DASHBOARD_PAST_DUE_DATE", pastDueDate+"");
     html = html.replace("DASHBOARD_LATE_EXECUTED", lateExecuted+"");
     html = html.replace("DASHBOARD_LATE_APPROVED", lateApproved+"");
 
     this.csvDataStats = 'Period,Total,Not Started,Approved,In Progress,Past Due Date,Late Executed,Late Approved\n';
-    this.csvDataStats += period + "," + total + "," + notStarted + "," + approved + "," + inProgress + "," + pastDueDate + "," + lateExecuted + "," + lateApproved;
+    this.csvDataStats += this.period + "," + total + "," + notStarted + "," + approved + "," + inProgress + "," + pastDueDate + "," + lateExecuted + "," + lateApproved;
 
     this.htmlDataStats = '<table class="w-100"><tr><th class="w-14">Total</th><th class="w-14">Not Started</th><th class="w-14">Approved</th><th class="w-14">In Progress</th><th class="w-14">Past Due Date</th><th class="w-14">Late Executed</th><th class="w-14">Late Approved</th><tr>'
     this.htmlDataStats += '<tr><td class="w-14 text-center td-odd">'+total+'</td><td class="w-14 text-center td-odd">'+notStarted+'</td><td class="w-14 text-center td-odd">'+approved+'</td><td class="w-14 text-center td-odd">'+inProgress+'</td><td class="w-14 text-center td-odd">'+pastDueDate+'</td><td class="w-14 text-center td-odd">'+lateExecuted+'</td><td class="w-14 text-center td-odd">'+lateApproved+'</td><tr></table>'
@@ -4543,6 +5060,8 @@ export class SfIEvents extends LitElement {
   renderRangeEvents = (firstDate: Date, count: number) => {
 
     this.clearGraphData();
+
+    console.log('rendering range', firstDate, count);
 
     this.selectedItems = [];
 
@@ -4572,7 +5091,7 @@ export class SfIEvents extends LitElement {
           html += '<label for="radio-frequency" part="input-label">Frequency</label></div>';
         html += '</div>';
       html += '</div>';
-      html += '<div class="chart-container d-flex scroll-x align-center"><div part="chart-item" class="chart-item"><canvas id="myChart"></div></canvas><div part="chart-item chart-item-middle" class="chart-item"><canvas id="myChart2" class="gone"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart3" class="gone"></div></div>';
+      html += '<div class="chart-container d-flex scroll-x align-center"><div part="chart-item" class="chart-item"><canvas id="myChart"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart4" class="gone"></canvas></div><div part="chart-item chart-item-middle" class="chart-item"><canvas id="myChart2" class="gone"></canvas></div><div part="chart-item" class="chart-item"><canvas id="myChart3" class="gone"></canvas></div></div>';
       html += '<div id="chart-settings-controls" class="mt-20"></div>'
       html += '<div id="chart-settings"></div>'
     html += '</div>';
@@ -4583,14 +5102,16 @@ export class SfIEvents extends LitElement {
 
     html += '<div id="stream-event-summary" part="stream-event-total" class="d-flex flex-wrap">';
     html += '<div part="badge-dashboard" class="mr-10 mb-10 no-shrink"><span>Total:</span> <span id="graph-total">DASHBOARD_TOTAL</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-icons color-not-started">schedule</span>&nbsp;&nbsp;<span>Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-pending">pending</span>&nbsp;&nbsp;<span>In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
-    html += '<div part="badge-dashboard" class="d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-done">check_circle</span>&nbsp;&nbsp;<span>Approved:</span><span id="graph-approved">DASHBOARD_APPROVED</span></div>';
-    html += '<div part="calendar-tab-button-not-selected" class="d-flex justify-center align-center mr-10 mb-10 no-shrink cursor" id="button-status-more"><span class="material-symbols-outlined">navigate_next</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-past-due-date">running_with_errors</span>&nbsp;&nbsp;<span>Past Due Date:</span> <span id="graph-past-due-date">DASHBOARD_PAST_DUE_DATE</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-late-approved">running_with_errors</span>&nbsp;&nbsp;<span>Late Approved:</span> <span id="graph-late-approved">DASHBOARD_LATE_APPROVED</span></div>';
-    html += '<div part="badge-dashboard" class="justify-center align-center mr-10 mb-10 no-shrink late-statuses gone"><span class="material-icons color-late-executed">running_with_errors</span>&nbsp;&nbsp;<span>Late Executed:</span> <span id="graph-late-executed">DASHBOARD_LATE_EXECUTED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-icons color-not-started">schedule</span>&nbsp;&nbsp;<span>Not Started:</span> <span id="graph-not-started">DASHBOARD_NOT_STARTED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-pending">pending</span>&nbsp;&nbsp;<span>In Progress:</span> <span id="graph-in-progress">DASHBOARD_IN_PROGRESS</span></div>';
+    html += '<div part="badge-dashboard" class="stat-completeness d-flex justify-center align-center mr-10 mb-10 no-shrink"><span class="material-symbols-outlined color-done">check_circle</span>&nbsp;&nbsp;<span>Approved:</span><span id="graph-approved">DASHBOARD_APPROVED</span></div>';
+    // html += '<div part="calendar-tab-button-not-selected" class="gone d-flex justify-center align-center mr-10 mb-10 no-shrink cursor" id="button-status-more"><span class="material-symbols-outlined">navigate_next</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-not-started">timer</span>&nbsp;&nbsp;<span>In Time:</span> <span id="graph-in-time">DASHBOARD_IN_TIME</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-past-due-date">running_with_errors</span>&nbsp;&nbsp;<span>Past Due Date:</span> <span id="graph-past-due-date">DASHBOARD_PAST_DUE_DATE</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-late-approved">running_with_errors</span>&nbsp;&nbsp;<span>Late Approved:</span> <span id="graph-late-approved">DASHBOARD_LATE_APPROVED</span></div>';
+    html += '<div part="badge-dashboard" class="stat-timeliness justify-center align-center mr-10 mb-10 no-shrink late-statuses"><span class="material-icons color-late-executed">running_with_errors</span>&nbsp;&nbsp;<span>Late Executed:</span> <span id="graph-late-executed">DASHBOARD_LATE_EXECUTED</span></div>';
     html += '</div>';
+    html += '<div id="stream-event-filter" part="stream-event-total" class="d-flex flex-wrap"></div>';
 
     var lastDate = new Date(firstDate.getTime());
     lastDate.setDate(lastDate.getDate() + count)
@@ -4600,11 +5121,24 @@ export class SfIEvents extends LitElement {
     var csvValues = "", htmlValues = "";
     var period = ("0" + (firstDate.getMonth()+1)).slice(-2) + "/" + ("0" + firstDate.getDate()).slice(-2) + ' - ' + ("0" + (lastDate.getMonth()+1)).slice(-2) + "/" + ("0" + lastDate.getDate()).slice(-2)
 
+    let firstDay: Date | null = null;
+    let endDay = null;
+
     for(var i = 1; i <= count; i++) {
+
+      if(i === 1) {
+        firstDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+        endDay = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+      } else {
+        endDay?.setDate(endDay.getDate() + 1);
+      }
+
 
       const mmdd = ("0" + (firstDate.getMonth()+1)).slice(-2) + "/" + ("0" + firstDate.getDate()).slice(-2);
 
       var hide = true;
+
+      console.log('event status', mmdd, this.events[mmdd]);
 
       if(this.events[mmdd] != null) {
         hide = false;
@@ -4636,6 +5170,8 @@ export class SfIEvents extends LitElement {
             total++;
             this.events[mmdd][j]['mmdd'] = mmdd
             this.eventsInWindow.push(this.events[mmdd][j]);
+
+            this.events[mmdd][j] = this.renderLatestCompliance(("0" + (firstDate.getMonth()+1)).slice(-2), this.events[mmdd][j]);
 
             var partStatus = "";
             var lateStatus = "in-time";
@@ -4673,14 +5209,14 @@ export class SfIEvents extends LitElement {
             html += '<div class="stream-events-container flex-grow">';
               html += '<div class="hidden-tags hide">'+JSON.stringify(this.events[mmdd][j]['tags'])+'</div>'
               html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>filtered out</i></th></thead></table></div>'
-              html += '<div part="stream-events-event-title" class="d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') +  '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
+              html += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((this.events[mmdd][j].makercheckers != null && (this.events[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((this.events[mmdd][j].docs != null && (this.events[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + this.events[mmdd][j].entityid.replace(/-/g, '_') + '-' + this.events[mmdd][j].locationid.replace(/-/g, '_') + '-' + this.events[mmdd][j].id.replace(/-/g, '_') +  '-' + this.events[mmdd][j].duedate.split('/')[1] + '-' + this.events[mmdd][j].duedate.split('/')[0] + '-' + this.events[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="'+this.events[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text></div>';
               html += '<table class="stream-events-container-table">';
               html += '<thead>';
               html += '<th part="td-head">';
               html += 'Status'
               if(csvCols.indexOf('Status') < 0) {
                 csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate' 
-                htmlCols += '<tr><th>Id</th><th>Status</th><th class="w-200px">Statute</th><th>Reference</th><th class="w-200px">Applicability</th><th class="w-200px">Obligation</th><th>ObligationType</th><th class="w-200px">Penalty</th><th>RiskSeverity</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th></tr>'
+                htmlCols += '<tr><th>Id</th><th>Status</th><th>Statute</th><th>Reference</th><th class="w-200px">Applicability</th><th>ObligationType</th><th class="w-200px">Obligation</th><th class="w-200px">InternalControls</th><th class="w-200px">Penalty</th><th>RiskSeverity</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th><th>ReportParameter</th></tr>'
               }
               html += '</th>';
               html += '<th part="td-head">';
@@ -4746,6 +5282,7 @@ export class SfIEvents extends LitElement {
               html += '<tbody>';
               csvValues += (period + ',');
               htmlValues += ('<tr><td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["id"]+'</td>');
+
               if(partStatus == "status-approved") {
                 approved++
                 html += '<td part="td-body">';
@@ -4758,7 +5295,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-late-executed">running_with_errors</span>';
                   }
                   csvValues += 'approved late-executed,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-executed">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">approved late-executed</td>');
                 } else if(lateStatus == "late-approved") {
                   lateApproved++;
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
@@ -4768,7 +5305,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-late-approved">running_with_errors</span>'
                   }
                   csvValues += 'approved late-approved,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-done">check_circle</span><span class="material-icons color-late-approved">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">approved late-approved</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-symbols-outlined color-done">check_circle</span>'
@@ -4777,7 +5314,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'approved,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-done">check_circle</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">approved</td>');
                 }
                 html += '</td>';
               } else if(partStatus == "status-in-progress") {
@@ -4791,7 +5328,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>'
                   }
                   csvValues += 'in-progress past-due-date,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-pending">pending</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">in-progress past-due-date</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-symbols-outlined color-pending">pending</span>'
@@ -4800,7 +5337,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'in-progress,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-symbols-outlined color-pending">pending</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">in-progress</td>');
                 }
                 
                 html += '</td>';
@@ -4815,7 +5352,7 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-icons color-past-due-date">running_with_errors</span>'
                   }
                   csvValues += 'not started past-due-date,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-not-started">schedule</span><span class="material-icons color-past-due-date">running_with_errors</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">not-started past-due-date</td>');
                 } else {
                   if(this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
                     html += '<span class="material-icons color-not-started">schedule</span>'
@@ -4824,11 +5361,12 @@ export class SfIEvents extends LitElement {
                     html += '<span class="material-symbols-outlined color-not-started">timer</span>'
                   }
                   csvValues += 'not started,';
-                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center"><span class="material-icons color-not-started">schedule</span></td>');
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' text-center">not-started</td>');
                 }
                 
                 html += '</td>';
               }
+
               html += '<td id="td-expand-'+i+'" part="td-body">';
               html += '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>'
               html += '</td>';
@@ -4859,8 +5397,9 @@ export class SfIEvents extends LitElement {
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["statute"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["reference"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["applicability"]+'</td>');
-              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligationtype"]+'</td>');
+              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["obligation"]+'</td>');
+              htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["internalcontrols"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["penalty"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["risk"]+'</td>');
               htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["frequency"]+'</td>');
@@ -4896,7 +5435,7 @@ export class SfIEvents extends LitElement {
                 html += '</th>'
               }
               csvValues += '\n';
-              htmlValues += ('</tr>');
+              
               // for(var k = 0; k < Object.keys(this.events[mmdd][j]).length; k++) {
               //   html += '<th part="td-body">';
               //   if(this.events[mmdd][j][Object.keys(this.events[mmdd][j])[k]].indexOf("[") >= 0) {
@@ -4911,6 +5450,9 @@ export class SfIEvents extends LitElement {
               html += '</table>';
               html += '<div class="hidden-filtername hide"><table><thead><th part="badge-filter-name" class="filtername"></th></thead></table></div>'
 
+              let reporterStr = this.getReporterStringFromEvent(this.events[mmdd][j]);
+              let approverStr = this.getApproverStringFromEvent(this.events[mmdd][j]);
+
               if(this.flowGraph != this.FLOW_GRAPH_COMPLETENESS && this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
 
                 let graphParam = '';
@@ -4919,23 +5461,28 @@ export class SfIEvents extends LitElement {
                 } else {
                   graphParam = this.events[mmdd][j][this.flowGraph].replace(/ *\([^)]*\) */g, "");
                 }
-                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + graphParam + '</div></div>';
+                html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + graphParam + '</div>'+reporterStr + approverStr+'</div>';
+                htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+graphParam+'</td>');
 
               } else {
 
                 if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) {
 
-                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + partStatus.replace('status-', '') + '</div></div>';
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + partStatus.replace('status-', '') + '</div>'+reporterStr + approverStr+'</div>';
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+partStatus.replace('status-', '')+'</td>');
 
                 }
 
                 if(this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
 
-                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname mb-20">' + lateStatus + '</div></div>';
+                  html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + lateStatus + '</div>'+reporterStr + approverStr+'</div>';
+                  htmlValues += ('<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+lateStatus+'</td>');
 
                 }
 
               }
+
+              htmlValues += ('</tr>');
 
             html += '</div>';
           }
@@ -4961,8 +5508,9 @@ export class SfIEvents extends LitElement {
 
     }
 
-
     html += '</div>';
+
+    this.period = firstDay?.getDate() + '/' + (firstDay!.getMonth()+1) + '/' + firstDay?.getFullYear() + " - " + endDay?.getDate() + '/' + (endDay!.getMonth()+1) + '/' + endDay?.getFullYear();
 
     this.csvDataCompliances = csvCols + "\n" + csvValues;
     this.htmlDataCompliances = '<table>' + htmlCols + htmlValues + '</table>';
@@ -4975,12 +5523,13 @@ export class SfIEvents extends LitElement {
     html = html.replace("DASHBOARD_NOT_STARTED", notStarted+"");
     html = html.replace("DASHBOARD_APPROVED", approved+"");
     html = html.replace("DASHBOARD_IN_PROGRESS", inProgress+"");
+    html = html.replace("DASHBOARD_IN_TIME", (total - pastDueDate - lateApproved - lateExecuted)+"");
     html = html.replace("DASHBOARD_PAST_DUE_DATE", pastDueDate+"");
     html = html.replace("DASHBOARD_LATE_EXECUTED", lateExecuted+"");
     html = html.replace("DASHBOARD_LATE_APPROVED", lateApproved+"");
 
     this.csvDataStats = 'Period,Total,Not Started,Approved,In Progress,Past Due Date,Late Executed,Late Approved\n';
-    this.csvDataStats += period + "," + total + "," + notStarted + "," + approved + "," + inProgress + "," + pastDueDate + "," + lateExecuted + "," + lateApproved;
+    this.csvDataStats += this.period + "," + total + "," + notStarted + "," + approved + "," + inProgress + "," + pastDueDate + "," + lateExecuted + "," + lateApproved;
 
     this.htmlDataStats = '<table class="w-100"><tr><th class="w-14">Total</th><th class="w-14">Not Started</th><th class="w-14">Approved</th><th class="w-14">In Progress</th><th class="w-14">Past Due Date</th><th class="w-14">Late Executed</th><th class="w-14">Late Approved</th><tr>';
     this.htmlDataStats += '<tr><td class="w-14 text-center td-odd">'+total+'</td><td class="w-14 text-center td-odd">'+notStarted+'</td><td class="w-14 text-center td-odd">'+approved+'</td><td class="w-14 text-center td-odd">'+inProgress+'</td><td class="w-14 text-center td-odd">'+pastDueDate+'</td><td class="w-14 text-center td-odd">'+lateExecuted+'</td><td class="w-14 text-center td-odd">'+lateApproved+'</td><tr></table>';
@@ -5011,19 +5560,7 @@ export class SfIEvents extends LitElement {
 
         (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
 
-        var yyyy = "";
-
-        var currMonth = new Date().getMonth() + 1;
-
-        if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
-          yyyy = new Date().getFullYear() + "";
-        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() - 1) + "";
-        } else if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() + 1) + "";
-        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() + 1) + "";
-        }
+        var yyyy = this.getCurrentYear(idArr[3]);
 
         this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, null);
   
@@ -5164,8 +5701,17 @@ export class SfIEvents extends LitElement {
         (this._SfStreamEventStatus as HTMLDivElement).innerHTML = "Chosen time window cannot be greater than 400 days";
         return;
       }
-      await this.fetchUserCalendar_2(valueStart.split('-')[1] + "/" + valueStart.split('-')[2] + "/" + valueStart.split('-')[0], valueEnd.split('-')[1] + "/" + valueEnd.split('-')[2] + "/" + valueEnd.split('-')[0]);
-      this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime())/(1000*60*60*24));
+      const tsStart = new Date(valueStart);
+      const tsEnd = new Date(valueEnd);
+      tsStart.setDate(tsStart.getDate() - 2);
+      tsEnd.setDate(tsEnd.getDate() + 2);
+
+      console.log('tsstart', tsStart);
+      console.log('tsend', tsEnd);
+      
+      // await this.fetchUserCalendar_2(tsStart.getMonth() + "/" + tsStart.getDate() + "/" + tsStart.getFullYear(), valueEnd.split('-')[1] + "/" + valueEnd.split('-')[2] + "/" + valueEnd.split('-')[0]);
+      await this.fetchAndYearlyRenderUserCalendar_2((tsStart.getMonth() + 1) + "/" + tsStart.getDate() + "/" + tsStart.getFullYear(), (tsEnd.getMonth() + 1) + "/" + tsEnd.getDate() + "/" + tsEnd.getFullYear());
+      this.renderRangeEvents(new Date(valueStart), ((new Date(valueEnd).getTime()+24*60*60*1000) - new Date(valueStart).getTime())/(1000*60*60*24));
     } else if(valueStart != "" && valueEnd == "") {
       (this._SfStreamEventStatus as HTMLDivElement).innerHTML = "Please select End Date";
     } else if(valueStart == "" && valueEnd != "") {
@@ -5271,16 +5817,16 @@ export class SfIEvents extends LitElement {
         
       });
   
-      const buttonStatusMore = (this._SfCustomContainer as HTMLDivElement).querySelector('#button-status-more');
-      buttonStatusMore?.addEventListener('click', () => {
+      // const buttonStatusMore = (this._SfCustomContainer as HTMLDivElement).querySelector('#button-status-more');
+      // buttonStatusMore?.addEventListener('click', () => {
   
-        const divStatusList = (this._SfCustomContainer as HTMLDivElement).querySelectorAll('.late-statuses') as NodeListOf<HTMLDivElement>;
-        for(var i = 0; i < divStatusList.length; i++) {
-          divStatusList[i].style.display = 'flex';
-        }
-        (buttonStatusMore as HTMLButtonElement).style.display = 'none';
+      //   const divStatusList = (this._SfCustomContainer as HTMLDivElement).querySelectorAll('.late-statuses') as NodeListOf<HTMLDivElement>;
+      //   for(var i = 0; i < divStatusList.length; i++) {
+      //     divStatusList[i].style.display = 'flex';
+      //   }
+      //   (buttonStatusMore as HTMLButtonElement).style.display = 'none';
   
-      });
+      // });
   
     }
 
@@ -5463,7 +6009,7 @@ export class SfIEvents extends LitElement {
 
     const arrData = [];
 
-    console.log('window', this.eventsInWindow);
+    console.log('window', this.eventsInWindow, ctx);
 
     if(divContainer != null) this.clearGraph(divContainer, 2);
     if(divContainer != null) this.clearGraph(divContainer, 3);
@@ -5534,6 +6080,11 @@ export class SfIEvents extends LitElement {
       tagsCompressed.push(this.truncate(tags[i].split(';')[0], 20, false, false));
     }
 
+    if(divContainer != null) {
+      this.clearGraph(divContainer, 1);
+      this.showGraph(divContainer, 4);
+    }
+
     if(this.fill == "solid") {
 
       const data = {
@@ -5557,7 +6108,20 @@ export class SfIEvents extends LitElement {
         ]
       }
 
-      this.renderChart(ctx, 'bar', data, "Custom Plot")
+      const ctx4 = divContainer?.querySelector('#myChart4') as ChartItem;
+      (divContainer?.querySelector('#myChart4') as HTMLCanvasElement).classList.remove('gone');
+      
+      if(this.fill == "solid") {
+
+        this.renderChart4(ctx4, 'bar', data, "Custom Plot")
+
+      } else {
+
+        this.renderChart4(ctx4, 'bar', data, "Custom Plot")
+
+      }
+
+      
 
     } else {
 
@@ -5582,7 +6146,20 @@ export class SfIEvents extends LitElement {
         ]
       }
 
-      this.renderChart(ctx, 'bar', data, "Custom Plot")
+      const ctx4 = divContainer?.querySelector('#myChart4') as ChartItem;
+      (divContainer?.querySelector('#myChart4') as HTMLCanvasElement).classList.remove('gone');
+      
+      if(this.fill == "solid") {
+
+        this.renderChart4(ctx4, 'bar', data, "Custom Plot")
+
+      } else {
+
+        this.renderChart4(ctx4, 'bar', data, "Custom Plot")
+
+      }
+
+      // this.renderChart(ctx, 'bar', data, "Custom Plot")
 
     }
 
@@ -5613,6 +6190,7 @@ export class SfIEvents extends LitElement {
     (this._SfOnboardingDuedatesContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingInternalControlsContainer as HTMLDivElement).style.display = 'none';
+    (this._SfOnboardingSignoffContainer as HTMLDivElement).style.display = 'none';
     (this._SfOnboardingCalendarContainer as HTMLDivElement).style.display = 'none';
 
     (this._SfOnboardingStatutesContainer as HTMLDivElement).innerHTML = '';
@@ -5632,6 +6210,7 @@ export class SfIEvents extends LitElement {
     (this._SfOnboardingDuedatesContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingInternalControlsContainer as HTMLDivElement).innerHTML = '';
+    (this._SfOnboardingSignoffContainer as HTMLDivElement).innerHTML = '';
     (this._SfOnboardingCalendarContainer as HTMLDivElement).innerHTML = '';
 
   }
@@ -5889,10 +6468,12 @@ export class SfIEvents extends LitElement {
     const entitiesJobs = await this.fetchEntitiesJobs();
     const mappedEntities = await this.fetchMappedEntities();
     const mappedSerializedCountries = await this.fetchMappedSerializedCountries();
+    const arrStatuteEntitiesApplicabilities = await this.loadProposedFromStatutes(7);
     // const mappedStatutes = await this.fetchMappedStatutes();
     console.log('mappedSerializedCountries', mappedSerializedCountries);
     console.log('mappedEntities', mappedEntities);
-    this.renderOnboardingEntities(mappedEntities, mappedSerializedCountries, entitiesJobs);
+    console.log('entitiesApplicabilities', arrStatuteEntitiesApplicabilities);
+    this.renderOnboardingEntities(mappedEntities, mappedSerializedCountries, entitiesJobs, arrStatuteEntitiesApplicabilities);
   }
 
   loadOnboardingLocations = async () => {
@@ -5929,15 +6510,33 @@ export class SfIEvents extends LitElement {
     this.renderOnboardingTags(mappedTags, mappedSerializedFunctions, tagsJobs);
   }
 
+  loadProposedFromStatutes = async (fieldIndex: number) => {
+    const mappedStatutes = await this.fetchMappedStatutes();
+    console.log('mappedstatutes', mappedStatutes);
+    const arrStatuteReporters : any = {}
+    for(var i = 0; i < mappedStatutes.data.mappings.mappings.length; i++) {
+      if(arrStatuteReporters[mappedStatutes.data.mappings.mappings[i].countryname] == null) {
+        arrStatuteReporters[mappedStatutes.data.mappings.mappings[i].countryname] = {}
+      }
+      if(arrStatuteReporters[mappedStatutes.data.mappings.mappings[i].countryname][mappedStatutes.data.mappings.mappings[i].statutename] == null) {
+        arrStatuteReporters[mappedStatutes.data.mappings.mappings[i].countryname][mappedStatutes.data.mappings.mappings[i].statutename] = {}
+      }
+      arrStatuteReporters[mappedStatutes.data.mappings.mappings[i].countryname][mappedStatutes.data.mappings.mappings[i].statutename] = mappedStatutes.data.mappings.mappings[i].extraFields[fieldIndex];
+    }
+    return arrStatuteReporters;
+  }
+
   loadOnboardingReporters = async () => {
     this.hideTabContainers();
     (this._SfOnboardingReportersContainer as HTMLDivElement).style.display = 'flex';
     const reportersJobs = await this.fetchReportersJobs();
     const mappedSerializedTags = await this.fetchMappedSerializedTags();
     const mappedReporters = await this.fetchMappedReporters();
+    const arrStatuteReporters = await this.loadProposedFromStatutes(1);
     console.log('mappedserializedtags', mappedSerializedTags);
     console.log('mappedreporters', mappedReporters);
-    this.renderOnboardingReporters(mappedReporters, mappedSerializedTags, reportersJobs);
+    console.log('arrstatutereporters', arrStatuteReporters);
+    this.renderOnboardingReporters(mappedReporters, mappedSerializedTags, reportersJobs, arrStatuteReporters);
   }
 
   loadOnboardingApprovers = async () => {
@@ -5946,9 +6545,10 @@ export class SfIEvents extends LitElement {
     const approversJobs = await this.fetchApproversJobs();
     const mappedSerializedReporters = await this.fetchMappedSerializedReporters();
     const mappedApprovers = await this.fetchMappedApprovers();
+    const arrStatuteApprovers = await this.loadProposedFromStatutes(2);
     console.log('mappedserializedreporters', mappedSerializedReporters);
     console.log('mappedapprovers', mappedApprovers);
-    this.renderOnboardingApprovers(mappedApprovers, mappedSerializedReporters, approversJobs);
+    this.renderOnboardingApprovers(mappedApprovers, mappedSerializedReporters, approversJobs, arrStatuteApprovers);
   }
 
   loadOnboardingFunctionHeads = async () => {
@@ -5957,9 +6557,10 @@ export class SfIEvents extends LitElement {
     const functionHeadsJobs = await this.fetchFunctionHeadsJobs();
     const mappedSerializedApprovers = await this.fetchMappedSerializedApprovers();
     const mappedFunctionHeads = await this.fetchMappedFunctionHeads();
+    const arrStatuteFunctionheads = await this.loadProposedFromStatutes(3);
     console.log('mappedserializedapprovers', mappedSerializedApprovers);
     console.log('mappedfunctionheads', mappedFunctionHeads);
-    this.renderOnboardingFunctionHeads(mappedFunctionHeads, mappedSerializedApprovers, functionHeadsJobs);
+    this.renderOnboardingFunctionHeads(mappedFunctionHeads, mappedSerializedApprovers, functionHeadsJobs, arrStatuteFunctionheads);
   }
 
   loadOnboardingViewers = async () => {
@@ -5968,9 +6569,10 @@ export class SfIEvents extends LitElement {
     const makerViewersJobs = await this.fetchViewersJobs();
     const mappedSerializedAuditors = await this.fetchMappedSerializedAuditors();
     const mappedViewers = await this.fetchMappedViewers();
+    const arrStatuteViewers = await this.loadProposedFromStatutes(5);
     console.log('mappedSerializedAuditors', mappedSerializedAuditors);
     console.log('mappedViewers', mappedViewers);
-    this.renderOnboardingViewers(mappedViewers, mappedSerializedAuditors, makerViewersJobs);
+    this.renderOnboardingViewers(mappedViewers, mappedSerializedAuditors, makerViewersJobs, arrStatuteViewers);
   }
 
   loadOnboardingDocs = async () => {
@@ -6001,9 +6603,10 @@ export class SfIEvents extends LitElement {
     const auditorsJobs = await this.fetchAuditorsJobs();
     const mappedSerializedFunctionheads = await this.fetchMappedSerializedFunctionheads();
     const mappedAuditors = await this.fetchMappedAuditors();
+    const arrStatuteAuditors = await this.loadProposedFromStatutes(4);
     console.log('mappedSerializedFunctionheads', mappedSerializedFunctionheads);
     console.log('mappedAuditors', mappedAuditors);
-    this.renderOnboardingAuditors(mappedAuditors, mappedSerializedFunctionheads, auditorsJobs);
+    this.renderOnboardingAuditors(mappedAuditors, mappedSerializedFunctionheads, auditorsJobs, arrStatuteAuditors);
   }
 
   loadOnboardingDuedates = async () => {
@@ -6039,6 +6642,14 @@ export class SfIEvents extends LitElement {
     this.renderOnboardingInternalControls(mappedInternalControls, mappedSerializedAlertSchedules, internalcontrolsJobs);
   }
 
+  loadOnboardingSignoff = async () => {
+    this.hideTabContainers();
+    (this._SfOnboardingSignoffContainer as HTMLDivElement).style.display = 'flex';
+    const signoff = await this.fetchGetSignOff();
+    this.renderOnboardingSignoff(signoff);
+    console.log(signoff);
+  }
+
   loadOnboardingCalendar = async () => {
     this.hideTabContainers();
     (this._SfOnboardingCalendarContainer as HTMLDivElement).style.display = 'flex';
@@ -6062,14 +6673,19 @@ export class SfIEvents extends LitElement {
 
     }
 
-    let currDay = new Date();
+    let nowMonth = new Date().getMonth() + 1;
+    let nowYear = parseInt(this.getCurrentYear(nowMonth + ""));
+    let nowDate = new Date(nowYear, new Date().getMonth(), new Date().getDate())
+
+    let currDay = nowDate;
     for(var i = 0; i < block; i++) {
       currDay.setDate(currDay.getDate() - 1);
     }
 
     const startDate = ("0" + (currDay.getMonth() + 1)).slice(-2) + "/" + ("0" + (currDay.getDate() + 1)).slice(-2) + "/" + currDay.getFullYear();
 
-    currDay = new Date();
+    // currDay = new Date();
+    currDay = nowDate;
     for(var i = 0; i < block; i++) {
       currDay.setDate(currDay.getDate() + 1);
     }
@@ -6082,14 +6698,19 @@ export class SfIEvents extends LitElement {
 
   calculateStartAndEndDateOfThis = (index: number = 0) => {
 
-    console.log('calculating start and end of upcoming');
+    console.log('calculating start and end of this');
 
     let block = 10;
     var firstDate = new Date();
+    firstDate = new Date(parseInt(this.getCurrentYear((firstDate.getMonth() + 1) + "")), firstDate.getMonth(), firstDate.getDate())
 
     if(index === 0) {
 
-      firstDate = (this.getFirstDateOfWeek(new Date()) as Date);
+      let nowMonth = new Date().getMonth() + 1;
+      let nowYear = parseInt(this.getCurrentYear(nowMonth + ""));
+      let nowDate = new Date(nowYear, new Date().getMonth(), new Date().getDate())
+
+      firstDate = (this.getFirstDateOfWeek(nowDate) as Date);
       console.log('this first date', firstDate);
       block = 10;
 
@@ -6097,149 +6718,272 @@ export class SfIEvents extends LitElement {
 
     if(index === 1) {
 
-      firstDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+      let nowMonth = new Date().getMonth() + 1;
+      let nowYear = parseInt(this.getCurrentYear(nowMonth + ""));
+
+      firstDate = new Date(nowYear, new Date().getMonth(), 1);
       console.log('this first date', firstDate);
       block = 35;
 
     }
 
-    const currentMonth = parseInt(("0" + (new Date().getMonth() + 1)).slice(-2));
-    let lastMonth = -1;
-    if(currentMonth <= 11 && currentMonth >= 2) {
-      lastMonth = parseInt(((currentMonth - 1) + "").slice(-2));
-    } else if(currentMonth === 12) {
-      lastMonth = 11;
-    } else if(currentMonth === 1) {
-      lastMonth = 12;
+    let sDate = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+
+    let eDate = new Date(sDate.getFullYear(), sDate.getMonth(), sDate.getDate());
+
+    for(var i = 0; i < block; i++) {
+      eDate.setDate(eDate.getDate() + 1);
     }
 
-    let lastMonthsYear = -1;
-    if((lastMonth) >= parseInt(this.calendarStartMM)) {
-      lastMonthsYear = parseInt(this.calendarStartYYYY);
-    } else {
-      lastMonthsYear = parseInt(this.calendarStartYYYY) + 1;
-    }
+    return {startDate: (sDate.getMonth() + 1) + '/' + sDate.getDate() + '/' + sDate.getFullYear(), endDate: (eDate.getMonth() + 1) + '/' + eDate.getDate() + '/' + eDate.getFullYear()}
 
-    var incDate = new Date();
-    for(var j = 0; j < block; j++) {
-      incDate.setDate(incDate.getDate() + 1);
-    }
-
-    let incDateMonth = (incDate.getMonth() + 1);
-
-    let incDateYear = -1;
-    if((incDateMonth) >= parseInt(this.calendarStartMM)) {
-      incDateYear = parseInt(this.calendarStartYYYY);
-    } else {
-      incDateYear = parseInt(this.calendarStartYYYY) + 1;
-    }
-
-    let startDate = lastMonth + "/25/" + lastMonthsYear;        
-    let endDate = (incDate.getMonth() + 1) + "/" + incDate.getDate() + "/" + incDateYear;
-
-    console.log('calculating start and end of upcoming', {startDate: startDate, endDate: endDate});
-
-    return {startDate: startDate, endDate: endDate}
 
   }
 
-  calculateStartAndEndDateOfUpcoming = (index: number = 0) => {
+  calculateStartAndEndDateOfUpcoming = (index: number = 0) : any => {
 
     console.log('calculating start and end of upcoming');
 
+    let nowMonth = new Date().getMonth() + 1;
+    let nowYear = parseInt(this.getCurrentYear(nowMonth + ""));
+
+    let currDate = new Date();
+    let sDate = new Date(nowYear, currDate.getMonth(), currDate.getDate());
+    sDate.setDate(sDate.getDate() - 1);
+
     let block = 10;
     if(index === 0) {
-      block = 10;
+      block = 8;
     } else if(index === 1) {
-      block = 35;
+      block = 32;
     } else {
-      block = 95;
+      block = 92;
     }
 
-    const currentMonth = parseInt(("0" + (new Date().getMonth() + 1)).slice(-2));
-    let lastMonth = -1;
-    if(currentMonth <= 11 && currentMonth >= 2) {
-      lastMonth = parseInt(((currentMonth - 1) + "").slice(-2));
-    } else if(currentMonth === 12) {
-      lastMonth = 11;
-    } else if(currentMonth === 1) {
-      lastMonth = 12;
+    let eDate = new Date(sDate.getFullYear(), sDate.getMonth(), sDate.getDate());
+
+    for(var i = 0; i < block; i++) {
+      eDate.setDate(eDate.getDate() + 1);
     }
 
-    let lastMonthsYear = -1;
-    if((lastMonth) >= parseInt(this.calendarStartMM)) {
-      lastMonthsYear = parseInt(this.calendarStartYYYY);
-    } else {
-      lastMonthsYear = parseInt(this.calendarStartYYYY) + 1;
-    }
-
-    var incDate = new Date();
-    for(var j = 0; j < block; j++) {
-      incDate.setDate(incDate.getDate() + 1);
-    }
-
-    let incDateMonth = (incDate.getMonth() + 1);
-
-    let incDateYear = -1;
-    if((incDateMonth) >= parseInt(this.calendarStartMM)) {
-      incDateYear = parseInt(this.calendarStartYYYY);
-    } else {
-      incDateYear = parseInt(this.calendarStartYYYY) + 1;
-    }
-
-    let startDate = lastMonth + "/25/" + lastMonthsYear;        
-    let endDate = (incDate.getMonth() + 1) + "/" + incDate.getDate() + "/" + incDateYear;
-
-    console.log('calculating start and end of upcoming', {startDate: startDate, endDate: endDate});
-
-    return {startDate: startDate, endDate: endDate}
+    return {startDate: (sDate.getMonth() + 1) + '/' + sDate.getDate() + '/' + sDate.getFullYear(), endDate: (eDate.getMonth() + 1) + '/' + eDate.getDate() + '/' + eDate.getFullYear()}
 
   }
 
   calculateStartAndEndDateOfStream = (index: number = 0) => {
 
-    console.log('calculateStartAndEndDateOfStream', index);
-
     let month = parseInt(this.calendarStartMM);
+
+    console.log('calculateStartAndEndDateOfStream', index, month);
+
     for(var j = 0; j < 12; j++) {
       if(j === index) {
 
         let currentMonth = month;
+        let nowMonth = new Date().getMonth() + 1;
+        //let nowYear = new Date().getFullYear();
+        let nowYear = parseInt(this.getCurrentYear(nowMonth + ""));
         let lastMonth = -1;
         let nextMonth = -1;
-
-        if(currentMonth <= 11 && currentMonth >= 2) {
-          lastMonth = parseInt(((currentMonth - 1) + "").slice(-2));
-          nextMonth = parseInt(((currentMonth + 1) + "").slice(-2));
-        } else if(currentMonth === 12) {
-          lastMonth = 11;
-          nextMonth = 1;
-        } else if(currentMonth === 1) {
-          lastMonth = 12;
-          nextMonth = 2;
-        }
-
-        console.log('last month', lastMonth);
 
         let lastMonthsYear = -1;
         let nextMonthsYear = -1;
 
-        if((lastMonth) >= parseInt(this.calendarStartMM)) {
-          lastMonthsYear = parseInt(this.calendarStartYYYY);
-        } else {
-          if(j === 0) {
-            lastMonthsYear = parseInt(this.calendarStartYYYY);
+        if(currentMonth === 1) {
+          // Mar
+          lastMonth = 12;
+          nextMonth = 2;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear - 1;
+            nextMonthsYear = nowYear;
           } else {
-            lastMonthsYear = parseInt(this.calendarStartYYYY) + 1;
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear + 1;
+          }
+          
+          
+          
+        }
+        
+        if(currentMonth === 2) {
+          // Mar
+          lastMonth = 1;
+          nextMonth = 3;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear;
+          } else {
+            lastMonthsYear = nowYear + 1;
+            nextMonthsYear = nowYear + 1;
           }
           
         }
 
-        if((nextMonth) >= parseInt(this.calendarStartMM)) {
-          nextMonthsYear = parseInt(this.calendarStartYYYY);
-        } else {
-          nextMonthsYear = parseInt(this.calendarStartYYYY) + 1;
+        if(currentMonth === 3) {
+          // Mar
+          lastMonth = 2;
+          nextMonth = 4;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear;
+          } else {
+            lastMonthsYear = nowYear + 1;
+            nextMonthsYear = nowYear + 1;
+          }
         }
+
+        if(currentMonth === 4) {
+          // Mar
+          lastMonth = 3;
+          nextMonth = 5;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear - 1;
+            nextMonthsYear = nowYear - 1;
+          } else {
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear;
+          }
+        }
+
+        if(currentMonth === 5) {
+          // Mar
+          lastMonth = 4;
+          nextMonth = 6;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear - 1;
+            nextMonthsYear = nowYear - 1;
+          } else {
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear;
+          }
+        }
+
+        if(currentMonth === 6) {
+          // Mar
+          lastMonth = 5;
+          nextMonth = 7;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear - 1;
+            nextMonthsYear = nowYear - 1;
+          } else {
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear;
+          }
+        }
+
+        if(currentMonth === 7) {
+          // Mar
+          lastMonth = 6;
+          nextMonth = 8;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear - 1;
+            nextMonthsYear = nowYear - 1;
+          } else {
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear;
+          }
+        }
+
+        if(currentMonth === 8) {
+          // Mar
+          lastMonth = 7;
+          nextMonth = 9;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear - 1;
+            nextMonthsYear = nowYear - 1;
+          } else {
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear;
+          }
+        }
+
+        if(currentMonth === 9) {
+          // Mar
+          lastMonth = 8;
+          nextMonth = 10;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear - 1;
+            nextMonthsYear = nowYear - 1;
+          } else {
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear;
+          }
+        }
+
+        if(currentMonth === 10) {
+          // Mar
+          lastMonth = 9;
+          nextMonth = 11;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear - 1;
+            nextMonthsYear = nowYear - 1;
+          } else {
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear;
+          }
+        }
+
+        if(currentMonth === 11) {
+          // Mar
+          lastMonth = 10;
+          nextMonth = 12;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear - 1;
+            nextMonthsYear = nowYear - 1;
+          } else {
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear;
+          }
+        }
+
+        if(currentMonth === 12) {
+          // Mar
+          lastMonth = 11;
+          nextMonth = 1;
+          if(nowMonth < parseInt(this.calendarStartMM)) {
+            lastMonthsYear = nowYear - 1;
+            nextMonthsYear = nowYear;
+          } else {
+            lastMonthsYear = nowYear;
+            nextMonthsYear = nowYear + 1;
+          }
+        }
+
+        // console.log('calculateStartAndEndDateOfStream', currentMonth, index);
+
+        // if(currentMonth <= 11 && currentMonth >= 2) {
+        //   lastMonth = parseInt(((currentMonth - 1) + "").slice(-2));
+        //   nextMonth = parseInt(((currentMonth + 1) + "").slice(-2));
+        // } else if(currentMonth === 12) {
+        //   lastMonth = 11;
+        //   nextMonth = 1;
+        // } else if(currentMonth === 1) {
+        //   lastMonth = 12;
+        //   nextMonth = 2;
+        // }
+
+        // console.log('last month', lastMonth);
+        // console.log('next month', nextMonth, this.calendarStartMM);
+
+        // // let lastMonthsYear = -1;
+        // // let nextMonthsYear = -1;
+
+        // if((lastMonth) >= parseInt(this.calendarStartMM)) {
+        //   lastMonthsYear = parseInt(this.calendarStartYYYY);
+        // } else {
+        //   if(j === 0) {
+        //     lastMonthsYear = parseInt(this.calendarStartYYYY);
+        //   } else {
+        //     lastMonthsYear = parseInt(this.calendarStartYYYY) + 1;
+        //   }
+          
+        // }
+
+        // if((nextMonth) >= parseInt(this.calendarStartMM)) {
+        //   nextMonthsYear = parseInt(this.calendarStartYYYY);
+        // } else {
+        //   nextMonthsYear = parseInt(this.calendarStartYYYY) + 1;
+        // }
 
         let startDate = lastMonth + "/25/" + lastMonthsYear;
         let endDate = nextMonth + "/01/" + nextMonthsYear;
@@ -6570,6 +7314,10 @@ export class SfIEvents extends LitElement {
 
   renderCustom = () => {
 
+    this.clearGraphData();
+    this.clearSelectedGraphParam();
+    this.clearSelectedLegend();
+
     var html = '';
 
     html += '<div class="scroll-x w-100 mobile-only">';
@@ -6647,9 +7395,13 @@ export class SfIEvents extends LitElement {
     // }
   }
 
-  renderPast = (index: number = 0) => {
+  renderPast = (index: number = 0, showGraph: boolean = true) => {
 
     this.clearGraphData();
+    this.clearSelectedGraphParam();
+    this.clearSelectedLegend();
+
+    this.streamIndex = index;
 
     var html = '';
 
@@ -6699,7 +7451,7 @@ export class SfIEvents extends LitElement {
 
       // var startDate = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
       var startDate = new Date();
-      html += this.renderPastEvents(index, startDate);
+      html += this.renderPastEvents(index, startDate, showGraph);
       startDate.setDate(startDate.getDate() + 1);
         
       html += '</div>';
@@ -6788,34 +7540,34 @@ export class SfIEvents extends LitElement {
       
     });
 
-    const buttonStatusMore = (this._SfPastContainer as HTMLDivElement).querySelector('#button-status-more');
-    buttonStatusMore?.addEventListener('click', () => {
+    // const buttonStatusMore = (this._SfPastContainer as HTMLDivElement).querySelector('#button-status-more');
+    // buttonStatusMore?.addEventListener('click', () => {
 
-      const divStatusList = (this._SfPastContainer as HTMLDivElement).querySelectorAll('.late-statuses') as NodeListOf<HTMLDivElement>;
-      for(var i = 0; i < divStatusList.length; i++) {
-        divStatusList[i].style.display = 'flex';
-      }
-      (buttonStatusMore as HTMLButtonElement).style.display = 'none';
+    //   const divStatusList = (this._SfPastContainer as HTMLDivElement).querySelectorAll('.late-statuses') as NodeListOf<HTMLDivElement>;
+    //   for(var i = 0; i < divStatusList.length; i++) {
+    //     divStatusList[i].style.display = 'flex';
+    //   }
+    //   (buttonStatusMore as HTMLButtonElement).style.display = 'none';
 
-    });
+    // });
 
     for(var i = 0; i < 3; i++) {
       (this._SfPastContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
         const dateResult = this.calculateStartAndEndDateOfPast(target);
-        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
-        console.log('clicked ', target);
         this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
         this.currentColumnIndex = target + "";
+        await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
+        console.log('clicked ', target);
         this.renderPast(target);
       });
       (this._SfPastContainer as HTMLDivElement).querySelector('#stream-month-' + i + '-mobile')?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
         const dateResult = this.calculateStartAndEndDateOfPast(target);
-        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
-        console.log('clicked ', target);
         this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
         this.currentColumnIndex = target + "";
+        await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
+        console.log('clicked ', target);
         this.renderPast(target);
       })
     }
@@ -6844,19 +7596,7 @@ export class SfIEvents extends LitElement {
 
         (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
 
-        var yyyy = "";
-
-        var currMonth = new Date().getMonth() + 1;
-
-        if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
-          yyyy = new Date().getFullYear() + "";
-        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() - 1) + "";
-        } else if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() + 1) + "";
-        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() + 1) + "";
-        }
+        var yyyy = this.getCurrentYear(idArr[3]);
 
         this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfPastContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
   
@@ -6932,13 +7672,17 @@ export class SfIEvents extends LitElement {
 
     }
 
-    this.renderCompletenessGraph((this._SfPastContainer as HTMLDivElement));
+    if(showGraph) this.renderCompletenessGraph((this._SfPastContainer as HTMLDivElement));
 
   }
 
-  renderUpcoming = (index: number = 0) => {
+  renderUpcoming = (index: number = 0, showGraph: boolean = true) => {
 
     this.clearGraphData();
+    this.clearSelectedGraphParam();
+    this.clearSelectedLegend();
+
+    this.streamIndex = index;
 
     var html = '';
 
@@ -7005,17 +7749,17 @@ export class SfIEvents extends LitElement {
        // var startDate = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
        var startDate = new Date();
       if(index === 0) {
-        html += this.renderUpcomingEvents(index, startDate, 7);
+        html += this.renderUpcomingEvents(index, startDate, 7, showGraph);
         startDate.setDate(startDate.getDate() + 1);
       }
 
       if(index === 1) {
-        html += this.renderUpcomingEvents(index, startDate, 30);
+        html += this.renderUpcomingEvents(index, startDate, 30, showGraph);
         startDate.setDate(startDate.getDate() + 1);
       }
 
       if(index === 2) {
-        html += this.renderUpcomingEvents(index, startDate, 90);
+        html += this.renderUpcomingEvents(index, startDate, 90, showGraph);
         startDate.setDate(startDate.getDate() + 1);
       }
 
@@ -7108,27 +7852,25 @@ export class SfIEvents extends LitElement {
       
     });
 
-    const buttonStatusMore = (this._SfUpcomingContainer as HTMLDivElement).querySelector('#button-status-more');
-    buttonStatusMore?.addEventListener('click', () => {
+    // const buttonStatusMore = (this._SfUpcomingContainer as HTMLDivElement).querySelector('#button-status-more');
+    // buttonStatusMore?.addEventListener('click', () => {
 
-      const divStatusList = (this._SfUpcomingContainer as HTMLDivElement).querySelectorAll('.late-statuses') as NodeListOf<HTMLDivElement>;
-      for(var i = 0; i < divStatusList.length; i++) {
-        divStatusList[i].style.display = 'flex';
-      }
-      (buttonStatusMore as HTMLButtonElement).style.display = 'none';
+    //   const divStatusList = (this._SfUpcomingContainer as HTMLDivElement).querySelectorAll('.late-statuses') as NodeListOf<HTMLDivElement>;
+    //   for(var i = 0; i < divStatusList.length; i++) {
+    //     divStatusList[i].style.display = 'flex';
+    //   }
+    //   (buttonStatusMore as HTMLButtonElement).style.display = 'none';
 
-    });
+    // });
 
     for(var i = 0; i < 3; i++) {
       (this._SfUpcomingContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
-
         const dateResult = this.calculateStartAndEndDateOfUpcoming(target);
-        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
-
         console.log('clicked ', target);
         this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
         this.currentColumnIndex = target + "";
+        await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
         this.renderUpcoming(target);
 
       });
@@ -7137,11 +7879,10 @@ export class SfIEvents extends LitElement {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
 
         const dateResult = this.calculateStartAndEndDateOfUpcoming(target);
-        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
-
-        console.log('clicked ', target);
         this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
         this.currentColumnIndex = target + "";
+        await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
+        console.log('clicked ', target);
         this.renderUpcoming(target);
 
       })
@@ -7171,19 +7912,7 @@ export class SfIEvents extends LitElement {
 
         (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
 
-        var yyyy = "";
-
-        var currMonth = new Date().getMonth() + 1;
-
-        if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
-          yyyy = new Date().getFullYear() + "";
-        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() - 1) + "";
-        } else if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() + 1) + "";
-        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() + 1) + "";
-        }
+        var yyyy = this.getCurrentYear(idArr[3]);
 
         this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfUpcomingContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
   
@@ -7259,13 +7988,17 @@ export class SfIEvents extends LitElement {
 
     }
     
-    this.renderCompletenessGraph((this._SfUpcomingContainer as HTMLDivElement));
+    if(showGraph) this.renderCompletenessGraph((this._SfUpcomingContainer as HTMLDivElement));
 
   }
 
-  renderThis = (index: number = 0) => {
+  renderThis = (index: number = 0, showGraph: boolean = true) => {
 
     this.clearGraphData();
+    this.clearSelectedGraphParam();
+    this.clearSelectedLegend();
+
+    this.streamIndex = index;
 
     var html = '';
 
@@ -7315,7 +8048,7 @@ export class SfIEvents extends LitElement {
 
       // var startDate = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
       var startDate = new Date();
-      html += this.renderThisEvents(index, startDate);
+      html += this.renderThisEvents(index, startDate, showGraph);
       startDate.setDate(startDate.getDate() + 1);
         
       html += '</div>';
@@ -7405,35 +8138,35 @@ export class SfIEvents extends LitElement {
       
     });
 
-    const buttonStatusMore = (this._SfThisContainer as HTMLDivElement).querySelector('#button-status-more');
-    buttonStatusMore?.addEventListener('click', () => {
+    // const buttonStatusMore = (this._SfThisContainer as HTMLDivElement).querySelector('#button-status-more');
+    // buttonStatusMore?.addEventListener('click', () => {
 
-      const divStatusList = (this._SfThisContainer as HTMLDivElement).querySelectorAll('.late-statuses') as NodeListOf<HTMLDivElement>;
-      for(var i = 0; i < divStatusList.length; i++) {
-        divStatusList[i].style.display = 'flex';
-      }
-      (buttonStatusMore as HTMLButtonElement).style.display = 'none';
+    //   const divStatusList = (this._SfThisContainer as HTMLDivElement).querySelectorAll('.late-statuses') as NodeListOf<HTMLDivElement>;
+    //   for(var i = 0; i < divStatusList.length; i++) {
+    //     divStatusList[i].style.display = 'flex';
+    //   }
+    //   (buttonStatusMore as HTMLButtonElement).style.display = 'none';
 
-    });
+    // });
 
     for(var i = 0; i < 3; i++) {
       (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
         console.log('clicked ', target);
         const dateResult = this.calculateStartAndEndDateOfThis(target);
-        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
         this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
         this.currentColumnIndex = target + "";
+        await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
         this.renderThis(target);
       });
 
       (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-' + i + '-mobile')?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
         console.log('clicked ', target);
-        const dateResult = this.calculateStartAndEndDateOfThis(target);
-        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
         this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
         this.currentColumnIndex = target + "";
+        const dateResult = this.calculateStartAndEndDateOfThis(target);
+        await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
         this.renderThis(target);
       })
     }
@@ -7462,19 +8195,7 @@ export class SfIEvents extends LitElement {
 
         (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
 
-        var yyyy = "";
-
-        var currMonth = new Date().getMonth() + 1;
-
-        if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
-          yyyy = new Date().getFullYear() + "";
-        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() - 1) + "";
-        } else if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() + 1) + "";
-        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() + 1) + "";
-        }
+        var yyyy = this.getCurrentYear(idArr[3]);
 
         this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
   
@@ -7551,13 +8272,17 @@ export class SfIEvents extends LitElement {
     }
 
 
-    this.renderCompletenessGraph((this._SfThisContainer as HTMLDivElement));
+    if(showGraph) this.renderCompletenessGraph((this._SfThisContainer as HTMLDivElement));
     
   }
 
-  renderStream = (index: number = 0) => {
+  renderStream = (index: number = 0, showGraph: boolean = true) => {
+
+    this.streamIndex = index;
 
     this.clearGraphData();
+    this.clearSelectedGraphParam();
+    this.clearSelectedLegend();
 
     var startDate = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
 
@@ -7608,7 +8333,7 @@ export class SfIEvents extends LitElement {
         for(i = 0; i < 12; i++) {
           if(i === index) {
             console.log(i, index)
-            html += this.renderStreamEvents(i, startDate.getMonth(), startDate.getFullYear())
+            html += this.renderStreamEvents(i, startDate.getMonth(), startDate.getFullYear(), showGraph)
           }
           startDate.setMonth(startDate.getMonth() + 1);
         }
@@ -7699,16 +8424,16 @@ export class SfIEvents extends LitElement {
       
     });
     
-    const buttonStatusMore = (this._SfStreamContainer as HTMLDivElement).querySelector('#button-status-more');
-    buttonStatusMore?.addEventListener('click', () => {
+    // const buttonStatusMore = (this._SfStreamContainer as HTMLDivElement).querySelector('#button-status-more');
+    // buttonStatusMore?.addEventListener('click', () => {
 
-      const divStatusList = (this._SfStreamContainer as HTMLDivElement).querySelectorAll('.late-statuses') as NodeListOf<HTMLDivElement>;
-      for(var i = 0; i < divStatusList.length; i++) {
-        divStatusList[i].style.display = 'flex';
-      }
-      (buttonStatusMore as HTMLButtonElement).style.display = 'none';
+    //   const divStatusList = (this._SfStreamContainer as HTMLDivElement).querySelectorAll('.late-statuses') as NodeListOf<HTMLDivElement>;
+    //   for(var i = 0; i < divStatusList.length; i++) {
+    //     divStatusList[i].style.display = 'flex';
+    //   }
+    //   (buttonStatusMore as HTMLButtonElement).style.display = 'none';
 
-    });
+    // });
 
     for(var i = 0; i < 12; i++) {
       (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-' + i)?.addEventListener('click', async (ev: any)=> {
@@ -7716,13 +8441,12 @@ export class SfIEvents extends LitElement {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
         const dateResult = this.calculateStartAndEndDateOfStream(target);
         console.log('dateresult', dateResult);
+        this.currentColumnIndex = target + "";
         if(dateResult != null) {
-          await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+          await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
         }
         this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
-        this.currentColumnIndex = target + "";
         this.renderStream(target);
-
 
       });
 
@@ -7731,7 +8455,7 @@ export class SfIEvents extends LitElement {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
         const dateResult = this.calculateStartAndEndDateOfStream(target);
         if(dateResult != null) {
-          await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+          await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
         }
         this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
         this.currentColumnIndex = target + "";
@@ -7766,19 +8490,7 @@ export class SfIEvents extends LitElement {
 
         console.log('current column index', (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
 
-        var yyyy = "";
-
-        var currMonth = new Date().getMonth() + 1;
-
-        if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
-          yyyy = new Date().getFullYear() + "";
-        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() - 1) + "";
-        } else if(parseInt(idArr[3]) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() + 1) + "";
-        } else if(parseInt(idArr[3]) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
-          yyyy = (new Date().getFullYear() + 1) + "";
-        }
+        var yyyy = this.getCurrentYear(idArr[3]);
 
         this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
   
@@ -7854,8 +8566,37 @@ export class SfIEvents extends LitElement {
 
     }
 
-    this.renderCompletenessGraph((this._SfStreamContainer as HTMLDivElement));
+    if(showGraph) this.renderCompletenessGraph((this._SfStreamContainer as HTMLDivElement));
 
+  }
+
+  getCurrentYear = (mm: string) => {
+
+    // var currMonth = new Date().getMonth() + 1;
+
+    // // if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+    // //   yyyy = new Date().getFullYear() + "";
+    // // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+    // //   yyyy = (new Date().getFullYear() - 1) + "";
+    // // } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    // //   yyyy = (new Date().getFullYear() + 1) + "";
+    // // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    // //   yyyy = (new Date().getFullYear() + 1) + "";
+    // // }
+
+    // if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth < parseInt(this.calendarStartMM)) {
+    //   yyyy = parseInt(this.calendarStartYYYY) + "";
+    // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth <= parseInt(this.calendarStartMM)) {
+    //   yyyy = (parseInt(this.calendarStartYYYY) - 1) + "";
+    // } else if(parseInt(mm) < parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    //   yyyy = (parseInt(this.calendarStartYYYY) + 1) + "";
+    // } else if(parseInt(mm) >= parseInt(this.calendarStartMM) && currMonth >= parseInt(this.calendarStartMM)) {
+    //   yyyy = (parseInt(this.calendarStartYYYY) + 1) + "";
+    // }
+
+    var yyyy = this.getYearFromMonthAndCalendarStart(mm);
+
+    return yyyy;
   }
 
   clearButtonSelection = () => {
@@ -7871,9 +8612,11 @@ export class SfIEvents extends LitElement {
   }
 
   clearGraphData = () => {
+    console.log('clearing graph data');
     this.chart = null;
     this.chart2 = null;
     this.chart3 = null;
+    this.chart4 = null;
     this.riskAreasData = null;
     this.riskAreasPartStatusData = null;
     this.riskAreasLateStatusData = null;
@@ -7897,42 +8640,128 @@ export class SfIEvents extends LitElement {
     this.frequencyPartStatusData = null;
   }
 
-  clearGraph = (divContainer: HTMLDivElement, index: number) => {
+  showGraph =  (divContainer: HTMLDivElement, index: number) => {
 
+    if(index == 1) {
+
+      (divContainer.querySelector('#myChart') as HTMLCanvasElement).parentElement!.style.display = 'block';
+
+    }
+
+    if(index == 4) {
+
+      (divContainer.querySelector('#myChart4') as HTMLCanvasElement).parentElement!.style.display = 'block';
+      
+    }
+    
     if(index == 2) {
 
-      (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.add('gone');
-      (divContainer.querySelector('#myChart2') as HTMLCanvasElement).parentElement!.style.height = '0px';
-      if(this.chart2 != null) {
-        (this.chart2 as Chart).destroy();
-      }
-      this.chart2 = null;
+      (divContainer.querySelector('#myChart2') as HTMLCanvasElement).parentElement!.style.display = 'block';
+      // (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.add('gone');
+      // (divContainer.querySelector('#myChart2') as HTMLCanvasElement).parentElement!.style.height = '0px';
+      // if(this.chart2 != null) {
+      //   (this.chart2 as Chart).destroy();
+      // }
+      // this.chart2 = null;
 
     }
 
     if(index == 3) {
 
-      (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.add('gone');
-      (divContainer.querySelector('#myChart3') as HTMLCanvasElement).parentElement!.style.height = '0px';
-      if(this.chart3 != null) {
-        (this.chart3 as Chart).destroy();
-      }
-      this.chart3 = null;
+      (divContainer.querySelector('#myChart3') as HTMLCanvasElement).parentElement!.style.display = 'block';
+      // (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.add('gone');
+      // (divContainer.querySelector('#myChart3') as HTMLCanvasElement).parentElement!.style.height = '0px';
+      // if(this.chart3 != null) {
+      //   (this.chart3 as Chart).destroy();
+      // }
+      // this.chart3 = null;
       
     }
 
   }
 
+  clearGraph = (divContainer: HTMLDivElement, index: number) => {
+    
+    if(index == 1) {
+
+      (divContainer.querySelector('#myChart') as HTMLCanvasElement).parentElement!.style.display = 'none';
+
+    }
+
+    if(index == 4) {
+
+      (divContainer.querySelector('#myChart4') as HTMLCanvasElement).parentElement!.style.display = 'none';
+      
+    }
+    
+    if(index == 2) {
+
+      (divContainer.querySelector('#myChart2') as HTMLCanvasElement).parentElement!.style.display = 'none';
+      // (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.add('gone');
+      // (divContainer.querySelector('#myChart2') as HTMLCanvasElement).parentElement!.style.height = '0px';
+      // if(this.chart2 != null) {
+      //   (this.chart2 as Chart).destroy();
+      // }
+      // this.chart2 = null;
+
+    }
+
+    if(index == 3) {
+
+      (divContainer.querySelector('#myChart3') as HTMLCanvasElement).parentElement!.style.display = 'none';
+      // (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.add('gone');
+      // (divContainer.querySelector('#myChart3') as HTMLCanvasElement).parentElement!.style.height = '0px';
+      // if(this.chart3 != null) {
+      //   (this.chart3 as Chart).destroy();
+      // }
+      // this.chart3 = null;
+      
+    }
+
+  }
+
+  renderCompletenessCsvForGraph = (dataBar: any, parameter: string) => {
+
+    this.csvCompletenessStats = parameter + ",Not Started,In Progress,Complete\n";
+    for(var i = 0; i < dataBar['labels'].length; i++) {
+      this.csvCompletenessStats += dataBar['labels'][i].join(" ") + "," + dataBar['datasets'][2]['data'][i] + "," + dataBar['datasets'][1]['data'][i] + "," + dataBar['datasets'][0]['data'][i] + (i < (dataBar['labels'].length - 1) ? "\n" : "");
+    }
+
+    console.log('rendering csv completeness', this.csvCompletenessStats);
+
+  }
+
+  renderTimelinessCsvForGraph = (dataBar: any, parameter: string) => {
+
+    this.csvTimelinessStats = parameter + ",In Time,Past Due Date,Late Approved,Late Executed\n";
+    for(var i = 0; i < dataBar['labels'].length; i++) {
+      this.csvTimelinessStats += dataBar['labels'][i].join(" ") + "," + dataBar['datasets'][0]['data'][i] + "," + dataBar['datasets'][1]['data'][i] + "," + dataBar['datasets'][3]['data'][i] + "," + dataBar['datasets'][2]['data'][i] + (i < (dataBar['labels'].length - 1) ? "\n" : "");
+    }
+
+    console.log('rendering csv csvTimelinessStats', this.csvTimelinessStats);
+
+  }
+
   renderCompletenessGraph = (divContainer: HTMLDivElement) => {
+
+    this.clearSelectedGraphParam();
+    // this.clearSelectedLegend();
+    
+    this.csvGraphStats = "";
+    this.csvCompletenessStats = "";
+    this.csvTimelinessStats = "";
+
+    if((divContainer.querySelector('#graph-approved') as HTMLSpanElement) == null) return;
 
     var dataApproved = (divContainer.querySelector('#graph-approved') as HTMLSpanElement).innerHTML;
     var dataNotStarted = (divContainer.querySelector('#graph-not-started') as HTMLSpanElement).innerHTML;
     var dataInProgress = (divContainer.querySelector('#graph-in-progress') as HTMLSpanElement).innerHTML;
 
     const ctx = divContainer.querySelector('#myChart') as ChartItem;
+    this.showGraph(divContainer, 1);
     this.clearGraph(divContainer, 2);
     this.clearGraph(divContainer, 3);
-
+    this.clearGraph(divContainer, 4);
 
     if(this.fill == "pattern") {
 
@@ -7971,6 +8800,18 @@ export class SfIEvents extends LitElement {
         }]
       }
 
+      this.csvGraphStats += 'Completeness,Approved,Not Started,In Progress,Total\n';
+      this.csvGraphStats += 'Total,'+dataApproved+','+dataNotStarted+','+dataInProgress+','+(parseInt(dataApproved)+parseInt(dataNotStarted)+parseInt(dataInProgress))+'\n';
+
+      const itemsTimeliness = divContainer.querySelectorAll('.stat-timeliness') as NodeListOf<HTMLElement>;
+      for(var i = 0; i < itemsTimeliness.length; i++) {
+        itemsTimeliness[i].style.display = 'none';
+      }
+      const itemsCompleteness = divContainer.querySelectorAll('.stat-completeness') as NodeListOf<HTMLElement>;
+      for(var i = 0; i < itemsCompleteness.length; i++) {
+        itemsCompleteness[i].style.display = 'flex';
+      }
+
       this.renderChartSettings(divContainer, -1, ctx);
       this.renderChart(ctx, 'doughnut', data, "Completeness")
 
@@ -7980,6 +8821,12 @@ export class SfIEvents extends LitElement {
 
   renderTimelinessGraph = (divContainer: HTMLDivElement) => {
 
+    this.clearSelectedGraphParam();
+    // this.clearSelectedLegend();
+
+    this.csvGraphStats = "";
+    this.csvCompletenessStats = "";
+    this.csvTimelinessStats = "";
 
     var dataTotal = (divContainer.querySelector('#graph-total') as HTMLSpanElement).innerHTML;
     var dataPastDueDate = (divContainer.querySelector('#graph-past-due-date') as HTMLSpanElement).innerHTML;
@@ -7987,8 +8834,11 @@ export class SfIEvents extends LitElement {
     var dataLateExecuted = (divContainer.querySelector('#graph-late-executed') as HTMLSpanElement).innerHTML;
 
     const ctx = divContainer.querySelector('#myChart') as ChartItem;
+    this.showGraph(divContainer, 1);
     this.clearGraph(divContainer, 2);
     this.clearGraph(divContainer, 3);
+    this.clearGraph(divContainer, 4);
+
 
     if(this.fill == "pattern") {
 
@@ -8029,16 +8879,41 @@ export class SfIEvents extends LitElement {
         }]
       }
 
+      this.csvGraphStats += 'Completeness,In Time,Past Due Date,Late Approved,Late Executed,Total\n';
+      this.csvGraphStats += 'Count,'+(parseInt(dataTotal) - (parseInt(dataPastDueDate)+parseInt(dataLateApproved)+parseInt(dataLateExecuted)))+','+(parseInt(dataPastDueDate)+','+parseInt(dataLateApproved)+','+parseInt(dataLateExecuted)+',' + (parseInt(dataTotal) - (parseInt(dataPastDueDate)+parseInt(dataLateApproved)+parseInt(dataLateExecuted))))+'\n';
+
+      console.log('rendering timeliness graph', this.csvGraphStats);
+
+
+      const itemsTimeliness = divContainer.querySelectorAll('.stat-timeliness') as NodeListOf<HTMLElement>;
+      for(var i = 0; i < itemsTimeliness.length; i++) {
+        itemsTimeliness[i].style.display = 'flex';
+      }
+      const itemsCompleteness = divContainer.querySelectorAll('.stat-completeness') as NodeListOf<HTMLElement>;
+      for(var i = 0; i < itemsCompleteness.length; i++) {
+        itemsCompleteness[i].style.display = 'none';
+      }
+
       this.renderChartSettings(divContainer, -1, ctx);
       this.renderChart(ctx, 'doughnut', data, "Timeliness")
 
     }
 
+
   }
 
   renderRiskSeverityGraph = (divContainer: HTMLDivElement) => {
 
+    this.clearSelectedGraphParam();
+    // this.clearSelectedLegend();
+
+    this.csvGraphStats = "";
+    this.csvCompletenessStats = "";
+    this.csvTimelinessStats = "";
+
     if(this.riskSeverityData == null) return;
+
+    this.clearGraph(divContainer, 4);
 
     const data:any = {};
     data['labels'] = [];
@@ -8054,6 +8929,24 @@ export class SfIEvents extends LitElement {
       data['datasets'][0]['data'].push(this.riskSeverityData[Object.keys(this.riskSeverityData)[i]]);
       data['datasets'][0]['backgroundColor'].push(Util.getRandomColor());
     }
+
+    this.csvGraphStats += 'Risk,'
+    for(var i = 0; i < Object.keys(this.riskSeverityData).length; i++) {
+      this.csvGraphStats += (Object.keys(this.riskSeverityData)[i])
+      if(i < (Object.keys(this.riskSeverityData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
+
+    this.csvGraphStats += 'Count,'
+    for(var i = 0; i < Object.keys(this.riskSeverityData).length; i++) {
+      this.csvGraphStats += (this.riskSeverityData[Object.keys(this.riskSeverityData)[i]])
+      if(i < (Object.keys(this.riskSeverityData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
 
     // var dataTotal = (divContainer.querySelector('#graph-total') as HTMLSpanElement).innerHTML;
     // var dataPastDueDate = (divContainer.querySelector('#graph-past-due-date') as HTMLSpanElement).innerHTML;
@@ -8114,7 +9007,8 @@ export class SfIEvents extends LitElement {
     dataBar['datasets'][2]['backgroundColor'] = '#A4A9AD';
 
     const ctx2 = divContainer.querySelector('#myChart2') as ChartItem;
-    (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 2);
     
     console.log('databar', dataBar);
 
@@ -8127,6 +9021,8 @@ export class SfIEvents extends LitElement {
       this.renderChart2(ctx2, 'bar', dataBar, "Risk Severity vs Completeness")
 
     }
+
+    this.renderCompletenessCsvForGraph(dataBar, "Risk Completeness Breakdown")
 
     // 3
 
@@ -8171,9 +9067,19 @@ export class SfIEvents extends LitElement {
     dataBar2['datasets'][3]['backgroundColor'] = '#EE2F36';
 
     const ctx3 = divContainer.querySelector('#myChart3') as ChartItem;
-    (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 3);
+    // (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
     
     console.log('databar', dataBar2);
+
+    const itemsTimeliness = divContainer.querySelectorAll('.stat-timeliness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsTimeliness.length; i++) {
+      itemsTimeliness[i].style.display = 'flex';
+    }
+    const itemsCompleteness = divContainer.querySelectorAll('.stat-completeness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsCompleteness.length; i++) {
+      itemsCompleteness[i].style.display = 'flex';
+    }
 
     if(this.fill == "solid") {
 
@@ -8185,12 +9091,23 @@ export class SfIEvents extends LitElement {
 
     }
 
+    this.renderTimelinessCsvForGraph(dataBar2, "Risk Timeliness Breakdown")
+
 
   }
 
   renderObligationTypeGraph = (divContainer: HTMLDivElement) => {
 
+    this.clearSelectedGraphParam();
+    // this.clearSelectedLegend();
+
+    this.csvGraphStats = "";
+    this.csvCompletenessStats = "";
+    this.csvTimelinessStats = "";
+
     if(this.obligationTypeData == null) return;
+
+    this.clearGraph(divContainer, 4);
 
     const data:any = {};
     data['labels'] = [];
@@ -8206,6 +9123,24 @@ export class SfIEvents extends LitElement {
       data['datasets'][0]['data'].push(this.obligationTypeData[Object.keys(this.obligationTypeData)[i]]);
       data['datasets'][0]['backgroundColor'].push(Util.getRandomColor());
     }
+
+    this.csvGraphStats += 'Obligation Type,'
+    for(var i = 0; i < Object.keys(this.obligationTypeData).length; i++) {
+      this.csvGraphStats += (Object.keys(this.obligationTypeData)[i])
+      if(i < (Object.keys(this.obligationTypeData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
+
+    this.csvGraphStats += 'Count,'
+    for(var i = 0; i < Object.keys(this.obligationTypeData).length; i++) {
+      this.csvGraphStats += (this.obligationTypeData[Object.keys(this.obligationTypeData)[i]])
+      if(i < (Object.keys(this.obligationTypeData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
 
     // var dataTotal = (divContainer.querySelector('#graph-total') as HTMLSpanElement).innerHTML;
     // var dataPastDueDate = (divContainer.querySelector('#graph-past-due-date') as HTMLSpanElement).innerHTML;
@@ -8265,7 +9200,8 @@ export class SfIEvents extends LitElement {
     dataBar['datasets'][2]['backgroundColor'] = '#A4A9AD';
 
     const ctx2 = divContainer.querySelector('#myChart2') as ChartItem;
-    (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 2);
     
     console.log('databar', dataBar);
 
@@ -8278,6 +9214,8 @@ export class SfIEvents extends LitElement {
       this.renderChart2(ctx2, 'bar', dataBar, "Obligation Type vs Completeness")
 
     }
+
+    this.renderCompletenessCsvForGraph(dataBar, "Obligation Type Completeness Breakdown")
 
     // 3
 
@@ -8322,9 +9260,19 @@ export class SfIEvents extends LitElement {
     dataBar2['datasets'][3]['backgroundColor'] = '#EE2F36';
 
     const ctx3 = divContainer.querySelector('#myChart3') as ChartItem;
-    (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 3);
     
     console.log('databar', dataBar2);
+
+    const itemsTimeliness = divContainer.querySelectorAll('.stat-timeliness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsTimeliness.length; i++) {
+      itemsTimeliness[i].style.display = 'flex';
+    }
+    const itemsCompleteness = divContainer.querySelectorAll('.stat-completeness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsCompleteness.length; i++) {
+      itemsCompleteness[i].style.display = 'flex';
+    }
 
     if(this.fill == "solid") {
 
@@ -8336,11 +9284,22 @@ export class SfIEvents extends LitElement {
 
     }
 
+    this.renderTimelinessCsvForGraph(dataBar2, "Obligation Type Timeliness Breakdown")
+
   }
 
   renderFunctionGraph = (divContainer: HTMLDivElement) => {
 
+    this.clearSelectedGraphParam();
+    // this.clearSelectedLegend();
+
+    this.csvGraphStats = "";
+    this.csvCompletenessStats = "";
+    this.csvTimelinessStats = "";
+
     if(this.functionData == null) return;
+
+    this.clearGraph(divContainer, 4);
 
     const data:any = {};
     data['labels'] = [];
@@ -8356,6 +9315,24 @@ export class SfIEvents extends LitElement {
       data['datasets'][0]['data'].push(this.functionData[Object.keys(this.functionData)[i]]);
       data['datasets'][0]['backgroundColor'].push(Util.getRandomColor());
     }
+
+    this.csvGraphStats += 'Function,'
+    for(var i = 0; i < Object.keys(this.functionData).length; i++) {
+      this.csvGraphStats += (Object.keys(this.functionData)[i])
+      if(i < (Object.keys(this.functionData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
+
+    this.csvGraphStats += 'Count,'
+    for(var i = 0; i < Object.keys(this.functionData).length; i++) {
+      this.csvGraphStats += (this.functionData[Object.keys(this.functionData)[i]])
+      if(i < (Object.keys(this.functionData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
 
     // var dataTotal = (divContainer.querySelector('#graph-total') as HTMLSpanElement).innerHTML;
     // var dataPastDueDate = (divContainer.querySelector('#graph-past-due-date') as HTMLSpanElement).innerHTML;
@@ -8415,7 +9392,8 @@ export class SfIEvents extends LitElement {
     dataBar['datasets'][2]['backgroundColor'] = '#A4A9AD';
 
     const ctx2 = divContainer.querySelector('#myChart2') as ChartItem;
-    (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 2);
     
     console.log('databar', dataBar);
 
@@ -8428,6 +9406,8 @@ export class SfIEvents extends LitElement {
       this.renderChart2(ctx2, 'bar', dataBar, "Function vs Completeness")
 
     }
+
+    this.renderCompletenessCsvForGraph(dataBar, "Function Completeness Breakdown")
 
     // 3
 
@@ -8472,9 +9452,19 @@ export class SfIEvents extends LitElement {
     dataBar2['datasets'][3]['backgroundColor'] = '#EE2F36';
 
     const ctx3 = divContainer.querySelector('#myChart3') as ChartItem;
-    (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 3);
     
     console.log('databar', dataBar2);
+
+    const itemsTimeliness = divContainer.querySelectorAll('.stat-timeliness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsTimeliness.length; i++) {
+      itemsTimeliness[i].style.display = 'flex';
+    }
+    const itemsCompleteness = divContainer.querySelectorAll('.stat-completeness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsCompleteness.length; i++) {
+      itemsCompleteness[i].style.display = 'flex';
+    }
 
     if(this.fill == "solid") {
 
@@ -8486,13 +9476,22 @@ export class SfIEvents extends LitElement {
 
     }
 
+    this.renderTimelinessCsvForGraph(dataBar2, "Function Timeliness Breakdown")
+
   }
 
   renderLocationGraph = (divContainer: HTMLDivElement) => {
+    
+    this.clearSelectedGraphParam();
+    // this.clearSelectedLegend();
 
-    console.log('locationdata', this.locationData);
-
+    this.csvGraphStats = "";
+    this.csvCompletenessStats = "";
+    this.csvTimelinessStats = "";
+    
     if(this.locationData == null) return;
+
+    this.clearGraph(divContainer, 4);
 
     const data:any = {};
     data['labels'] = [];
@@ -8508,6 +9507,24 @@ export class SfIEvents extends LitElement {
       data['datasets'][0]['data'].push(this.locationData[Object.keys(this.locationData)[i]]);
       data['datasets'][0]['backgroundColor'].push(Util.getRandomColor());
     }
+
+    this.csvGraphStats += 'Location,'
+    for(var i = 0; i < Object.keys(this.locationData).length; i++) {
+      this.csvGraphStats += (Object.keys(this.locationData)[i])
+      if(i < (Object.keys(this.locationData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
+
+    this.csvGraphStats += 'Count,'
+    for(var i = 0; i < Object.keys(this.locationData).length; i++) {
+      this.csvGraphStats += (this.locationData[Object.keys(this.locationData)[i]])
+      if(i < (Object.keys(this.locationData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
 
     // var dataTotal = (divContainer.querySelector('#graph-total') as HTMLSpanElement).innerHTML;
     // var dataPastDueDate = (divContainer.querySelector('#graph-past-due-date') as HTMLSpanElement).innerHTML;
@@ -8567,7 +9584,8 @@ export class SfIEvents extends LitElement {
     dataBar['datasets'][2]['backgroundColor'] = '#A4A9AD';
 
     const ctx2 = divContainer.querySelector('#myChart2') as ChartItem;
-    (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 2);
     
     console.log('databar', dataBar);
 
@@ -8580,6 +9598,8 @@ export class SfIEvents extends LitElement {
       this.renderChart2(ctx2, 'bar', dataBar, "Location vs Completeness")
 
     }
+
+    this.renderCompletenessCsvForGraph(dataBar, "Location Completeness Breakdown")
 
     // 3
 
@@ -8624,9 +9644,19 @@ export class SfIEvents extends LitElement {
     dataBar2['datasets'][3]['backgroundColor'] = '#EE2F36';
 
     const ctx3 = divContainer.querySelector('#myChart3') as ChartItem;
-    (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 3);
     
     console.log('databar', dataBar2);
+
+    const itemsTimeliness = divContainer.querySelectorAll('.stat-timeliness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsTimeliness.length; i++) {
+      itemsTimeliness[i].style.display = 'flex';
+    }
+    const itemsCompleteness = divContainer.querySelectorAll('.stat-completeness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsCompleteness.length; i++) {
+      itemsCompleteness[i].style.display = 'flex';
+    }
 
     if(this.fill == "solid") {
 
@@ -8638,11 +9668,22 @@ export class SfIEvents extends LitElement {
 
     }
 
+    this.renderTimelinessCsvForGraph(dataBar2, "Location Timeliness Breakdown")
+
   }
 
   renderJurisdictionGraph = (divContainer: HTMLDivElement) => {
 
+    this.clearSelectedGraphParam();
+    this.clearSelectedLegend();
+
+    this.csvGraphStats = "";
+    this.csvCompletenessStats = "";
+    this.csvTimelinessStats = "";
+
     if(this.jurisdictionData == null) return;
+
+    this.clearGraph(divContainer, 4);
 
     const data:any = {};
     data['labels'] = [];
@@ -8658,6 +9699,24 @@ export class SfIEvents extends LitElement {
       data['datasets'][0]['data'].push(this.jurisdictionData[Object.keys(this.jurisdictionData)[i]]);
       data['datasets'][0]['backgroundColor'].push(Util.getRandomColor());
     }
+
+    this.csvGraphStats += 'Jurisdiction,'
+    for(var i = 0; i < Object.keys(this.jurisdictionData).length; i++) {
+      this.csvGraphStats += (Object.keys(this.jurisdictionData)[i])
+      if(i < (Object.keys(this.jurisdictionData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
+
+    this.csvGraphStats += 'Count,'
+    for(var i = 0; i < Object.keys(this.jurisdictionData).length; i++) {
+      this.csvGraphStats += (this.jurisdictionData[Object.keys(this.jurisdictionData)[i]])
+      if(i < (Object.keys(this.jurisdictionData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
 
     // var dataTotal = (divContainer.querySelector('#graph-total') as HTMLSpanElement).innerHTML;
     // var dataPastDueDate = (divContainer.querySelector('#graph-past-due-date') as HTMLSpanElement).innerHTML;
@@ -8717,7 +9776,8 @@ export class SfIEvents extends LitElement {
     dataBar['datasets'][2]['backgroundColor'] = '#A4A9AD';
 
     const ctx2 = divContainer.querySelector('#myChart2') as ChartItem;
-    (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 2);
     
     console.log('databar', dataBar);
 
@@ -8730,6 +9790,8 @@ export class SfIEvents extends LitElement {
       this.renderChart2(ctx2, 'bar', dataBar, "Jurisdiction vs Completeness")
 
     }
+
+    this.renderCompletenessCsvForGraph(dataBar, "Jurisdiction Completeness Breakdown")
 
     // 3
 
@@ -8774,9 +9836,19 @@ export class SfIEvents extends LitElement {
     dataBar2['datasets'][3]['backgroundColor'] = '#EE2F36';
 
     const ctx3 = divContainer.querySelector('#myChart3') as ChartItem;
-    (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 3);
     
     console.log('databar', dataBar2);
+
+    const itemsTimeliness = divContainer.querySelectorAll('.stat-timeliness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsTimeliness.length; i++) {
+      itemsTimeliness[i].style.display = 'flex';
+    }
+    const itemsCompleteness = divContainer.querySelectorAll('.stat-completeness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsCompleteness.length; i++) {
+      itemsCompleteness[i].style.display = 'flex';
+    }
 
     if(this.fill == "solid") {
 
@@ -8788,11 +9860,22 @@ export class SfIEvents extends LitElement {
 
     }
 
+    this.renderTimelinessCsvForGraph(dataBar2, "Jurisdiction Timeliness Breakdown")
+
   }
 
   renderFrequencyGraph = (divContainer: HTMLDivElement) => {
 
+    this.clearSelectedGraphParam();
+    // this.clearSelectedLegend();
+
+    this.csvGraphStats = "";
+    this.csvCompletenessStats = "";
+    this.csvTimelinessStats = "";
+
     if(this.frequencyData == null) return;
+
+    this.clearGraph(divContainer, 4);
 
     const data:any = {};
     data['labels'] = [];
@@ -8808,6 +9891,24 @@ export class SfIEvents extends LitElement {
       data['datasets'][0]['data'].push(this.frequencyData[Object.keys(this.frequencyData)[i]]);
       data['datasets'][0]['backgroundColor'].push(Util.getRandomColor());
     }
+
+    this.csvGraphStats += 'Frequency,'
+    for(var i = 0; i < Object.keys(this.frequencyData).length; i++) {
+      this.csvGraphStats += (Object.keys(this.frequencyData)[i])
+      if(i < (Object.keys(this.frequencyData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
+
+    this.csvGraphStats += 'Count,'
+    for(var i = 0; i < Object.keys(this.frequencyData).length; i++) {
+      this.csvGraphStats += (this.frequencyData[Object.keys(this.frequencyData)[i]])
+      if(i < (Object.keys(this.frequencyData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
 
     // var dataTotal = (divContainer.querySelector('#graph-total') as HTMLSpanElement).innerHTML;
     // var dataPastDueDate = (divContainer.querySelector('#graph-past-due-date') as HTMLSpanElement).innerHTML;
@@ -8867,7 +9968,8 @@ export class SfIEvents extends LitElement {
     dataBar['datasets'][2]['backgroundColor'] = '#A4A9AD';
 
     const ctx2 = divContainer.querySelector('#myChart2') as ChartItem;
-    (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 2);
     
     console.log('databar', dataBar);
 
@@ -8880,6 +9982,8 @@ export class SfIEvents extends LitElement {
       this.renderChart2(ctx2, 'bar', dataBar, "Frequency vs Completeness")
 
     }
+
+    this.renderCompletenessCsvForGraph(dataBar, "Frequency Completeness Breakdown")
 
     // 3
 
@@ -8924,9 +10028,19 @@ export class SfIEvents extends LitElement {
     dataBar2['datasets'][3]['backgroundColor'] = '#EE2F36';
 
     const ctx3 = divContainer.querySelector('#myChart3') as ChartItem;
-    (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 3);
     
     console.log('databar', dataBar2);
+
+    const itemsTimeliness = divContainer.querySelectorAll('.stat-timeliness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsTimeliness.length; i++) {
+      itemsTimeliness[i].style.display = 'flex';
+    }
+    const itemsCompleteness = divContainer.querySelectorAll('.stat-completeness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsCompleteness.length; i++) {
+      itemsCompleteness[i].style.display = 'flex';
+    }
 
     if(this.fill == "solid") {
 
@@ -8938,15 +10052,24 @@ export class SfIEvents extends LitElement {
 
     }
 
+    this.renderTimelinessCsvForGraph(dataBar2, "Frequency Timeliness Breakdown")
+
   }
 
   renderRiskGraph = (divContainer: HTMLDivElement) => {
 
+    this.clearSelectedGraphParam();
+    // this.clearSelectedLegend();
+
+    this.csvGraphStats = "";
+    this.csvCompletenessStats = "";
+    this.csvTimelinessStats = "";
+
     // Pie chart
 
-    console.log('risk data', this.riskAreasData, this.riskAreasPartStatusData, this.riskAreasLateStatusData);
-
     if(this.riskAreasData == null) return;
+
+    this.clearGraph(divContainer, 4);
 
     const data:any = {};
     data['labels'] = [];
@@ -8962,6 +10085,24 @@ export class SfIEvents extends LitElement {
       data['datasets'][0]['data'].push(this.riskAreasData[Object.keys(this.riskAreasData)[i]]);
       data['datasets'][0]['backgroundColor'].push(Util.getRandomColor());
     }
+
+    this.csvGraphStats += 'Risk Area,'
+    for(var i = 0; i < Object.keys(this.riskAreasData).length; i++) {
+      this.csvGraphStats += (Object.keys(this.riskAreasData)[i])
+      if(i < (Object.keys(this.riskAreasData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
+
+    this.csvGraphStats += 'Count,'
+    for(var i = 0; i < Object.keys(this.riskAreasData).length; i++) {
+      this.csvGraphStats += (this.riskAreasData[Object.keys(this.riskAreasData)[i]])
+      if(i < (Object.keys(this.riskAreasData).length - 1)) {
+        this.csvGraphStats += ','
+      }
+    }
+    this.csvGraphStats += '\n'
 
     const ctx = divContainer.querySelector('#myChart') as ChartItem;
     //(divContainer.querySelector('#myChart') as HTMLCanvasElement).style.width = '50%';
@@ -9014,7 +10155,8 @@ export class SfIEvents extends LitElement {
     dataBar['datasets'][2]['backgroundColor'] = '#A4A9AD';
 
     const ctx2 = divContainer.querySelector('#myChart2') as ChartItem;
-    (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart2') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 2);
     
     console.log('databar', dataBar);
 
@@ -9027,6 +10169,8 @@ export class SfIEvents extends LitElement {
       this.renderChart2(ctx2, 'bar', dataBar, "Risk Area vs Completeness")
 
     }
+
+    this.renderCompletenessCsvForGraph(dataBar, "Risk Area Completeness Breakdown")
 
     // 3
 
@@ -9071,9 +10215,19 @@ export class SfIEvents extends LitElement {
     dataBar2['datasets'][3]['backgroundColor'] = '#EE2F36';
 
     const ctx3 = divContainer.querySelector('#myChart3') as ChartItem;
-    (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    // (divContainer.querySelector('#myChart3') as HTMLCanvasElement).classList.remove('gone');
+    this.showGraph(divContainer, 3);
     
     console.log('databar', dataBar2);
+
+    const itemsTimeliness = divContainer.querySelectorAll('.stat-timeliness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsTimeliness.length; i++) {
+      itemsTimeliness[i].style.display = 'flex';
+    }
+    const itemsCompleteness = divContainer.querySelectorAll('.stat-completeness') as NodeListOf<HTMLElement>;
+    for(var i = 0; i < itemsCompleteness.length; i++) {
+      itemsCompleteness[i].style.display = 'flex';
+    }
 
     if(this.fill == "solid") {
 
@@ -9084,6 +10238,8 @@ export class SfIEvents extends LitElement {
       this.renderChart3(ctx3, 'bar', dataBar2, "Risk Area vs Timeliness")
 
     }
+
+    this.renderTimelinessCsvForGraph(dataBar2, "Risk Area Timeliness Breakdown")
 
   }
 
@@ -9104,7 +10260,7 @@ export class SfIEvents extends LitElement {
     approved = event['approved'] == null ? false : event['approved'] == null ? false : event['approved'];
     dateOfCompletion = event['dateofcompletion'] == null ? '' : event['dateofcompletion'] == null ? '' : event['dateofcompletion'];
     makercheckers = event['makercheckers'] == null ? [] : event['makercheckers'] == null ? [] : event['makercheckers']; 
-    docsOptional = event['docs'] == null ? [] : event['docs'] == null ? [] : event['docs']; 
+    docsOptional = event['docs'] == null ? [] : event['docs'] == null ? [] : event['docs'];
 
     console.log('event detail', event);
     console.log('event dateofcompletion', dateOfCompletion);
@@ -9196,6 +10352,16 @@ export class SfIEvents extends LitElement {
         html += comments.length
         html += '</div>';
       }
+
+      html += '<div class="m-20">';
+      html += '<div part="detail-head"><strong>Reporters</strong></div>'
+      html += this.getReporterDetailStringFromEvent(event);
+      html += '</div>';
+
+      html += '<div class="m-20">';
+      html += '<div part="detail-head"><strong>Approvers</strong></div>'
+      html += this.getApproverDetailStringFromEvent(event);
+      html += '</div>';
 
       html += '</div>';
     html += '</div>';
@@ -9297,12 +10463,23 @@ export class SfIEvents extends LitElement {
 
             html += '<div class="m-20">';
             html += '<div part="detail-head"><strong>'+grcFields[i]+'</strong></div>'
-            if((event[grcFields[i]] + "").indexOf("[") >= 0) {
-              html += this.getEventTexts(grcFields[i], JSON.parse(event[grcFields[i]]), event);
+
+            if(grcFields[i].toLowerCase() == "riskarea") {
+
+              const arrValues = event[grcFields[i]];
+              for(var k = 0; k < arrValues.length; k++) {
+                html += '<div part="detail-reporter-name" class="mr-10">' + arrValues[k] + '</div>';
+              }
+
             } else {
-              console.log('grcfield', event[grcFields[i]]);
-              html += '<sf-i-elastic-text text="'+(event[grcFields[i]] + "").replace(/"/g, "").replace(/\n/g,'<br />')+'" minLength="80"></sf-i-elastic-text>';
+              if((event[grcFields[i]] + "").indexOf("[") >= 0) {
+                html += this.getEventTexts(grcFields[i], JSON.parse(event[grcFields[i]]), event);
+              } else {
+                console.log('grcfield', event[grcFields[i]]);
+                html += '<sf-i-elastic-text text="'+(event[grcFields[i]] + "").replace(/"/g, "").replace(/\n/g,'<br />')+'" minLength="80"></sf-i-elastic-text>';
+              }
             }
+            
             html += '</div>';
 
           }
@@ -9355,7 +10532,7 @@ export class SfIEvents extends LitElement {
             html += '<button id="button-uploader-submit-approve" class="button-submit" part="button">Save</button>'
           html += '</div>'
 
-          if(this.myRole != this.TAB_FUNCTION_HEAD && docsOptional.length === 0) {
+          if(this.myRole != this.TAB_FUNCTION_HEAD && docs.length > 0) {
             html += '<div class="m-20">';
             html += '<label part="input-label">Supporting Documents</label>';
             html += '<slot name="uploader"></slot>';
@@ -9363,12 +10540,12 @@ export class SfIEvents extends LitElement {
           }
 
           html += '<div class="d-flex m-20 flex-col">';
-            html += '<label part="input-label">Approver Comments</label>';
+            html += '<label part="input-label">Approver Comments*</label>';
             html += '<input id="input-approver-comments" type="text" part="input" value=""/><br />';
-            html += '<label part="input-label">Date of Completion</label>';
+            html += '<label part="input-label">Date of Completion*</label>';
             html += '<input id="input-reporter-doc" part="input" type="date" value="'+(dateOfCompletion == "" ? dateOfCompletion : new Date(parseInt(dateOfCompletion)).toISOString().substring(0,10))+'" disabled/><br />';
             html += '<div>'
-              html += '<label part="input-label">Approve?</label><br />';
+              html += '<label part="input-label">Approve?*</label><br />';
               html += '<div class="mt-5">'
               html += '<input id="input-approve-yes" name="radio-approved" type="radio"/> Yes';
               html += '<input id="input-approve-no" name="radio-approved" type="radio" checked/> No';
@@ -9415,14 +10592,14 @@ export class SfIEvents extends LitElement {
           html += '</div>'
 
           html += '<div class="d-flex m-20 flex-col">';
-            html += '<label part="input-label">Reporter Comments</label>';
+            html += '<label part="input-label">Reporter Comments*</label>';
             html += '<input id="input-reporter-comments" type="text" part="input" value=""/><br />';
-            html += '<label part="input-label">Date of Completion</label>';
+            html += '<label part="input-label">Date of Completion*</label>';
             html += '<input id="input-reporter-doc" part="input" type="date" value="'+(dateOfCompletion == "" ? dateOfCompletion : new Date(parseInt(dateOfCompletion)).toISOString().substring(0,10))+'" max="'+(new Date().toISOString().substring(0, 10))+'"/><br />';
-            if(docsOptional.length === 0) {
-              html += '<label part="input-label">Supporting Documents</label>';
+            // if(docsOptional.length === 0) {
+              html += '<label part="input-label">Supporting Documents' + ((docsOptional.length > 0) ? '' : '*') + '</label>';
               html += '<slot name="uploader"></slot>';
-            }
+            // }
             html += '<br />';
             if(makercheckers.length > 0) {
               html += '<div part="td-head" class="td-head d-flex justify-center align-center"><span class="material-symbols-outlined">check_small</span><div>&nbsp;Auto-approve Enabled</div></div>';
@@ -9461,7 +10638,7 @@ export class SfIEvents extends LitElement {
               html += '</div>'
             html += '</div>';
           html += '<br />';
-          if(docsOptional.length === 0) {
+          if(docs.length > 0) {
             html += '<label part="input-label">Supporting Documents</label>';
             html += '<slot name="uploader"></slot>';
           }
@@ -9486,7 +10663,7 @@ export class SfIEvents extends LitElement {
               html += '</div>'
             html += '</div>';
           html += '<br />';
-          if(docsOptional.length === 0) {
+          if(docs.length === 0) {
             html += '<label part="input-label">Supporting Documents</label>';
             html += '<slot name="uploader"></slot>';
           }
@@ -9504,7 +10681,8 @@ export class SfIEvents extends LitElement {
 
           for(var i = 0; i < comments.length; i++) {
             html += '<div part="commentbox" class="d-flex commentbox '+(comments[i].author + "").toLowerCase()+'box">';
-            html += '<div class="mr-20"><strong>'+comments[i].author+'</strong></div>';
+            html += '<div class="mr-20"><strong>'+comments[i].author+'</strong><br />' + ((i === (comments.length - 1) && this.enableDeleteLatestReport) ? '<button class="mt-5 button-delete" part="button">Delete</button>' : '') + '</div>';
+            
             const onlyCommentText = comments[i].comment.replace(/ *\([^)]*\) */g, "").trim();
             try {
 
@@ -9542,6 +10720,31 @@ export class SfIEvents extends LitElement {
     }
 
     (this._SfDetailContainer as HTMLDivElement).innerHTML = html;
+
+    (this._SfDetailContainer as HTMLDivElement).querySelector('.button-delete')?.addEventListener('click', async () => {
+
+      const resultDelete = await this.fetchDeleteReview(event["id"], mmddyyyy, entityId, locationId);
+      this.setSuccess('Deleted successfully!')
+      setTimeout(() => {
+        this.clearMessages()
+      }, 3000);
+      console.log('deleted', resultDelete);
+      if(this.getCurrentTab() == this.TAB_CUSTOM) {
+        this.processDateSelection();
+      } else {
+        if(currentColumnButton != null) {
+          currentColumnButton.click();
+        }
+      }
+      
+      var clickEvent = new MouseEvent("click", {
+        "view": window,
+        "bubbles": true,
+        "cancelable": false
+      });
+      ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
+
+    });
 
     (this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close')?.addEventListener('click', () => {
 
@@ -9603,8 +10806,6 @@ export class SfIEvents extends LitElement {
         const comments = ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approver-comments') as HTMLInputElement).value;
         const approved = ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approve-yes') as HTMLInputElement).checked;
 
-        console.log(comments, approved);
-
         await this.uploadReview(entityId, locationId, mmddyyyy, event["id"], comments, approved)
         
         var clickEvent = new MouseEvent("click", {
@@ -9628,43 +10829,56 @@ export class SfIEvents extends LitElement {
         const comments = ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-auditor-comments') as HTMLInputElement).value;
         const approved = ((this._SfDetailContainer as HTMLDivElement).querySelector('#input-approve-yes') as HTMLInputElement).checked;
 
-        if(this.selectedItems.length === 0) {
+        if(comments.trim().length === 0) {
 
-          await this.uploadAudit(entityId, locationId, mmddyyyy, event["id"], comments, approved)
+          this.setError('Comments cannot be blank!');
+          setTimeout(() => {
+            this.clearMessages();
+          }, 3000);
+
+        } else {
+
+          if(this.selectedItems.length === 0) {
+
+            await this.uploadAudit(entityId, locationId, mmddyyyy, event["id"], comments, approved)
+          
+          } else {
+
+            for(var k = 0; k < this.selectedItems.length; k++) {
+                      
+              const selectedId = this.selectedItems[k];
+              console.log('selectedid', selectedId);
+
+              entityId = selectedId.split('-')[7].replace(/_/g, '-');
+              locationId = selectedId.split('-')[8].replace(/_/g, '-');
+              const eventId = selectedId.split('-')[9].replace(/_/g, '-');
+              mmddyyyy = selectedId.split('-')[10] + '/' + selectedId.split('-')[11] + '/' + selectedId.split('-')[12];
+
+              console.log(entityId, locationId, eventId, mmddyyyy);
+
+              await this.uploadAudit(entityId, locationId, mmddyyyy, eventId, comments, approved);
+
+            }
+
+          }
+
+          var clickEvent = new MouseEvent("click", {
+              "view": window,
+              "bubbles": true,
+              "cancelable": false
+          });
+          ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
+          if(this.getCurrentTab() == this.TAB_CUSTOM) {
+            this.processDateSelection();
+          } else {
+            if(currentColumnButton != null) {
+              currentColumnButton.click();
+            }
+          }
+
+        }
+
         
-        } else {
-
-          for(var k = 0; k < this.selectedItems.length; k++) {
-                    
-            const selectedId = this.selectedItems[k];
-            console.log('selectedid', selectedId);
-
-            entityId = selectedId.split('-')[7].replace(/_/g, '-');
-            locationId = selectedId.split('-')[8].replace(/_/g, '-');
-            const eventId = selectedId.split('-')[9].replace(/_/g, '-');
-            mmddyyyy = selectedId.split('-')[10] + '/' + selectedId.split('-')[11] + '/' + selectedId.split('-')[12];
-
-            console.log(entityId, locationId, eventId, mmddyyyy);
-
-            await this.uploadAudit(entityId, locationId, mmddyyyy, eventId, comments, approved);
-
-          }
-
-        }
-
-        var clickEvent = new MouseEvent("click", {
-            "view": window,
-            "bubbles": true,
-            "cancelable": false
-        });
-        ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
-        if(this.getCurrentTab() == this.TAB_CUSTOM) {
-          this.processDateSelection();
-        } else {
-          if(currentColumnButton != null) {
-            currentColumnButton.click();
-          }
-        }
 
       });
 
@@ -9695,9 +10909,9 @@ export class SfIEvents extends LitElement {
 
               console.log('reporter comments 2', reportercomments);
               
-              if(docsOptional.length === 0) {
+              // if(docsOptional.length === 0) {
                 docs = (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.selectedValues();
-              }
+              // }
       
               console.log('docs', docs);
 
@@ -9723,63 +10937,75 @@ export class SfIEvents extends LitElement {
 
                   console.log('makerscheckers 1', reportercomments);
 
-                  if(this.selectedItems.length === 0) {
+                  if(reportercomments.trim().length === 0) {
 
-                    console.log('makerscheckers', makercheckers, reportercomments);
-
-                    await this.uploadReport(entityId, locationId, mmddyyyy, event["id"], reportercomments, reporterdoc, docs)
-                    if(makercheckers.length > 0) {
-
-                      await this.uploadReview(entityId, locationId, mmddyyyy, event["id"], "Auto approved", true);
-
-                    }
+                    this.setError('Comments cannot be blank!');
+                    setTimeout(() => {
+                      this.clearMessages();
+                    }, 3000);
 
                   } else {
 
-                    for(var k = 0; k < this.selectedItems.length; k++) {
-                      
-                      const selectedId = this.selectedItems[k];
-                      console.log('selectedid', selectedId);
+                    if(this.selectedItems.length === 0) {
 
-                      const makercheckersL = selectedId.split('-')[5];
-                      entityId = selectedId.split('-')[7].replace(/_/g, '-');
-                      locationId = selectedId.split('-')[8].replace(/_/g, '-');
-                      const eventId = selectedId.split('-')[9].replace(/_/g, '-');
-                      mmddyyyy = selectedId.split('-')[10] + '/' + selectedId.split('-')[11] + '/' + selectedId.split('-')[12];
+                      console.log('makerscheckers', makercheckers, reportercomments);
 
-                      console.log(entityId, locationId, eventId, mmddyyyy);
+                      await this.uploadReport(entityId, locationId, mmddyyyy, event["id"], reportercomments, reporterdoc, docs)
+                      if(makercheckers.length > 0) {
 
-                      await this.uploadReport(entityId, locationId, mmddyyyy, eventId, reportercomments, reporterdoc, docs)
-                      if(parseInt(makercheckersL) > 0) {
+                        await this.uploadReview(entityId, locationId, mmddyyyy, event["id"], "Auto approved", true);
 
-                        await this.uploadReview(entityId, locationId, mmddyyyy, eventId, "Auto approved", true);
+                      }
+
+                    } else {
+
+                      for(var k = 0; k < this.selectedItems.length; k++) {
+                        
+                        const selectedId = this.selectedItems[k];
+                        console.log('selectedid', selectedId);
+
+                        const makercheckersL = selectedId.split('-')[5];
+                        entityId = selectedId.split('-')[7].replace(/_/g, '-');
+                        locationId = selectedId.split('-')[8].replace(/_/g, '-');
+                        const eventId = selectedId.split('-')[9].replace(/_/g, '-');
+                        mmddyyyy = selectedId.split('-')[10] + '/' + selectedId.split('-')[11] + '/' + selectedId.split('-')[12];
+
+                        console.log(entityId, locationId, eventId, mmddyyyy);
+
+                        await this.uploadReport(entityId, locationId, mmddyyyy, eventId, reportercomments, reporterdoc, docs)
+                        if(parseInt(makercheckersL) > 0) {
+
+                          await this.uploadReview(entityId, locationId, mmddyyyy, eventId, "Auto approved", true);
+
+                        }
 
                       }
 
                     }
 
-                  }
+                    var clickEvent = new MouseEvent("click", {
+                      "view": window,
+                      "bubbles": true,
+                      "cancelable": false
+                    });
 
-                  var clickEvent = new MouseEvent("click", {
-                    "view": window,
-                    "bubbles": true,
-                    "cancelable": false
-                  });
-
-                  ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
-                  // await this.fetchUserCalendar_2();
-                  // if(this.getCurrentTab() == this.TAB_STREAM) {
-                  //   this.renderTabs(this.TAB_STREAM);
-                  //   this.renderStream();
-                  // }
-                  console.log('currentColumnButton', currentColumnButton);
-                  if(this.getCurrentTab() == this.TAB_CUSTOM) {
-                    this.processDateSelection();
-                  } else {
-                    if(currentColumnButton != null) {
-                      currentColumnButton.click();
+                    ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
+                    // await this.fetchUserCalendar_2();
+                    // if(this.getCurrentTab() == this.TAB_STREAM) {
+                    //   this.renderTabs(this.TAB_STREAM);
+                    //   this.renderStream();
+                    // }
+                    console.log('currentColumnButton', currentColumnButton);
+                    if(this.getCurrentTab() == this.TAB_CUSTOM) {
+                      this.processDateSelection();
+                    } else {
+                      if(currentColumnButton != null) {
+                        currentColumnButton.click();
+                      }
                     }
+
                   }
+                  
 
                 }
               }
@@ -9910,12 +11136,193 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderTaggingTable = (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any, mandatoryFields: any, jobs: any, anotherProjection: any) => {
+  matchesOnBoardingFilter = (country: string, state: string, subcategory: string) => {
+
+    // console.log('matching',country, state, subcategory);
+
+    let matchesCountry = false;
+
+    for(var i = 0; i < this.getfilterOnboarding().length; i++) {
+
+      matchesCountry = false;
+
+      if(country.toLowerCase().indexOf(this.getfilterOnboarding()[i].country.toLowerCase()) >= 0) {
+
+        matchesCountry = true;
+
+        let matchesState = false;
+        let matchesSubcategory = false;    
+
+        for(var j = 0; j < this.getfilterOnboarding()[i].states.length; j++) {
+
+          if(state.toLowerCase().indexOf(this.getfilterOnboarding()[i].states[j].toLowerCase()) >= 0) {
+            matchesState = true;
+            break;
+          }
+
+        }
+
+        for(var j = 0; j < this.getfilterOnboarding()[i].subcategories.length; j++) {
+
+          if(subcategory.toLowerCase().indexOf(this.getfilterOnboarding()[i].subcategories[j].toLowerCase()) >= 0) {
+            matchesSubcategory = true;
+          }
+
+        }
+
+        // console.log('matching result', matchesCountry, matchesState, matchesSubcategory, country, state, subcategory);
+
+        if(matchesCountry && matchesState && matchesSubcategory) {
+          return true;
+        }
+
+      }
+
+    }
+
+    return false;
+
+  }
+
+  applyAndReloadTagging = (e: any, colName: string, taggingArray: any, sourceArray: any, divElement: any) => {
+
+    const selectedIndex = e.currentTarget.id.split('-')[1];
+
+    taggingArray.data.mappings.mappings = [];
+
+    for(var count = 0; count < sourceArray.data.mappings.mappings.length; count++) {
+
+      console.log('selectedindexchecking', selectedIndex, count, this.selectedCbs.includes(selectedIndex), this.selectedCbs.includes(count));
+      taggingArray.data.mappings.mappings[count] = sourceArray.data.mappings.mappings[count];
+      // console.log('selectedindexchecking', this.selectedCbs, count, this.selectedCbs.includes(selectedIndex), this.selectedCbs.includes(count));
+      if(this.selectedCbs.includes(selectedIndex) && this.selectedCbs.includes(count + '')) {
+        if(((divElement as HTMLDivElement).querySelector('#tags-' + selectedIndex) as SfIForm).selectedValues != null) {
+          taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + selectedIndex) as SfIForm).selectedValues();
+        } else {
+          taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + selectedIndex) as HTMLInputElement).value;
+        }
+        
+      } else {
+        if(((divElement as HTMLDivElement).querySelector('#tags-' + count) as SfIForm).selectedValues != null) {
+          taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as SfIForm).selectedValues();
+        } else {
+          taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as HTMLInputElement).value;
+        }
+        
+      }
+
+    }
+
+  }
+
+  saveMapping = async (divElement: any, uploadBlock: number, jsonData: any, extraFields: any, searchString: string, uploadFunction: any, refreshFunction: any, saveInBackground: boolean = false) => {
+
+    async function process() {
+      const checkboxArr = (divElement as HTMLDivElement).querySelectorAll('.checkbox-row') as NodeListOf<HTMLInputElement>;
+      const statuteArr = (divElement as HTMLDivElement).querySelectorAll('.statute') as NodeListOf<SfIElasticText>;
+      console.log(checkboxArr);
+      console.log(statuteArr);
+      let jsonArr = [];
+      if(uploadBlock < 0) {
+
+        for(var i = 0; i < checkboxArr.length; i++) {
+          var dataToBePushed = {id: (statuteArr[i] as SfIElasticText).text, selected: checkboxArr[i].checked, data: jsonData[i].data.data, cols: jsonData[i].data.cols, extraFields: [] as string[]};
+            for(var j = 0; j < extraFields.length; j++) {
+              const inputArr = (divElement as HTMLDivElement).querySelectorAll('.extra-field-'+j) as NodeListOf<HTMLInputElement>;
+              const value = inputArr[i].value as string;
+              dataToBePushed.extraFields.push(value);
+            }
+            jsonArr.push(dataToBePushed)    
+        }
+        console.log('jsonArr', jsonArr);
+        const batchNum = new Date().getTime();
+        await uploadFunction({"searchstring": searchString, "mappings": jsonArr, "batch": batchNum});
+
+      } else {
+
+        const batchNum = new Date().getTime();
+        for(var i = 0; i < checkboxArr.length; i+=uploadBlock) {
+
+          jsonArr = [];
+          for(var k = i; k < (i + uploadBlock) && k < checkboxArr.length; k++) {
+
+            console.log('before pushing', k, (statuteArr[k] as SfIElasticText));
+            if((statuteArr[k] as SfIElasticText) != null) {
+
+              var dataToBePushed = {id: (statuteArr[k] as SfIElasticText).text, selected: checkboxArr[k].checked, data: jsonData[k].data.data, cols: jsonData[k].data.cols, extraFields: [] as string[]};
+              for(var j = 0; j < extraFields.length; j++) {
+                const inputArr = (divElement as HTMLDivElement).querySelectorAll('.extra-field-'+j) as NodeListOf<HTMLInputElement>;
+                const value = inputArr[k].value as string;
+                dataToBePushed.extraFields.push(value);
+              }
+              jsonArr.push(dataToBePushed)
+
+            }
+
+
+          }
+
+          console.log('jsonArr', i, jsonArr);
+          await uploadFunction({"searchstring": searchString, "mappings": jsonArr, "percentage": parseInt(((k*100)/checkboxArr.length) + ""), "batch": batchNum});
+
+        }
+
+      }
+      
+      if(!saveInBackground) refreshFunction();
+    }
+
+    if(saveInBackground) {
+      if(this.AUTOSAVE_FLAG) {
+        this.AUTOSAVE_FLAG = false;
+        setTimeout(async () => {
+            await process();
+            this.AUTOSAVE_FLAG = true;
+            this.setSuccess('Autosaved');
+            setTimeout(() => {
+              this.clearMessages();
+            }, 1000);
+        }, 5000);
+      }
+    } else {
+      process();
+    }
+
+  }
+
+  saveTagging = async (mapping: any, uploadFunction: any, refreshFunction: any, saveInBackground: boolean) => {
+
+    async function process() {
+      
+      await uploadFunction(mapping);
+      if(!saveInBackground) refreshFunction();
+    }
+
+    if(saveInBackground) {
+      if(this.AUTOSAVE_FLAG) {
+        this.AUTOSAVE_FLAG = false;
+        setTimeout(async () => {
+            await process();
+            this.AUTOSAVE_FLAG = true;
+            this.setSuccess('Autosaved');
+            setTimeout(() => {
+              this.clearMessages();
+            }, 1000);
+        }, 10000);
+      }
+    } else {
+      process();
+    }
+
+  }
+
+  renderTaggingTable = (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any, mandatoryFields: any, jobs: any, anotherProjection: any, extraFields: Array<string>, arrFeedbackReference: any, proposedUsersLabel: string, subfilter: string) => {
 
     console.log('divelement', divElement);
     console.log('sourcearray', sourceArray);
     console.log('taggingarray', taggingArray);
     console.log('uniqcols', uniqCols);
+    console.log('subfiltervalue', subfilter);
 
     this.selectedCbs = [];
 
@@ -9951,13 +11358,9 @@ export class SfIEvents extends LitElement {
         foundArr.push(taggingArray.data.mappings.mappings[i]);
       }
 
-      console.log('found', taggingArray.data.mappings.mappings[i].id, found);
-
     }
 
     taggingArray.data.mappings.mappings = foundArr;
-
-    console.log('tagging array after', taggingArray.data.mappings.mappings.length,taggingArray.data.mappings.mappings);
 
     let mandatoryPresent = true;
 
@@ -9965,7 +11368,7 @@ export class SfIEvents extends LitElement {
 
       for(var j = 0; j < taggingArray.data.mappings.mappings.length; j++) {
 
-        console.log('checking mandatory', mandatoryFields[i], taggingArray.data.mappings.mappings[j], taggingArray.data.mappings.mappings[j][mandatoryFields[i]])
+
         if(taggingArray.data.mappings.mappings[j][mandatoryFields[i]] == null) {
           mandatoryPresent = false;
         }
@@ -9979,7 +11382,7 @@ export class SfIEvents extends LitElement {
     for(var j = 0; j < taggingArray.data.mappings.mappings.length; j++) {
 
       if(taggingArray.data.mappings.mappings[j] != null) {
-        if(taggingArray.data.mappings.mappings[j][colName].length > 0) {
+        if(taggingArray.data.mappings.mappings[j][colName] != null && taggingArray.data.mappings.mappings[j][colName].length > 0) {
           tagged++;
         }
   
@@ -9987,13 +11390,20 @@ export class SfIEvents extends LitElement {
       
     }
 
+    let colCountry = -1;
+    let colState = -1;
+    let colSubcategory = -1;
+
+    const unfilteredDict : any [] = [];
 
     var html = '';
 
     var showTable = true;
 
+    html += '<div class="d-flex justify-between flex-wrap align-center"> ';
+
     if(jobs && jobs.data) {
-      html += (jobs.data.status == "0" ? "<div part=\"results-title\" class=\"d-flex align-center mb-10\"><span class=\"color-not-started material-icons\">schedule</span>&nbsp; Job initizalied</div>" : jobs.data.status == "1" ? "<div  part=\"results-title\" class=\"d-flex align-center mb-10\"><span class=\"color-pending material-icons\">pending</span>&nbsp; Job in-progress&nbsp; "+parseInt(jobs.data.progress)+"% complete</div>" : "<div part=\"results-title\" class=\"d-flex align-center mb-10\"><span class=\"color-done material-icons\">check_circle</span>&nbsp; Job complete</div>" );
+      html += (jobs.data.status == "0" ? "<div part=\"results-title\" class=\"left-sticky d-flex align-center mb-10 mr-10\"><span class=\"color-not-started material-icons\">schedule</span>&nbsp; Job initizalied</div>" : jobs.data.status == "1" ? "<div  part=\"results-title\" class=\"left-sticky d-flex align-center mb-10 mr-10\"><span class=\"color-pending material-icons\">pending</span>&nbsp; Job in-progress&nbsp; "+parseInt(jobs.data.progress)+"% complete</div>" : "<div part=\"results-title\" class=\"left-sticky d-flex align-center mb-10 mr-10\"><span class=\"color-done material-icons\">check_circle</span>&nbsp; Job complete</div>" );
       if(jobs.data.status == "0" || jobs.data.status == "1") {
         showTable = false;
       }
@@ -10015,26 +11425,74 @@ export class SfIEvents extends LitElement {
 
     if(showTable) {
 
-      html += '<div class="left-sticky mb-10 d-flex justify-between align-center"><h4 part="results-title" class="d-flex align-center m-0">'+status+'&nbsp;&nbsp;Mapped '+tagged+' out of '+sourceArray.data.mappings.mappings.length+'</h4><button part="button" class="button-save">Save</button></div>'
+      html += ((jobs && jobs.data && (jobs.data.status == "1" || jobs.data.status == "0" )) ? '' : '<div class="left-sticky d-flex justify-between align-center mr-10"><h4 part="results-title" class="d-flex align-center m-0">'+status+'&nbsp;&nbsp;Mapped '+tagged+' out of '+sourceArray.data.mappings.mappings.length+'</h4></div>');
 
     } else {
 
-      html += '<div class="left-sticky mb-10 d-flex justify-between align-center"><h4 part="results-title" class="d-flex align-center m-0">'+status+'&nbsp;&nbsp;Mapped '+tagged+' out of '+sourceArray.data.mappings.mappings.length+'</h4></div>'
+      html += ((jobs && jobs.data && (jobs.data.status == "1" || jobs.data.status == "0" )) ? '' : '<div class="left-sticky d-flex justify-between align-center mr-10"><h4 part="results-title" class="d-flex align-center m-0">'+status+'&nbsp;&nbsp;Mapped '+tagged+' out of '+sourceArray.data.mappings.mappings.length+'</h4></div>')
 
     }
     
-    html += '<div class="left-sticky mb-10 d-flex justify-between align-center"><h4 part="results-title" class="d-flex align-center m-0">' + mandatoryStatus + '</h4></div>'
+    html += ((jobs && jobs.data && (jobs.data.status == "1" || jobs.data.status == "0" )) ? '' : '<div class="left-sticky d-flex justify-between align-center mr-10"><h4 part="results-title" class="d-flex align-center m-0">' + mandatoryStatus + '</h4></div>')
+    
+    html += ((jobs && jobs.data && (jobs.data.status == "1" || jobs.data.status == "0" )) ? '' : '<div class="left-sticky d-flex justify-between align-center mr-10"><h4 id="span-extra-filled" class="m-0" part="results-title"></h4></div>')
+
+    html += '<div class="left-sticky">';
+    html += '<h4 id="span-filtered" part="results-title"></h4>'
+    html += '<div id="div-subfiltered"></div>'
+    html += '</div>';
+
+    html += '<div class="d-flex align-center">';
+      html += '<input part="input" type="text" placeholder="Filter" class="input-filter mr-10" value="'+subfilter+'" />';
+      html += '<div class="mr-10">';
+        html += '<div class="d-flex justify-end"><button part="calendar-tab-icon-not-selected" class="material-icons button-toggle-more">expand_more</button><button part="calendar-tab-icon-selected" class="material-icons button-toggle-more-back hide">expand_less</button></div>'
+        html += '<div class="d-flex justify-end"><button part="button" class="align-center button-download-backups hide" style="position: absolute; margin-top: 5px;"><span class="material-symbols-outlined mr-10">file_save</span><span>Download Backups</span></button></div>'
+      html += '</div>';
+      html += (jobs.data == null ? '<button part="button" class="button-save d-flex align-center"><span class="material-symbols-outlined mr-10">save</span><span>Save</span></button>' : ((jobs.data.status == "1" || jobs.data.status == "0" ) ? '<button part="button" class="button-cancel">Cancel Job</button>' : '<button part="button" class="button-save d-flex align-center"><span class="material-symbols-outlined mr-10">save</span><span>Save</span></button>'));
+    html += '</div>';
+
+    html += '</div>';
+
+    html += '<br />';
+
+    var subfiltered = 0;
 
     if(showTable) {
+
+      for(var j = 0; j < JSON.parse(sourceArray.data.mappings.mappings[0].cols).length; j++) {
+        if(JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j].toLowerCase() == "country") {
+          console.log('colstate-setting country', JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j].toLowerCase(), j);
+          colCountry = j;
+        }
+        if(JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j].toLowerCase() == "state") {
+          console.log('colstate-setting state', JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j].toLowerCase(), j);
+          colState = j;
+        }
+        if(JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j].toLowerCase() == "subcategory") {
+          console.log('colstate-setting subcategory', JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j].toLowerCase(), j);
+          colSubcategory = j;
+        }
+      }
 
       html += '<table class="mt-20">';
 
       html += '<thead>';
       html += '<th part="td-head" class="td-head">'
+      html += '<div id="select-all"><input class="checkbox checkbox-all" part="input-checkbox" type="checkbox" '+((this.disableflagggrcresponse.toLowerCase() == "yes") ? 'disabled' : '')+'/></div>';
       html += '</th>'
+      for(var i = 0; i < extraFields.length; i++) {
+        html += '<th part="td-head" class="td-head">'
+        html += extraFields[i];
+        html += '</th>'
+      }
       html += '<th part="td-head" class="td-head">'
       html += colName;
       html += '</th>'
+      if(arrFeedbackReference != null) {
+        html += '<th part="td-head" class="td-head">'
+        html += proposedUsersLabel;
+        html += '</th>'
+      }
       for(i = 0; i < uniqCols.length; i++) {
         html += '<th part="td-head" class="td-head">'
         html += uniqCols[i];
@@ -10056,6 +11514,115 @@ export class SfIEvents extends LitElement {
 
       for(i = 0; i < sourceArray.data.mappings.mappings.length; i++) {
 
+
+        var showSearch = false;
+
+        if(subfilter == "") {
+          console.log('showsearch true 1');
+          showSearch = true;
+        }
+
+        // check showSearch in extra fields
+
+        if(!showSearch) {
+
+          for(var j = 0; j < extraFields.length; j++) {
+
+            var k = 0;
+            for(k = 0; k < taggingArray.data.mappings.mappings.length; k++) {
+
+              if(taggingArray.data.mappings.mappings[k].id == sourceArray.data.mappings.mappings[i].id) {
+                break;
+              }
+
+            }
+
+            if(k < taggingArray.data.mappings.mappings.length) {
+
+              if(taggingArray.data.mappings.mappings[k].extraFields != null && taggingArray.data.mappings.mappings[k].extraFields[j] != null && taggingArray.data.mappings.mappings[k].extraFields[j].toLowerCase().indexOf(subfilter.toLowerCase()) >= 0) {
+
+                console.log('showsearch true 2', taggingArray.data.mappings.mappings[k].extraFields[j].toLowerCase(), subfilter);
+                showSearch = true;
+                subfiltered++;
+                break;
+    
+              }  
+
+            }
+
+          }
+
+        }
+
+        if(!showSearch) {
+
+          // check showSearch in uniq cols
+
+          for(var l = 0; l < uniqCols.length; l++) {
+
+            if(sourceArray.data.mappings.mappings[i][uniqCols[l]].replace(/ *\([^)]*\) */g, "").toLowerCase().indexOf(subfilter.toLowerCase()) >= 0) {
+
+              console.log('showsearch true 3');
+              showSearch = true;
+              subfiltered++;
+              break;
+  
+            }  
+            
+          }
+
+        }
+
+        if(!showSearch) {
+
+          // check showSearch in source cols
+
+          for(l = 0; l < sourceCols.length; l++) {
+
+            for(var j = 0; j < JSON.parse(sourceArray.data.mappings.mappings[0].cols).length; j++) {
+  
+              if(sourceCols[l] == JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j]) {
+      
+                if(sourceArray.data.mappings.mappings[i].data != null) {
+
+                  if(Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j])) {
+                  
+                    for(var k = 0; k < JSON.parse(sourceArray.data.mappings.mappings[i].data)[j].length; k++) {
+
+                      if(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j][k].toLowerCase().indexOf(subfilter.toLowerCase()) >= 0) {
+
+                        console.log('showsearch true 4');
+                        showSearch = true;
+                        subfiltered++;
+                        break;
+            
+                      }  
+
+                    }
+            
+                  } else {
+
+                    if(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j].toLowerCase().indexOf(subfilter.toLowerCase()) >= 0) {
+
+                      console.log('showsearch true 5');
+                      showSearch = true;
+                      subfiltered++;
+                      break;
+          
+                    }
+          
+                  }
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
         var classBg = "";
 
         if(i%2 === 0) {
@@ -10064,11 +11631,47 @@ export class SfIEvents extends LitElement {
           classBg = 'td-dark';
         }
 
-        html += '<tr>';
+        html += '<tr class="" id="tablerow-'+i+'">';
 
-        html += '<td class="td-body '+classBg+'" ><input id="cb-'+i+'" type="checkbox" class="cb-select"/></td>';
+        html += '<td class="td-body '+classBg+'" ><div class="'+(!showSearch ? 'truncate' : '')+'"><input id="cb-'+i+'" type="checkbox" class="checkbox-row cb-select"/></div></td>';
+
+        for(var j = 0; j < extraFields.length; j++) {
+
+          var k = 0;
+          for(k = 0; k < taggingArray.data.mappings.mappings.length; k++) {
+
+            if(taggingArray.data.mappings.mappings[k].id == sourceArray.data.mappings.mappings[i].id) {
+              break;
+            }
+
+          }
+
+          console.log('before before before filtermatch',taggingArray.data.mappings.mappings[k]);
+
+          if(k < taggingArray.data.mappings.mappings.length) {
+
+            html += '<td part="td-body" class="'+classBg+'">';
+            html += '<div class="'+(!showSearch ? 'truncate' : '')+'">'
+            // html += '<input part="input" id="extra-field-'+i+'-'+j+'" class="extra-field-'+j+'" type="text" value="'+(taggingArray.data.mappings.mappings[k].extraFields != null ? (taggingArray.data.mappings.mappings[k].extraFields[j] != null ? taggingArray.data.mappings.mappings[k].extraFields[j] : "") : "")+'" '+ (taggingArray.data.mappings.mappings[k].extraFields != null ? (taggingArray.data.mappings.mappings[k].extraFields[j] != null ?  ((taggingArray.data.mappings.mappings[k].extraFields[j].toLowerCase() == "flagggrc response" && this.disableflagggrcresponse.toLowerCase() == "yes") ? 'disabled' : '') : "") : "") +' />';
+            html += '<textarea part="input" id="extra-field-'+i+'-'+j+'" class="extra-field extra-field-'+j+'" '+ (taggingArray.data.mappings.mappings[k].extraFields != null ? (taggingArray.data.mappings.mappings[k].extraFields[j] != null ?  ((taggingArray.data.mappings.mappings[k].extraFields[j].toLowerCase() == "client remarks" && this.disableflagggrcresponse.toLowerCase() == "yes") ? 'disabled' : ((taggingArray.data.mappings.mappings[k].extraFields[j].toLowerCase() == "flagggrc response" && this.disableflagggrcresponse.toLowerCase() == "yes") ? 'disabled' : '')) : "") : "") +' >'+(taggingArray.data.mappings.mappings[k].extraFields != null ? (taggingArray.data.mappings.mappings[k].extraFields[j] != null ? taggingArray.data.mappings.mappings[k].extraFields[j] : "") : "")+'</textarea>';
+            html += '</div>';
+            html += '</td>';
+  
+          } else {
+
+            html += '<td part="td-body" class="'+classBg+'">';
+            html += '<div class="'+(!showSearch ? 'truncate' : '')+'">';
+            html += '<textarea part="input" id="extra-field-'+i+'-'+j+'" class="extra-field extra-field-'+j+'" type="text" value="" '+ ((extraFields[j].toLowerCase() == "flagggrc response" && this.disableflagggrcresponse.toLowerCase() == "yes") ? 'disabled' : '') +' ></textarea>';
+            html += '</div>';
+            html += '</td>';
+
+          }
+
+          
+        }
 
         html += '<td class="td-body '+classBg+'" part="td-key">'
+        html += '<div class="'+(!showSearch ? 'truncate' : '')+'">';
         if(apiIdDropdown.length > 0) {
           if(anotherProjection != null) {
             html += '<sf-i-form id="tags-'+i+'" class="tags-input tags-'+i+'" name="Tags" label="Select '+colName+'" apiId="'+apiIdDropdown+'" mode="multiselect-dropdown" searchPhrase="'+this.projectName+((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "")+'" selectProjection="name" selectAnotherProjection="'+anotherProjection+'" mandatory></sf-i-form>';
@@ -10079,11 +11682,23 @@ export class SfIEvents extends LitElement {
         } else {
           html += '<input id="tags-'+i+'" type="text" part="input" class="tags-input"/>';
         }
+        html += '</div>';
         html += '</td>'
+        if(arrFeedbackReference != null) {
 
+          // console.log('proposedUserLabel',arrFeedbackReference[JSON.parse(sourceArray.data.mappings.mappings[i].data)[1][0].trim()][JSON.parse(sourceArray.data.mappings.mappings[i].data)[6][0].trim()], JSON.parse(sourceArray.data.mappings.mappings[i].data)[1][0], JSON.parse(sourceArray.data.mappings.mappings[i].data)[6][0]);
+          html += '<td class="td-body '+classBg+'" part="td-key">'
+          html += '<div class="'+(!showSearch ? 'truncate' : '')+'">';
+          html += '<sf-i-elastic-text text="'+arrFeedbackReference[JSON.parse(sourceArray.data.mappings.mappings[i].data)[1][0].trim()][JSON.parse(sourceArray.data.mappings.mappings[i].data)[6][0].trim()]+'" minLength="60"></sf-i-elastic-text>';
+          html += '</div>';
+          html += '</td>'
+ 
+        }
         for(var l = 0; l < uniqCols.length; l++) {
           html += '<td class="td-body '+classBg+'" part="td-key">'
+          html += '<div class="'+(!showSearch ? 'truncate' : '')+'">';
           html += '<sf-i-elastic-text text="'+sourceArray.data.mappings.mappings[i][uniqCols[l]].replace(/ *\([^)]*\) */g, "")+'" minLength="60"></sf-i-elastic-text>';
+          html += '</div>';
           html += '</td>'
         }
 
@@ -10094,20 +11709,40 @@ export class SfIEvents extends LitElement {
 
             if(sourceCols[l] == JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j]) {
     
-              html += '<td class="td-body '+classBg+'" part="td-body">';
-    
-              console.log('isArray', sourceCols[l], Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j]));
-              if(Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j])) {
-                
-                for(var k = 0; k < JSON.parse(sourceArray.data.mappings.mappings[i].data)[j].length; k++) {
-                  html +=  ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j][k]+'" minLength="60"></sf-i-elastic-text>');
+              if(sourceArray.data.mappings.mappings[i].data != null) {
+
+                html += '<td class="td-body '+classBg+'" part="td-body">';
+                html += '<div class="'+(!showSearch ? 'truncate' : '')+'">';
+
+                console.log('before before filtermatch',sourceCols[l],JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j], colCountry, (sourceArray.data.mappings.mappings[i]), (sourceArray.data.mappings.mappings[i].data), colState);
+
+                console.log('before filtermatch', colCountry, JSON.parse(sourceArray.data.mappings.mappings[i].data)[colCountry], colState, JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState], JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory]);
+
+                const filterMatch = this.matchesOnBoardingFilter(JSON.parse(sourceArray.data.mappings.mappings[i].data)[colCountry][0], JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState].length > 0 ? JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState][0] : "", JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory].length > 0 ? JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory][0] : "");
+
+                console.log('after filtermatch', filterMatch);
+
+                if(filterMatch) {
+                  if(!unfilteredDict.includes(i)) {
+                    unfilteredDict.push(i);
+                  }
                 }
-        
-              } else {
-                html += ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j]+'" minLength="60"></sf-i-elastic-text>')
+      
+                console.log('isArray', sourceCols[l], Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j]));
+                if(Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j])) {
+                  
+                  for(var k = 0; k < JSON.parse(sourceArray.data.mappings.mappings[i].data)[j].length; k++) {
+                    html +=  ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j][k]+'" minLength="60"></sf-i-elastic-text>');
+                  }
+          
+                } else {
+                  html += ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j]+'" minLength="60"></sf-i-elastic-text>')
+                }
+      
+                html += '</div>';
+                html += '</td>';
+
               }
-    
-              html += '</td>';
     
             }
     
@@ -10125,6 +11760,151 @@ export class SfIEvents extends LitElement {
     }
 
     divElement.innerHTML = html;
+
+    if(unfilteredDict.length > 0) {
+      var html = '';
+      html += '<div class="mb-10">Partitioned Results (' + unfilteredDict.length + ")</div>";
+      html += this.getFilterOnboardingString();
+      ((divElement as HTMLDivElement).querySelector('#span-filtered') as HTMLDivElement).innerHTML = html;
+      
+    } else {
+      ((divElement as HTMLDivElement).querySelector('#span-filtered') as HTMLDivElement).style.display = 'none'; 
+    }
+
+    if(subfiltered > 0) {
+      ((divElement as HTMLDivElement).querySelector('#div-subfiltered') as HTMLDivElement).innerHTML = '<h4 part="results-title">Filtered Results ('+subfiltered+')</h4>';
+    }
+
+    if(this.getfilterOnboarding().length > 0) {
+      for(var i = 0; i < sourceArray.data.mappings.mappings.length; i++) {
+
+        if(!unfilteredDict.includes(i)) {
+          const tableRow = (divElement as HTMLDivElement).querySelector('#tablerow-'+i);
+          if(tableRow != null) {
+            (tableRow as HTMLTableRowElement).style.display = 'none';
+          }
+          
+        }
+        
+      } 
+    }
+
+    const inputFilter = (divElement as HTMLDivElement).querySelector('.input-filter') as HTMLInputElement;
+    inputFilter.addEventListener('keyup', (e: any) => {
+
+      if(e.key == 'Enter') {
+        console.log(inputFilter.value);
+        this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection, extraFields, arrFeedbackReference, proposedUsersLabel, inputFilter.value);    
+      }
+
+    });
+
+    (divElement as HTMLDivElement).querySelector('.checkbox-all')?.addEventListener('change', (e: any) => {
+
+      ((divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement).disabled = false;
+
+      const arrCheckBoxes = (divElement as HTMLDivElement).querySelectorAll('.checkbox-row') as NodeListOf<HTMLInputElement>;
+      console.log('cb-length', arrCheckBoxes.length);
+      for(var i = 0; i < arrCheckBoxes.length; i++) {
+        const tableRow = (divElement as HTMLDivElement).querySelector('#tablerow-' + (i)) as HTMLElement;
+        console.log('tablerow', i, tableRow);
+        if(tableRow != null) {
+          if(tableRow.style.display != 'none') {
+            console.log('tablerow setting', e.currentTarget.checked, (arrCheckBoxes[i] as HTMLInputElement));
+            (arrCheckBoxes[i] as HTMLInputElement).checked = e.currentTarget.checked;
+            if(e.currentTarget.checked) {
+              if(!this.selectedCbs.includes(i + '')) {
+                this.selectedCbs.push(i + '');
+              }
+            } else {
+              this.selectedCbs = [];
+            }
+          }
+        }
+      }
+
+      console.log('checkedarr', this.selectedCbs);
+
+    });
+
+    for(var j = 0; j < extraFields.length; j++) {
+
+      const inputArrJ = (divElement as HTMLDivElement).querySelectorAll('.extra-field-'+j) as NodeListOf<SfIForm|HTMLInputElement>;
+      for(var k = 0; k < inputArrJ.length; k++) {
+        inputArrJ[k].addEventListener('keyup', (e: any) => {
+
+          ((divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement).disabled = false;
+
+          if(e.key == "Enter") {
+
+            this.applyAndReloadTagging(e,colName, taggingArray, sourceArray, divElement);
+
+            const activeIndex = e.target.id.split('-')[2];
+
+            for(var count = 0; count < sourceArray.data.mappings.mappings.length; count++) {
+
+              taggingArray.data.mappings.mappings[count].extraFields = [];
+              
+              if(this.selectedCbs.length > 0 && this.selectedCbs.includes(count + "")) {
+
+                for(var l = 0; l < extraFields.length; l++) {
+                  const inputExtraField = ((divElement as HTMLDivElement).querySelector('#extra-field-'+activeIndex+'-'+l) as HTMLInputElement);
+                  taggingArray.data.mappings.mappings[count].extraFields.push(inputExtraField.value)
+                }
+    
+              } else {
+
+                for(var l = 0; l < extraFields.length; l++) {
+                  const inputExtraField = ((divElement as HTMLDivElement).querySelector('#extra-field-'+count+'-'+l) as HTMLInputElement);
+                  taggingArray.data.mappings.mappings[count].extraFields.push(inputExtraField.value)
+                }
+    
+              }
+
+            }
+  
+            this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection, extraFields, arrFeedbackReference, proposedUsersLabel, subfilter)
+
+          }
+          
+          // this.saveTagging(taggingArray.data.mappings, uploadFunction, refreshFunction, true);
+
+        });
+
+        inputArrJ[k].addEventListener('focusout', (e: any) => {
+
+          this.applyAndReloadTagging(e,colName, taggingArray, sourceArray, divElement);
+
+          const activeIndex = e.target.id.split('-')[2];
+
+          for(var count = 0; count < sourceArray.data.mappings.mappings.length; count++) {
+
+            taggingArray.data.mappings.mappings[count].extraFields = [];
+            
+            if(this.selectedCbs.length > 0 && this.selectedCbs.includes(count + "")) {
+
+              for(var l = 0; l < extraFields.length; l++) {
+                const inputExtraField = ((divElement as HTMLDivElement).querySelector('#extra-field-'+activeIndex+'-'+l) as HTMLInputElement);
+                taggingArray.data.mappings.mappings[count].extraFields.push(inputExtraField.value)
+              }
+  
+            } else {
+
+              for(var l = 0; l < extraFields.length; l++) {
+                const inputExtraField = ((divElement as HTMLDivElement).querySelector('#extra-field-'+count+'-'+l) as HTMLInputElement);
+                taggingArray.data.mappings.mappings[count].extraFields.push(inputExtraField.value)
+              }
+  
+            }
+
+          }
+
+          this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection, extraFields, arrFeedbackReference, proposedUsersLabel, subfilter)
+          
+        });
+      }
+
+    }
 
     const multiArr = (divElement as HTMLDivElement).querySelectorAll('.tags-input') as NodeListOf<SfIForm|HTMLInputElement>;
 
@@ -10148,9 +11928,6 @@ export class SfIEvents extends LitElement {
 
           if(equal) {
             
-            // if(taggingArray.data.mappings.mappings[i] != null && taggingArray.data.mappings.mappings[i][colName] != null) {
-            //   (multiArr[i] as SfIForm).preselectedValues = JSON.stringify(taggingArray.data.mappings.mappings[i][colName]);
-            // }
             (multiArr[i] as SfIForm).preselectedValues = JSON.stringify(taggingArray.data.mappings.mappings[j][colName]);
             if(taggingArray.data.mappings.mappings[j][colName].length > 0) {
               ((multiArr[i] as SfIForm).parentElement as HTMLTableCellElement).setAttribute("part", "row-mapped");
@@ -10162,26 +11939,12 @@ export class SfIEvents extends LitElement {
 
         console.log('preselect', multiArr[i]);
 
-        multiArr[i].addEventListener('valueChanged', ( e: any  ) => {
+        multiArr[i].addEventListener('valueChanged', async ( e: any  ) => {
 
-          const selectedIndex = e.currentTarget.id.split('-')[1];
-
-          taggingArray.data.mappings.mappings = [];
-
-          for(var count = 0; count < sourceArray.data.mappings.mappings.length; count++) {
-
-            taggingArray.data.mappings.mappings[count] = sourceArray.data.mappings.mappings[count];
-            console.log('selectedindexchecking', this.selectedCbs, count, this.selectedCbs.includes(selectedIndex), this.selectedCbs.includes(count));
-            if(this.selectedCbs.includes(selectedIndex) && this.selectedCbs.includes(count + '')) {
-              taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + selectedIndex) as SfIForm).selectedValues();
-            } else {
-              taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as SfIForm).selectedValues();
-            }
-
-          }
-
-          
-          this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection)
+          ((divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement).disabled = false;
+          this.applyAndReloadTagging(e,colName, taggingArray, sourceArray, divElement);
+          this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection, extraFields, arrFeedbackReference, proposedUsersLabel, subfilter); 
+          //await this.saveTagging(taggingArray.data.mappings, uploadFunction, refreshFunction, true);
   
         });
 
@@ -10191,38 +11954,84 @@ export class SfIEvents extends LitElement {
           (multiArr[i] as HTMLInputElement).value = taggingArray.data.mappings.mappings[i][colName];
         }
 
-        multiArr[i].addEventListener('keyup', (e: any) => {
-
-          const selectedIndex = e.currentTarget.id.split('-')[1];
+        multiArr[i].addEventListener('keyup', async (e: any) => {
 
           if(e.key == "Enter") {
 
-            taggingArray.data.mappings.mappings = [];
-
-            for(var count = 0; count < sourceArray.data.mappings.mappings.length; count++) {
-              taggingArray.data.mappings.mappings[count] = sourceArray.data.mappings.mappings[count];
-              if(this.selectedCbs.includes(selectedIndex) && this.selectedCbs.includes(count + '')) {
-                taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + selectedIndex) as HTMLInputElement).value;
-              } else {
-                taggingArray.data.mappings.mappings[count][colName] = ((divElement as HTMLDivElement).querySelector('#tags-' + count) as HTMLInputElement).value;
-              }
-              
-            }
-            
-            this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection)
+            ((divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement).disabled = false;
+            this.applyAndReloadTagging(e,colName, taggingArray, sourceArray, divElement);
+            this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection, extraFields, arrFeedbackReference, proposedUsersLabel, subfilter)
+            //await this.saveTagging(taggingArray.data.mappings, uploadFunction, refreshFunction, true);
     
           }
 
         });
+
 
       }
 
   
     }
 
+    const buttonToggleMoreBack = (divElement as HTMLDivElement).querySelector('.button-toggle-more-back') as HTMLButtonElement;
+    const buttonToggleMore = (divElement as HTMLDivElement).querySelector('.button-toggle-more') as HTMLButtonElement;
+    
+    buttonToggleMore.addEventListener('click', async (ev: any) => {
+
+      ev.target.classList.add('hide');
+      buttonToggleMoreBack.classList.remove('hide');
+      const buttonDownloadBackups = (divElement as HTMLDivElement).querySelector('.button-download-backups') as HTMLButtonElement;
+      buttonDownloadBackups.style.display = 'flex';
+
+      const buttonDownloadBackupsNew = Util.clearListeners(buttonDownloadBackups);
+      buttonDownloadBackupsNew.addEventListener('click', async () => {
+
+        const result = await this.fetchGetStoredMapping(colName);
+
+        for(var i = 0; i < result.data.length; i++) {
+
+          const blob = new Blob([JSON.stringify(result.data[i].mappings)], { type: 'text/html' });
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.setAttribute('href', url)
+          a.setAttribute('download', 'report_'+colName+'_'+i+'.json');
+          a.click()
+
+        }
+
+        (buttonToggleMoreBack as HTMLButtonElement).click();
+
+        if(result.data.length === 0) {
+
+          this.setError("No backups found!")
+          setTimeout(() => {
+            this.clearMessages();
+          }, 3000);
+
+        }
+        
+      });
+    
+    });
+
+    buttonToggleMoreBack.addEventListener('click', async (ev: any) => {
+
+      ev.target.classList.add('hide');
+      buttonToggleMore.classList.remove('hide');
+      const buttonDownloadBackups = (divElement as HTMLDivElement).querySelector('.button-download-backups') as HTMLButtonElement;
+      buttonDownloadBackups.style.display = 'none';
+    
+    });
+
     const buttonSave = (divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement;
     buttonSave?.addEventListener('click', async () => {
-      await uploadFunction(taggingArray.data.mappings);
+      await this.saveTagging(taggingArray.data.mappings, uploadFunction, refreshFunction, false);
+    });
+
+    const buttonCancel = (divElement as HTMLDivElement).querySelector('.button-cancel') as HTMLButtonElement;
+    buttonCancel?.addEventListener('click', async () => {
+      console.log('cancel clicked');
+      await this.fetchCancelOnboardingJob(colName);
       refreshFunction();
     });
 
@@ -10241,9 +12050,26 @@ export class SfIEvents extends LitElement {
       })
     }
 
+    const arrExtraFields = (divElement as HTMLDivElement).querySelectorAll('.extra-field') as NodeListOf<HTMLInputElement>;
+    var totalFields = 0;
+    var filledFields = 0;
+    for(var i = 0; i < arrExtraFields.length; i++) {
+      const extraField = arrExtraFields[i] as HTMLInputElement;
+      if(extraField.parentElement?.parentElement?.style.display != "none") {
+        if(extraField.value != "") {
+          filledFields++;
+        }
+        totalFields++;
+      }
+    }
+    if((divElement as HTMLDivElement).querySelector("#span-extra-filled") != null) {
+      (divElement as HTMLDivElement).querySelector("#span-extra-filled")!.innerHTML = "Fields: " + filledFields + "/" + totalFields + " completed";
+      console.log('Total fields = ' + totalFields + ', filled fields = ' + filledFields);
+    }
+    
   }
 
-  renderMappingTable = (divElement: any, jsonData: Array<any>, cursor: Array<any>, fetchFunction: any, searchString: string, mappedArray: any, found: number, uploadFunction: any, refreshFunction: any) => {
+  renderMappingTable = (divElement: any, jsonData: Array<any>, cursor: Array<any>, fetchFunction: any, searchString: string, mappedArray: any, found: number, uploadFunction: any, refreshFunction: any, extraFields: Array<string>, uploadBlock: number, extraFieldPosition: number, colName: string, subfilter: string) => {
     console.log('divelement', divElement);
     console.log('jsonData', jsonData);
     console.log('cursor', cursor);
@@ -10252,90 +12078,530 @@ export class SfIEvents extends LitElement {
 
     if(jsonData.length === 0) return;
 
+    this.selectedCbs = [];
+
+    let colCountry = -1;
+    let colState = -1;
+    let colSubcategory = -1;
+
+    const unfilteredDict : any [] = [];
+
     var html = '';
 
-    html += '<div class="d-flex justify-between align-center left-sticky">';
-    html += '<h3 part="results-title">Search Results ('+found+')</h3>';
-    html += '<button part="button" class="button-save">Save</button>';
+    html += '<div class="d-flex justify-between align-center left-sticky flex-wrap mb-20">';
+      html += '<div>';
+        html += '<h3 part="results-title">Search Results ('+found+')</h3>';
+        html += '<h4 id="span-filtered" part="results-title"></h4>'
+        html += '<h4 id="span-extra-filled" part="results-title"></h4>'
+        html += '<div id="div-subfiltered"></div>'
+      html += '</div>';
+
+      html += '<div id="scroll-overlay" part="onboarding-scroll-overlay" class="pos-fixed-scroll justify-center align-center">';
+        html += '<div id="scroll-overlay-left" class="mr-10"><button part="button-icon"><span class="material-symbols-outlined">arrow_left_alt</span></button></div>';
+        html += '<div id="scroll-overlay-right" class="ml-10"><button part="button-icon"><span class="material-symbols-outlined">arrow_right_alt</span></button></div>';
+      html += '</div>';
+
+      html += '<div id="detail-overlay" part="onboarding-detail-overlay" class="pos-fixed justify-center align-center hide">';
+        html += '<div class="cover-slide"></div>';
+        html += '<div class="detail-container p-10">';
+          html += '<div class="d-flex justify-between align-center mb-20">';
+            html += '<div part="results-title">Row Details</div>';
+            html += '<button part="button-icon" class="detail-close"><span class="material-symbols-outlined">close</span></button>';
+          html += '</div>';
+          html += '<div id="detail-overlay-list">';
+          html += '</div>';
+        html += '</div>';
+      html += '</div>';
+      
+      html += '<div class="d-flex align-center">';
+        html += '<input part="input" type="text" placeholder="Filter" class="input-filter mr-10" value="'+subfilter+'" />';
+        html += '<div class="mr-10">';
+          html += '<div class="d-flex justify-end"><button part="calendar-tab-icon-not-selected" class="material-icons button-toggle-more">expand_more</button><button part="calendar-tab-icon-selected" class="material-icons button-toggle-more-back hide">expand_less</button></div>'
+          html += '<div class="d-flex justify-end"><button part="button" class="align-center button-download-backups hide" style="position: absolute; margin-top: 5px;"><span class="material-symbols-outlined mr-10">file_save</span><span>Download Backups</span></button></div>'
+        html += '</div>';
+        html += '<button part="button" class="button-save" disabled>Save</button>';
+      html += '</div>';
+      
     html += '</div>';
 
     html += '<table>';
 
     html += '<thead>';
-    html += '<th part="td-head" class="td-head left-sticky">'
-    html += 'Select';
+    html += '<th part="td-head" class="td-head">'
+    // html += 'Select';
+    html += '<div id="select-all"><input class="checkbox checkbox-all" part="input-checkbox" type="checkbox" '+((this.disableflagggrcresponse.toLowerCase() == "yes") ? 'disabled' : '')+'/></div>';
     html += '</th>'
+    html += '<th part="td-head" class="td-head">'
+    html += '<div>View</div>';
+    html += '</th>'
+    if(extraFieldPosition === 0) {
+      for(var i = 0; i < extraFields.length; i++) {
+        html += '<th part="td-head" class="td-head">'
+        html += extraFields[i];
+        html += '</th>'
+      }
+    }
     html += '<th part="td-head" class="td-head">'
     html += 'Id';
     html += '</th>'
-    for(var i = 0; i < jsonData[0].cols.length; i++) {
-      html += '<th part="td-head" class="td-head">'
-      html += jsonData[0].cols[i]
-      html += '</th>'
+
+    for(var j = 0; j < JSON.parse(jsonData[0].data.cols).length; j++) {
+
+      if(jsonData[0].cols.includes(JSON.parse(jsonData[0].data.cols)[j])) {
+        html += '<th part="td-head" class="td-head">'
+        html += JSON.parse(jsonData[0].data.cols)[j]
+        html += '</th>'
+      }
+
+    }
+
+    if(extraFieldPosition === 1) {
+      for(var i = 0; i < extraFields.length; i++) {
+        html += '<th part="td-head" class="td-head">'
+        html += extraFields[i];
+        html += '</th>'
+      }
     }
     html += '</thead>'
 
+    console.log('colstate',  JSON.parse(jsonData[0].data.cols));
+
+    for(var i = 0; i < JSON.parse(jsonData[0].data.cols).length; i++) {
+      if(JSON.parse(jsonData[0].data.cols)[i].toLowerCase() == "country") {
+        console.log('colstate country', JSON.parse(jsonData[0].data.cols)[i].toLowerCase(), i);
+        colCountry = i;
+      }
+      if(JSON.parse(jsonData[0].data.cols)[i].toLowerCase() == "state") {
+        console.log('colstate state', JSON.parse(jsonData[0].data.cols)[i].toLowerCase(), i);
+        colState = i;
+      }
+      if(JSON.parse(jsonData[0].data.cols)[i].toLowerCase() == "subcategory") {
+        console.log('colstate subcategory', JSON.parse(jsonData[0].data.cols)[i].toLowerCase(), i);
+        colSubcategory = i;
+      }
+    }
+
+    var countExtra0 = 0, countextra = [];
+
+    var subfiltered = 0;
+    
     html += '<tbody>'
-    for(var i = 0; i < jsonData.length; i++) {
 
-      var classBg = "";
+    for(let level = 0; level < 2; level++) {
 
-      if(i%2 === 0) {
-        classBg = 'td-light';
-      } else {
-        classBg = 'td-dark';
-      }
+      for(var i = 0; i < jsonData.length; i++) {
 
-      var mapped = "";
+        console.log('subfilter value before', subfiltered);
 
-      if(jsonData[i].mapped) {
-        mapped = "checked";
-      }
+        if(JSON.parse(jsonData[i].data.data)[colCountry].length === 0 && level === 1) {
 
-      html += '<tr>';
-      html += '<td part="td-action" class="left-sticky">';
-      html += '<div id="select-'+i+'"><input class="checkbox checkbox-'+i+'" part="input-checkbox" type="checkbox" '+mapped+'/></div>';
-      html += '</td>';
-      html += '<td part="td-body" class="'+classBg+'">';
-      html += '<sf-i-elastic-text class="statute id-'+i+'" text="'+(jsonData[i].id)+'" minLength="80"></sf-i-elastic-text>';
-      html += '</td>';
-      //let data = JSON.parse(jsonData[i].fields.data);
-      for(var j = 0; j < JSON.parse(jsonData[i].data.cols).length; j++) {
+          html += '<tr id="tablerow-'+i+'" class="tablerow" style="display: none">';
 
-        if(jsonData[i].cols.includes(JSON.parse(jsonData[i].data.cols)[j])) {
-          html += '<td part="td-body" class="td-body '+classBg+'">';
-          if(Array.isArray(JSON.parse(jsonData[i].data.data)[j])) {
+            html += '<td part="td-action">';
+            html += '<div id="select-'+i+'"><input class="checkbox checkbox-'+i+' checkbox-row" part="input-checkbox" type="checkbox"/></div>';
+            html += '</td>';
+            html += '<td part="td-action">';
+            html += '<div><button part="button" id="show-detail-'+i+'"><span class="material-symbols-outlined">open_in_new</span></button></div>';
+            html += '</td>';
+            for(var j = 0; j < extraFields.length; j++) {
+              html += '<td part="td-body">';
+              html += '<input part="input" id="extra-field-'+jsonData[i].id+'" class="extra-field-'+j+'" type="text" value="'+(jsonData[i].extraFields != null ? (jsonData[i].extraFields[j] != null ? jsonData[i].extraFields[j] : "") : "")+'" '+((extraFields[j].toLowerCase() == "client remarks" && this.disableclientresponse.toLowerCase() == "yes") ? 'disabled' : ((extraFields[j].toLowerCase() == "flagggrc response" && this.disableflagggrcresponse.toLowerCase() == "yes") ? 'disabled' : ''))+' />';
+              html += '</td>';
+              if(j === 0) {
+                countExtra0++;
+                countextra.push(i);
+              }
+            }
+            html += '<td part="td-body">';
+            html += '<sf-i-elastic-text class="statute id-'+i+'" text="'+(jsonData[i].id)+'" minLength="10"></sf-i-elastic-text>';
+            html += '</td>';
 
-            for(var k = 0; k < JSON.parse(jsonData[i].data.data)[j].length; k++) {
-              html +=  ('<sf-i-elastic-text text="'+JSON.parse(jsonData[i].data.data)[j][k]+'" minLength="80"></sf-i-elastic-text>');
-              // if(k < (JSON.parse(jsonData[i].data.data)[j].length - 1)) {
-              //   html += "; ";
-              // }
+          html += '</tr>';
+
+          continue;
+
+        }
+
+        var showSearch = false;
+
+        if(subfilter == "") {
+          showSearch = true;
+        } else {
+
+          for(var j = 0; j < extraFields.length; j++) {
+
+            if(jsonData[i].extraFields != null && jsonData[i].extraFields[j] != null && jsonData[i].extraFields[j].toLowerCase().indexOf(subfilter.toLowerCase()) >= 0) {
+
+              showSearch = true;
+              subfiltered++;
+              console.log('subfilter value inc', subfiltered);
+              break;
+
             }
 
-          } else {
-            html += ('<sf-i-elastic-text text="'+JSON.parse(jsonData[i].data.data)[j]+'" minLength="80"></sf-i-elastic-text>')
           }
+
+          if(!showSearch) {
+            for(var j = 0; j < JSON.parse(jsonData[i].data.cols).length; j++) {
+
+              if(jsonData[i].cols.includes(JSON.parse(jsonData[i].data.cols)[j])) {
+
+                if(Array.isArray(JSON.parse(jsonData[i].data.data)[j])) {
+
+                  var tempCount = subfiltered;
+                  for(var k = 0; k < JSON.parse(jsonData[i].data.data)[j].length; k++) {
+
+                    if(JSON.parse(jsonData[i].data.data)[j][k].toLowerCase().indexOf(subfilter.toLowerCase()) >= 0) {
+                      showSearch = true;
+                      console.log('subfilter value inside 1', subfiltered);
+                      subfiltered++;
+                      break;
+                    }
+
+                  }
+
+                  if(subfiltered > tempCount) break;
+      
+                } else {
+
+                  if(JSON.parse(jsonData[i].data.data)[j].toLowerCase().indexOf(subfilter.toLowerCase()) >= 0) {
+                    showSearch = true;
+                    console.log('subfilter value inside 2', subfiltered);
+                    subfiltered++;
+                    break;
+                  }
+                  
+                }
+      
+              }
+      
+            }
+
+          }
+
+        }
+
+        console.log('subfilter value', subfiltered);
+
+        var classBg = "";
+
+        if(i%2 === 0) {
+          classBg = 'td-light';
+        } else {
+          classBg = 'td-dark';
+        }
+
+        var mapped = "";
+
+        if(jsonData[i].mapped) {
+          mapped = "checked";
+          this.selectedCbs.push(i);
+        }
+
+        if((level == 0 && jsonData[i].mapped) || (level == 1 && !jsonData[i].mapped)) {
+
+          html += '<tr id="tablerow-'+i+'" class="tablerow">';
+          html += '<td part="td-action" class="' + (jsonData[i].mapped ? 'chosen' : '') + '">';
+          html += '<div id="select-'+i+'" class="'+(!showSearch ? 'truncate' : '')+'"><input class="checkbox checkbox-'+i+' checkbox-row" part="input-checkbox" type="checkbox" '+mapped+' '+((this.disableflagggrcresponse.toLowerCase() == "yes") ? 'disabled' : '')+'/></div>';
           html += '</td>';
+          html += '<td part="td-action" class="' + (jsonData[i].mapped ? 'chosen' : '') + '">';
+          html += '<div class="'+(!showSearch ? 'truncate' : '')+'"><button class="button-expand" part="button-icon" id="show-detail-'+i+'"><span class="material-symbols-outlined">open_in_new</span></button></div>';
+          if(extraFieldPosition === 0) {
+            for(var j = 0; j < extraFields.length; j++) {
+              if(jsonData[i].id == "2a4a0bc1-17d2-4e64-83ac-e375b5201503") {
+                console.log('foundid', jsonData[i]);
+              }
+              html += '<td part="td-body" class="'+classBg+' ' + (jsonData[i].mapped ? 'chosen' : '') + '">';
+
+              html += '<div class="'+(!showSearch ? 'truncate' : '')+'"><textarea part="input" id="extra-field-'+jsonData[i].id+'-'+j+'" class="extra-field-'+j+' extra-field" '+(mapped != "checked" ? 'disabled' : ((extraFields[j].toLowerCase() == "client remarks" && this.disableclientresponse.toLowerCase() == "yes") ? 'disabled' : ((extraFields[j].toLowerCase() == "flagggrc response" && this.disableflagggrcresponse.toLowerCase() == "yes") ? 'disabled' : '')))+' >'+(jsonData[i].extraFields != null ? (jsonData[i].extraFields[j] != null ? jsonData[i].extraFields[j] : "") : "")+'</textarea></div>';
+              html += '</td>';
+              if(j === 0) {
+                countExtra0++;
+              }
+            }
+          }
+          html += '<td part="td-body" class="'+classBg+' ' + (jsonData[i].mapped ? 'chosen' : '') + '">';
+          html += '<div class="'+(!showSearch ? 'truncate' : '')+'"><sf-i-elastic-text class="statute id-'+i+'" text="'+(jsonData[i].id)+'" minLength="10"></sf-i-elastic-text></div>';
+          html += '</td>';
+          //let data = JSON.parse(jsonData[i].fields.data);
+          for(var j = 0; j < JSON.parse(jsonData[i].data.cols).length; j++) {
+
+            if(jsonData[i].cols.includes(JSON.parse(jsonData[i].data.cols)[j])) {
+
+              html += '<td part="td-body" class="td-body '+classBg+' ' + (jsonData[i].mapped ? 'chosen' : '') + '">';
+              html += '<div class="'+(!showSearch ? 'truncate' : '')+'">'
+              const filterMatch = this.matchesOnBoardingFilter(JSON.parse(jsonData[i].data.data)[colCountry][0], JSON.parse(jsonData[i].data.data)[colState].length > 0 ? JSON.parse(jsonData[i].data.data)[colState][0] : "", JSON.parse(jsonData[i].data.data)[colSubcategory].length > 0 ? JSON.parse(jsonData[i].data.data)[colSubcategory][0] : "");
+              if(filterMatch) {
+                if(!unfilteredDict.includes(i)) {
+                  unfilteredDict.push(i);
+                }
+              }
+
+              if(Array.isArray(JSON.parse(jsonData[i].data.data)[j])) {
+
+                for(var k = 0; k < JSON.parse(jsonData[i].data.data)[j].length; k++) {
+                  
+                  html +=  ('<sf-i-elastic-text text="'+JSON.parse(jsonData[i].data.data)[j][k]+'" minLength="80"></sf-i-elastic-text>');
+                  console.log('Considering', JSON.parse(jsonData[i].data.cols)[j], jsonData[i].cols, j, JSON.parse(jsonData[i].data.data)[j], '<sf-i-elastic-text text="'+JSON.parse(jsonData[i].data.data)[j][k]+'" minLength="80"></sf-i-elastic-text>');
+                  
+                }
+
+              } else {
+                
+                html += ('<sf-i-elastic-text text="'+JSON.parse(jsonData[i].data.data)[j]+'" minLength="80"></sf-i-elastic-text>')
+                console.log('Considering', JSON.parse(jsonData[i].data.cols)[j], jsonData[i].cols, j, JSON.parse(jsonData[i].data.data)[j], '<sf-i-elastic-text text="'+JSON.parse(jsonData[i].data.data)[j]+'" minLength="80"></sf-i-elastic-text>');
+                
+              }
+              html += '</div>';
+              html += '</td>';
+
+            }
+
+          }
+
+          if(extraFieldPosition === 1) {
+            for(var j = 0; j < extraFields.length; j++) {
+              html += '<td part="td-body" class="'+classBg+' ' + (jsonData[i].mapped ? 'chosen' : '') + '">';
+              html += '<div class="'+(!showSearch ? 'truncate' : '')+'"><textarea part="input" id="extra-field-'+jsonData[i].id+'-'+j+'" class="extra-field-'+j+' extra-field" '+(mapped != "checked" ? 'disabled' : ((extraFields[j].toLowerCase() == "client remarks" && this.disableclientresponse.toLowerCase() == "yes") ? 'disabled' : ((extraFields[j].toLowerCase() == "flagggrc response" && this.disableflagggrcresponse.toLowerCase() == "yes") ? 'disabled' : '')))+' >'+(jsonData[i].extraFields != null ? (jsonData[i].extraFields[j] != null ? jsonData[i].extraFields[j] : "") : "")+'</textarea></div>';
+              html += '</td>';
+            }
+          }
+          html += '</tr>';
+
         }
 
       }
-      html += '</tr>';
+
+
     }
+
     html += '</tbody>'
     html += '</table>';
 
-    // html += '<div class="mt-10 mb-10 d-flex justify-center align-center left-sticky">';
-    //   if(cursor[cursor.length - 1].prev != "") {
-    //     html += '<button part="button-icon" class="material-icons ml-10 mr-10 button-prev">navigate_before</button>'
-    //   }
-    //   html += '<label part="input-label" class="ml-10 mr-10">'+cursor.length+' of '+Math.ceil(found/this.SEARCH_BLOCK_SIZE)+'</label>'
-    //   if(jsonData.length === this.SEARCH_BLOCK_SIZE) {
-    //     html += '<button part="button-icon" class="material-icons ml-10 mr-10 button-next">navigate_next</button>'
-    //   }
-    // html += '</div>';
+    console.log('countextra', countExtra0, countextra);
 
     divElement.innerHTML = html;
+
+    if(unfilteredDict.length > 0) {
+      var html = '';
+      html += '<div class="mb-10">Paritioned Results (' + unfilteredDict.length + ")</div>";
+      html += this.getFilterOnboardingString();
+      ((divElement as HTMLDivElement).querySelector('#span-filtered') as HTMLDivElement).innerHTML = html;
+      
+    } else {
+      ((divElement as HTMLDivElement).querySelector('#span-filtered') as HTMLDivElement).style.display = 'none'; 
+    }
+
+    if(subfiltered > 0) {
+      ((divElement as HTMLDivElement).querySelector('#div-subfiltered') as HTMLDivElement).innerHTML = '<h5 part="results-title">Filtered Results ('+subfiltered+')</h5>';
+    }
+
+    if(this.getfilterOnboarding().length > 0) {
+      for(var i = 0; i < jsonData.length; i++) {
+        if(!unfilteredDict.includes(i)) {
+          const tableRow = (divElement as HTMLDivElement).querySelector('#tablerow-'+i);
+          if(tableRow != null) {
+            (tableRow as HTMLTableRowElement).style.display = 'none';
+          } 
+        }
+      } 
+    }
+
+    // Scroll arrow handlers
+
+    const scrollLeft = (divElement as HTMLDivElement).querySelector('#scroll-overlay-left') as HTMLButtonElement;
+    scrollLeft.addEventListener('click', () => {
+      console.log('left');
+      (this._SfOnboardingStatutesListContainer as HTMLDivElement).scrollLeft -= 150;
+    });
+
+    const scrollRight = (divElement as HTMLDivElement).querySelector('#scroll-overlay-right') as HTMLButtonElement;
+    scrollRight.addEventListener('click', () => {
+      console.log('right');
+      //var scrollLeft = ((divElement as HTMLDivElement).querySelector('#statutes-list-container') as HTMLDivElement).scrollLeft;
+      //((divElement as HTMLDivElement).querySelector('#statutes-list-container') as HTMLDivElement).scrollLeft += 100;
+      (this._SfOnboardingStatutesListContainer as HTMLDivElement).scrollLeft += 150;
+    });
+
+    // Extra field handlers
+
+    for(var i = 0; i < extraFields.length; i++) {
+
+      const arrExtraFields = (divElement as HTMLDivElement).querySelectorAll('.extra-field-' + i) as NodeListOf<HTMLInputElement>;
+      for(var j = 0; j < arrExtraFields.length; j++) {
+
+        const extraField = (divElement as HTMLDivElement).querySelector('#extra-field-' + jsonData[j].id + '-' + i);
+        extraField?.addEventListener('focusout', () => {
+          ((divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement).disabled = false;
+        });
+
+        extraField?.addEventListener('keyup', async (_e:any) => {
+          await this.saveMapping (divElement, uploadBlock, jsonData, extraFields, searchString, uploadFunction, refreshFunction, true)
+        });
+
+      }
+
+    }
+
+    // Filter field handlers
+
+    const inputFilter = (divElement as HTMLDivElement).querySelector('.input-filter') as HTMLInputElement;
+    inputFilter.addEventListener('keyup', (e: any) => {
+
+      if(e.key == 'Enter') {
+        console.log(inputFilter.value);
+        this.renderMappingTable(divElement, jsonData, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction, extraFields, uploadBlock, extraFieldPosition, colName, inputFilter.value)
+      }
+
+    });
+    
+    // More button handlers
+    
+    const buttonToggleMoreBack = (divElement as HTMLDivElement).querySelector('.button-toggle-more-back') as HTMLButtonElement;
+    const buttonToggleMore = (divElement as HTMLDivElement).querySelector('.button-toggle-more') as HTMLButtonElement;
+    
+    buttonToggleMore.addEventListener('click', async (ev: any) => {
+
+      ev.target.classList.add('hide');
+      buttonToggleMoreBack.classList.remove('hide');
+      const buttonDownloadBackups = (divElement as HTMLDivElement).querySelector('.button-download-backups') as HTMLButtonElement;
+      buttonDownloadBackups.style.display = 'flex';
+
+      const buttonDownloadBackupsNew = Util.clearListeners(buttonDownloadBackups);
+      buttonDownloadBackupsNew.addEventListener('click', async () => {
+
+        const result = await this.fetchGetStoredMapping(colName);
+
+        for(var i = 0; i < result.data.length; i++) {
+
+          const blob = new Blob([JSON.stringify(result.data[i].mappings)], { type: 'text/html' });
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.setAttribute('href', url)
+          a.setAttribute('download', 'report_'+colName+'_'+i+'.json');
+          a.click()
+
+        }
+
+        (buttonToggleMoreBack as HTMLButtonElement).click();
+
+        if(result.data.length === 0) {
+
+          this.setError("No backups found!")
+          setTimeout(() => {
+            this.clearMessages();
+          }, 3000);
+
+        }
+        
+      });
+    
+    });
+
+    buttonToggleMoreBack.addEventListener('click', async (ev: any) => {
+
+
+      ev.target.classList.add('hide');
+      buttonToggleMore.classList.remove('hide');
+      const buttonDownloadBackups = (divElement as HTMLDivElement).querySelector('.button-download-backups') as HTMLButtonElement;
+      buttonDownloadBackups.style.display = 'none';
+    
+    });
+
+    // Expand handlers
+
+    const arrExpands = (divElement as HTMLDivElement).querySelectorAll('.button-expand') as NodeListOf<HTMLInputElement>;
+    for(var i = 0; i < arrExpands.length; i++) {
+      arrExpands[i].addEventListener('click', (e: any) => {
+
+        (divElement as HTMLDivElement).querySelector('#detail-overlay')?.classList.remove('hide');
+        const id = e.currentTarget.id;
+        const index = id.split("-")[2];
+        console.log(id, index);
+        var html = '';
+
+        html += '<div class="d-flex flex-wrap">';
+        for(var j = 0; j < JSON.parse(jsonData[0].data.cols).length; j++) {
+
+          html += '<div class="p-10">';
+            html += ('<div part="td-head">' + JSON.parse(jsonData[0].data.cols)[j] + '</div>');
+            if(JSON.parse(jsonData[0].data.cols)[j] == "state") {
+              console.log('state value', JSON.parse(jsonData[index].data.data)[j]);
+            }
+            if(Array.isArray(JSON.parse(jsonData[index].data.data)[j])) {
+
+              html +=  '<div part="td-body">';
+              if(JSON.parse(jsonData[index].data.data)[j].length === 0) {
+
+                html +=  ('-<br />');
+
+              } else {
+                for(var k = 0; k < JSON.parse(jsonData[index].data.data)[j].length; k++) {
+                
+                  var val = JSON.parse(jsonData[index].data.data)[j][k];
+                  if(val == '') {
+                    val = '-';
+                  }
+                  html +=  ('<sf-i-elastic-text text="'+val+'" minLength="80"></sf-i-elastic-text>');
+                  
+                }
+              }
+              
+              html +=  '</div>';
+
+            } else {
+              
+              var val = JSON.parse(jsonData[index].data.data)[j];
+              if(val == '') {
+                val = '-';
+              }
+              html += ('<div part="td-body">' + '<sf-i-elastic-text text="'+val+'" minLength="80"></sf-i-elastic-text>' + '</div><br />')
+              
+            }
+          html += '</div>';
+        }
+        html += '</div>';
+
+        (divElement as HTMLDivElement).querySelector('#detail-overlay-list')!.innerHTML = html;
+
+      })
+
+    }
+
+    // Detail close
+
+    ((divElement as HTMLDivElement).querySelector('.detail-close') as HTMLButtonElement).addEventListener('click', (_e: any) => {
+      (divElement as HTMLDivElement).querySelector('#detail-overlay')?.classList.add('hide');
+    });
+
+    // Checkbox handlers
+
+    const arrCheckBoxes = (divElement as HTMLDivElement).querySelectorAll('.checkbox-row') as NodeListOf<HTMLInputElement>;
+    for(var i = 0; i < arrCheckBoxes.length; i++) {
+      arrCheckBoxes[i].addEventListener('change', async (_e: any) => {
+        ((divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement).disabled = false;
+        await this.saveMapping (divElement, uploadBlock, jsonData, extraFields, searchString, uploadFunction, refreshFunction, true)
+      });
+    }
+
+    (divElement as HTMLDivElement).querySelector('.checkbox-all')?.addEventListener('change', (e: any) => {
+
+      console.log('cb-length', arrCheckBoxes.length);
+      for(var i = 0; i < arrCheckBoxes.length; i++) {
+        const tableRow = (divElement as HTMLDivElement).querySelector('#tablerow-' + (i)) as HTMLElement;
+        console.log('tablerow', i, tableRow);
+        if(tableRow != null) {
+          if(tableRow.style.display != 'none') {
+            console.log('tablerow setting', e.currentTarget.checked, (arrCheckBoxes[i] as HTMLInputElement));
+            (arrCheckBoxes[i] as HTMLInputElement).checked = e.currentTarget.checked;
+          }
+        }
+      }
+      ((divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement).disabled = false;
+
+    });
+
+    // Next, previous, save handlers
 
     (this._SfButtonNext as HTMLButtonElement)?.addEventListener('click', async () => {
       const resultFunction = await fetchFunction(searchString, cursor[cursor.length - 1].next);
@@ -10361,9 +12627,9 @@ export class SfIEvents extends LitElement {
 
           jsonData1.push({id: resultFunction.values[i].id, mapped: mapped, data: resultFunction.values[i].fields, cols: jsonData[0].cols})
         }
-        console.log('clicked', jsonData1);
+        
         cursor.push({prev: cursor[cursor.length - 1].next, next: resultFunction.cursor})
-        this.renderMappingTable(divElement, jsonData1, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction)
+        this.renderMappingTable(divElement, jsonData1, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction, extraFields, uploadBlock, extraFieldPosition, colName, subfilter)
       }
     });
 
@@ -10385,24 +12651,30 @@ export class SfIEvents extends LitElement {
           jsonData1.push({id: resultFunction.values[i].id, mapped: mapped, data: resultFunction.values[i].fields, cols: jsonData[0].cols})
         }
         console.log('clicked', jsonData1);
-        this.renderMappingTable(divElement, jsonData1, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction)
+        this.renderMappingTable(divElement, jsonData1, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction, extraFields, uploadBlock, extraFieldPosition, colName, subfilter)
       }
     });
 
     (this._SfButtonSave as HTMLButtonElement)?.addEventListener('click', async () => {
-      const checkboxArr = (divElement as HTMLDivElement).querySelectorAll('.checkbox') as NodeListOf<HTMLInputElement>;
-      const statuteArr = (divElement as HTMLDivElement).querySelectorAll('.statute') as NodeListOf<SfIElasticText>;
-      console.log(checkboxArr);
-      console.log(statuteArr);
-      const jsonArr = [];
-      for(var i = 0; i < checkboxArr.length; i++) {
-        jsonArr.push({id: (statuteArr[i] as SfIElasticText).text, selected: checkboxArr[i].checked, data: jsonData[i].data.data, cols: jsonData[i].data.cols})
-      }
-      console.log('jsonArr', jsonArr);
-      await uploadFunction({"searchstring": searchString, "mappings": jsonArr});
-      refreshFunction();
+
+      await this.saveMapping (divElement, uploadBlock, jsonData, extraFields, searchString, uploadFunction, refreshFunction, false)
+
     });
 
+    const arrExtraFields = (divElement as HTMLDivElement).querySelectorAll('.extra-field') as NodeListOf<HTMLInputElement>;
+    var totalFields = 0;
+    var filledFields = 0;
+    for(var i = 0; i < arrExtraFields.length; i++) {
+      const extraField = arrExtraFields[i] as HTMLInputElement;
+      if(extraField.parentElement?.parentElement?.parentElement?.style.display != "none" && (extraField.parentElement?.parentElement?.parentElement?.firstChild?.firstChild?.firstChild as HTMLInputElement).checked) {
+        if(extraField.value != "") {
+          filledFields++;
+        }
+        totalFields++;
+      }
+    }
+    (divElement as HTMLDivElement).querySelector("#span-extra-filled")!.innerHTML = "Fields: " + filledFields + "/" + totalFields + " completed";
+    console.log('Total fields = ' + totalFields + ', filled fields = ' + filledFields);
 
   }
 
@@ -10423,6 +12695,99 @@ export class SfIEvents extends LitElement {
       }
 
     }
+
+  }
+
+  renderNewOnboarding = () => {
+
+    var html = '';
+
+    html += '<div class="w-100 d-flex justify-center">';
+      html += '<div>';
+        html += '<div part="rcm-section-title" class="d-flex mt-20 mb-20 justify-center"><span>Client Sign Off</span></div><br />';
+        html += '<label part="input-label" class="mt-5">Remarks</label><br />';
+        html += '<textarea id="rcm-signoff" part="input" type="text"></textarea><br /><br />'
+        html += '<label part="input-label" class="mt-5">Signature</label><br />';
+        html += '<input id="rcm-signature" part="input" type="text" class="w-90"/><br /><br />'
+        html += '<div class="d-flex justify-end align-center mt-20"><button part="button" class="d-flex align-center submit-signoff"><span class="material-symbols-outlined">signature</span>&nbsp;&nbsp;  Submit</button></div>'
+        html += '<div class="mt-20 mb-10"></div>';
+      html += '</div>';
+    html += '</div>';
+
+    (this._SfOnboardingSignoffContainer as HTMLDivElement).innerHTML = html;
+
+    (this._SfOnboardingSignoffContainer as HTMLDivElement).querySelector('.submit-signoff')?.addEventListener('click', async (_e: any) => {
+
+      const signofftext = ((this._SfOnboardingSignoffContainer as HTMLDivElement).querySelector('#rcm-signoff') as HTMLInputElement).value;
+      const signoffsignature = ((this._SfOnboardingSignoffContainer as HTMLDivElement).querySelector('#rcm-signature') as HTMLInputElement).value;
+      await this.fetchUpdateSignOff(signofftext, signoffsignature);
+      this.loadOnboardingSignoff();
+    })
+
+  }
+
+  renderOnboardingSignoff = (signoff: any) => {
+
+    var html = '';
+
+    if(signoff.result == null) {
+
+      this.renderNewOnboarding();
+
+    } else {
+
+      html += '<div class="w-100 d-flex justify-center">';
+        html += '<div>';
+          html += '<div class="d-flex justify-between align-center">';
+          html += '<div part="rcm-section-title" class="d-flex mt-20 mb-20 justify-center"><span>Client Sign Off</span></div>';
+          html += (this.disablesignoff == "yes" ? "" : '<button part="button" class="button-new d-flex align-center mt-20 mb-20"><span class="material-symbols-outlined">add</span><span>&nbsp;&nbsp;New</span></button>');
+          html += '</div>';
+          html += '<table class="mt-20">';
+            html += '<thead>';
+            html += '<th part="td-head" class="td-head">';
+            html += 'Remarks';
+            html += '</th>';
+            html += '<th part="td-head" class="td-head">';
+            html += 'Signature';
+            html += '</th>';
+            html += '<th part="td-head" class="td-head">';
+            html += 'Timestamp';
+            html += '</th>';
+            html += '</thead>';
+            const jsonData = JSON.parse(signoff.result.data.S);
+            for(var i = 0; i < jsonData.length; i++) {
+
+              var classBg = "";
+              if (i % 2 === 0) {
+                  classBg = 'td-light';
+              }
+              else {
+                  classBg = 'td-dark';
+              }
+              html += '<tr>';
+              html += '<td part="td-body" class="td-body ' + classBg + '">';
+              html += jsonData[i].signofftext;
+              html += '</td>';
+              html += '<td part="td-body" class="td-body ' + classBg + '">';
+              html += jsonData[i].signature;
+              html += '</td>';
+              html += '<td part="td-body" class="td-body ' + classBg + '">';
+              html += new Date(parseInt(jsonData[i].timestamp));
+              html += '</td>';
+              console.log(jsonData[i]);
+            }
+          html += '</table>';
+        html += '</div>';
+      html += '</div>';
+
+    }
+
+    (this._SfOnboardingSignoffContainer as HTMLDivElement).innerHTML = html;
+    (this._SfOnboardingSignoffContainer as HTMLDivElement).querySelector('.button-new')?.addEventListener('click', async (_e: any) => {
+
+      this.renderNewOnboarding();
+
+    })
 
   }
 
@@ -10456,6 +12821,7 @@ export class SfIEvents extends LitElement {
       }
 
       html += '<div class="d-flex justify-center align-center w-100 mt-20">';
+        html += '<select id="select-year" class="mr-10"><option value="2024">2024-25</option><option value="2023">2023-24</option></select>'
         html += '<button part="button" class="button-submit d-flex align-center"><span class="material-icons">bolt</span>&nbsp;<span>Update Calendar</span></button>';
       html += '</div>';
 
@@ -10464,7 +12830,9 @@ export class SfIEvents extends LitElement {
     (this._SfOnboardingCalendarContainer as HTMLDivElement).innerHTML = html;
 
     (this._SfOnboardingCalendarContainer as HTMLDivElement).querySelector('.button-submit')?.addEventListener('click', async () => {
-      await this.fetchGetMappedCalendar();
+      const year = ((this._SfOnboardingCalendarContainer as HTMLDivElement).querySelector('#select-year') as HTMLSelectElement).value;
+      console.log(year);
+      await this.fetchGetMappedCalendar(year);
       setTimeout( () => {
         this.refreshCalendar();
       }, 10000);
@@ -10483,7 +12851,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingInternalControlsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingInternalControlsListContainer as HTMLDivElement),mappedSerializedAlertSchedules, mappedInternalControls, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadInternalControlsMapping, this.loadMode, "internalcontrols", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "functionheads", "auditors", "viewers", "docs", "makercheckers", "duedates", "alertschedules", "internalcontrols"], internalcontrolsJobs, null);
+    this.renderTaggingTable((this._SfOnboardingInternalControlsListContainer as HTMLDivElement),mappedSerializedAlertSchedules, mappedInternalControls, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadInternalControlsMapping, this.loadMode, "internalcontrols", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "functionheads", "auditors", "viewers", "docs", "makercheckers", "duedates", "alertschedules", "internalcontrols"], internalcontrolsJobs, null, ["Client remarks", "FlaggGRC response"], null, "", "");
 
   }
 
@@ -10496,7 +12864,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingAlertSchedulesListContainer as HTMLDivElement),mappedSerializedDuedates, mappedAlertSchedules, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadAlertSchedulesMapping, this.loadMode, "alertschedules", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "functionheads", "auditors", "viewers", "docs", "makercheckers", "duedates", "alertschedules"], alertschedulesJobs, null);
+    this.renderTaggingTable((this._SfOnboardingAlertSchedulesListContainer as HTMLDivElement),mappedSerializedDuedates, mappedAlertSchedules, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadAlertSchedulesMapping, this.loadMode, "alertschedules", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "functionheads", "auditors", "viewers", "docs", "makercheckers", "duedates", "alertschedules"], alertschedulesJobs, null, ["Client remarks", "FlaggGRC response"], null, "", "");
 
   }
 
@@ -10509,11 +12877,11 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingDuedatesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingDuedatesListContainer as HTMLDivElement),mappedSerializedMakerCheckers, mappedDuedates, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadDuedatesMapping, this.loadMode, "duedates", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "functionheads", "auditors", "viewers", "docs", "makercheckers", "duedates"], duedatesJobs, null);
+    this.renderTaggingTable((this._SfOnboardingDuedatesListContainer as HTMLDivElement),mappedSerializedMakerCheckers, mappedDuedates, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadDuedatesMapping, this.loadMode, "duedates", ["id", "entityname", "locationname"], '', "", ["reporters", "functions", "tags", "approvers", "functionheads", "auditors", "viewers", "docs", "makercheckers", "duedates"], duedatesJobs, null, ["Client remarks", "FlaggGRC response", "Extensions"], null, "", "");
 
   }
 
-  renderOnboardingReporters = (mappedReporters: any, mappedSerializedTags: any, reportersJobs: any) => {
+  renderOnboardingReporters = (mappedReporters: any, mappedSerializedTags: any, reportersJobs: any, arrFeedbackReference: any) => {
 
     var html = '';
 
@@ -10522,11 +12890,11 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingReportersContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingReportersListContainer as HTMLDivElement),mappedSerializedTags, mappedReporters, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadReportersMapping, this.loadMode, "reporters", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["reporters", "functions", "tags"], reportersJobs, null);
+    this.renderTaggingTable((this._SfOnboardingReportersListContainer as HTMLDivElement),mappedSerializedTags, mappedReporters, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadReportersMapping, this.loadMode, "reporters", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["reporters", "functions", "tags"], reportersJobs, null, ["Client remarks", "FlaggGRC response"], arrFeedbackReference, "Guidelines", "");
 
   }
 
-  renderOnboardingApprovers = (mappedApprovers: any, mappedSerializedReporters: any, approversJobs: any) => {
+  renderOnboardingApprovers = (mappedApprovers: any, mappedSerializedReporters: any, approversJobs: any, arrFeedbackReference: any) => {
 
     var html = '';
 
@@ -10535,11 +12903,11 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingApproversContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingApproversListContainer as HTMLDivElement),mappedSerializedReporters, mappedApprovers, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadApproversMapping, this.loadMode, "approvers", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters"], approversJobs, null);
+    this.renderTaggingTable((this._SfOnboardingApproversListContainer as HTMLDivElement),mappedSerializedReporters, mappedApprovers, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadApproversMapping, this.loadMode, "approvers", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters"], approversJobs, null, ["Client remarks", "FlaggGRC response"], arrFeedbackReference, "Guidelines", "");
 
   }
 
-  renderOnboardingFunctionHeads = (mappedFunctionHeads: any, mappedSerializedApprovers: any, functionHeadsJobs: any) => {
+  renderOnboardingFunctionHeads = (mappedFunctionHeads: any, mappedSerializedApprovers: any, functionHeadsJobs: any, arrFeedbackReference: any) => {
 
     var html = '';
 
@@ -10548,7 +12916,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingFunctionHeadsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingFunctionHeadsListContainer as HTMLDivElement),mappedSerializedApprovers, mappedFunctionHeads, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadFunctionHeadsMapping, this.loadMode, "functionheads", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters", "functionheads"], functionHeadsJobs, null);
+    this.renderTaggingTable((this._SfOnboardingFunctionHeadsListContainer as HTMLDivElement),mappedSerializedApprovers, mappedFunctionHeads, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadFunctionHeadsMapping, this.loadMode, "functionheads", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters", "functionheads"], functionHeadsJobs, null, ["Client remarks", "FlaggGRC response"], arrFeedbackReference, "Guidelines", "");
 
   }
 
@@ -10561,7 +12929,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingMakerCheckersContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingMakerCheckersListContainer as HTMLDivElement),mappedSerializedDocs, mappedMakerCheckers, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadMakerCheckersMapping, this.loadMode, "makercheckers", ["id", "entityname", "locationname"], this.apiIdTags, "&MakerChecker", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors", "viewers", "docs", "makercheckers"], makerCheckerJobs, null);
+    this.renderTaggingTable((this._SfOnboardingMakerCheckersListContainer as HTMLDivElement),mappedSerializedDocs, mappedMakerCheckers, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadMakerCheckersMapping, this.loadMode, "makercheckers", ["id", "entityname", "locationname"], this.apiIdTags, "&MakerChecker", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors", "viewers", "docs", "makercheckers"], makerCheckerJobs, null, ["Client remarks", "FlaggGRC response"], null, "", "");
 
   }
 
@@ -10574,11 +12942,11 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingDocsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingDocsListContainer as HTMLDivElement),mappedSerializedViewers, mappedDocs, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadDocsMapping, this.loadMode, "docs", ["id", "entityname", "locationname"], this.apiIdTags, "&MakerChecker", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors", "viewers", "docs"], docsJobs, null);
+    this.renderTaggingTable((this._SfOnboardingDocsListContainer as HTMLDivElement),mappedSerializedViewers, mappedDocs, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadDocsMapping, this.loadMode, "docs", ["id", "entityname", "locationname"], this.apiIdTags, "&MakerChecker", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors", "viewers", "docs"], docsJobs, null, ["Client remarks", "FlaggGRC response"], null, "", "");
 
   }
 
-  renderOnboardingAuditors = (mappedAuditors: any, mappedSerializedFunctionheads: any, auditorsJobs: any) => {
+  renderOnboardingAuditors = (mappedAuditors: any, mappedSerializedFunctionheads: any, auditorsJobs: any, arrFeedbackReference: any) => {
 
     console.log('inside rendering auditors..');
 
@@ -10589,11 +12957,11 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingAuditorsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingAuditorsListContainer as HTMLDivElement),mappedSerializedFunctionheads, mappedAuditors, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadAuditorsMapping, this.loadMode, "auditors", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors"], auditorsJobs, null);
+    this.renderTaggingTable((this._SfOnboardingAuditorsListContainer as HTMLDivElement),mappedSerializedFunctionheads, mappedAuditors, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadAuditorsMapping, this.loadMode, "auditors", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors"], auditorsJobs, null, ["Client remarks", "FlaggGRC response"], arrFeedbackReference, "Guidelines", "");
 
   }
 
-  renderOnboardingViewers = (mappedViewers: any, mappedSerializedAuditors: any, viewersJobs: any) => {
+  renderOnboardingViewers = (mappedViewers: any, mappedSerializedAuditors: any, viewersJobs: any, arrFeedbackReference: any) => {
 
     console.log('inside rendering viewers..');
 
@@ -10604,7 +12972,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingViewersContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingViewersListContainer as HTMLDivElement),mappedSerializedAuditors, mappedViewers, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadViewersMapping, this.loadMode, "viewers", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors", "viewers"], viewersJobs, null);
+    this.renderTaggingTable((this._SfOnboardingViewersListContainer as HTMLDivElement),mappedSerializedAuditors, mappedViewers, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadViewersMapping, this.loadMode, "viewers", ["id", "entityname", "locationname"], this.apiIdUsers, "", ["approvers", "functions", "tags", "reporters", "functionheads", "auditors", "viewers"], viewersJobs, null, ["Client remarks", "FlaggGRC response"], arrFeedbackReference, "Guidelines", "");
 
   }
 
@@ -10617,7 +12985,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingTagsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingTagsListContainer as HTMLDivElement),mappedSerializedFunctions, mappedTags, ["firstlineofdefence", "obligationtype", "obligation", "reference", "country", "statute"], this.uploadTagsMapping, this.loadMode, "tags", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Tag", ["tags", "functions"], tagsJobs, "tagtype");
+    this.renderTaggingTable((this._SfOnboardingTagsListContainer as HTMLDivElement),mappedSerializedFunctions, mappedTags, ["firstlineofdefence", "obligationtype", "obligation", "reference", "country", "statute"], this.uploadTagsMapping, this.loadMode, "tags", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Tag", ["tags", "functions"], tagsJobs, "tagtype", ["Client remarks", "FlaggGRC response"], null, "", "");
 
   }
 
@@ -10630,7 +12998,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingFunctionsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingFunctionsListContainer as HTMLDivElement),mappedSerializedLocations, mappedFunctions, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadFunctionsMapping, this.loadMode, "functions", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Function", ["functions"], functionsJobs, null);
+    this.renderTaggingTable((this._SfOnboardingFunctionsListContainer as HTMLDivElement),mappedSerializedLocations, mappedFunctions, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadFunctionsMapping, this.loadMode, "functions", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Function", ["functions"], functionsJobs, null, ["Client remarks", "FlaggGRC response"], null, "", "");
 
   }
 
@@ -10643,7 +13011,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingLocationsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingLocationsListContainer as HTMLDivElement),mappedSerializedEntities, mappedLocations, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadLocationsMapping, this.loadMode, "locations", ["id", "countryname", "entityname"], this.apiIdTags, "&Location", ["locations"], locationsJobs, null);
+    this.renderTaggingTable((this._SfOnboardingLocationsListContainer as HTMLDivElement),mappedSerializedEntities, mappedLocations, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadLocationsMapping, this.loadMode, "locations", ["id", "countryname", "entityname"], this.apiIdTags, "&Location", ["locations"], locationsJobs, null, ["Client remarks", "FlaggGRC response"], null, "", "");
 
   }
 
@@ -10679,37 +13047,53 @@ export class SfIEvents extends LitElement {
     html += '</div>';
 
     (this._SfOnboardingCompliancesContainer as HTMLDivElement).innerHTML = html;
-
-    // (this._SfInputSearch as HTMLInputElement).addEventListener('keyup', (e: any) => {
-    //   if(e.key == 'Enter') {
-    //     (this._SfButtonSearch as HTMLButtonElement).click();
-    //   }
-    // });
     
     (this._SfButtonSearch as HTMLButtonElement).addEventListener('click', async () => {
       console.log('clicked', mappedStatutes.data.mappings.mappings);
-      // const searchString = (this._SfInputSearch as HTMLButtonElement).value;
+      const searchString = (this._SfInputSearch as HTMLButtonElement).value;
+      console.log('searchstring', searchString);
       if(searchString.length > 0) {
-        const resultCompliances = await this.fetchSearchCompliances(searchString, "");
-        console.log('resultcompliances', resultCompliances);
+
+        const arrSearchString = searchString.split('|');
+        var resultCompliances : any = {};
+        resultCompliances.values = [];
+        const chunkSize = 20;
+        for (let k = 0; k < arrSearchString.length; k += chunkSize) {
+          
+          const chunk = arrSearchString.slice(k, k + chunkSize);
+            // do whatever
+          const tempResultCompliances = await this.fetchSearchCompliances(chunk.join('|'), "", k, arrSearchString.length);
+          console.log(tempResultCompliances)
+          resultCompliances.values.push(...tempResultCompliances.values);
+          console.log(resultCompliances);
+            
+        }
+
         if(resultCompliances != null) {
+
           const jsonData = [];
+
           for(var i = 0; i < resultCompliances.values.length; i++) {
             var mapped = false;
+            var extraFields = null;
             for(var j = 0; j < mappedCompliances.data.mappings.mappings.length; j++) {
               if(mappedCompliances.data.mappings.mappings[j].id == resultCompliances.values[i].id) {
                 if(mappedCompliances.data.mappings.mappings[j].selected) {
                   mapped = true;
                 }
+                extraFields = mappedCompliances.data.mappings.mappings[j].extraFields;
               }
             }
-
-            jsonData.push({id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "state", "category", "statute", "applicability", "obligation", "risk", "riskarea", "frequency", "penalty"]})
+            // console.log('checking',mapped);
+            jsonData.push({id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "jurisdiction", "state", "category", "subcategory", "statute", "applicability", "obligation", "risk", "riskarea", "frequency", "penalty"], extraFields: extraFields})
           }
-          console.log('clicked', jsonData);
-          this.renderMappingTable((this._SfOnboardingCompliancesListContainer as HTMLDivElement), jsonData, [{prev: initCursor, next: resultCompliances.cursor}], this.fetchSearchCompliances, searchString, mappedCompliances, resultCompliances.found, this.uploadCompliancesMapping, this.loadMode)
+
+          this.renderMappingTable((this._SfOnboardingCompliancesListContainer as HTMLDivElement), jsonData, [{prev: initCursor, next: resultCompliances.cursor}], this.fetchSearchCompliances, searchString, mappedCompliances, resultCompliances.values.length, this.uploadCompliancesMapping, this.loadOnboardingCompliances, ["Client remarks", "FlaggGRC response"], 30, 0, "compliances", "");
+
         }
+
       }
+
     });
 
     console.log('compliances searchstring', searchString);
@@ -10721,7 +13105,7 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderOnboardingEntities = (mappedEntities: any, mappedSerializedCountries: any, entitiesJobs: any) => {
+  renderOnboardingEntities = (mappedEntities: any, mappedSerializedCountries: any, entitiesJobs: any, arrFeedbackReference: any) => {
 
     var html = '';
 
@@ -10730,7 +13114,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingEntitiesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingEntitiesListContainer as HTMLDivElement),mappedSerializedCountries, mappedEntities, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadEntitiesMapping, this.loadMode, "entities", ["id", "countryname"], this.apiIdTags, "&Entity", ["entities"], entitiesJobs, null);
+    this.renderTaggingTable((this._SfOnboardingEntitiesListContainer as HTMLDivElement),mappedSerializedCountries, mappedEntities, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadEntitiesMapping, this.loadMode, "entities", ["id", "countryname"], this.apiIdTags, "&Entity", ["entities"], entitiesJobs, null, ["Client remarks", "FlaggGRC response"], arrFeedbackReference, "Guideline", "");
 
   }
 
@@ -10762,7 +13146,7 @@ export class SfIEvents extends LitElement {
 
     // mappedCountries.data.mappings.mappings = arr2;
 
-    this.renderTaggingTable((this._SfOnboardingCountriesListContainer as HTMLDivElement), mappedCompliances, mappedCountries, ["firstlineofdefence", "obligation", "country", "statute"], this.uploadCountriesMapping, this.loadMode, "countries", ["id"], this.apiIdTags, "-Country", ["countries"], countriesJobs, null);
+    this.renderTaggingTable((this._SfOnboardingCountriesListContainer as HTMLDivElement), mappedCompliances, mappedCountries, ["firstlineofdefence", "obligation", "country", "statute", "state", "subcategory"], this.uploadCountriesMapping, this.loadMode, "countries", ["id"], this.apiIdTags, "-Country", ["countries"], countriesJobs, null, ["Client remarks", "FlaggGRC response"], null, "", "");
 
   }
 
@@ -10801,19 +13185,21 @@ export class SfIEvents extends LitElement {
           const jsonData = [];
           for(var i = 0; i < resultStatutes.values.length; i++) {
             var mapped = false;
+            var extraFields = null;
             for(var j = 0; j < mappedStatutes.data.mappings.mappings.length; j++) {
               if(mappedStatutes.data.mappings.mappings[j].id == resultStatutes.values[i].id) {
                 console.log('comparing',mappedStatutes.data.mappings.mappings[j].id,resultStatutes.values[i].id);
                 if(mappedStatutes.data.mappings.mappings[j].selected) {
                   mapped = true;
                 }
+                extraFields = mappedStatutes.data.mappings.mappings[j].extraFields;
               }
             }
 
-            jsonData.push({id: resultStatutes.values[i].id, mapped: mapped, data: resultStatutes.values[i].fields, cols: ["country", "state", "name", "category", "shortid"]})
+            jsonData.push({id: resultStatutes.values[i].id, mapped: mapped, data: resultStatutes.values[i].fields, cols: ["country", "jurisdiction", "state", "name", "category", "subcategory", "jurisdiction"], extraFields: extraFields})
           }
           console.log('clicked', jsonData);
-          this.renderMappingTable((this._SfOnboardingStatutesListContainer as HTMLDivElement), jsonData, [{prev: initCursor, next: resultStatutes.cursor}], this.fetchSearchStatutes, searchString, mappedStatutes, resultStatutes.found, this.uploadStatutesMapping, this.loadMode)
+          this.renderMappingTable((this._SfOnboardingStatutesListContainer as HTMLDivElement), jsonData, [{prev: initCursor, next: resultStatutes.cursor}], this.fetchSearchStatutes, searchString, mappedStatutes, resultStatutes.found, this.uploadStatutesMapping, this.loadOnboardingStatutes, ["Client remarks", "Entity applicability", "Locations applicability", "Reporters", "Approvers", "Functionheads", "Auditors", "Viewers", "FlaggGRC response"], -1, 1, "statutes", "")
         }
       }
     });
@@ -10884,32 +13270,116 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderOnboardingTabs = () => {
+  renderOnboardingStatus = (status: any) => {
+
+    for(var i = 0; i < status.length; i++) {
+
+      const arrStatus = status[i].split(';');
+      if(arrStatus[0].toLowerCase().indexOf('statutes') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-statutes')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('compliances') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-compliances')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('countries') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-countries')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('entities') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-entities')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('locations') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-locations')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('functions') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-functions')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('tags') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-tags')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('reporters') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-reporters')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('approvers') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-approvers')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('functionheads') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-functionheads')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('auditors') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-auditors')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('viewers') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-viewers')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('docs') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-docs')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('makercheckers') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-makercheckers')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('duedates') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-duedates')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('alertschedules') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-alertschedules')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+      if(arrStatus[0].toLowerCase().indexOf('internalcontrols') >= 0) {
+        (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#button-status-internalcontrols')!.innerHTML = arrStatus[1] + (arrStatus[2] == "" ? "" : "&nbsp;" + (arrStatus[2] == "true" ? '<span class="material-symbols-outlined" part="status-success">check_circle</span>' : '<span class="material-symbols-outlined" part="status-error">error</span>'));
+      }
+
+    }
+
+  }
+
+  renderClearOnboardingContent = () =>{
+
+    (this._SfOnboardingCountriesContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingEntitiesContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingLocationsContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingFunctionsContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingTagsContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingReportersContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingApproversContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingFunctionHeadsContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingAuditorsContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingViewersContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingDocsContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingMakerCheckersContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingDuedatesContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement)!.innerHTML = '';
+    (this._SfOnboardingInternalControlsContainer as HTMLDivElement)!.innerHTML = '';
+
+  }
+
+  renderOnboardingTabs = async () => {
 
     console.log('render onboarding tabs');
+
+    this.selectedCbs = [];
 
     (this._SfOnboardingTabContainer as HTMLDivElement).innerHTML = '';
 
     var html = '';
 
-    html += '<button class="tab-button mb-10" id="onboarding-tab-statutes" part="'+(this.myOnboardingTab == this.TAB_STATUTES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Statutes</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-compliances" part="'+(this.myOnboardingTab == this.TAB_COMPLIANCES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Compliances</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-countries" part="'+(this.myOnboardingTab == this.TAB_COUNTRIES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Countries</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-entities" part="'+(this.myOnboardingTab == this.TAB_ENTITIES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Entities</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-locations" part="'+(this.myOnboardingTab == this.TAB_LOCATIONS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Locations</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-functions" part="'+(this.myOnboardingTab == this.TAB_FUNCTIONS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Functions</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-tags" part="'+(this.myOnboardingTab == this.TAB_TAGS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Tags</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-reporters" part="'+(this.myOnboardingTab == this.TAB_REPORTERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Reporters</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-approvers" part="'+(this.myOnboardingTab == this.TAB_APPROVERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Approvers</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-functionheads" part="'+(this.myOnboardingTab == this.TAB_FUNCTION_HEADS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Function Heads</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-auditors" part="'+(this.myOnboardingTab == this.TAB_AUDITORS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Auditors</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-viewers" part="'+(this.myOnboardingTab == this.TAB_VIEWERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Viewers</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-docs" part="'+(this.myOnboardingTab == this.TAB_DOCS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Docs</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-makercheckers" part="'+(this.myOnboardingTab == this.TAB_MAKER_CHECKERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Maker Checkers</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-duedates" part="'+(this.myOnboardingTab == this.TAB_DUEDATES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Duedates</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-alertschedules" part="'+(this.myOnboardingTab == this.TAB_ALERTSCHEDULES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Alert Schedules</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-internalcontrols" part="'+(this.myOnboardingTab == this.TAB_INTERNALCONTROLS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Internal Controls</button>';
-    html += '<button class="tab-button mb-10" id="onboarding-tab-calendar" part="'+(this.myOnboardingTab == this.TAB_CALENDAR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Calendar</button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-statutes" part="'+(this.myOnboardingTab == this.TAB_STATUTES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Statutes<br /><span id="button-status-statutes" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-compliances" part="'+(this.myOnboardingTab == this.TAB_COMPLIANCES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Compliances<br /><span id="button-status-compliances" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-countries" part="'+(this.myOnboardingTab == this.TAB_COUNTRIES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Countries<br /><span id="button-status-countries" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-entities" part="'+(this.myOnboardingTab == this.TAB_ENTITIES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Entities<br /><span id="button-status-entities" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-locations" part="'+(this.myOnboardingTab == this.TAB_LOCATIONS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Locations<br /><span id="button-status-locations" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-functions" part="'+(this.myOnboardingTab == this.TAB_FUNCTIONS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Functions<br /><span id="button-status-functions" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-tags" part="'+(this.myOnboardingTab == this.TAB_TAGS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Tags<br /><span id="button-status-tags" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-reporters" part="'+(this.myOnboardingTab == this.TAB_REPORTERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Reporters<br /><span id="button-status-reporters" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-approvers" part="'+(this.myOnboardingTab == this.TAB_APPROVERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Approvers<br /><span id="button-status-approvers" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-functionheads" part="'+(this.myOnboardingTab == this.TAB_FUNCTION_HEADS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Function Heads<br /><span id="button-status-functionheads" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-auditors" part="'+(this.myOnboardingTab == this.TAB_AUDITORS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Auditors<br /><span id="button-status-auditors" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-viewers" part="'+(this.myOnboardingTab == this.TAB_VIEWERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Viewers<br /><span id="button-status-viewers" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-docs" part="'+(this.myOnboardingTab == this.TAB_DOCS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Docs<br /><span id="button-status-docs" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-makercheckers" part="'+(this.myOnboardingTab == this.TAB_MAKER_CHECKERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Maker Checkers<br /><span id="button-status-makercheckers" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-duedates" part="'+(this.myOnboardingTab == this.TAB_DUEDATES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Duedates<br /><span id="button-status-duedates" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-alertschedules" part="'+(this.myOnboardingTab == this.TAB_ALERTSCHEDULES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Alert Schedules<br /><span id="button-status-alertschedules" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-internalcontrols" part="'+(this.myOnboardingTab == this.TAB_INTERNALCONTROLS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Internal Controls<br /><span id="button-status-internalcontrols" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-signoff" part="'+(this.myOnboardingTab == this.TAB_SIGNOFF ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Sign Off<br /><span id="button-status-signoff" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
+    html += '<button class="tab-button mb-10" id="onboarding-tab-calendar" part="'+(this.myOnboardingTab == this.TAB_CALENDAR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Calendar<br /><span id="button-status-calendar" class="d-flex button-status align-center justify-center" part="button-status">...</span></button>';
 
     (this._SfOnboardingTabContainer as HTMLDivElement).innerHTML = html;
 
@@ -11049,6 +13519,14 @@ export class SfIEvents extends LitElement {
 
     });
 
+    (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-signoff')?.addEventListener('click', async () => {
+
+      this.myOnboardingTab = this.TAB_SIGNOFF;
+      this.renderOnboardingTabs();
+      this.loadOnboardingSignoff();
+
+    });
+
     (this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-calendar')?.addEventListener('click', async () => {
 
       this.myOnboardingTab = this.TAB_CALENDAR;
@@ -11057,6 +13535,9 @@ export class SfIEvents extends LitElement {
 
     });
 
+    const statusOnboarding = await this.fetchOnboardingStatus();
+    this.renderOnboardingStatus(statusOnboarding.result)
+    this.renderClearOnboardingContent();
     
   }
 
@@ -11459,7 +13940,7 @@ export class SfIEvents extends LitElement {
 
     html += '<tbody>';
 
-    for(var i = 0; i < jobs.data.length; i++) {
+    for(var i = jobs.data.length - 1; i >= 0; i--) {
 
       var classBg = "";
       if(i%2 === 0) {
@@ -11599,7 +14080,7 @@ export class SfIEvents extends LitElement {
 
   proceedToCalendar = async () => {
     this.renderRoleTabs();
-    await this.fetchUserCalendar_2();
+    await this.fetchAndYearlyRenderUserCalendar_2();
     this.enableCalendar();
     if(this.events != null) {
       this.renderTabs(this.TAB_YEAR);
@@ -11758,6 +14239,7 @@ export class SfIEvents extends LitElement {
       console.log('divs', divs);
 
       for(var i = 0; i < divs.length; i++) {
+
         var found = false;
         var filterMatched = "";
         const tagsEmbedded = JSON.parse((divs[i] as HTMLDivElement).querySelector('.hidden-tags')?.innerHTML + "");
@@ -11868,7 +14350,7 @@ export class SfIEvents extends LitElement {
       var html = this.COMPLIANCES_HTML;
       html = html.replace(/PROJECT_NAME/g, this.projectName);
       html = html.replace(/REPORT_DATE/g, new Date().getDate() + "/" + (new Date().getMonth()+1) + "/" + new Date().getFullYear() + " " + new Date().getHours() + ":" + new Date().getMinutes());
-      html = html.replace(/PERSON_COMPLIANCES/g, this.htmlDataCompliances);
+      html = html.replace(/PERSON_COMPLIANCES/g, this.htmlDataStats + (this.csvGraphStats.length > 0 ? this.csvToHtmlTable(this.csvGraphStats) : "") + this.csvToHtmlTable(this.csvCompletenessStats) + this.csvToHtmlTable(this.csvTimelinessStats) + '<br /><br />' + this.getFilteredString());
 
       const blob = new Blob([html], { type: 'text/html' });
       const url = window.URL.createObjectURL(blob)
@@ -11890,13 +14372,33 @@ export class SfIEvents extends LitElement {
 
       if(radioCsv.checked) {
 
-        const blob = new Blob([this.csvDataStats], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.setAttribute('href', url)
-        a.setAttribute('download', 'download.csv');
-        a.click()
+        // if(this.csvGraphStats.length === 0) {
 
+        //   const blob = new Blob([this.csvGraphStats], { type: 'text/csv' });
+        //   const url = window.URL.createObjectURL(blob)
+        //   const a = document.createElement('a')
+        //   a.setAttribute('href', url)
+        //   a.setAttribute('download', 'download_'+(new Date())+'.csv');
+        //   a.click()
+  
+        // } else {
+
+        //   const blob2 = new Blob([this.csvGraphStats], { type: 'text/csv' });
+        //   const url2 = window.URL.createObjectURL(blob2)
+        //   const a2 = document.createElement('a')
+        //   a2.setAttribute('href', url2)
+        //   a2.setAttribute('download', 'download_'+new Date()+'.csv');
+        //   a2.click()
+  
+        // }
+        const blob2 = new Blob([this.csvGraphStats], { type: 'text/csv' });
+        const url2 = window.URL.createObjectURL(blob2)
+        const a2 = document.createElement('a')
+        a2.setAttribute('href', url2)
+        a2.setAttribute('download', 'download_'+new Date()+'.csv');
+        a2.click()
+
+        
       }
 
       if(radioImage.checked) {
@@ -11930,9 +14432,9 @@ export class SfIEvents extends LitElement {
       html = html.replace(/PERSON_NAME/g, this.userName);
       html = html.replace(/PERSON_DESIGNATION/g, this.myRole);
       html = html.replace(/PERSON_COMPANY/g, this.projectName);
-      html = html.replace(/PERSON_DATE/g, new Date().getDate() + "/" + new Date().getMonth() + "/" + new Date().getFullYear());
-      html = html.replace(/PERSON_COMPLIANCE_STATUS/g, this.htmlDataStats);
-      html = html.replace(/PERSON_COMPLIANCES/g, this.htmlDataCompliances);
+      html = html.replace(/PERSON_DATE/g, new Date().getDate() + "/" + (new Date().getMonth()+1) + "/" + new Date().getFullYear());
+      html = html.replace(/PERSON_COMPLIANCE_STATUS/g, this.htmlDataStats + (this.csvGraphStats.length > 0 ? this.csvToHtmlTable(this.csvGraphStats) : "") + this.csvToHtmlTable(this.csvCompletenessStats) + this.csvToHtmlTable(this.csvTimelinessStats));
+      html = html.replace(/PERSON_COMPLIANCES/g, this.getFilteredString());
       html = html.replace(/PERSON_PERIOD/g, this.period);
 
       console.log('downloaded certificate');
@@ -11971,9 +14473,9 @@ export class SfIEvents extends LitElement {
 
     html += '<div class="d-flex justify-end align-start">';
     if (selectedTab === 0) {
-      html += '<button class="tab-button" id="chart-control-filters" part="calendar-tab-button-selected" class="mr-10"><span class="material-icons">filter_list</span></button>';
+      //html += '<button class="tab-button" id="chart-control-filters" part="calendar-tab-button-selected" class="mr-10"><span class="material-icons">filter_list</span></button>';
     } else {
-      html += '<button class="tab-button" id="chart-control-filters" part="calendar-tab-button-not-selected" class="mr-10"><span class="material-icons">filter_list</span></button>';
+      //html += '<button class="tab-button" id="chart-control-filters" part="calendar-tab-button-not-selected" class="mr-10"><span class="material-icons">filter_list</span></button>';
     }
     if (selectedTab === 1) {
       html += '<button class="tab-button" id="chart-control-settings" part="calendar-tab-button-selected" class="mr-10"><span class="material-icons">cloud_download</span></button>';
@@ -11990,11 +14492,11 @@ export class SfIEvents extends LitElement {
 
     });
 
-    (container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-filters')?.addEventListener('click', () => {
+    // (container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-filters')?.addEventListener('click', () => {
 
-      this.renderChartSettings(container, 0, ctx);
+    //   this.renderChartSettings(container, 0, ctx);
 
-    });
+    // });
 
     if(selectedTab === 0) {
 
@@ -12011,8 +14513,25 @@ export class SfIEvents extends LitElement {
 
     (container.querySelector('#chart-settings') as HTMLDivElement).addEventListener('canceled', () => {
       console.log('canceled');
-      this.renderChartSettings(container, -1, ctx);
-      this.renderStream();
+      if(this.getCurrentTab() == this.TAB_STREAM) {
+        this.renderChartSettings(container, -1, ctx);
+        this.renderStream(this.streamIndex);
+      }
+      if(this.getCurrentTab() == this.TAB_UPCOMING) {
+        this.renderChartSettings(container, -1, ctx);
+        this.renderUpcoming(this.streamIndex);
+      }
+      if(this.getCurrentTab() == this.TAB_THIS) {
+        this.renderChartSettings(container, -1, ctx);
+        this.renderThis(this.streamIndex);
+      }
+      if(this.getCurrentTab() == this.TAB_PAST) {
+        this.renderChartSettings(container, -1, ctx);
+        this.renderPast(this.streamIndex);
+      }
+      if(this.getCurrentTab() == this.TAB_CUSTOM) {
+        this.processDateSelection();
+      }
     })
 
     
@@ -12050,6 +14569,136 @@ export class SfIEvents extends LitElement {
 
     // })
 
+  }
+
+  csvToHtmlTable = (strCsv: string) => {
+
+    var html = '';
+
+    console.log('csvToHtmlTable', strCsv);
+
+    var strArr = strCsv.split("\n");
+
+    console.log('csvToHtmlTable', strArr);
+
+    html += '<br />' + strArr[0].split(',')[0] + '<br /><br />';
+
+    html += '<table class="w-100">';
+
+    for(var i = 0; i < strArr.length; i++) {
+
+      html += '<tr>';
+      if(i === 0) {
+
+        const strArrArr = strArr[i].split(',');
+        for(var j = 0; j < strArrArr.length; j++) {
+          html += ('<th>'+ strArrArr[j] +'</th>');
+        }
+
+      } else {
+
+        const strArrArr = strArr[i].split(',');
+        for(var j = 0; j < strArrArr.length; j++) {
+          html += ('<td class="text-center">'+ strArrArr[j] +'</td>');
+        }
+
+      }
+      html += '</tr>';
+
+    }
+
+    html += '</table>';
+
+    console.log('csvToHtmlTable', html);
+
+    return html;
+
+
+  }
+
+  getFilteredString = () => {
+
+    console.log('selectedfilter', this.selectedFilter);
+
+    var tempDiv = document.createElement('div');
+    tempDiv.id = "div-filter-content";
+    tempDiv.innerHTML = this.htmlDataCompliances;
+
+    const newArrList: Array<HTMLTableRowElement> = [];
+
+    const rows = tempDiv.querySelectorAll('tr');
+    for(var i = 0; i < rows.length; i++) {
+      let cols = rows[i].querySelectorAll('td');
+      if(cols.length === 0) {
+        cols = rows[i].querySelectorAll('th');
+      }
+      if(i === 0) {
+        newArrList.push(rows[i]);
+      } else {
+
+        if(cols.length > 0) {
+          if(this.selectedFilter == null) {
+            newArrList.push(rows[i]);
+          } else {
+
+            if(!this.selectedFilter.selected) {
+
+              var found = false;
+
+              for(var j = 0; j < this.selectedFilter.length; j++) {
+                if(cols[cols.length - 1].innerHTML.toLowerCase().replace(/&amp;/g, '&').indexOf(this.selectedFilter[j].value.toLowerCase().replace(/&amp;/g, '&')) >= 0) {
+                  found = true;
+                }  
+              }
+
+              if(!found){
+                newArrList.push(rows[i]);
+              }
+
+            } else {
+
+              console.log('selected filter', this.selectedFilter, cols[cols.length - 1].innerHTML.toLowerCase(), '*-*', this.selectedFilter.value.toLowerCase());
+
+              if(cols[cols.length - 1].innerHTML.toLowerCase().replace(/&amp;/g, '&').indexOf(this.selectedFilter.value.toLowerCase().replace(/&amp;/g, '&')) >= 0) {
+                newArrList.push(rows[i]);
+              }
+            }
+
+          }
+        }
+      }
+    }
+
+    console.log('newarrlist', newArrList);
+
+    let filteredHTML = '';
+
+    if(this.selectedFilter != null) {
+      if(this.selectedFilter.selected) {
+        filteredHTML += '<small>Filter (included parameters): ' + this.selectedFilter.value.charAt(0).toUpperCase() + this.selectedFilter.value.slice(1) + '</small>';
+      } else {
+
+        let params = "";
+        for(var i = 0; i < this.selectedFilter.length; i++) {
+
+          params += this.selectedFilter[i].value.charAt(0).toUpperCase() + this.selectedFilter[i].value.slice(1);
+          if(i < (this.selectedFilter.length - 1)) {
+            params += ',';
+          }
+
+        }
+
+        filteredHTML += '<small>Filter (excluded parameters): ' + params + '</small>';
+      }
+    }
+
+    filteredHTML += '<br /><br /><table>';
+    for(var i = 0; i < newArrList.length; i++) {
+      console.log('htmlrender', (newArrList[i] as HTMLTableRowElement).outerHTML);
+      filteredHTML += (newArrList[i] as HTMLTableRowElement).outerHTML;
+    }
+    filteredHTML += '</table>';
+    return filteredHTML;
   }
 
   formatLabel = (str: string, maxwidth: number) => {
@@ -12094,7 +14743,168 @@ export class SfIEvents extends LitElement {
   
     return sections;
   }
-  
+
+  renderChart4 = (ctx: any, type: any, data: any, title: string) => {
+
+    if(this.chart4 != null) {
+      (this.chart4 as Chart).destroy();
+    }
+    
+    this.chart4 =  new Chart(ctx, {
+      type: type,
+      data: data,
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          onComplete: () => {
+
+            if(this.chart4 != null) {
+
+              if(type == 'bar') {
+
+                this.chart4.ctx.font = "bold 10pt Courier";
+                this.chart4.ctx.fillStyle = '#fff';
+                this.chart4.ctx.textBaseline = "middle";
+                this.chart4.ctx.textAlign = "center";
+
+                for(var i = 0; i < this.chart4.data.datasets.length; i++) {
+
+                  const dataset = this.chart4.data.datasets[i];
+                  for (var j = 0; j < dataset.data.length; j++) {
+
+                    if(parseInt(dataset.data[j]) > 0) {
+                      console.log('points', this.chart4.getDatasetMeta(i).data[j]);
+                      this.chart4.ctx.fillText(dataset.data[j], this.chart4.getDatasetMeta(i).data[j].x - 20, this.chart4.getDatasetMeta(i).data[j].y);
+                    }
+
+                  }
+
+                }
+
+              } else {
+
+                console.log('onanimation complete', this.chart4, this.chart4.data);
+                for(var i = 0; i < this.chart4.data.datasets.length; i++) {
+
+                  const dataset = this.chart4.data.datasets[i];
+                  for (var j = 0; j < dataset.data.length; j++) {
+
+                    if(parseInt(dataset.data[j]) > 0) {
+
+                      console.log(this.chart4.getDatasetMeta(i));
+                      console.log(i + "," + j, this.chart4.getDatasetMeta(i).data[j]);
+                      var total = this.chart4.getDatasetMeta(i).total;
+                      console.log('total', total);
+                      var mid_radius = this.chart4.getDatasetMeta(i).data[j].innerRadius + (this.chart4.getDatasetMeta(i).data[j].outerRadius - this.chart4.getDatasetMeta(i).data[j].innerRadius)/2;
+                      console.log('mid_radius', mid_radius);
+                      var start_angle = this.chart4.getDatasetMeta(i).data[j].startAngle;
+                      console.log('start_angle', start_angle);
+                      var end_angle = this.chart4.getDatasetMeta(i).data[j].endAngle;
+                      console.log('end_angle', end_angle);
+                      var mid_angle = start_angle + (end_angle - start_angle)/2;
+                      console.log('mid_angle', mid_angle);
+
+                      var x = mid_radius * Math.cos(mid_angle);
+                      var y = mid_radius * Math.sin(mid_angle);
+
+                      this.chart4.ctx.fillStyle = '#fff';
+                      if (i == 3){ // Darker text color for lighter background
+                        this.chart4.ctx.fillStyle = '#444';
+                      }
+                      // var percent = String(Math.round(dataset.data[j]/total*100)) + "%";
+                      var str = "";
+                      for(var k = 0; k <= dataset.data[j].length; k++) {
+                        str += '█';
+                      }
+                      console.log('outputting bg', str);
+                      this.chart4.ctx.fillStyle = '#000';
+                      //this.chart.ctx.fillText(str, this.chart.getDatasetMeta(i).data[j].x + x, this.chart.getDatasetMeta(i).data[j].y + y);
+                      //const match = /(?<value>\d+\.?\d*)/;
+                      let fillText = '';
+                      if((this.chart4.data.labels[j] + "").toLowerCase().replace(/ /g, "-") == this.graphParam) {
+                        this.chart4.ctx.font = "bold 20pt Courier";
+                        fillText = dataset.data[j] + '✓';
+                      } else {
+                        this.chart4.ctx.font = "bold 15pt Courier";
+                        fillText = dataset.data[j];
+                      }
+                      this.chart4.ctx.fillStyle = '#fff';
+                      this.chart4.ctx.textBaseline = "middle";
+                      this.chart4.ctx.textAlign = "center";
+
+                      console.log('comparing labels', (this.chart4.data.labels[j] + "").toLowerCase().replace(/ /g, "-"), j, this.graphParam, this.chart4.getDatasetMeta(i).data[j]);
+                      this.chart4.ctx.fillText(fillText, this.chart4.getDatasetMeta(i).data[j].x + x, this.chart4.getDatasetMeta(i).data[j].y + y);
+
+                    }
+                    
+                  }
+                }
+
+              }
+
+              
+            }
+
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+                display: false,
+                drawBorder: false
+            },
+            ticks: {
+              display: false,
+            },
+            stacked: true,
+          },
+          y: {
+            grid: {
+                display: false,
+                drawBorder: false
+            },
+            ticks: {
+              font: {
+                size: window.innerWidth > window.innerHeight ? window.innerWidth/170 : window.innerWidth/40,
+              }
+            },
+            stacked: true,
+          }
+        },
+        barPercentage: 0.8,
+        categoryPercentage: 0.5,
+        plugins: {
+          legend: {
+            display: true,
+            position: "bottom",
+            align: "center",
+            labels: {
+              font: {
+                size: 10,
+              },
+              boxWidth: 10,
+              boxHeight: 10,
+            }
+          },
+          title: {
+            display: true,
+            text: title,
+            font: {
+                size: 16,
+            }
+          }
+        }
+      },
+        
+    });
+
+    console.log('canvas parent node', this.chart4.canvas.parentNode);
+    this.chart4.canvas.parentNode.style.height = (parseInt(data.labels.length)*90 + 40) + 'px';
+
+  }
+
   renderChart3 = (ctx: any, type: any, data: any, title: string) => {
 
     if(this.chart3 != null) {
@@ -12115,8 +14925,8 @@ export class SfIEvents extends LitElement {
 
               if(type == 'bar') {
 
-                this.chart3.ctx.font = "bold 10pt Courier";
-                this.chart3.ctx.fillStyle = '#fff';
+                this.chart3.ctx.font = "bold 10pt 'Helvetica Neue'";
+                this.chart3.ctx.fillStyle = '#000';
                 this.chart3.ctx.textBaseline = "middle";
                 this.chart3.ctx.textAlign = "center";
 
@@ -12126,8 +14936,15 @@ export class SfIEvents extends LitElement {
                   for (var j = 0; j < dataset.data.length; j++) {
 
                     if(parseInt(dataset.data[j]) > 0) {
-                      console.log('points', this.chart3.getDatasetMeta(i).data[j]);
-                      this.chart3.ctx.fillText(dataset.data[j], this.chart3.getDatasetMeta(i).data[j].x - 20, this.chart3.getDatasetMeta(i).data[j].y);
+
+                      if((this.chart3.data.labels[j].join(" ") + "").toLowerCase().trim() == this.graphParam) {
+                        this.chart3.ctx.fillStyle = '#fff';
+                      } else {
+                        this.chart3.ctx.fillStyle = '#000';
+                      }
+
+                      this.chart3.ctx.fillText(dataset.data[j], this.chart3.getDatasetMeta(i).data[j].x - 13, this.chart3.getDatasetMeta(i).data[j].y);
+
                     }
 
                   }
@@ -12219,6 +15036,22 @@ export class SfIEvents extends LitElement {
             ticks: {
               font: {
                 size: window.innerWidth > window.innerHeight ? window.innerWidth/170 : window.innerWidth/40,
+              },
+              callback: (val: any, _index: any) => {
+                // Hide every 2nd tick label
+                let value = data.labels[val];
+                console.log('callback', this.graphParam);
+                if(this.graphParam.length > 0) {
+                  if((data.labels[val].join(" ") + "").toLowerCase().trim() == this.graphParam) {
+                  } else {
+                    value = "";
+                  }
+                } else {
+                  if(this.isSelectedLegend(val)) {
+                    return "";
+                  }
+                }
+                return value;
               }
             },
             stacked: true,
@@ -12237,7 +15070,8 @@ export class SfIEvents extends LitElement {
               },
               boxWidth: 10,
               boxHeight: 10,
-            }
+            },
+            onClick: () => {}
           },
           title: {
             display: true,
@@ -12245,8 +15079,25 @@ export class SfIEvents extends LitElement {
             font: {
                 size: 16,
             }
+          },
+        },
+        onClick: (_event: any = {}, array: any) => {
+
+          // if(array == null) return;
+          // if(array[0] == null) return;
+          // const barIndex = array[0].index;
+          // this.clickOnBar(false, 2, barIndex)
+          // this.clickOnPie(true, barIndex)
+
+          if(array == null) return;
+          if(array[0] == null) return;
+          const pieIndex = array[0].index;
+          this.clickOnPie(false, pieIndex)
+          if(this.chart2 != null && this.chart3 != null) {
+            this.clickOnBar(true, 2, array[0].index);
           }
-        }
+
+        },
       },
         
     });
@@ -12273,11 +15124,11 @@ export class SfIEvents extends LitElement {
           onComplete: () => {
 
             if(this.chart2 != null) {
-
+              
               if(type == 'bar') {
 
-                this.chart2.ctx.font = "bold 10pt Courier";
-                this.chart2.ctx.fillStyle = '#fff';
+                this.chart2.ctx.font = "bold 10pt 'Helvetica Neue'";
+                this.chart2.ctx.fillStyle = '#000';
                 this.chart2.ctx.textBaseline = "middle";
                 this.chart2.ctx.textAlign = "center";
 
@@ -12287,8 +15138,15 @@ export class SfIEvents extends LitElement {
                   for (var j = 0; j < dataset.data.length; j++) {
 
                     if(parseInt(dataset.data[j]) > 0) {
-                      console.log('points', this.chart2.getDatasetMeta(i).data[j]);
-                      this.chart2.ctx.fillText(dataset.data[j], this.chart2.getDatasetMeta(i).data[j].x - 20, this.chart2.getDatasetMeta(i).data[j].y);
+
+                      if((this.chart2.data.labels[j].join(" ") + "").toLowerCase().trim() == this.graphParam) {
+                        this.chart2.ctx.fillStyle = '#fff';
+                      } else {
+                        this.chart2.ctx.fillStyle = '#000';
+                      }
+
+                      this.chart2.ctx.fillText(dataset.data[j], this.chart2.getDatasetMeta(i).data[j].x - 13, this.chart2.getDatasetMeta(i).data[j].y);
+
                     }
 
                   }
@@ -12296,8 +15154,6 @@ export class SfIEvents extends LitElement {
                 }
 
               } else {
-
-                console.log('onanimation complete', this.chart2, this.chart2.data);
               
                 for(var i = 0; i < this.chart2.data.datasets.length; i++) {
 
@@ -12306,18 +15162,10 @@ export class SfIEvents extends LitElement {
 
                     if(parseInt(dataset.data[j]) > 0) {
 
-                      console.log(this.chart2.getDatasetMeta(i));
-                      console.log(i + "," + j, this.chart2.getDatasetMeta(i).data[j]);
-                      var total = this.chart2.getDatasetMeta(i).total;
-                      console.log('total', total);
                       var mid_radius = this.chart2.getDatasetMeta(i).data[j].innerRadius + (this.chart2.getDatasetMeta(i).data[j].outerRadius - this.chart2.getDatasetMeta(i).data[j].innerRadius)/2;
-                      console.log('mid_radius', mid_radius);
                       var start_angle = this.chart2.getDatasetMeta(i).data[j].startAngle;
-                      console.log('start_angle', start_angle);
                       var end_angle = this.chart2.getDatasetMeta(i).data[j].endAngle;
-                      console.log('end_angle', end_angle);
                       var mid_angle = start_angle + (end_angle - start_angle)/2;
-                      console.log('mid_angle', mid_angle);
 
                       var x = mid_radius * Math.cos(mid_angle);
                       var y = mid_radius * Math.sin(mid_angle);
@@ -12327,16 +15175,16 @@ export class SfIEvents extends LitElement {
                         this.chart2.ctx.fillStyle = '#444';
                       }
                       // var percent = String(Math.round(dataset.data[j]/total*100)) + "%";
-                      var str = "";
-                      for(var k = 0; k <= dataset.data[j].length; k++) {
-                        str += '█';
-                      }
-                      console.log('outputting bg', str);
+                      // var str;
+                      // str = "";
+                      // for(var k = 0; k <= dataset.data[j].length; k++) {
+                      //   str += '█';
+                      // }
                       this.chart2.ctx.fillStyle = '#000';
                       //this.chart.ctx.fillText(str, this.chart.getDatasetMeta(i).data[j].x + x, this.chart.getDatasetMeta(i).data[j].y + y);
                       //const match = /(?<value>\d+\.?\d*)/;
                       let fillText = '';
-                      if((this.chart2.data.labels[j] + "").toLowerCase().replace(/ /g, "-") == this.graphParam) {
+                      if((this.chart2.data.labels[j] + "").toLowerCase().replace(/ /g, "-") == this.graphParam)  {
                         this.chart2.ctx.font = "bold 20pt Courier";
                         fillText = dataset.data[j] + '✓';
                       } else {
@@ -12346,8 +15194,6 @@ export class SfIEvents extends LitElement {
                       this.chart2.ctx.fillStyle = '#fff';
                       this.chart2.ctx.textBaseline = "middle";
                       this.chart2.ctx.textAlign = "center";
-
-                      console.log('comparing labels', (this.chart2.data.labels[j] + "").toLowerCase().replace(/ /g, "-"), j, this.graphParam, this.chart2.getDatasetMeta(i).data[j]);
                       this.chart2.ctx.fillText(fillText, this.chart2.getDatasetMeta(i).data[j].x + x, this.chart2.getDatasetMeta(i).data[j].y + y);
 
                     }
@@ -12358,7 +15204,6 @@ export class SfIEvents extends LitElement {
               }
 
             }
-
           }
         },
         scales: {
@@ -12380,6 +15225,22 @@ export class SfIEvents extends LitElement {
             ticks: {
               font: {
                 size: window.innerWidth > window.innerHeight ? window.innerWidth/170 : window.innerWidth/40,
+              },
+              callback: (val: any, _index: any) => {
+                // Hide every 2nd tick label
+                let value = data.labels[val];
+                console.log('callback', this.graphParam);
+                if(this.graphParam.length > 0) {
+                  if((data.labels[val].join(" ") + "").toLowerCase().trim() == this.graphParam) {
+                  } else {
+                    value = "";
+                  }
+                } else {
+                  if(this.isSelectedLegend(val)) {
+                    return "";
+                  }
+                }
+                return value;
               }
             },
             stacked: true,
@@ -12388,6 +15249,7 @@ export class SfIEvents extends LitElement {
         barPercentage: 0.8,
         categoryPercentage: 0.5,
         plugins: {
+          
           legend: {
             display: true,
             position: "bottom",
@@ -12398,7 +15260,8 @@ export class SfIEvents extends LitElement {
               },
               boxWidth: 10,
               boxHeight: 10,
-            }
+            },
+            onClick: () => {}
           },
           title: {
             display: true,
@@ -12407,7 +15270,28 @@ export class SfIEvents extends LitElement {
                 size: 16,
             }
           }
-        }
+        },
+        onClick: (_event: any = {}, array: any) => {
+
+          // if(array == null) return;
+          // if(array[0] == null) return;
+          // const barIndex = array[0].index;
+          // this.clickOnBar(false, 2, barIndex)
+          // this.clickOnPie(true, barIndex)
+
+          if(array == null) return;
+          if(array[0] == null) return;
+          const pieIndex = array[0].index;
+          // const tempGraphParam = this.graphParam
+          console.log('pie bar trigger 0', this.graphParam, array[0].index, JSON.stringify(this.barCharDataSet2));
+          this.clickOnPie(false, pieIndex)
+          console.log('pie bar trigger 1', this.graphParam, array[0].index, JSON.stringify(this.barCharDataSet2));
+          if(this.chart2 != null && this.chart3 != null) {
+            console.log('pie bar trigger 2', this.graphParam, array[0].index);
+            this.clickOnBar(true, 2, array[0].index);
+          }
+
+        },
       },
         
     });
@@ -12419,8 +15303,12 @@ export class SfIEvents extends LitElement {
 
   renderChart = (ctx: any, type: any, data: any, title: string) => {
 
+    console.log('rendering chart', this.chart);
+
     if(this.chart != null) {
+      console.log('destroying chart', this.chart);
       (this.chart as Chart).destroy();
+      this.chart = null;
     }
     
     this.chart =  new Chart(ctx, {
@@ -12458,7 +15346,8 @@ export class SfIEvents extends LitElement {
 
               } else {
 
-                console.log('onanimation complete', this.chart, this.chart.data);
+                console.log('onanimation complete', this.chart, this.chart.data, this.graphParam);
+                console.log('onanimation complete', this.graphParam);
               
                 var rendered = false;
 
@@ -12504,18 +15393,31 @@ export class SfIEvents extends LitElement {
                       if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS || this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
                         replaceText = '-';
                       }
-                      if((this.chart.data.labels[j] + "").toLowerCase().replace(/ /g, replaceText) == this.graphParam) {
-                        this.chart.ctx.font = "bold 20pt Courier";
-                        fillText = dataset.data[j] + '✓';
-                      } else {
-                        this.chart.ctx.font = "bold 15pt Courier";
-                        fillText = dataset.data[j];
-                      }
                       this.chart.ctx.fillStyle = '#fff';
+                      if((this.chart.data.labels[j] + "").toLowerCase().replace(/ /g, replaceText) == this.graphParam) {
+                        this.chart.ctx.font = "bold 20pt 'Helvetica Neue'";
+                        if(this.isSelectedLegend(j)) {
+                          fillText = '';
+                        } else {
+                          this.chart.ctx.fillStyle = '#fff';
+                          fillText = dataset.data[j] + '✓';
+                        }
+                        
+                      } else {
+                        this.chart.ctx.font = "bold 12pt 'Helvetica Neue'";
+                        if(this.isSelectedLegend(j)) {
+                          fillText = '';
+                        } else {
+                          this.chart.ctx.fillStyle = '#000';
+                          fillText = dataset.data[j];
+                          
+                        }
+                        
+                      }
+
                       this.chart.ctx.textBaseline = "middle";
                       this.chart.ctx.textAlign = "center";
 
-                      console.log('comparing labels', (this.chart.data.labels[j] + "").toLowerCase().replace(/ /g, "-"), j, this.graphParam, this.chart.getDatasetMeta(i).data[j]);
                       this.chart.ctx.fillText(fillText, this.chart.getDatasetMeta(i).data[j].x + x, this.chart.getDatasetMeta(i).data[j].y + y);
 
                     }
@@ -12578,6 +15480,22 @@ export class SfIEvents extends LitElement {
               },
               boxWidth: 10,
               boxHeight: 10,
+              generateLabels: (chart: any) => chart.data.labels.map((l: any, i: any) => ({
+                datasetIndex: i,
+                index: i,
+                text: l,
+                fillStyle: chart.data.datasets[0].backgroundColor[i],
+                strokeStyle: chart.data.datasets[0].backgroundColor[i],
+                hidden: chart.getDatasetMeta(0).data[i].hidden
+             }))
+            },
+            onClick: (_evt: any, legendItem: any, _legend: any) => {
+              if(this.graphParam.length > 0) {
+                this.clearSelectedGraphParam();
+              }
+              //
+              console.log('index clicked', legendItem.index, this.chart.legend.legendItems[legendItem.index]);
+              this.processClickOnLegend(legendItem.index, legendItem);
             }
           },
           title: {
@@ -12588,8 +15506,19 @@ export class SfIEvents extends LitElement {
             }
           }
         },
-        onClick: (event: any, array: any) => {
-          this.clickOnPie(event, array, data)
+        onClick: (_event: any, array: any) => {
+          
+          if(array == null) return;
+          if(array[0] == null) return;
+          const pieIndex = array[0].index;
+          // const tempGraphParam = this.graphParam
+          console.log('pie bar trigger 0', this.graphParam, array[0].index, JSON.stringify(this.barCharDataSet2));
+          this.clickOnPie(false, pieIndex)
+          console.log('pie bar trigger 1', this.graphParam, array[0].index, JSON.stringify(this.barCharDataSet2));
+          if(this.chart2 != null && this.chart3 != null) {
+            console.log('pie bar trigger 2', this.graphParam, array[0].index);
+            this.clickOnBar(true, 2, array[0].index);
+          }
         }
       },
         
@@ -12599,23 +15528,28 @@ export class SfIEvents extends LitElement {
     
   }
 
-  clickOnPie = (event: any, array: any, data: any) => {
-    console.log('graph onclick', event);
-    console.log('graph onclick', array);
-    console.log('graph onclick', data);
-    console.log('graph onclick element', array[0].element);
-    console.log('graph onclick index', array[0].index);
-    console.log('graph onclick label', (data.labels[array[0].index] + "").toLowerCase().replace(/ /g, "-"));
-    console.log('graph onclick data', data.datasets[0].data[array[0].index]);
-
-    let labelClicked = '';
-
-    if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS || this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
-      labelClicked = (data.labels[array[0].index] + "").toLowerCase().replace(/ /g, "-").replace('status-', '');  
-    } else {
-      labelClicked = (data.labels[array[0].index] + "").toLowerCase();
+  copy = (aObject: any) => {
+    // Prevent undefined objects
+    // if (!aObject) return aObject;
+  
+    let bObject : any = Array.isArray(aObject) ? [] : {};
+  
+    let value;
+    for (const key in aObject) {
+  
+      // Prevent self-references to parent object
+      // if (Object.is(aObject[key], aObject)) continue;
+      
+      value = aObject[key];
+  
+      bObject[key] = (typeof value === "object") ? this.copy(value) : value;
     }
-    
+  
+    return bObject;
+  }
+
+  processGraphHide = (clickedValue: string, hide: boolean) => {
+    console.log('processGraphHide', clickedValue, hide, this.selectedFilter);
 
     let eventContainer = null;
 
@@ -12640,36 +15574,395 @@ export class SfIEvents extends LitElement {
     }
 
     const divs = eventContainer!.querySelectorAll('.stream-events-container') as NodeListOf<HTMLElement>;
+    const eventTitles = eventContainer!.querySelectorAll('.stream-events-event-title') as NodeListOf<HTMLElement>;
     const tables = eventContainer!.querySelectorAll('.stream-events-container-table') as NodeListOf<HTMLTableElement>;
-    const graphparamnames = eventContainer!.querySelectorAll('.graphparamname') as NodeListOf<HTMLTableCellElement>;
+    const graphparamnames1 = eventContainer!.querySelectorAll('.graphparamname1') as NodeListOf<HTMLTableCellElement>;
+    const graphparamnames2 = eventContainer!.querySelectorAll('.graphparamname2') as NodeListOf<HTMLTableCellElement>;
+    const graphparamnames3 = eventContainer!.querySelectorAll('.graphparamname3') as NodeListOf<HTMLTableCellElement>;
     const streamEventSummary = eventContainer!.querySelector('#stream-event-summary') as HTMLDivElement;
+    const streamEventFilters = eventContainer!.querySelector('#stream-event-filter') as HTMLDivElement;
 
-    if(this.graphParam == labelClicked) {
+    if(hide) {
+      //this.graphParam = clickedValue;
+      streamEventSummary.style.display = 'none';
+      console.log('selectedfilter', this.selectedFilter);
+      if(this.selectedFilter == null) {
+        this.selectedFilter = [];
+      }
+      this.selectedFilter.push({
+        selected: false,
+        value: clickedValue
+      });
+
+      var filterString = "";
+      for(var j = 0; j < this.selectedFilter.length; j++) {
+        filterString += this.selectedFilter[j].value;
+        if(j < (this.selectedFilter.length - 1)) {
+          filterString += ',';
+        }
+      }
+
+      (streamEventFilters as HTMLDivElement).style.display = 'block';
+      (streamEventFilters as HTMLDivElement).innerHTML = '<div part="badge-dashboard" class="mr-10 mb-10 no-shrink"><span>Filtered by</span>&nbsp;&nbsp;<span id="graph-total" part="badge-filter-name">excluding '+filterString+'</span></div>';
+    } else {
+
+      streamEventSummary.style.display = 'flex';
+      this.selectedFilter = null;
+      (streamEventFilters as HTMLDivElement).style.display = 'none';
+      (streamEventFilters as HTMLDivElement).innerHTML = '';
+
+    }
+
+    console.log('selectedfilter', this.selectedFilter);
+
+    for(var i = 0; i < divs.length; i++) {
+
+      if(!hide) {
+        (tables[i] as HTMLDivElement).style.display = 'block';
+          //(hiddenFilternames[i] as HTMLDivElement).style.display = 'block';
+          (graphparamnames1[i] as HTMLDivElement).style.display = 'block';
+          if(graphparamnames2 != null && graphparamnames2[i] != null) (graphparamnames2[i] as HTMLDivElement).style.display = 'block';
+          if(graphparamnames3 != null && graphparamnames3[i] != null) (graphparamnames3[i] as HTMLDivElement).style.display = 'block';
+          (eventTitles[i] as HTMLDivElement).style.display = 'flex';
+          
+      } else {
+
+        var found = false;
+
+        if(this.selectedFilter != null) {
+          for(var j = 0; j < this.selectedFilter.length; j++) {
+            if((graphparamnames1[i] as HTMLDivElement).innerHTML.toLowerCase().replace('&amp;', '&').indexOf(this.selectedFilter[j].value) >= 0) {
+              found = true;
+              break;
+            }
+          }
+        }
+  
+        if(found) {
+          (tables[i] as HTMLDivElement).style.display = 'none';
+          //(hiddenFilternames[i] as HTMLDivElement).style.display = 'none';
+          (graphparamnames1[i] as HTMLDivElement).style.display = 'none';
+          if(graphparamnames2 != null && graphparamnames2[i] != null) (graphparamnames2[i] as HTMLDivElement).style.display = 'none';
+          if(graphparamnames3 != null && graphparamnames3[i] != null) (graphparamnames3[i] as HTMLDivElement).style.display = 'none';
+          (eventTitles[i] as HTMLDivElement).style.display = 'none';  
+        } 
+      }
+
+      // var found = false;
+
+      // if(this.selectedFilter != null) {
+      //   for(var j = 0; j < this.selectedFilter.length; j++) {
+      //     if((graphparamnames[i] as HTMLDivElement).innerHTML.toLowerCase().replace('&amp;', '&').indexOf(this.selectedFilter[j].value) >= 0) {
+      //       found = true;
+      //       break;
+      //     }
+      //   }
+      // }
+      
+
+      // if(found) {
+      //   if(hide) {
+      //     (tables[i] as HTMLDivElement).style.display = 'none';
+      //     //(hiddenFilternames[i] as HTMLDivElement).style.display = 'none';
+      //     (graphparamnames[i] as HTMLDivElement).style.display = 'none';
+      //     (eventTitles[i] as HTMLDivElement).style.display = 'none';  
+      //   } else {
+      //     (tables[i] as HTMLDivElement).style.display = 'block';
+      //     //(hiddenFilternames[i] as HTMLDivElement).style.display = 'block';
+      //     (graphparamnames[i] as HTMLDivElement).style.display = 'block';
+      //     (eventTitles[i] as HTMLDivElement).style.display = 'flex';
+          
+      //   }
+      // } 
+      
+    }
+
+  }
+
+  processGraphFilter = (clickedValue: string) => {
+
+    let eventContainer = null;
+
+    if(this.getCurrentTab() == this.TAB_STREAM) {
+      eventContainer = (this._SfStreamContainer as HTMLDivElement);
+    }
+
+    if(this.getCurrentTab() == this.TAB_UPCOMING) {
+      eventContainer = (this._SfUpcomingContainer as HTMLDivElement);
+    }
+
+    if(this.getCurrentTab() == this.TAB_THIS) {
+      eventContainer = (this._SfThisContainer as HTMLDivElement);
+    }
+
+    if(this.getCurrentTab() == this.TAB_PAST) {
+      eventContainer = (this._SfPastContainer as HTMLDivElement);
+    }
+
+    if(this.getCurrentTab() == this.TAB_CUSTOM) {
+      eventContainer = (this._SfCustomContainer as HTMLDivElement);
+    }
+
+    const divs = eventContainer!.querySelectorAll('.stream-events-container') as NodeListOf<HTMLElement>;
+    const eventTitles = eventContainer!.querySelectorAll('.stream-events-event-title') as NodeListOf<HTMLElement>;
+    const tables = eventContainer!.querySelectorAll('.stream-events-container-table') as NodeListOf<HTMLTableElement>;
+    const graphparamnames1 = eventContainer!.querySelectorAll('.graphparamname1') as NodeListOf<HTMLTableCellElement>;
+    const graphparamnames2 = eventContainer!.querySelectorAll('.graphparamname2') as NodeListOf<HTMLTableCellElement>;
+    const graphparamnames3 = eventContainer!.querySelectorAll('.graphparamname3') as NodeListOf<HTMLTableCellElement>;
+    const streamEventSummary = eventContainer!.querySelector('#stream-event-summary') as HTMLDivElement;
+    const streamEventFilters = eventContainer!.querySelector('#stream-event-filter') as HTMLDivElement;
+
+    if(streamEventSummary == null) {
+      return;
+    }
+
+    if(this.graphParam == clickedValue) {
 
       this.graphParam = "";
       streamEventSummary.style.display = 'flex';
+      this.selectedFilter = null;
+      (streamEventFilters as HTMLDivElement).style.display = 'none';
+      (streamEventFilters as HTMLDivElement).innerHTML = '';
 
     } else {
 
-      this.graphParam = labelClicked;
+      this.graphParam = clickedValue;
       streamEventSummary.style.display = 'none';
+      this.selectedFilter = {
+        selected: true,
+        value: clickedValue
+      };
+      (streamEventFilters as HTMLDivElement).style.display = 'block';
+      (streamEventFilters as HTMLDivElement).innerHTML = '<div part="badge-dashboard" class="mr-10 mb-10 no-shrink"><span>Filtered by</span>&nbsp;&nbsp;<span id="graph-total" part="badge-filter-name">'+clickedValue+'</span></div>';
 
     }
 
     for(var i = 0; i < divs.length; i++) {
 
-      console.log('comparing', (graphparamnames[i] as HTMLDivElement).innerHTML.toLowerCase().replace('&amp;', '&'), this.graphParam);
-      if((graphparamnames[i] as HTMLDivElement).innerHTML.toLowerCase().replace('&amp;', '&').indexOf(this.graphParam) >= 0) {
+      if((graphparamnames1[i] as HTMLDivElement).innerHTML.toLowerCase().replace('&amp;', '&').indexOf(this.graphParam) >= 0) {
         (tables[i] as HTMLDivElement).style.display = 'block';
         //(hiddenFilternames[i] as HTMLDivElement).style.display = 'block';
-        (graphparamnames[i] as HTMLDivElement).style.display = 'block';
+        (graphparamnames1[i] as HTMLDivElement).style.display = 'block';
+        if(graphparamnames2 != null && graphparamnames2[i] != null) (graphparamnames2[i] as HTMLDivElement).style.display = 'block';
+        if(graphparamnames3 != null && graphparamnames3[i] != null) (graphparamnames3[i] as HTMLDivElement).style.display = 'block';
+        (eventTitles[i] as HTMLDivElement).style.display = 'flex';
       } else {
         (tables[i] as HTMLDivElement).style.display = 'none';
         //(hiddenFilternames[i] as HTMLDivElement).style.display = 'none';
-        (graphparamnames[i] as HTMLDivElement).style.display = 'none';
+        (graphparamnames1[i] as HTMLDivElement).style.display = 'none';
+        if(graphparamnames2 != null && graphparamnames2[i] != null) (graphparamnames2[i] as HTMLDivElement).style.display = 'none';
+        if(graphparamnames3 != null && graphparamnames3[i] != null) (graphparamnames3[i] as HTMLDivElement).style.display = 'none';
+        (eventTitles[i] as HTMLDivElement).style.display = 'none';
       }
 
     }
+
+  }
+
+  processClickOnLegend = (index: number, legendItem: any) => {
+
+    legendItem.hidden = true;
+    const ci = this.chart;
+    if(this.chart.legend.chart.data.datasets != null) {
+      this.chart.legend.chart.data.datasets[0].data.forEach((_d: any, i: any) => {
+        if(index === i) {
+  
+          let opHide = true;
+  
+          console.log('dataset-found before before', this.isSelectedLegend(i), legendItem, this.chartSelectedLegend);
+  
+          if(!this.isSelectedLegend(i)) {
+  
+            //this.clearSelectedLegend();
+  
+            opHide = true;
+            this.chart.legend.chart.getDatasetMeta(0).data[index].hidden = true;
+            this.chartSelectedLegend.push(index);
+            ci.update();
+  
+          } else {
+
+            opHide = false;
+
+            for(var j = 0; j < this.chartSelectedLegend.length; j++) {
+              this.chart.legend.chart.getDatasetMeta(0).data[this.chartSelectedLegend[j]].hidden = false;  
+            }
+            this.removeFromSelectedLegend(index)
+            ci.update();
+            
+          }
+  
+          this.clickOnLegend(this.isSelectedLegend(i), legendItem.text);
+  
+          if(this.chart2 != null && this.chart3 != null) {
+  
+            if(opHide) {
+  
+              // if(this.barCharDataSet2Arr.length > 0) {
+              //   this.chart2.data.datasets = this.barCharDataSet2Arr.pop();
+              // }
+    
+              // if(this.barCharDataSet3Arr.length > 0) {
+              //   this.chart3.data.datasets = this.barCharDataSet3Arr.pop();
+              // }
+    
+              // this.barCharDataSet2Arr.push({index: index, value: this.copy(this.chart2.data.datasets)});
+              // this.barCharDataSet3Arr.push({index: index, value: this.copy(this.chart3.data.datasets)});
+  
+              this.barCharDataSet2Arr.push(this.copy(this.chart2.data.datasets));
+              this.barCharDataSet3Arr.push(this.copy(this.chart3.data.datasets));
+    
+              for(var k = 0; k < this.chart2.data.datasets.length; k++) {
+                const dataset = this.chart2.data.datasets[k];
+                for (var j = 0; j < dataset.data.length; j++) {
+                  if(j === index) {
+                    dataset.data[j] = 0;
+                  } else {
+                  }
+                }
+              }
+    
+              for(var k = 0; k < this.chart3.data.datasets.length; k++) {
+                const dataset = this.chart3.data.datasets[k];
+                for (var j = 0; j < dataset.data.length; j++) {
+                  if(j === index) {
+                    dataset.data[j] = 0;
+                  } else {
+                  }
+                }
+              }
+    
+              console.log('dataset-found before', this.barCharDataSet3Arr);
+    
+            } else {
+  
+              do {
+                this.chart2.data.datasets = this.barCharDataSet2Arr.pop();
+                this.chart3.data.datasets = this.barCharDataSet3Arr.pop();  
+              } while(this.barCharDataSet2Arr.length > 0);
+  
+              this.chartSelectedLegend = [];
+
+            }
+
+            this.chart2.update();
+            this.chart3.update();
+              
+          }
+  
+          //console.log('modified datasets', this.chart2.data.datasets);
+
+          console.log('dataset-found after', this.chartSelectedLegend);
+  
+        }
+      })
+  
+    }
+    
+  }
+
+  clickOnLegend = (hide: boolean, label: string) => {
+    console.log(hide, label);
+    let labelClicked = '';
+
+    if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS || this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
+      labelClicked = (label).toLowerCase().replace(/ /g, "-").replace('status-', '');  
+    } else {
+      labelClicked = (label).toLowerCase();
+    }
+
+    this.processGraphHide(labelClicked, hide);
+  }
+
+  clickOnPie = (callingFromBar: boolean, pieIndex: number) => {
+
+    console.log('pie bar trigger 1 0', JSON.stringify(this.barCharDataSet2));
+    console.log('pieIndex', pieIndex);
+
+    if(this.barCharDataSet2Arr.length > 0) {
+      this.clearSelectedLegend();
+    }
+
+    console.log('pie bar trigger 1 1', JSON.stringify(this.barCharDataSet2));
+
+    let labelClicked = '';
+
+    if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS || this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
+      labelClicked = (this.chart.data.labels[pieIndex] + "").toLowerCase().replace(/ /g, "-").replace('status-', '');  
+    } else {
+      labelClicked = (this.chart.data.labels[pieIndex] + "").toLowerCase();
+    }
+    
+    console.log('pieIndex', labelClicked);
+
+    if(!callingFromBar) {
+      console.log('pieIndex', labelClicked);
+      this.processGraphFilter(labelClicked);
+    }
+    
+  }
+
+  clickOnBar = (callingFromPie: boolean, graphNumber: number, barIndex: number) => {
+    
+    let labelClicked = '';
+
+    if(graphNumber === 2 || graphNumber === 3) {
+      if(this.flowGraph == this.FLOW_GRAPH_COMPLETENESS || this.flowGraph == this.FLOW_GRAPH_TIMELINESS) {
+        labelClicked = (this.chart2.data.labels[barIndex].join(" ") + "").toLowerCase().replace(/ /g, "-").replace('status-', '');  
+      } else {
+        labelClicked = (this.chart2.data.labels[barIndex].join(" ") + "").toLowerCase();
+      }
+    }
+    
+    if(!callingFromPie) {
+      this.processGraphFilter(labelClicked);
+    }
+
+    console.log('clickonbar trigger', this.graphParam, '><', this.barCharDataSet2);
+
+    if(this.graphParam.length > 0) {
+
+      if(this.barCharDataSet2.length > 0 && this.barCharDataSet3.length > 0) {
+        this.chart2.data.datasets = this.barCharDataSet2.pop();
+        this.chart3.data.datasets = this.barCharDataSet3.pop();
+      }
+
+      this.barCharDataSet2.push(this.copy(this.chart2.data.datasets));
+      for(var i = 0; i < this.chart2.data.datasets.length; i++) {
+        const dataset = this.chart2.data.datasets[i];
+        for (var j = 0; j < dataset.data.length; j++) {
+          if(j === barIndex) {
+
+          } else {
+            dataset.data[j] = 0;
+          }
+        }
+      }
+
+      this.barCharDataSet3.push(this.copy(this.chart3.data.datasets));
+      for(var i = 0; i < this.chart3.data.datasets.length; i++) {
+        const dataset = this.chart3.data.datasets[i];
+        for (var j = 0; j < dataset.data.length; j++) {
+          if(j === barIndex) {
+
+          } else {
+            dataset.data[j] = 0;
+          }
+        }
+      }
+
+      console.log('clickonbar trigger latest values', this.chart2.data.datasets);
+      console.log('clickonbar trigger in storage', this.barCharDataSet2);
+    
+    } else {
+      this.chart2.data.datasets = this.barCharDataSet2.pop();
+      this.chart3.data.datasets = this.barCharDataSet3.pop();
+    }
+    
+    console.log(this.chart2.data);
+    this.chart2.update();
+    this.chart3.update();
+    
   }
 
   getCurrentTab = () => {
@@ -12704,6 +15997,8 @@ export class SfIEvents extends LitElement {
 
   renderTabs = (selectedTab: string) => {
 
+    this.selectedTab = selectedTab;
+
     this.clearAllCalendars();
 
     this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
@@ -12727,8 +16022,8 @@ export class SfIEvents extends LitElement {
       if(this.mode == "consumer") {
         this.renderTabs(this.TAB_YEAR);
         this.enableCalendar();
-        await this.fetchUserCalendar_2();
-        this.renderCalendar();
+        await this.fetchAndYearlyRenderUserCalendar_2();
+        //this.renderCalendar();
         // this.loadMode();
         
       } else {
@@ -12753,11 +16048,11 @@ export class SfIEvents extends LitElement {
           break;
         }
       }
+      this.currentColumnIndex =  idx + "";
       const dateResult = this.calculateStartAndEndDateOfStream(idx);
       if(dateResult != null) {
-        await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
+        await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
       }
-      this.currentColumnIndex =  idx + "";
       this.renderStream(idx);
     });
 
@@ -12766,8 +16061,8 @@ export class SfIEvents extends LitElement {
       this.renderTabs(this.TAB_UPCOMING);
       const dateResult = this.calculateStartAndEndDateOfUpcoming(0);
       console.log('dateresult', dateResult)
-      await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
       this.currentColumnIndex =  0 + ""
+      await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
       this.renderUpcoming();
     });
 
@@ -12776,8 +16071,8 @@ export class SfIEvents extends LitElement {
       this.renderTabs(this.TAB_THIS);
       const dateResult = this.calculateStartAndEndDateOfThis(0);
       console.log('dateresult', dateResult)
-      await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
       this.currentColumnIndex =  0 + ""
+      await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
       this.renderThis();
     });
 
@@ -12786,8 +16081,8 @@ export class SfIEvents extends LitElement {
       this.renderTabs(this.TAB_PAST);
       const dateResult = this.calculateStartAndEndDateOfPast(0);
       console.log('dateresult', dateResult)
-      await this.fetchUserCalendar_2(dateResult.startDate, dateResult.endDate);
       this.currentColumnIndex =  0 + ""
+      await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
       this.renderPast();
     });
 
@@ -13452,7 +16747,7 @@ export class SfIEvents extends LitElement {
 
   uploadInternalControlsMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedinternalcontrols";
+    let url = "https://"+this.apiId+"/updatemappedinternalcontrols";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13479,7 +16774,7 @@ export class SfIEvents extends LitElement {
 
   uploadAlertSchedulesMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedalertschedules";
+    let url = "https://"+this.apiId+"/updatemappedalertschedules";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13506,7 +16801,7 @@ export class SfIEvents extends LitElement {
 
   uploadDuedatesMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedduedates";
+    let url = "https://"+this.apiId+"/updatemappedduedates";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13533,7 +16828,7 @@ export class SfIEvents extends LitElement {
 
   uploadApproversMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedapprovers";
+    let url = "https://"+this.apiId+"/updatemappedapprovers";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13560,7 +16855,7 @@ export class SfIEvents extends LitElement {
 
   uploadFunctionHeadsMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedfunctionheads";
+    let url = "https://"+this.apiId+"/updatemappedfunctionheads";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13587,7 +16882,7 @@ export class SfIEvents extends LitElement {
 
   uploadMakerCheckersMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedmakercheckers";
+    let url = "https://"+this.apiId+"/updatemappedmakercheckers";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13614,7 +16909,7 @@ export class SfIEvents extends LitElement {
 
   uploadDocsMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappeddocs";
+    let url = "https://"+this.apiId+"/updatemappeddocs";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13641,7 +16936,7 @@ export class SfIEvents extends LitElement {
 
   uploadAuditorsMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedauditors";
+    let url = "https://"+this.apiId+"/updatemappedauditors";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13668,7 +16963,7 @@ export class SfIEvents extends LitElement {
 
   uploadViewersMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedviewers";
+    let url = "https://"+this.apiId+"/updatemappedviewers";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13695,7 +16990,7 @@ export class SfIEvents extends LitElement {
 
   uploadReportersMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedreporters";
+    let url = "https://"+this.apiId+"/updatemappedreporters";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13722,7 +17017,7 @@ export class SfIEvents extends LitElement {
 
   uploadTagsMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedtags";
+    let url = "https://"+this.apiId+"/updatemappedtags";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13749,7 +17044,7 @@ export class SfIEvents extends LitElement {
 
   uploadFunctionsMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedfunctions";
+    let url = "https://"+this.apiId+"/updatemappedfunctions";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13776,7 +17071,7 @@ export class SfIEvents extends LitElement {
 
   uploadLocationsMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedlocations";
+    let url = "https://"+this.apiId+"/updatemappedlocations";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13803,7 +17098,7 @@ export class SfIEvents extends LitElement {
 
   uploadEntitiesMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedentities";
+    let url = "https://"+this.apiId+"/updatemappedentities";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13830,7 +17125,7 @@ export class SfIEvents extends LitElement {
 
   uploadCountriesMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedcountries";
+    let url = "https://"+this.apiId+"/updatemappedcountries";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13857,7 +17152,7 @@ export class SfIEvents extends LitElement {
 
   uploadCompliancesMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedcompliances";
+    let url = "https://"+this.apiId+"/updatemappedcompliances";
 
     const body = { 
       "projectid": this.projectId, 
@@ -13865,7 +17160,7 @@ export class SfIEvents extends LitElement {
     }
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization, data["percentage"] + '%')) as any;
     this._SfLoader.innerHTML = '';
     if(xhr.status == 200) {
 
@@ -13884,7 +17179,7 @@ export class SfIEvents extends LitElement {
 
   uploadStatutesMapping = async (data: any) => {
     console.log('uploading..', data);
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatemappedstatutes";
+    let url = "https://"+this.apiId+"/updatemappedstatutes";
 
     var searchstring = '';
 
@@ -13925,7 +17220,7 @@ export class SfIEvents extends LitElement {
 
   uploadUnTriggerEvent = async (eventid: string, mmdd: string) => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/untriggermyevent";
+    let url = "https://"+this.apiId+"/untriggermyevent";
 
     const body = { 
       "mmdd": mmdd, 
@@ -13943,7 +17238,7 @@ export class SfIEvents extends LitElement {
       const jsonRespose = JSON.parse(xhr.responseText);
       console.log('jsonResponse sync', jsonRespose);
       this.setSuccess("Event untriggered successfully!");
-      await this.fetchUserCalendar_2();
+      await this.fetchAndYearlyRenderUserCalendar_2();
       setTimeout(() => {
         this.clearMessages()
         this.renderTabs(this.TAB_ADHOC);
@@ -13962,7 +17257,7 @@ export class SfIEvents extends LitElement {
 
   uploadTriggerEvent = async (entityId: string, locationId: string, eventid: string, dateofoccurrence: string) => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/triggermyevent";
+    let url = "https://"+this.apiId+"/triggermyevent";
 
     const body = { 
       "dateofoccurrence": dateofoccurrence,
@@ -13982,7 +17277,7 @@ export class SfIEvents extends LitElement {
       const jsonRespose = JSON.parse(xhr.responseText);
       console.log('jsonResponse sync', jsonRespose);
       this.setSuccess("Event triggered successfully!");
-      await this.fetchUserCalendar_2();
+      await this.fetchAndYearlyRenderUserCalendar_2();
       setTimeout(() => {
         this.clearMessages()
         this.renderTabs(this.TAB_ADHOC);
@@ -14000,7 +17295,7 @@ export class SfIEvents extends LitElement {
   }
 
   uploadAudit = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => {
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/uploadaudit";
+    let url = "https://"+this.apiId+"/uploadaudit";
 
     const body = { 
       "mmddyyyy": mmddyyyy,
@@ -14038,7 +17333,7 @@ export class SfIEvents extends LitElement {
   }
 
   uploadReview = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => {
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/uploadreview";
+    let url = "https://"+this.apiId+"/uploadreview";
 
     const body = { 
       "mmddyyyy": mmddyyyy,
@@ -14050,6 +17345,8 @@ export class SfIEvents extends LitElement {
       "entityid": entityId,
       "locationid": locationId
     } 
+
+    console.log('uploading review', body);
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -14076,7 +17373,7 @@ export class SfIEvents extends LitElement {
   }
 
   uploadReport = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, doc: string, docs: any) => {
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/uploadreport";
+    let url = "https://"+this.apiId+"/uploadreport";
 
     const body = { 
       "mmddyyyy": mmddyyyy,
@@ -14119,7 +17416,7 @@ export class SfIEvents extends LitElement {
 
   uploadMapping = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/mapevents";
+    let url = "https://"+this.apiId+"/mapevents";
 
     const mapping = this.transformMappingsForUpload({
       duedates: this.mappedValuesDueDates,
@@ -14156,7 +17453,7 @@ export class SfIEvents extends LitElement {
 
   uploadEvents = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/synccalendar";
+    let url = "https://"+this.apiId+"/synccalendar";
 
     const body = { "projectid": (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0], "events": JSON.stringify(this.events)} 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
@@ -14179,7 +17476,7 @@ export class SfIEvents extends LitElement {
 
   uploadReprogramTrigger = async (eventid: string, timestamp: string) => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/reprogramtrigger";
+    let url = "https://"+this.apiId+"/reprogramtrigger";
 
     const body = { "projectid": (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0], "eventid": eventid, "timestamp": timestamp + ""} 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
@@ -14317,7 +17614,7 @@ export class SfIEvents extends LitElement {
 
   fetchRcmLockedCompliances = async (lockedCompliances: Array<string>) => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getrcmlockedcompliances";
+    let url = "https://"+this.apiId+"/getrcmlockedcompliances";
     let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     let xhr : any = (await this.prepareXhr({data: lockedCompliances}, url, this._SfLoader, authorization)) as any;
 
@@ -14338,9 +17635,51 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchCancelOnboardingJob = async (onboardingStep: string) => {
+    let url = "https://"+this.apiId+"/cancelonboardingjob";
+    let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    let xhr : any = (await this.prepareXhr({"projectid": this.projectId, "onboardingstep": onboardingStep}, url, this._SfLoader, authorization)) as any;
+
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('fetchCancelnboardingJob', jsonRespose);
+
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+  }
+
+  fetchGetStoredMapping = async (flow: string) => {
+    let url = "https://"+this.apiId+"/getstoredmapping";
+    let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    let xhr : any = (await this.prepareXhr({"projectid": this.projectId, "flow": flow}, url, this._SfLoader, authorization)) as any;
+
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('fetchGetStoredMapping', jsonRespose);
+
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+  }
+
   fetchUpdateRcmLock = async (complianceId: string) => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/updatercmlock";
+    let url = "https://"+this.apiId+"/updatercmlock";
     let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     let xhr : any = (await this.prepareXhr({"complianceid": complianceId, "locked": true}, url, this._SfLoader, authorization)) as any;
 
@@ -14373,6 +17712,27 @@ export class SfIEvents extends LitElement {
       const jsonRespose = JSON.parse(xhr.responseText);
       console.log('searchprojects', jsonRespose);
 
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchDeleteReview = async (eventId: string, mmddyyyy: string, entityId: string, locationId: string) => {
+
+    let url = "https://"+this.apiId+"/deletereview";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "entityid": entityId, "locationid": locationId, "mmddyyyy": mmddyyyy, "eventid": eventId, }, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
       return jsonRespose;
       
     } else {
@@ -14431,7 +17791,7 @@ export class SfIEvents extends LitElement {
 
   }
 
-  fetchSearchCompliances = async (searchString: string, cursor: string = "") => {
+  fetchSearchCompliances = async (searchString: string, cursor: string = "", count: number, length: number) => {
 
     let url = "https://"+this.apiIdCompliances+".execute-api.us-east-1.amazonaws.com/test/list";
     let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
@@ -14440,33 +17800,30 @@ export class SfIEvents extends LitElement {
     if(xhr.status == 200) {
 
       const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
+     // console.log(jsonRespose);
 
       let newCursor = jsonRespose.cursor;
-      console.log('newcursor', newCursor);
-      let i = 0;
+      //console.log('newcursor', newCursor);
 
       while(true) {
 
         url = "https://"+this.apiIdCompliances+".execute-api.us-east-1.amazonaws.com/test/list";
         authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-        xhr = (await this.prepareXhr({"searchstring": searchString, "cursor": newCursor}, url, this._SfLoader, authorization, "" + parseInt(((i)*10*100/jsonRespose.found) + "") + "%")) as any;
+        xhr = (await this.prepareXhr({"searchstring": searchString, "cursor": newCursor}, url, this._SfLoader, authorization, "" + parseInt(((count)*100/length) + "") + "%")) as any;
 
         this._SfLoader.innerHTML = '';
         if(xhr.status == 200) {
           const jsonRespose1 = JSON.parse(xhr.responseText);
-          console.log('newcursor response', jsonRespose1);
+         // console.log('newcursor response', jsonRespose1);
           jsonRespose.values.push(...jsonRespose1.values);
           if(newCursor == jsonRespose1.cursor) {
             break;
           }
           newCursor = jsonRespose1.cursor;
-          console.log('newcursor', i, jsonRespose1.cursor);
+          //console.log('newcursor', i, jsonRespose1.cursor);
         } else {
           break;
         }
-
-        i++;
 
       }
 
@@ -14483,7 +17840,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedLocations = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedlocations";
+    let url = "https://"+this.apiId+"/getmappedlocations";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -14504,7 +17861,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedFunctions = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedfunctions";
+    let url = "https://"+this.apiId+"/getmappedfunctions";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -14525,7 +17882,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedProjects = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedprojects";
+    let url = "https://"+this.apiId+"/getmappedprojects";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"complianceid": this.rcmSelectedCompliance.id}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -14544,9 +17901,9 @@ export class SfIEvents extends LitElement {
 
   }
 
-  fetchMappedCompliances = async () => {
+  fetchOnboardingStatus = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedcompliances";
+    let url = "https://"+this.apiId+"/getonboardingstatus";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -14562,306 +17919,252 @@ export class SfIEvents extends LitElement {
       this.setError(jsonRespose.error);
 
     }
+
+  }
+
+  fetchGetSignOff = async () => {
+
+    let url = "https://"+this.apiId+"/getsignoff";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchUpdateSignOff = async (signoffText: string, signature: string) => {
+
+    let url = "https://"+this.apiId+"/updatesignoff";
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "signofftext": signoffText, "signature": signature}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log(jsonRespose);
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchMappedCompliances = async () => {
+
+    // let url = "https://"+this.apiId+"/getmappedcompliances";
+    // const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    // const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    // this._SfLoader.innerHTML = '';
+    // if(xhr.status == 200) {
+
+    //   const jsonRespose = JSON.parse(xhr.responseText);
+    //   console.log(jsonRespose);
+    //   return jsonRespose;
+      
+    // } else {
+
+    //   const jsonRespose = JSON.parse(xhr.responseText);
+    //   this.setError(jsonRespose.error);
+
+    // }
+
+    let jsonResponse : any = null;
+    let lastEvaluatedKey : any = 0;
+
+    do {
+
+      console.log(lastEvaluatedKey);
+
+      let url = "https://"+this.apiId+"/getmappedcompliances";
+      const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+      const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "lastevaluatedkey": lastEvaluatedKey}, url, this._SfLoader, authorization)) as any;
+      this._SfLoader.innerHTML = '';
+      if(xhr.status == 200) {
+  
+        const jsRespose = JSON.parse(xhr.responseText);
+        console.log(jsRespose);
+
+        if(jsRespose == null) return;
+
+        if(lastEvaluatedKey === 0) {
+            jsonResponse = {};
+            jsonResponse.data = {}
+            jsonResponse.data = jsRespose.data;
+        } else {
+          jsonResponse.data.mappings.mappings.push(...jsRespose.data.mappings.mappings);
+        }
+
+        if(jsRespose.lastEvaluatedKey < 0) break;
+
+        lastEvaluatedKey = jsRespose.lastEvaluatedKey;
+        
+      } else {
+  
+        const jsonRespose = JSON.parse(xhr.responseText);
+        this.setError(jsonRespose.error);
+        break;
+  
+      }
+
+    } while(true);
+    
+    return jsonResponse;
 
   }
 
   fetchMappedSerializedAlertSchedules = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedalertschedules";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedalertschedules"));
 
   }
 
   fetchMappedSerializedDuedates = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedduedates";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
-
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedduedates"));
+    
   }
 
   fetchMappedSerializedApprovers = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedapprovers";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
-
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedapprovers"));
+    
   }
 
   fetchMappedSerializedFunctionheads = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedfunctionheads";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedfunctionheads"));
 
   }
 
   fetchMappedSerializedMakerCheckers = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedmakercheckers";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedmakercheckers"));
 
   }
 
   fetchMappedSerializedDocs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializeddocs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
-
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializeddocs"));
+    
   }
 
   fetchMappedSerializedAuditors = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedauditors";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
-
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedauditors"));
+    
   }
 
   fetchMappedSerializedViewers = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedviewers";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedviewers"));
 
   }
 
   fetchMappedSerializedReporters = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedreporters";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedreporters"));
 
   }
 
   fetchMappedSerializedTags = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedtags";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedtags"));
 
   }
 
   fetchMappedSerializedLocations = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedlocations";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedlocations"));
 
   }
 
   fetchMappedSerializedFunctions = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedfunctions";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedfunctions"));
 
   }
 
   fetchMappedSerializedEntities = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedentities";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedentities"));
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
+  }
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  fetchSerializedPartByPart = async (url: string) => {
 
-    }
+    let jsonResponse : any = null;
+    let lastEvaluatedKey : any = null;
+
+    do {
+
+      console.log(lastEvaluatedKey);
+
+      const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+      const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "lastevaluatedkey": lastEvaluatedKey}, url, this._SfLoader, authorization)) as any;
+      this._SfLoader.innerHTML = '';
+      if(xhr.status == 200) {
+  
+        const jsRespose = JSON.parse(xhr.responseText);
+        console.log(jsRespose);
+        if(jsRespose != null && jsRespose.lastEvaluatedKey == null) {
+
+          jsonResponse.data.mappings.mappings.push(...jsRespose.data.mappings.mappings);
+
+          break;
+        } else {
+
+          if(jsonResponse == null) {
+
+            jsonResponse = {};
+            jsonResponse.data = {}
+            jsonResponse.data = jsRespose.data;
+
+          } else {
+
+            jsonResponse.data.mappings.mappings.push(...jsRespose.data.mappings.mappings);
+
+          }
+          lastEvaluatedKey = jsRespose.lastEvaluatedKey;
+        }
+        
+      } else {
+  
+        const jsonRespose = JSON.parse(xhr.responseText);
+        this.setError(jsonRespose.error);
+  
+      }
+
+    } while(true);
+    
+    console.log(jsonResponse);
+    return jsonResponse;
 
   }
 
   fetchMappedSerializedCountries = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedserializedcountries";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      console.log(jsonRespose);
-      return jsonRespose;
-      
-    } else {
-
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
-
-    }
-
+    return (await this.fetchSerializedPartByPart("https://"+this.apiId+"/getmappedserializedcountries"));
+    
   }
 
   fetchMappedInternalControls = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedinternalcontrols";
+    let url = "https://"+this.apiId+"/getmappedinternalcontrols";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -14882,7 +18185,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedAlertSchedules = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedalertschedules";
+    let url = "https://"+this.apiId+"/getmappedalertschedules";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -14903,7 +18206,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedDuedates = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedduedates";
+    let url = "https://"+this.apiId+"/getmappedduedates";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -14924,7 +18227,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedReporters = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedreporters";
+    let url = "https://"+this.apiId+"/getmappedreporters";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -14945,7 +18248,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedApprovers = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedapprovers";
+    let url = "https://"+this.apiId+"/getmappedapprovers";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -14966,7 +18269,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedFunctionHeads = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedfunctionheads";
+    let url = "https://"+this.apiId+"/getmappedfunctionheads";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -14987,7 +18290,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedMakerCheckers = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedmakercheckers";
+    let url = "https://"+this.apiId+"/getmappedmakercheckers";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15008,7 +18311,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedDocs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappeddocs";
+    let url = "https://"+this.apiId+"/getmappeddocs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15029,7 +18332,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedAuditors = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedauditors";
+    let url = "https://"+this.apiId+"/getmappedauditors";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15050,7 +18353,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedViewers = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedviewers";
+    let url = "https://"+this.apiId+"/getmappedviewers";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15071,7 +18374,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedTags = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedtags";
+    let url = "https://"+this.apiId+"/getmappedtags";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15092,7 +18395,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedCountries = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedcountries";
+    let url = "https://"+this.apiId+"/getmappedcountries";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15113,7 +18416,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedEntities = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedentities";
+    let url = "https://"+this.apiId+"/getmappedentities";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15155,7 +18458,7 @@ export class SfIEvents extends LitElement {
 
   fetchMappedStatutes = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedstatutes";
+    let url = "https://"+this.apiId+"/getmappedstatutes";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15182,7 +18485,7 @@ export class SfIEvents extends LitElement {
     data.projects = [];
     data.projects.push(...projects)
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/creatercmjob";
+    let url = "https://"+this.apiId+"/creatercmjob";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"complianceid": complianceid, "data": data}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15203,7 +18506,7 @@ export class SfIEvents extends LitElement {
 
   fetchRcmNotifications = async (projectid: string) => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getrcmnotifications";
+    let url = "https://"+this.apiId+"/getrcmnotifications";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": projectid}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15224,7 +18527,7 @@ export class SfIEvents extends LitElement {
 
   fetchRcmJobs = async (complianceid: string) => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getrcmjobs";
+    let url = "https://"+this.apiId+"/getrcmjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"complianceid": complianceid}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15245,7 +18548,7 @@ export class SfIEvents extends LitElement {
 
   fetchInternalControlsJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getinternalcontrolsjobs";
+    let url = "https://"+this.apiId+"/getinternalcontrolsjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15266,7 +18569,7 @@ export class SfIEvents extends LitElement {
 
   fetchAlertSchedulesJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getalertschedulesjobs";
+    let url = "https://"+this.apiId+"/getalertschedulesjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15287,7 +18590,7 @@ export class SfIEvents extends LitElement {
 
   fetchDueDatesJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getduedatesjobs";
+    let url = "https://"+this.apiId+"/getduedatesjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15308,7 +18611,7 @@ export class SfIEvents extends LitElement {
 
   fetchApproversJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getapproversjobs";
+    let url = "https://"+this.apiId+"/getapproversjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15329,7 +18632,7 @@ export class SfIEvents extends LitElement {
 
   fetchFunctionHeadsJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getfunctionheadsjobs";
+    let url = "https://"+this.apiId+"/getfunctionheadsjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15350,7 +18653,7 @@ export class SfIEvents extends LitElement {
 
   fetchMakerCheckersJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmakercheckersjobs";
+    let url = "https://"+this.apiId+"/getmakercheckersjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15371,7 +18674,7 @@ export class SfIEvents extends LitElement {
 
   fetchDocsJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getdocsjobs";
+    let url = "https://"+this.apiId+"/getdocsjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15392,7 +18695,7 @@ export class SfIEvents extends LitElement {
 
   fetchAuditorsJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getauditorsjobs";
+    let url = "https://"+this.apiId+"/getauditorsjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15413,7 +18716,7 @@ export class SfIEvents extends LitElement {
 
   fetchViewersJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getviewersjobs";
+    let url = "https://"+this.apiId+"/getviewersjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15434,7 +18737,7 @@ export class SfIEvents extends LitElement {
 
   fetchReportersJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getreportersjobs";
+    let url = "https://"+this.apiId+"/getreportersjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15455,7 +18758,7 @@ export class SfIEvents extends LitElement {
   
   fetchTagsJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/gettagsjobs";
+    let url = "https://"+this.apiId+"/gettagsjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15476,7 +18779,7 @@ export class SfIEvents extends LitElement {
   
   fetchLocationsJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getlocationsjobs";
+    let url = "https://"+this.apiId+"/getlocationsjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15497,7 +18800,7 @@ export class SfIEvents extends LitElement {
   
   fetchCountriesJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getcountriesjobs";
+    let url = "https://"+this.apiId+"/getcountriesjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15518,7 +18821,7 @@ export class SfIEvents extends LitElement {
   
   fetchEntitiesJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getentitiesjobs";
+    let url = "https://"+this.apiId+"/getentitiesjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15539,7 +18842,7 @@ export class SfIEvents extends LitElement {
   
   fetchFunctionJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getfunctionsjobs";
+    let url = "https://"+this.apiId+"/getfunctionsjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15560,7 +18863,7 @@ export class SfIEvents extends LitElement {
 
   fetchCalendarJobs = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getcalendarjobs";
+    let url = "https://"+this.apiId+"/getcalendarjobs";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15605,12 +18908,12 @@ export class SfIEvents extends LitElement {
 
   }
 
-  fetchGetMappedCalendar = async() => {
+  fetchGetMappedCalendar = async(year: string) => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getmappedcalendar";
+    let url = "https://"+this.apiId+"/getmappedcalendar";
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization);
+    this.prepareXhr({"projectid": this.projectId, "year": year}, url, this._SfLoader, authorization);
     this.setSuccess('Operation triggered! It will complete in the background in a few minutes...');
     setTimeout(() => {
       this.clearMessages();
@@ -15619,35 +18922,13 @@ export class SfIEvents extends LitElement {
 
   }
 
-  // foundCalendarInLocal = (body: any) => {
-  //   var foundInLocal = false;
-  //   if(localStorage.getItem(JSON.stringify(body)) != null) {
-  //     if(localStorage.getItem(JSON.stringify(body)) != "") {
-  //       foundInLocal = true;
-  //     }
-  //   }
-  //   return foundInLocal;
-  // }
+  sleepFunction = async (ms: number) => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
 
-  // // getLocalKey = () => {
-  // //   const localKey = this.projectId + ';' + this.userProfileId + ';' + this.entityId + ';' + this.locationId;
-  // //   return localKey;
-  // // }
-
-  // cleanLocalStorage = (body: any) => {
-    
-  //   const delKeys = [];
-  //   for(var i = 0; i < localStorage.length; i++) {
-  //     if(localStorage.key(i) != JSON.stringify(body)) {
-  //       delKeys.push(localStorage.key(i));
-  //     }
-  //   }
-  //   for( var i = 0; i < delKeys.length; i++) {
-  //     localStorage.removeItem(delKeys[i] || "");
-  //   }
-  // }
-
-  fetchUserCalendar_2 = async(startDate: string = "", endDate: string = "") => {
+  fetchAndYearlyRenderUserCalendar_2 = async(startDate: string = "", endDate: string = "") => {
 
     let path = "";
 
@@ -15665,13 +18946,13 @@ export class SfIEvents extends LitElement {
 
     let sDate = "";
     let eDate = "";
-    let paginate = false;
+    let paginate = true;
 
     console.log('currenttab', this.getCurrentTab());
 
     if(this.getCurrentTab() == this.TAB_YEAR) {
       sDate = "03/31/" + this.calendarStartYYYY;
-      eDate = "04/01/" + (this.calendarStartYYYY + 1);
+      eDate = "04/01/" + (parseInt(this.calendarStartYYYY) + 1);
       paginate = true;
     } else {
       sDate = startDate;
@@ -15679,9 +18960,10 @@ export class SfIEvents extends LitElement {
     }
 
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/"+ path;
+    let url = "https://"+this.apiId+"/"+ path;
+    
     console.log('fetch calendar url', url);
-    let urlBody = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": "", "sdate": sDate, "edate": eDate, "paginate": paginate};
+    let urlBody = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": "", "sdate": sDate, "edate": eDate, "paginate": paginate, "year": this.calendarStartYYYY};
 
     console.log('urlbody', urlBody);
 
@@ -15713,15 +18995,21 @@ export class SfIEvents extends LitElement {
         console.log(jsonRespose);
         this.events = (jsonRespose.data.events)
 
+        if(startDate == "" && endDate == "") this.renderCalendar(); // yearly
+
         let lastEvaluatedKey = jsonRespose.lastEvaluatedKey;
 
         console.log('lastevaluatedkey0', lastEvaluatedKey);
 
+        var recallCount = 0;
+
         do {
+
+          if(recallCount > 3) break;
 
           if(lastEvaluatedKey != null) {
 
-            const xhr2 : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": lastEvaluatedKey, "sdate": sDate, "edate": eDate, "paginate": paginate}, url, this._SfLoader, authorization)) as any;
+            const xhr2 : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": lastEvaluatedKey, "sdate": sDate, "edate": eDate, "paginate": paginate, "year": this.calendarStartYYYY}, url, this._SfLoader, authorization)) as any;
             this._SfLoader.innerHTML = '';
 
             if(xhr2.status == 200) {
@@ -15729,8 +19017,30 @@ export class SfIEvents extends LitElement {
               const jsonRespose2 = JSON.parse(xhr2.responseText);
               this.events = {...this.events, ...jsonRespose2.data.events}
 
-              lastEvaluatedKey = jsonRespose2.lastEvaluatedKey;
-              console.log('lastevaluatedkey1', lastEvaluatedKey);
+              if(startDate == "" && endDate == "") this.renderCalendar(); // yearly
+
+              if(this.selectedTab == this.TAB_STREAM) {
+                this.renderStream(parseInt(this.currentColumnIndex), false);
+              }
+              if(this.selectedTab == this.TAB_UPCOMING) {
+                this.renderUpcoming(parseInt(this.currentColumnIndex), false);
+              }
+              if(this.selectedTab == this.TAB_THIS) {
+                this.renderThis(parseInt(this.currentColumnIndex), false);
+              }
+              if(this.selectedTab == this.TAB_PAST) {
+                this.renderPast(parseInt(this.currentColumnIndex), false);
+              }
+              console.log(jsonRespose2);
+
+              if(jsonRespose2.lastEvaluatedKey != null && jsonRespose2.lastEvaluatedKey.name != null && jsonRespose2.lastEvaluatedKey.name == "ProvisionedThroughputExceededException") {
+                console.log("backing off...");
+                await this.sleep(2000);
+                recallCount++;
+              } else {
+                lastEvaluatedKey = jsonRespose2.lastEvaluatedKey;
+                console.log('lastevaluatedkey1', lastEvaluatedKey);  
+              }
 
             } else {
               console.log('calendar fetching error breaking');
@@ -15747,6 +19057,9 @@ export class SfIEvents extends LitElement {
         if(this.events != null) {
           // this.renderTabs(this.TAB_YEAR);
           //this.renderCalendar();
+
+          console.log('events received', this.events);
+          
         }
       
       // }
@@ -15772,7 +19085,7 @@ export class SfIEvents extends LitElement {
   
   fetchUserCalendar = async() => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getuserevents";
+    let url = "https://"+this.apiId+"/getuserevents";
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole}, url, this._SfLoader, authorization)) as any;
@@ -15811,7 +19124,7 @@ export class SfIEvents extends LitElement {
 
     //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getcalendar";
+    let url = "https://"+this.apiId+"/getcalendar";
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]}, url, this._SfLoader, authorization)) as any;
@@ -15848,7 +19161,7 @@ export class SfIEvents extends LitElement {
 
   fetchReprogramAdhoc = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/reprogramtrigger";
+    let url = "https://"+this.apiId+"/reprogramtrigger";
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": this.mode == "admin" ? (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0] : this.projectId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
@@ -15901,8 +19214,8 @@ export class SfIEvents extends LitElement {
     }
 
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/"+ path;
-    let urlBody = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "true", "exclusivestartkey": "", "sdate": sDate, "edate": eDate, "paginate": paginate};
+    let url = "https://"+this.apiId+"/"+ path;
+    let urlBody = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "true", "exclusivestartkey": "", "sdate": sDate, "edate": eDate, "paginate": paginate, "year": this.calendarStartYYYY};
 
     console.log('urlbody', urlBody);
 
@@ -15923,7 +19236,7 @@ export class SfIEvents extends LitElement {
 
         if(lastEvaluatedKey != null) {
 
-          const xhr2 : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "true", "exclusivestartkey": lastEvaluatedKey, "sdate": sDate, "edate": eDate, "paginate": paginate}, url, this._SfLoader, authorization)) as any;
+          const xhr2 : any = (await this.prepareXhr({"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "true", "exclusivestartkey": lastEvaluatedKey, "sdate": sDate, "edate": eDate, "paginate": paginate, "year": this.calendarStartYYYY}, url, this._SfLoader, authorization)) as any;
           this._SfLoader.innerHTML = '';
 
           if(xhr2.status == 200) {
@@ -15968,7 +19281,7 @@ export class SfIEvents extends LitElement {
 
   fetchEventMap = async () => {
 
-    let url = "https://"+this.apiId+".execute-api.us-east-1.amazonaws.com/test/getunmappedevents";
+    let url = "https://"+this.apiId+"/getunmappedevents";
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0], "role": this.myRole}, url, this._SfLoader, authorization)) as any;
@@ -16241,6 +19554,7 @@ export class SfIEvents extends LitElement {
     } else if(this.mode == "onboarding") {
 
       //this.myOnboardingTab = this.TAB_STATUTES;
+      
       this.renderOnboardingTabs();
       // this.clickOnboardingTabs();
       //this.loadOnboardingStatutes();
@@ -16402,6 +19716,10 @@ export class SfIEvents extends LitElement {
               <div class="loader-element"></div>
           </div>
           
+          <div class="d-flex mb-20 flex-wrap" id="onboarding-status-container">
+
+          </div>
+
           <div class="d-flex justify-center mb-20 flex-wrap" id="onboarding-tab-container">
 
           </div>
@@ -16456,6 +19774,9 @@ export class SfIEvents extends LitElement {
               
             </div>
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="internalcontrols-container">
+              
+            </div>
+            <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="signoff-container">
               
             </div>
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="calendar-container">

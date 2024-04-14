@@ -15,12 +15,35 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200;300;400;600&display=swap" rel="stylesheet">
     <script type="module">
+
+      import {LitElement, html, css} from 'https://esm.run/lit-element/lit-element.js';
+      import {SfISelect} from 'https://esm.run/sf-i-select@1.0.91/sf-i-select.js';
+      import {SfISubSelect} from 'https://esm.run/sf-i-sub-select@1.0.82/sf-i-sub-select.js';
+      import {SfIForm} from 'https://esm.run/sf-i-form@1.0.115/sf-i-form.js';
+      import {SfIElasticText} from 'https://esm.run/sf-i-elastic-text@1.0.7/sf-i-elastic-text.js';
+      import {SfIUploader} from 'https://esm.run/sf-i-uploader@1.0.41/sf-i-uploader.js';
+      
+      // import {LitElement, html, css} from 'https://unpkg.com/lit-element@3.3.3/lit-element.js?module';
+      // import {SfNav} from 'https://unpkg.com/sf-nav@1.0.73/sf-nav.js?module';
+      // import {SfChartPie} from 'https://unpkg.com/sf-chart-pie@1.0.4/sf-chart-pie.js?module';
+      // import {SfChartBar} from 'https://unpkg.com/sf-chart-bar@1.0.6/sf-chart-bar.js?module';
+      // import {SfUserAuth} from 'https://unpkg.com/sf-user-auth@1.0.87/sf-user-auth.js?module';
+      // import {SfISelect} from 'https://unpkg.com/sf-i-select@1.0.91/sf-i-select.js?module';
+      // import {SfISubSelect} from 'https://unpkg.com/sf-i-sub-select@1.0.82/sf-i-sub-select.js?module';
+      // import {SfIForm} from 'https://unpkg.com/sf-i-form@1.0.115/sf-i-form.js?module';
+      // import {SfIEvents} from 'https://unpkg.com/sf-i-events@1.0.423/sf-i-events.js?module';
+      // import {SfIElasticText} from 'https://unpkg.com/sf-i-elastic-text@1.0.7/sf-i-elastic-text.js?module';
+      // import {SfIUploader} from 'https://unpkg.com/sf-i-uploader@1.0.41/sf-i-uploader.js?module';
+      // import {SfRandomText} from 'https://unpkg.com/sf-random-text@1.0.2/sf-random-text.js?module';
+      
+  </script>
+    <!-- <script type="module">
         import {SfISelect} from 'https://unpkg.com/sf-i-select@1.0.80/sf-i-select.js?module';
         import {SfIForm} from 'https://unpkg.com/sf-i-form@1.0.115/sf-i-form.js?module';
         import {SfISubSelect} from 'https://unpkg.com/sf-i-sub-select@1.0.81/sf-i-sub-select.js?module';
         import {SfIElasticText} from 'https://unpkg.com/sf-i-elastic-text@1.0.7/sf-i-elastic-text.js?module';
         import {SfIUploader} from 'https://unpkg.com/sf-i-uploader@1.0.39/sf-i-uploader.js?module';
-    </script>
+    </script> -->
     <style>
       
       body {
@@ -566,467 +589,65 @@
   </head>
   <body>
 
-    <!-- <sf-i-events 
-      name="User Mapping"
-      apiId="8icpy39ru0"
-      apiIdUsers="rnmvvr922j"
-      apiIdTags="j385cxf2p0"
-      mode="admin"
-      apiIdList="tcic9iqenc"
-      apiMethodList="detail"
-      apiBodyList="{&quot;id&quot;: &quot;10daf75f-cb8f-45a5-95b7-ff9f27c4600a&quot;}"
-      apiResponseFieldList="compliance"
-      apiIdDetail="r42gyc2xx1"
-      apiMethodDetail="detail"
-      apiBodyDetail="{&quot;id&quot;: &quot;ID-DETAIL&quot;}"
-      eventFieldDependencies="[{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;country&quot;, &quot;child&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;category&quot;, &quot;child&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;frequency&quot;, &quot;child&quot;: &quot;subfrequency&quot;}]"
-      eventFields="[{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;3z3fiubz8e&quot;, &quot;field&quot;: &quot;riskarea&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;5s7ih5uw4h&quot;, &quot;field&quot;: &quot;jurisdiction&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;oqze24s784&quot;, &quot;field&quot;: &quot;updatetype&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;zu3kh9cq2c&quot;, &quot;field&quot;: &quot;country&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8ijy7mze67&quot;, &quot;field&quot;: &quot;specificity&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;et1hdzg882&quot;, &quot;field&quot;: &quot;risk&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;lhpn6gh0il&quot;, &quot;field&quot;: &quot;frequency&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8an2d4j1gc&quot;, &quot;field&quot;: &quot;category&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;vofssiq1t3&quot;, &quot;field&quot;: &quot;obligationtype&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;clnu4kk1ah&quot;, &quot;field&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;aysa6i6723&quot;, &quot;field&quot;: &quot;subfrequency&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;mdkc0e2bo5&quot;, &quot;field&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;sf-i-form&quot;, &quot;apiId&quot;: &quot;4wb2x6fkga&quot;, &quot;field&quot;: &quot;statute&quot;, &quot;projectField&quot;: &quot;name&quot;}]"
-      eventPreviewFields="[&quot;obligationtitle&quot;]"
-      eventHideFields="[&quot;comments&quot;,&quot;documents&quot;,&quot;lastupdated&quot;,&quot;approved&quot;,&quot;tags&quot;]"
-      calendarStartDD="01"
-      calendarStartMM="04"
-      calendarStartYYYY="2023"
-      >
 
-      <div slot="project">
+    <!-- <sf-i-events name="Calendar" apiid="d2gos2ro11pdov.cloudfront.net" mode="consumer" apiidtags="j385cxf2p0" fill="solid" username="Chief Compliance Officer" userprofileid="5fe96caa-1a44-4a2d-921a-920d29433eca" projectid="41ab3c86-ccc0-4c0e-8e31-cd079a07a710" projectname="ABC Global" countryid="07d73b44-648d-4301-82c4-d6df43397824" myrole="functionhead" eventfielddependencies="[{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;country&quot;, &quot;child&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;category&quot;, &quot;child&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;frequency&quot;, &quot;child&quot;: &quot;subfrequency&quot;}]" eventfields="[{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;3z3fiubz8e&quot;, &quot;field&quot;: &quot;riskarea&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;5s7ih5uw4h&quot;, &quot;field&quot;: &quot;jurisdiction&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;oqze24s784&quot;, &quot;field&quot;: &quot;updatetype&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;zu3kh9cq2c&quot;, &quot;field&quot;: &quot;country&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8ijy7mze67&quot;, &quot;field&quot;: &quot;specificity&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;et1hdzg882&quot;, &quot;field&quot;: &quot;risk&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;lhpn6gh0il&quot;, &quot;field&quot;: &quot;frequency&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8an2d4j1gc&quot;, &quot;field&quot;: &quot;category&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;vofssiq1t3&quot;, &quot;field&quot;: &quot;obligationtype&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;clnu4kk1ah&quot;, &quot;field&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;aysa6i6723&quot;, &quot;field&quot;: &quot;subfrequency&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;mdkc0e2bo5&quot;, &quot;field&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;sf-i-form&quot;, &quot;apiId&quot;: &quot;4wb2x6fkga&quot;, &quot;field&quot;: &quot;statute&quot;, &quot;projectField&quot;: &quot;name&quot;}]" eventpreviewfields="[&quot;obligation&quot;]" eventhidefields="[&quot;comments&quot;,&quot;documents&quot;,&quot;lastupdated&quot;,&quot;approved&quot;,&quot;tags&quot;]" enableDeleteLatestReport="yes" calendarstartdd="01" calendarstartmm="04" calendarstartyyyy="2024">
 
-        <sf-i-form 
-          id="sf-i-project"
-          name="Projects"
-          label="Select Project *"
-          apiId="tcic9iqenc"
-          mode="select"
-          selectProjection="name"
-          ignoreProjections="[&quot;compliance&quot;,&quot;search&quot;,&quot;updatetype&quot;,&quot;shortid&quot;]"
-          searchPhrase=''
-          mandatory
-          >
-        </sf-i-form>
+        <div slot="uploader">
+            <sf-i-uploader id="uploader" max="10" apiid="1peg5170d3" allowedextensions="[&quot;jpg&quot;,&quot;png&quot;,&quot;pdf&quot;]" extract="yes"></sf-i-uploader>
+        </div>
+        
+    </sf-i-events> -->
 
-      </div>
+    <!-- <sf-i-events mode="rcm" apiid="8icpy39ru0" apiidcompliances="r42gyc2xx1" apiidprojects="est9egdho9">
+
+    </sf-i-events> -->
+    
+    <!-- <sf-i-events projectid="41ab3c86-ccc0-4c0e-8e31-cd079a07a710" projectname="ABC Global" mode="onboarding" apiid="d2gos2ro11pdov.cloudfront.net" apiidstatutes="4wb2x6fkga" apiidcompliances="r42gyc2xx1" apiidtags="j385cxf2p0" apiidusers="rnmvvr922j" filteronboarding="[{&quot;country&quot;:&quot;India&quot;,&quot;states&quot;:[&quot;Maharashtra&quot;,&quot;Tamil Nadu&quot;],&quot;subcategories&quot;:[&quot;Labour and Employment&quot;]},{&quot;country&quot;:&quot;Singapore&quot;,&quot;states&quot;:[&quot;&quot;],&quot;subcategories&quot;:[&quot;&quot;]}]">
+
+    </sf-i-events> -->
+
+    <sf-i-events projectid="41ab3c86-ccc0-4c0e-8e31-cd079a07a710" projectname="ABC Global" mode="onboarding" apiid="d2gos2ro11pdov.cloudfront.net" apiidstatutes="4wb2x6fkga" apiidcompliances="r42gyc2xx1" apiidtags="j385cxf2p0" apiidusers="rnmvvr922j">
 
     </sf-i-events>
-     -->
 
-    <!-- <sf-i-events
-    
-      projectId="41ab3c86-ccc0-4c0e-8e31-cd079a07a710"
-      projectName="ABC Global"
-      mode="onboarding"
-      apiId="8icpy39ru0"
-      apiIdStatutes="4wb2x6fkga"
-      apiIdCompliances="r42gyc2xx1"
-      apiIdTags="j385cxf2p0"
-      apiIdUsers="rnmvvr922j"
-    
-    >
-
-    </sf-i-events> -->
-
-    <!-- <sf-i-events
-      
-        mode="rcmnotifications"
-        projectId="5c073644-5dce-4d8f-b82e-2bc2def2390f"
-        apiId="8icpy39ru0"
-    >
-
-    </sf-i-events> -->
-
-    <!-- <sf-i-events
-      
-        mode="rcm"
-        apiId="8icpy39ru0"
-        apiIdCompliances="r42gyc2xx1"
-        apiIdProjects="est9egdho9"
-
-    >
-
-    </sf-i-events> -->
-
-    <!-- <sf-i-events 
-      name="Calendar"
-      apiId="8icpy39ru0"
-      mode="consumer"
-      userProfileId="4266edf5-cb77-4e0b-9eaa-51db52f0d89d"
-      functionId="7e1512a7-a474-4f62-9967-75d6b0fc25d2"
-      locationId="9903b44b-6714-4906-bf00-a219c4ecfe0a"
-      projectId="3237530b-17e1-411e-a438-dd42a4e3b9be"
-      apiIdUsers="rnmvvr922j"
-      apiIdTags="j385cxf2p0"
-      projectName="ABC Tyres"
-      userName="Madhura Zende"
-      eventFieldDependencies="[{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;country&quot;, &quot;child&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;category&quot;, &quot;child&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;frequency&quot;, &quot;child&quot;: &quot;subfrequency&quot;}]"
-      eventFields="[{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;3z3fiubz8e&quot;, &quot;field&quot;: &quot;riskarea&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;5s7ih5uw4h&quot;, &quot;field&quot;: &quot;jurisdiction&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;oqze24s784&quot;, &quot;field&quot;: &quot;updatetype&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;zu3kh9cq2c&quot;, &quot;field&quot;: &quot;country&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8ijy7mze67&quot;, &quot;field&quot;: &quot;specificity&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;et1hdzg882&quot;, &quot;field&quot;: &quot;risk&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;lhpn6gh0il&quot;, &quot;field&quot;: &quot;frequency&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8an2d4j1gc&quot;, &quot;field&quot;: &quot;category&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;vofssiq1t3&quot;, &quot;field&quot;: &quot;obligationtype&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;clnu4kk1ah&quot;, &quot;field&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;aysa6i6723&quot;, &quot;field&quot;: &quot;subfrequency&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;mdkc0e2bo5&quot;, &quot;field&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;sf-i-form&quot;, &quot;apiId&quot;: &quot;4wb2x6fkga&quot;, &quot;field&quot;: &quot;statute&quot;, &quot;projectField&quot;: &quot;name&quot;}]"
-      eventPreviewFields="[&quot;obligationtitle&quot;]"
-      eventHideFields="[&quot;comments&quot;,&quot;documents&quot;,&quot;lastupdated&quot;,&quot;approved&quot;,&quot;tags&quot;]"
-      calendarStartDD="01"
-      calendarStartMM="04"
-      calendarStartYYYY="2023"
-      >
-
-      <div slot="uploader">
-        <sf-i-uploader id="uploader" max="10" apiId="1peg5170d3" allowedExtensions="[&quot;jpg&quot;,&quot;png&quot;]"></sf-i-uploader>
-      </div>
-      
-      <div slot="project">
-
-        <sf-i-form 
-          id="sf-i-project"
-          name="Projects"
-          label="Select Project *"
-          apiId="tcic9iqenc"
-          mode="select"
-          selectProjection="name"
-          ignoreProjections="[&quot;compliance&quot;,&quot;search&quot;,&quot;updatetype&quot;,&quot;shortid&quot;]"
-          searchPhrase=''
-          mandatory
-          >
-        </sf-i-form>
-
-      </div>
-
-    </sf-i-events> -->
-
-    <!-- Blank Entity-->
-
-    <sf-i-events name="Calendar" apiid="8icpy39ru0" mode="consumer" apiidtags="j385cxf2p0" fill="solid" username="Demo Auto Testing" userprofileid="b0531b64-b447-4f8a-968a-2f8b4c2a179a" projectid="2cf52fff-360e-4e22-bd0f-1f221f5e7211" projectname="ABC Finance" countryid="fbc73908-1cba-4960-9a37-b37d7844d3fe" myrole="functionhead" eventfielddependencies="[{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;country&quot;, &quot;child&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;category&quot;, &quot;child&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;frequency&quot;, &quot;child&quot;: &quot;subfrequency&quot;}]" eventfields="[{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;3z3fiubz8e&quot;, &quot;field&quot;: &quot;riskarea&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;5s7ih5uw4h&quot;, &quot;field&quot;: &quot;jurisdiction&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;oqze24s784&quot;, &quot;field&quot;: &quot;updatetype&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;zu3kh9cq2c&quot;, &quot;field&quot;: &quot;country&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8ijy7mze67&quot;, &quot;field&quot;: &quot;specificity&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;et1hdzg882&quot;, &quot;field&quot;: &quot;risk&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;lhpn6gh0il&quot;, &quot;field&quot;: &quot;frequency&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8an2d4j1gc&quot;, &quot;field&quot;: &quot;category&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;vofssiq1t3&quot;, &quot;field&quot;: &quot;obligationtype&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;clnu4kk1ah&quot;, &quot;field&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;aysa6i6723&quot;, &quot;field&quot;: &quot;subfrequency&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;mdkc0e2bo5&quot;, &quot;field&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;sf-i-form&quot;, &quot;apiId&quot;: &quot;4wb2x6fkga&quot;, &quot;field&quot;: &quot;statute&quot;, &quot;projectField&quot;: &quot;name&quot;}]" eventpreviewfields="[&quot;obligation&quot;]" eventhidefields="[&quot;comments&quot;,&quot;documents&quot;,&quot;lastupdated&quot;,&quot;approved&quot;,&quot;tags&quot;]" calendarstartdd="01" calendarstartmm="04" calendarstartyyyy="2023">
-
-                <div slot="uploader">
-                    <sf-i-uploader id="uploader" max="10" apiid="1peg5170d3" allowedextensions="[&quot;jpg&quot;,&quot;png&quot;,&quot;pdf&quot;]" extract="yes"></sf-i-uploader>
-                </div>
-                
-            </sf-i-events>
-
-
-
-<!-- 
-
-
-    <sf-i-events name="Calendar" apiid="8icpy39ru0" mode="consumer" apiidtags="j385cxf2p0" fill="solid" username="Chief Operating Officer" userprofileid="f2624400-38fb-4104-81be-2d9a00150293" projectid="5c073644-5dce-4d8f-b82e-2bc2def2390f" projectname="ABC Hospitals" countryid="04ebaebf-3521-4b8b-aec7-2f7111debe26" myrole="functionhead" eventfielddependencies="[{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;country&quot;, &quot;child&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;category&quot;, &quot;child&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;frequency&quot;, &quot;child&quot;: &quot;subfrequency&quot;}]" eventfields="[{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;3z3fiubz8e&quot;, &quot;field&quot;: &quot;riskarea&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;5s7ih5uw4h&quot;, &quot;field&quot;: &quot;jurisdiction&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;oqze24s784&quot;, &quot;field&quot;: &quot;updatetype&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;zu3kh9cq2c&quot;, &quot;field&quot;: &quot;country&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8ijy7mze67&quot;, &quot;field&quot;: &quot;specificity&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;et1hdzg882&quot;, &quot;field&quot;: &quot;risk&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;lhpn6gh0il&quot;, &quot;field&quot;: &quot;frequency&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8an2d4j1gc&quot;, &quot;field&quot;: &quot;category&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;vofssiq1t3&quot;, &quot;field&quot;: &quot;obligationtype&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;clnu4kk1ah&quot;, &quot;field&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;aysa6i6723&quot;, &quot;field&quot;: &quot;subfrequency&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;mdkc0e2bo5&quot;, &quot;field&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;sf-i-form&quot;, &quot;apiId&quot;: &quot;4wb2x6fkga&quot;, &quot;field&quot;: &quot;statute&quot;, &quot;projectField&quot;: &quot;name&quot;}]" eventpreviewfields="[]" eventhidefields="[&quot;comments&quot;,&quot;documents&quot;,&quot;lastupdated&quot;,&quot;approved&quot;,&quot;tags&quot;]" calendarstartdd="01" calendarstartmm="04" calendarstartyyyy="2023">
-
-                <div slot="uploader">
-                    <sf-i-uploader id="uploader" max="10" apiid="1peg5170d3" allowedextensions="[&quot;jpg&quot;,&quot;png&quot;,&quot;pdf&quot;]" extract="yes" callbackUrlHost="webhook.site" callbackUrlPath="d2f50e9d-8d27-47db-b457-b6691c3477e5"></sf-i-uploader>
-                </div>
-
-                <div slot="project">
-
-                  <sf-i-form 
-                    id="sf-i-project"
-                    name="Projects"
-                    label="Select Project *"
-                    apiId="tcic9iqenc"
-                    mode="select"
-                    selectProjection="name"
-                    ignoreProjections="[&quot;compliance&quot;,&quot;search&quot;,&quot;updatetype&quot;,&quot;shortid&quot;]"
-                    searchPhrase=''
-                    mandatory
-                    >
-                  </sf-i-form>
-          
-                </div>
-                
-            </sf-i-events> -->
-
-    <!-- <sf-i-events name="Calendar" apiid="8icpy39ru0" mode="consumer" apiidtags="j385cxf2p0" fill="solid" username="Chief Compliance Officer" userprofileid="5fe96caa-1a44-4a2d-921a-920d29433eca" projectid="41ab3c86-ccc0-4c0e-8e31-cd079a07a710" projectname="ABC Global" entityid="c989a44e-7d3d-427e-b712-90eacf585075" locationid="4fb7b672-5cce-443f-869b-6b35247d6331" myrole="functionhead" eventfielddependencies="[{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;country&quot;, &quot;child&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;category&quot;, &quot;child&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;frequency&quot;, &quot;child&quot;: &quot;subfrequency&quot;}]" eventfields="[{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;3z3fiubz8e&quot;, &quot;field&quot;: &quot;riskarea&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;5s7ih5uw4h&quot;, &quot;field&quot;: &quot;jurisdiction&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;oqze24s784&quot;, &quot;field&quot;: &quot;updatetype&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;zu3kh9cq2c&quot;, &quot;field&quot;: &quot;country&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8ijy7mze67&quot;, &quot;field&quot;: &quot;specificity&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;et1hdzg882&quot;, &quot;field&quot;: &quot;risk&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;lhpn6gh0il&quot;, &quot;field&quot;: &quot;frequency&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8an2d4j1gc&quot;, &quot;field&quot;: &quot;category&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;vofssiq1t3&quot;, &quot;field&quot;: &quot;obligationtype&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;clnu4kk1ah&quot;, &quot;field&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;aysa6i6723&quot;, &quot;field&quot;: &quot;subfrequency&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;mdkc0e2bo5&quot;, &quot;field&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;sf-i-form&quot;, &quot;apiId&quot;: &quot;4wb2x6fkga&quot;, &quot;field&quot;: &quot;statute&quot;, &quot;projectField&quot;: &quot;name&quot;}]" eventpreviewfields="[&quot;obligation&quot;]" eventhidefields="[&quot;comments&quot;,&quot;documents&quot;,&quot;lastupdated&quot;,&quot;approved&quot;,&quot;tags&quot;]" calendarstartdd="01" calendarstartmm="04" calendarstartyyyy="2023">
-
-                <div slot="uploader">
-                    <sf-i-uploader id="uploader" max="10" apiid="1peg5170d3" allowedextensions="[&quot;jpg&quot;,&quot;png&quot;]"></sf-i-uploader>
-                </div>
-                
-            </sf-i-events> -->
-
-    <!-- <sf-i-events 
-      name="Calendar"
-      apiId="8icpy39ru0"
-      mode="consumer"
-      userProfileId="0702e5d1-9331-4720-99c6-0934d82ec2b5"
-      countryId="04ebaebf-3521-4b8b-aec7-2f7111debe26"
-      projectId="5c073644-5dce-4d8f-b82e-2bc2def2390f"
-      myRole="functionhead"
-      apiIdUsers="rnmvvr922j"
-      apiIdTags="j385cxf2p0"
-      projectName="ABC Hospital"
-      userName="Chief Compliance Officer"
-      eventFieldDependencies="[{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;country&quot;, &quot;child&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;category&quot;, &quot;child&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;frequency&quot;, &quot;child&quot;: &quot;subfrequency&quot;}]"
-      eventFields="[{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;3z3fiubz8e&quot;, &quot;field&quot;: &quot;riskarea&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;5s7ih5uw4h&quot;, &quot;field&quot;: &quot;jurisdiction&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;oqze24s784&quot;, &quot;field&quot;: &quot;updatetype&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;zu3kh9cq2c&quot;, &quot;field&quot;: &quot;country&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8ijy7mze67&quot;, &quot;field&quot;: &quot;specificity&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;et1hdzg882&quot;, &quot;field&quot;: &quot;risk&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;lhpn6gh0il&quot;, &quot;field&quot;: &quot;frequency&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8an2d4j1gc&quot;, &quot;field&quot;: &quot;category&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;vofssiq1t3&quot;, &quot;field&quot;: &quot;obligationtype&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;clnu4kk1ah&quot;, &quot;field&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;aysa6i6723&quot;, &quot;field&quot;: &quot;subfrequency&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;mdkc0e2bo5&quot;, &quot;field&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;sf-i-form&quot;, &quot;apiId&quot;: &quot;4wb2x6fkga&quot;, &quot;field&quot;: &quot;statute&quot;, &quot;projectField&quot;: &quot;name&quot;}]"
-      eventPreviewFields="[&quot;obligationtitle&quot;]"
-      eventHideFields="[&quot;comments&quot;,&quot;documents&quot;,&quot;lastupdated&quot;,&quot;approved&quot;,&quot;tags&quot;]"
-      calendarStartDD="01"
-      calendarStartMM="04"
-      calendarStartYYYY="2023"
-      >
-
-      <div slot="uploader">
-        <sf-i-uploader id="uploader" max="10" apiId="1peg5170d3" allowedExtensions="[&quot;jpg&quot;,&quot;png&quot;]"></sf-i-uploader>
-      </div>
-      
-      <div slot="project">
-
-        <sf-i-form 
-          id="sf-i-project"
-          name="Projects"
-          label="Select Project *"
-          apiId="tcic9iqenc"
-          mode="select"
-          selectProjection="name"
-          ignoreProjections="[&quot;compliance&quot;,&quot;search&quot;,&quot;updatetype&quot;,&quot;shortid&quot;]"
-          searchPhrase=''
-          mandatory
-          >
-        </sf-i-form>
-
-      </div>
-
-    </sf-i-events> -->
-
-
-    <!-- <sf-i-events 
-      name="User Mapping"
-      apiId="8icpy39ru0"
-      apiIdUsers="rnmvvr922j"
-      apiIdTags="j385cxf2p0"
-      mode="admin"
-      apiIdList="tcic9iqenc"
-      apiMethodList="detail"
-      apiBodyList="{&quot;id&quot;: &quot;10daf75f-cb8f-45a5-95b7-ff9f27c4600a&quot;}"
-      apiResponseFieldList="compliance"
-      apiIdDetail="r42gyc2xx1"
-      apiMethodDetail="detail"
-      apiBodyDetail="{&quot;id&quot;: &quot;ID-DETAIL&quot;}"
-      eventFieldDependencies="[{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;country&quot;, &quot;child&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;category&quot;, &quot;child&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;frequency&quot;, &quot;child&quot;: &quot;subfrequency&quot;}]"
-      eventFields="[{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;3z3fiubz8e&quot;, &quot;field&quot;: &quot;riskarea&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;5s7ih5uw4h&quot;, &quot;field&quot;: &quot;jurisdiction&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;oqze24s784&quot;, &quot;field&quot;: &quot;updatetype&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;zu3kh9cq2c&quot;, &quot;field&quot;: &quot;country&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8ijy7mze67&quot;, &quot;field&quot;: &quot;specificity&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;et1hdzg882&quot;, &quot;field&quot;: &quot;risk&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;lhpn6gh0il&quot;, &quot;field&quot;: &quot;frequency&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8an2d4j1gc&quot;, &quot;field&quot;: &quot;category&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;vofssiq1t3&quot;, &quot;field&quot;: &quot;obligationtype&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;clnu4kk1ah&quot;, &quot;field&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;aysa6i6723&quot;, &quot;field&quot;: &quot;subfrequency&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;mdkc0e2bo5&quot;, &quot;field&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;sf-i-form&quot;, &quot;apiId&quot;: &quot;4wb2x6fkga&quot;, &quot;field&quot;: &quot;statute&quot;, &quot;projectField&quot;: &quot;name&quot;}]"
-      eventPreviewFields="[&quot;obligationtitle&quot;]"
-      eventHideFields="[&quot;comments&quot;,&quot;documents&quot;,&quot;lastupdated&quot;,&quot;approved&quot;]"
-      calendarStartDD="01"
-      calendarStartMM="04"
-      calendarStartYYYY="2023"
-      >
-
-      <div slot="project">
-
-        <sf-i-form 
-          id="sf-i-project"
-          name="Projects"
-          label="Select Project *"
-          apiId="tcic9iqenc"
-          mode="select"
-          selectProjection="name"
-          ignoreProjections="[&quot;compliance&quot;,&quot;search&quot;,&quot;updatetype&quot;,&quot;shortid&quot;]"
-          searchPhrase=''
-          mandatory
-          >
-        </sf-i-form>
-
-      </div>
+    <!-- <sf-i-events projectid="41ab3c86-ccc0-4c0e-8e31-cd079a07a710" projectname="ABC Global" mode="onboarding" apiid="8icpy39ru0" apiidstatutes="4wb2x6fkga" apiidcompliances="r42gyc2xx1" apiidtags="j385cxf2p0" apiidusers="rnmvvr922j">
 
     </sf-i-events> -->
 
     
-
-    <!-- <sf-i-events 
-      name="Calendar"
-      apiId="8icpy39ru0"
-      apiIdUsers="rnmvvr922j"
-      apiIdTags="j385cxf2p0"
-      mode="admin"
-      apiIdList="tcic9iqenc"
-      apiMethodList="detail"
-      apiBodyList="{&quot;id&quot;: &quot;10daf75f-cb8f-45a5-95b7-ff9f27c4600a&quot;}"
-      apiResponseFieldList="compliance"
-      apiIdDetail="r42gyc2xx1"
-      apiMethodDetail="detail"
-      apiBodyDetail="{&quot;id&quot;: &quot;ID-DETAIL&quot;}"
-      eventFieldDependencies="[{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;country&quot;, &quot;child&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;category&quot;, &quot;child&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;frequency&quot;, &quot;child&quot;: &quot;subfrequency&quot;}]"
-      eventFields="[{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;3z3fiubz8e&quot;, &quot;field&quot;: &quot;riskarea&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;5s7ih5uw4h&quot;, &quot;field&quot;: &quot;jurisdiction&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;oqze24s784&quot;, &quot;field&quot;: &quot;updatetype&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;zu3kh9cq2c&quot;, &quot;field&quot;: &quot;country&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8ijy7mze67&quot;, &quot;field&quot;: &quot;specificity&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;et1hdzg882&quot;, &quot;field&quot;: &quot;risk&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;lhpn6gh0il&quot;, &quot;field&quot;: &quot;frequency&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;8an2d4j1gc&quot;, &quot;field&quot;: &quot;category&quot;},{&quot;type&quot;: &quot;sf-i-select&quot;, &quot;apiId&quot;: &quot;vofssiq1t3&quot;, &quot;field&quot;: &quot;obligationtype&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;clnu4kk1ah&quot;, &quot;field&quot;: &quot;state&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;aysa6i6723&quot;, &quot;field&quot;: &quot;subfrequency&quot;},{&quot;type&quot;: &quot;sf-i-sub-select&quot;, &quot;apiId&quot;: &quot;mdkc0e2bo5&quot;, &quot;field&quot;: &quot;subcategory&quot;},{&quot;type&quot;: &quot;sf-i-form&quot;, &quot;apiId&quot;: &quot;4wb2x6fkga&quot;, &quot;field&quot;: &quot;statute&quot;, &quot;projectField&quot;: &quot;name&quot;}]"
-      eventPreviewFields="[&quot;obligationtitle&quot;]"
-      calendarStartDD="01"
-      calendarStartMM="04"
-      calendarStartYYYY="2023"
-      >
-
-      <div slot="project">
-
-        <sf-i-form 
-          id="sf-i-project"
-          name="Projects"
-          label="Select Project *"
-          apiId="tcic9iqenc"
-          mode="select"
-          selectProjection="name"
-          ignoreProjections="[&quot;compliance&quot;,&quot;search&quot;,&quot;updatetype&quot;,&quot;shortid&quot;]"
-          searchPhrase=''
-          mandatory
-          >
-        </sf-i-form>
-
-      </div>
-
-    </sf-i-events> -->
-    
-    <!-- <sf-i-events 
-      name="Compliances"
-      apiId="qwnfxbyrr1"
-      dependencies="[{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;sf-i-countries&quot;, &quot;child&quot;: &quot;sf-i-states&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;sf-i-categories&quot;, &quot;child&quot;: &quot;sf-i-subcategories&quot;},{&quot;type&quot;: &quot;foreignkey&quot;, &quot;parent&quot;: &quot;sf-i-frequencies&quot;, &quot;child&quot;: &quot;sf-i-subfrequencies&quot;},{&quot;type&quot;: &quot;searchable&quot;, &quot;parents&quot;: [&quot;sf-i-countries&quot;, &quot;sf-i-states&quot;, &quot;sf-i-categories&quot;, &quot;sf-i-subcategories&quot;], &quot;child&quot;: &quot;sf-i-statutes&quot;}]"
-      unitFiltersDetail="[{&quot;op&quot;: &quot;select&quot;, &quot;input&quot;: &quot;sf-i-updatetypes&quot;, &quot;value&quot;: &quot;3fddd5ed-6e2f-4973-b3de-00d3f03130a9&quot;},{&quot;op&quot;: &quot;remove&quot;, &quot;input&quot;: &quot;sf-i-updatetypes&quot;, &quot;value&quot;: &quot;64264b31-81ff-45bd-a1fa-04844984a35a&quot;}]"
-      unitFiltersNew="[{&quot;op&quot;: &quot;select&quot;, &quot;input&quot;: &quot;sf-i-updatetypes&quot;, &quot;value&quot;: &quot;64264b31-81ff-45bd-a1fa-04844984a35a&quot;},{&quot;op&quot;: &quot;remove&quot;, &quot;input&quot;: &quot;sf-i-updatetypes&quot;, &quot;value&quot;: &quot;20851e13-f0f7-4f8d-9bb8-ab96b1df6160&quot;},{&quot;op&quot;: &quot;remove&quot;, &quot;input&quot;: &quot;sf-i-updatetypes&quot;, &quot;value&quot;: &quot;3fddd5ed-6e2f-4973-b3de-00d3f03130a9&quot;}]"
-      inputIds="[&quot;sf-i-updatetypes&quot;, &quot;sf-i-countries&quot;, &quot;sf-i-jurisdictions&quot;, &quot;sf-i-states&quot;, &quot;sf-i-categories&quot;, &quot;sf-i-subcategories&quot;, &quot;sf-i-statutes&quot;, &quot;sf-i-reference&quot;, &quot;sf-i-applicability&quot;, &quot;sf-i-specificity&quot;, &quot;sf-i-obligationtypes&quot;, &quot;sf-i-obligationtitle&quot;, &quot;sf-i-obligation&quot;, &quot;sf-i-firstlineofdefence&quot;, &quot;sf-i-internalcontrols&quot;, &quot;sf-i-events&quot;, &quot;sf-i-authority&quot;, &quot;sf-i-penalties&quot;, &quot;sf-i-risks&quot;, &quot;sf-i-riskareas&quot;, &quot;sf-i-frequencies&quot;, &quot;sf-i-subfrequencies&quot;]"
-      fields="[&quot;updatetype&quot;,&quot;country&quot;,&quot;jurisdiction&quot;,&quot;state&quot;,&quot;category&quot;,&quot;subcategory&quot;,&quot;statute&quot;,&quot;reference&quot;,&quot;applicability&quot;,&quot;specificity&quot;,&quot;obligationtype&quot;,&quot;obligationtitle&quot;,&quot;obligation&quot;,&quot;firstlineofdefence&quot;,&quot;internalcontrols&quot;,&quot;form&quot;,&quot;authority&quot;,&quot;penalty&quot;,&quot;risk&quot;,&quot;riskarea&quot;,&quot;frequency&quot;,&quot;subfrequency&quot;]"
-      mode="view">
-
-      <div slot="form">
-
-        <div class="d-flex justify-center align-end">
-          <div class="w-30"></div>
-          <div class="w-5"></div>
-          <div class="w-30">
-            <sf-i-select id="sf-i-updatetypes" apiId="oqze24s784" name="UpdateTypes" label="Select Update Type *" mandatory>
-            </sf-i-select>
-          </div>
-          <div class="w-5"></div>
-          <div class="w-30"></div>
-        </div>
-        <br /><br />
-        <div class="d-flex justify-center align-end">
-          <div class="w-30">
-            <sf-i-select id="sf-i-countries" apiId="zu3kh9cq2c" name="Countries" label="Select Country *" mandatory>
-            </sf-i-select>
-          </div>
-          <div class="w-5"></div>
-          <div class="w-30">
-            <sf-i-select id="sf-i-jurisdictions" apiId="5s7ih5uw4h" name="Jurisdictions" label="Select Jurisdiction *" mandatory>
-            </sf-i-select>
-          </div>
-          <div class="w-5"></div>
-          <div class="w-33">
-            <sf-i-sub-select id="sf-i-states" apiId="clnu4kk1ah" name="States" label="Select States *" mandatory>
-            </sf-i-sub-select>
-          </div>
-        </div>
-        <br />
-        <div class="d-flex justify-center align-end">
-          <div class="w-47-5">
-            <sf-i-select id="sf-i-categories" apiId="8an2d4j1gc" name="Categories" label="Select Category *" mandatory>
-            </sf-i-select>
-          </div>
-          <div class="w-5"></div>
-          <div class="w-47-5">
-            <sf-i-sub-select id="sf-i-subcategories" apiId="mdkc0e2bo5" name="SubCategories" label="Select SubCategory *" mandatory>
-            </sf-i-sub-select>
-          </div>
-        </div>
-        <br />
-        <div class="d-flex justify-center align-end">
-          <div class="w-100-m-0">
-            <sf-i-events 
-              id="sf-i-statutes"
-              name="Statutes"
-              label="Select Statute *"
-              apiId="l8o208whql"
-              mode="select"
-              searchString="foo"
-              selectProjection="name"
-              mandatory
-              >
-            </sf-i-events>
-          </div>
-        </div>
-        <br />
-        <div class="d-flex justify-center align-end">
-          <div class="w-100-m-0">
-            <label>Statute Reference *</label><br />
-            <input id="sf-i-reference" type="text" class="w-100-m-0" mandatory/>
-          </div>
-        </div>
-        <br />
-        <div class="d-flex justify-center align-end">
-          <div class="w-100-m-0">
-            <label>Applicability *</label><br />
-            <input id="sf-i-applicability" type="text" class="w-100-m-0" mandatory/>
-          </div>
-        </div>
-        <br />
-        <div class="d-flex justify-center align-end">
-          <div class="w-30">
-            <sf-i-select id="sf-i-specificity" apiId="8ijy7mze67" name="Specificity" label="Select Universal / Industry Specific*" mandatory>
-            </sf-i-select>
-          </div>
-          <div class="w-5"></div>
-          <div class="w-30">
-            <sf-i-select id="sf-i-obligationtypes" apiId="vofssiq1t3" name="Obligation Type" label="Select Obligation Type *" mandatory>
-            </sf-i-select>
-          </div>
-          <div class="w-5"></div>
-          <div class="w-30">
-            <label>Obligation Title *</label><br />
-            <input id="sf-i-obligationtitle" type="text" class="w-100-m-0" mandatory/>
-          </div>
-        </div>
-        <br />
-        <div class="d-flex justify-center align-end">
-          <div class="w-100-m-0">
-            <label>Compliance Obligation *</label><br />
-            <input id="sf-i-obligation" type="text" class="w-100-m-0" mandatory/>
-          </div>
-        </div>
-        <br />
-        <div class="d-flex justify-center align-end">
-          <div class="w-30">
-            <label>First Line of Defence *</label><br />
-            <input id="sf-i-firstlineofdefence" type="text" class="w-100-m-0" mandatory/>
-          </div>
-          <div class="w-5"></div>
-          <div class="w-30">
-            <label>Internal Controls *</label><br />
-            <input id="sf-i-internalcontrols" type="text" class="w-100-m-0" mandatory/>
-          </div>
-          <div class="w-5"></div>
-          <div class="w-30">
-            <label>Form</label><br />
-            <input id="sf-i-events" type="text" class="w-100-m-0"/>
-          </div>
-        </div>
-        <br />
-        <div class="d-flex justify-center align-end">
-          <div class="w-30">
-            <label>Relevant Authority *</label><br />
-            <input id="sf-i-authority" type="text" class="w-100-m-0" mandatory/>
-          </div>
-          <div class="w-5"></div>
-          <div class="w-65">
-            <label>Offences and Penalties *</label><br />
-            <input id="sf-i-penalties" type="text" class="w-100-m-0" mandatory/>
-          </div>
-        </div>
-        <br />
-        <div class="d-flex justify-center align-end">
-          <div class="w-47-5">
-            <sf-i-select id="sf-i-risks" apiId="et1hdzg882" name="Risk" label="Select Risk Severity *" mandatory>
-            </sf-i-select>
-          </div>
-          <div class="w-5"></div>
-          <div class="w-47-5">
-            <sf-i-select id="sf-i-riskareas" apiId="3z3fiubz8e" name="Risk Areas" label="Select Risk Area *" mandatory>
-            </sf-i-select>
-          </div>
-        </div>
-        <br />
-        <div class="d-flex justify-center align-end">
-          <div class="w-30">
-            <sf-i-select id="sf-i-frequencies" apiId="lhpn6gh0il" name="Risk" label="Select Frequency *" mandatory>
-            </sf-i-select>
-          </div>
-          <div class="w-5"></div>
-          <div class="w-30">
-            <sf-i-sub-select id="sf-i-subfrequencies" apiId="aysa6i6723" name="Risk Areas" label="Select Sub Frequency">
-            </sf-i-sub-select >
-          </div>
-          <div class="w-5"></div>
-        </div>
-      </div>
-
-    </sf-i-events> -->
     <script>
+
+      function setCookie(name,value,days) {
+          var expires = "";
+          if (days) {
+              var date = new Date();
+              date.setTime(date.getTime() + (days*24*60*60*1000));
+              expires = "; expires=" + date.toUTCString();
+          }
+          document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+      }
+      function getCookie(name) {
+          var nameEQ = name + "=";
+          var ca = document.cookie.split(';');
+          for(var i=0;i < ca.length;i++) {
+              var c = ca[i];
+              while (c.charAt(0)==' ') c = c.substring(1,c.length);
+              if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+          }
+          return null;
+      }
+      function eraseCookie(name) {   
+          document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      }
       
+      // setCookie('admin', 'false', 10);
+      // setCookie('accessToken', 'lswr0qwuyso6z6c1vu', 10);
+      // setCookie('email', 'hrushi.mehendale@gmail.com', 10);
+
+      setCookie('admin', 'false', 10);
+      setCookie('accessToken', 'lu2ck0dj8nsfu9t4ih', 10);
+      setCookie('email', 'hrushi.mehendale@gmail.com', 10);
+
     </script>
   </body>
 </html>
