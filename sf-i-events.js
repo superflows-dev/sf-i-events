@@ -423,6 +423,12 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<th part="td-head">';
             html += 'Subcategory';
             html += '</th>';
+            html += '<th part="td-head">';
+            html += 'Exclusions';
+            html += '</th>';
+            html += '<th part="td-head">';
+            html += 'Inclusions';
+            html += '</th>';
             html += '</tr>';
             for (var i = 0; i < jsonFilterOnboarding.length; i++) {
                 var classBg = '';
@@ -444,6 +450,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                 html += '<td part="td-body1" class="' + classBg + '">';
                 for (var j = 0; j < jsonFilterOnboarding[i].subcategories.length; j++) {
                     html += ('<div>' + jsonFilterOnboarding[i].subcategories[j] + '</div>');
+                }
+                html += '</td>';
+                html += '<td part="td-body1" class="' + classBg + '">';
+                if (jsonFilterOnboarding[i].excludestatutes != null) {
+                    for (var j = 0; j < jsonFilterOnboarding[i].excludestatutes.length; j++) {
+                        html += ('<div><sf-i-elastic-text class="statute id-9" text="' + jsonFilterOnboarding[i].excludestatutes[j] + '" minlength="10"></sf-i-elastic-text></div>');
+                    }
+                }
+                html += '</td>';
+                html += '<td part="td-body1" class="' + classBg + '">';
+                if (jsonFilterOnboarding[i].includestatutes != null) {
+                    for (var j = 0; j < jsonFilterOnboarding[i].includestatutes.length; j++) {
+                        html += ('<div><sf-i-elastic-text class="statute id-9" text="' + jsonFilterOnboarding[i].includestatutes[j] + '" minlength="20"></sf-i-elastic-text></div>');
+                    }
                 }
                 html += '</td>';
                 html += '</tr>';
@@ -1610,10 +1630,10 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "late-executed") {
                                 lateExecuted++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-late-executed">running_with_errors</span>';
+                                    html += '<span class="material-icons color-late-executed color-late-executed color-late-executed-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-executed,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved late-executed</td>');
@@ -1621,20 +1641,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             else if (lateStatus == "late-approved") {
                                 lateApproved++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-late-approved">running_with_errors</span>';
+                                    html += '<span class="material-icons color-late-approved color-late-approved color-late-approved-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved late-approved</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved</td>');
@@ -1646,20 +1666,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                    html += '<span class="material-symbols-outlined color-pending color-pending-item color-pending-item-' + i + '">pending</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                    html += '<span class="material-icons color-past-due-date color-past-due-date-item color-past-due-date-item-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'in-progress past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">in-progress past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                    html += '<span class="material-symbols-outlined color-pending color-pending-item color-pending-item-' + i + '">pending</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'in-progress,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">in-progress</td>');
@@ -1671,20 +1691,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                    html += '<span class="material-icons color-not-started color-not-started-item color-not-started-item-' + i + '">schedule</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                    html += '<span class="material-icons color-past-due-date color-past-due-date-item color-past-due-date-item-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'not started past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">not-started past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                    html += '<span class="material-icons color-not-started color-not-started-item color-not-started-item-' + i + '">schedule</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'not started,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">not-started</td>');
@@ -2041,10 +2061,10 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "late-executed") {
                                 lateExecuted++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-late-executed">running_with_errors</span>';
+                                    html += '<span class="material-icons color-late-executed color-late-executed color-late-executed-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-executed,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved late-executed</td>');
@@ -2052,20 +2072,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             else if (lateStatus == "late-approved") {
                                 lateApproved++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-late-approved">running_with_errors</span>';
+                                    html += '<span class="material-icons color-late-approved color-late-approved color-late-approved-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved late-approved</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved</td>');
@@ -2077,20 +2097,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                    html += '<span class="material-symbols-outlined color-pending color-pending-item color-pending-item-' + i + '">pending</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                    html += '<span class="material-icons color-past-due-date color-past-due-date-item color-past-due-date-item-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'in-progress past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">in-progress past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                    html += '<span class="material-symbols-outlined color-pending color-pending-item color-pending-item-' + i + '">pending</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'in-progress,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">in-progress</td>');
@@ -2102,20 +2122,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                    html += '<span class="material-icons color-not-started color-not-started-item color-not-started-item-' + i + '">schedule</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                    html += '<span class="material-icons color-past-due-date color-past-due-date-item color-past-due-date-item-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'not started past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">not-started past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                    html += '<span class="material-icons color-not-started color-not-started-item color-not-started-item-' + i + '">schedule</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'not started,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">not-started</td>');
@@ -2486,10 +2506,10 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "late-executed") {
                                 lateExecuted++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-late-executed">running_with_errors</span>';
+                                    html += '<span class="material-icons color-late-executed color-late-executed color-late-executed-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-executed,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved late-executed</td>');
@@ -2497,20 +2517,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             else if (lateStatus == "late-approved") {
                                 lateApproved++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-late-approved">running_with_errors</span>';
+                                    html += '<span class="material-icons color-late-approved color-late-approved color-late-approved-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved late-approved</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved</td>');
@@ -2522,20 +2542,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                    html += '<span class="material-symbols-outlined color-pending color-pending-item color-pending-item-' + i + '">pending</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                    html += '<span class="material-icons color-past-due-date color-past-due-date-item color-past-due-date-item-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'in-progress past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">in-progress past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                    html += '<span class="material-symbols-outlined color-pending color-pending-item color-pending-item-' + i + '">pending</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'in-progress,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">in-progress</td>');
@@ -2547,20 +2567,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                    html += '<span class="material-icons color-not-started color-not-started-item color-not-started-item-' + i + '">schedule</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                    html += '<span class="material-icons color-past-due-date color-past-due-date-item color-past-due-date-item-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'not started past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">not-started past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                    html += '<span class="material-icons color-not-started color-not-started-item color-not-started-item-' + i + '">schedule</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'not started,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">not-started</td>');
@@ -2931,10 +2951,10 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "late-executed") {
                                 lateExecuted++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-late-executed">running_with_errors</span>';
+                                    html += '<span class="material-icons color-late-executed color-late-executed color-late-executed-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-executed,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved late-executed</td>');
@@ -2942,20 +2962,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             else if (lateStatus == "late-approved") {
                                 lateApproved++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-late-approved">running_with_errors</span>';
+                                    html += '<span class="material-icons color-late-approved color-late-approved color-late-approved-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved late-approved</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'approved,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved</td>');
@@ -2967,20 +2987,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                    html += '<span class="material-symbols-outlined color-pending color-pending-item color-pending-item-' + i + '">pending</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                    html += '<span class="material-icons color-past-due-date color-past-due-date-item color-past-due-date-item-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'in-progress past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">in-progress past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                    html += '<span class="material-symbols-outlined color-pending color-pending-item color-pending-item-' + i + '">pending</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'in-progress,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">in-progress</td>');
@@ -2992,20 +3012,20 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                    html += '<span class="material-icons color-not-started color-not-started-item color-not-started-item-' + i + '">schedule</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                    html += '<span class="material-icons color-past-due-date color-past-due-date-item color-past-due-date-item-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'not started past-due-date,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">not-started past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                    html += '<span class="material-icons color-not-started color-not-started-item color-not-started-item-' + i + '">schedule</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'not started,';
                                 htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">not-started</td>');
@@ -3360,34 +3380,34 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "late-executed") {
                                 lateExecuted++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-late-executed">running_with_errors</span>';
+                                    html += '<span class="material-icons color-late-executed color-late-executed color-late-executed-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-executed,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">approved late-executed</td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved late-executed</td>');
                             }
                             else if (lateStatus == "late-approved") {
                                 lateApproved++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-late-approved">running_with_errors</span>';
+                                    html += '<span class="material-icons color-late-approved color-late-approved color-late-approved-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'approved late-approved,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">approved late-approved</td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved late-approved</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-done">check_circle</span>';
+                                    html += '<span class="material-symbols-outlined color-done color-done-item color-done-item-' + i + '">check_circle</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'approved,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">approved</td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">approved</td>');
                             }
                             html += '</td>';
                         }
@@ -3396,23 +3416,23 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                    html += '<span class="material-symbols-outlined color-pending color-pending-item color-pending-item-' + i + '">pending</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                    html += '<span class="material-icons color-past-due-date color-past-due-date-item color-past-due-date-item-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'in-progress past-due-date,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">in-progress past-due-date</td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">in-progress past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-symbols-outlined color-pending">pending</span>';
+                                    html += '<span class="material-symbols-outlined color-pending color-pending-item color-pending-item-' + i + '">pending</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'in-progress,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">in-progress</td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">in-progress</td>');
                             }
                             html += '</td>';
                         }
@@ -3421,23 +3441,23 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (lateStatus == "past-due-date") {
                                 pastDueDate++;
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                    html += '<span class="material-icons color-not-started color-not-started-item color-not-started-item-' + i + '">schedule</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-icons color-past-due-date">running_with_errors</span>';
+                                    html += '<span class="material-icons color-past-due-date color-past-due-date-item color-past-due-date-item-' + i + '">running_with_errors</span>';
                                 }
                                 csvValues += 'not started past-due-date,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">not-started past-due-date</td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">not-started past-due-date</td>');
                             }
                             else {
                                 if (this.flowGraph != this.FLOW_GRAPH_TIMELINESS) {
-                                    html += '<span class="material-icons color-not-started">schedule</span>';
+                                    html += '<span class="material-icons color-not-started color-not-started-item color-not-started-item-' + i + '">schedule</span>';
                                 }
                                 if (this.flowGraph != this.FLOW_GRAPH_COMPLETENESS) {
-                                    html += '<span class="material-symbols-outlined color-not-started">timer</span>';
+                                    html += '<span class="material-symbols-outlined color-not-started color-not-started-item color-not-started-item-' + i + '">timer</span>';
                                 }
                                 csvValues += 'not started,';
-                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center">not-started</td>');
+                                htmlValues += ('<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' text-center status-format">not-started</td>');
                             }
                             html += '</td>';
                         }
@@ -7516,7 +7536,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 for (var i = 0; i < comments.length; i++) {
                     html += '<div part="commentbox" class="d-flex commentbox ' + (comments[i].author + "").toLowerCase() + 'box">';
                     html += '<div class="mr-20"><strong>' + comments[i].author + '</strong><br />' + ((i === (comments.length - 1) && this.enableDeleteLatestReport) ? '<button class="mt-5 button-delete" part="button">Delete</button>' : '') + '</div>';
-                    const onlyCommentText = comments[i].comment.replace(/ *\([^)]*\) */g, "").trim();
+                    const onlyCommentText = (comments[i].comment + "").replace(/ *\([^)]*\) */g, "").trim();
                     try {
                         const jsonComments = JSON.parse(onlyCommentText);
                         if (Util.isInteger(jsonComments)) {
@@ -7797,6 +7817,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                     };
                     const callbackUrlHost = "8icpy39ru0.execute-api.us-east-1.amazonaws.com";
                     const callbackUrlPath = "test/uploadextract";
+                    this._SfUploader[0].querySelector('#uploader').projectId = this.projectId;
                     this._SfUploader[0].querySelector('#uploader').dataPassthrough = JSON.stringify(dataPassthrough);
                     this._SfUploader[0].querySelector('#uploader').callbackUrlHost = callbackUrlHost;
                     this._SfUploader[0].querySelector('#uploader').callbackUrlPath = callbackUrlPath;
@@ -7825,8 +7846,12 @@ let SfIEvents = class SfIEvents extends LitElement {
                         }
                     }
                     else {
-                        this._SfDetailContainer.querySelector('#input-approve-yes').checked = false;
-                        this._SfDetailContainer.querySelector('#input-approve-no').checked = true;
+                        if (this._SfDetailContainer.querySelector('#input-approve-yes') != null) {
+                            this._SfDetailContainer.querySelector('#input-approve-yes').checked = false;
+                        }
+                        if (this._SfDetailContainer.querySelector('#input-approve-no') != null) {
+                            this._SfDetailContainer.querySelector('#input-approve-no').checked = true;
+                        }
                     }
                 }
             }
@@ -7860,8 +7885,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                 });
             }
         };
-        this.matchesOnBoardingFilter = (country, state, subcategory) => {
-            // console.log('matching',country, state, subcategory);
+        this.matchesOnBoardingFilter = (country, state, subcategory, statute) => {
+            console.log('matchingonboarding', country, state, subcategory, statute);
             let matchesCountry = false;
             for (var i = 0; i < this.getfilterOnboarding().length; i++) {
                 matchesCountry = false;
@@ -7880,8 +7905,22 @@ let SfIEvents = class SfIEvents extends LitElement {
                             matchesSubcategory = true;
                         }
                     }
-                    // console.log('matching result', matchesCountry, matchesState, matchesSubcategory, country, state, subcategory);
-                    if (matchesCountry && matchesState && matchesSubcategory) {
+                    let isNotExcludedStatute = true;
+                    if (this.getfilterOnboarding()[i].excludestatutes != null) {
+                        if (this.getfilterOnboarding()[i].excludestatutes.includes(statute)) {
+                            isNotExcludedStatute = false;
+                        }
+                    }
+                    let isIncludedStatute = false;
+                    if (this.getfilterOnboarding()[i].includestatutes != null) {
+                        if (this.getfilterOnboarding()[i].includestatutes.includes(statute)) {
+                            isIncludedStatute = true;
+                        }
+                    }
+                    if (matchesCountry && matchesState && matchesSubcategory && isNotExcludedStatute) {
+                        return true;
+                    }
+                    if (matchesCountry && isIncludedStatute) {
                         return true;
                     }
                 }
@@ -8048,6 +8087,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             let colCountry = -1;
             let colState = -1;
             let colSubcategory = -1;
+            let colStatute = -1;
             const unfilteredDict = [];
             var html = '';
             var showTable = true;
@@ -8080,10 +8120,6 @@ let SfIEvents = class SfIEvents extends LitElement {
             }
             html += ((jobs && jobs.data && (jobs.data.status == "1" || jobs.data.status == "0")) ? '' : '<div class="left-sticky d-flex justify-between align-center mr-10"><h4 part="results-title" class="d-flex align-center m-0">' + mandatoryStatus + '</h4></div>');
             html += ((jobs && jobs.data && (jobs.data.status == "1" || jobs.data.status == "0")) ? '' : '<div class="left-sticky d-flex justify-between align-center mr-10"><h4 id="span-extra-filled" class="m-0" part="results-title"></h4></div>');
-            html += '<div class="left-sticky">';
-            html += '<h4 id="span-filtered" part="results-title"></h4>';
-            html += '<div id="div-subfiltered"></div>';
-            html += '</div>';
             html += '<div class="d-flex align-center">';
             html += '<input part="input" type="text" placeholder="Filter" class="input-filter mr-10" value="' + subfilter + '" />';
             html += '<div class="mr-10">';
@@ -8092,6 +8128,10 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '</div>';
             html += (jobs.data == null ? '<button part="button" class="button-save d-flex align-center"><span class="material-symbols-outlined mr-10">save</span><span>Save</span></button>' : ((jobs.data.status == "1" || jobs.data.status == "0") ? '<button part="button" class="button-cancel">Cancel Job</button>' : '<button part="button" class="button-save d-flex align-center"><span class="material-symbols-outlined mr-10">save</span><span>Save</span></button>'));
             html += '</div>';
+            html += '</div>';
+            html += '<div>';
+            html += '<h4 id="span-filtered" part="results-title"></h4>';
+            html += '<div id="div-subfiltered"></div>';
             html += '</div>';
             html += '<br />';
             var subfiltered = 0;
@@ -8108,6 +8148,10 @@ let SfIEvents = class SfIEvents extends LitElement {
                     if (JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j].toLowerCase() == "subcategory") {
                         console.log('colstate-setting subcategory', JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j].toLowerCase(), j);
                         colSubcategory = j;
+                    }
+                    if (JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j].toLowerCase() == "statute") {
+                        console.log('colstate-setting statute', JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j].toLowerCase(), j);
+                        colStatute = j;
                     }
                 }
                 html += '<table class="mt-20">';
@@ -8281,7 +8325,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                                     html += '<div class="' + (!showSearch ? 'truncate' : '') + '">';
                                     console.log('before before filtermatch', sourceCols[l], JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j], colCountry, (sourceArray.data.mappings.mappings[i]), (sourceArray.data.mappings.mappings[i].data), colState);
                                     console.log('before filtermatch', colCountry, JSON.parse(sourceArray.data.mappings.mappings[i].data)[colCountry], colState, JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState], JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory]);
-                                    const filterMatch = this.matchesOnBoardingFilter(JSON.parse(sourceArray.data.mappings.mappings[i].data)[colCountry][0], JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState].length > 0 ? JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState][0] : "", JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory].length > 0 ? JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory][0] : "");
+                                    const filterMatch = this.matchesOnBoardingFilter(JSON.parse(sourceArray.data.mappings.mappings[i].data)[colCountry][0], JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState].length > 0 ? JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState][0] : "", JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory].length > 0 ? JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory][0] : "", Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[colStatute]) ? JSON.parse(sourceArray.data.mappings.mappings[i].data)[colStatute][0] : JSON.parse(sourceArray.data.mappings.mappings[i].data)[colStatute]);
                                     console.log('after filtermatch', filterMatch);
                                     if (filterMatch) {
                                         if (!unfilteredDict.includes(i)) {
@@ -8527,7 +8571,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 console.log('Total fields = ' + totalFields + ', filled fields = ' + filledFields);
             }
         };
-        this.renderMappingTable = (divElement, jsonData, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction, extraFields, uploadBlock, extraFieldPosition, colName, subfilter) => {
+        this.renderMappingTable = (divElement, jsonData, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction, extraFields, uploadBlock, extraFieldPosition, colName, subfilter, statuteColName) => {
             var _a, _b, _c, _f, _g, _h, _j, _k, _l, _m, _o, _p;
             console.log('divelement', divElement);
             console.log('jsonData', jsonData);
@@ -8540,6 +8584,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             let colCountry = -1;
             let colState = -1;
             let colSubcategory = -1;
+            let colStatute = -1;
             const unfilteredDict = [];
             var html = '';
             html += '<div class="d-flex justify-between align-center left-sticky flex-wrap mb-20">';
@@ -8620,6 +8665,10 @@ let SfIEvents = class SfIEvents extends LitElement {
                 if (JSON.parse(jsonData[0].data.cols)[i].toLowerCase() == "subcategory") {
                     console.log('colstate subcategory', JSON.parse(jsonData[0].data.cols)[i].toLowerCase(), i);
                     colSubcategory = i;
+                }
+                if (JSON.parse(jsonData[0].data.cols)[i].toLowerCase() == statuteColName) {
+                    console.log('colstate statute', JSON.parse(jsonData[0].data.cols)[i].toLowerCase(), i);
+                    colStatute = i;
                 }
             }
             var countExtra0 = 0, countextra = [];
@@ -8733,7 +8782,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (jsonData[i].cols.includes(JSON.parse(jsonData[i].data.cols)[j])) {
                                 html += '<td part="td-body" class="td-body ' + classBg + ' ' + (jsonData[i].mapped ? 'chosen' : '') + '">';
                                 html += '<div class="' + (!showSearch ? 'truncate' : '') + '">';
-                                const filterMatch = this.matchesOnBoardingFilter(JSON.parse(jsonData[i].data.data)[colCountry][0], JSON.parse(jsonData[i].data.data)[colState].length > 0 ? JSON.parse(jsonData[i].data.data)[colState][0] : "", JSON.parse(jsonData[i].data.data)[colSubcategory].length > 0 ? JSON.parse(jsonData[i].data.data)[colSubcategory][0] : "");
+                                const filterMatch = this.matchesOnBoardingFilter(JSON.parse(jsonData[i].data.data)[colCountry][0], JSON.parse(jsonData[i].data.data)[colState].length > 0 ? JSON.parse(jsonData[i].data.data)[colState][0] : "", JSON.parse(jsonData[i].data.data)[colSubcategory].length > 0 ? JSON.parse(jsonData[i].data.data)[colSubcategory][0] : "", Array.isArray(JSON.parse(jsonData[i].data.data)[colStatute]) ? JSON.parse(jsonData[i].data.data)[colStatute][0] : JSON.parse(jsonData[i].data.data)[colStatute]);
                                 if (filterMatch) {
                                     if (!unfilteredDict.includes(i)) {
                                         unfilteredDict.push(i);
@@ -8821,7 +8870,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             inputFilter.addEventListener('keyup', (e) => {
                 if (e.key == 'Enter') {
                     console.log(inputFilter.value);
-                    this.renderMappingTable(divElement, jsonData, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction, extraFields, uploadBlock, extraFieldPosition, colName, inputFilter.value);
+                    this.renderMappingTable(divElement, jsonData, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction, extraFields, uploadBlock, extraFieldPosition, colName, inputFilter.value, statuteColName);
                 }
             });
             // More button handlers
@@ -8956,7 +9005,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         jsonData1.push({ id: resultFunction.values[i].id, mapped: mapped, data: resultFunction.values[i].fields, cols: jsonData[0].cols });
                     }
                     cursor.push({ prev: cursor[cursor.length - 1].next, next: resultFunction.cursor });
-                    this.renderMappingTable(divElement, jsonData1, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction, extraFields, uploadBlock, extraFieldPosition, colName, subfilter);
+                    this.renderMappingTable(divElement, jsonData1, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction, extraFields, uploadBlock, extraFieldPosition, colName, subfilter, statuteColName);
                 }
             });
             (_c = this._SfButtonPrev) === null || _c === void 0 ? void 0 : _c.addEventListener('click', async () => {
@@ -8977,7 +9026,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         jsonData1.push({ id: resultFunction.values[i].id, mapped: mapped, data: resultFunction.values[i].fields, cols: jsonData[0].cols });
                     }
                     console.log('clicked', jsonData1);
-                    this.renderMappingTable(divElement, jsonData1, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction, extraFields, uploadBlock, extraFieldPosition, colName, subfilter);
+                    this.renderMappingTable(divElement, jsonData1, cursor, fetchFunction, searchString, mappedArray, found, uploadFunction, refreshFunction, extraFields, uploadBlock, extraFieldPosition, colName, subfilter, statuteColName);
                 }
             });
             (_f = this._SfButtonSave) === null || _f === void 0 ? void 0 : _f.addEventListener('click', async () => {
@@ -9272,7 +9321,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                             // console.log('checking',mapped);
                             jsonData.push({ id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "jurisdiction", "state", "category", "subcategory", "statute", "applicability", "obligation", "risk", "riskarea", "frequency", "penalty"], extraFields: extraFields });
                         }
-                        this.renderMappingTable(this._SfOnboardingCompliancesListContainer, jsonData, [{ prev: initCursor, next: resultCompliances.cursor }], this.fetchSearchCompliances, searchString, mappedCompliances, resultCompliances.values.length, this.uploadCompliancesMapping, this.loadOnboardingCompliances, ["Client remarks", "FlaggGRC response"], 30, 0, "compliances", "");
+                        this.renderMappingTable(this._SfOnboardingCompliancesListContainer, jsonData, [{ prev: initCursor, next: resultCompliances.cursor }], this.fetchSearchCompliances, searchString, mappedCompliances, resultCompliances.values.length, this.uploadCompliancesMapping, this.loadOnboardingCompliances, ["Client remarks", "FlaggGRC response"], 30, 0, "compliances", "", "statute");
                     }
                 }
             });
@@ -9351,7 +9400,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                             jsonData.push({ id: resultStatutes.values[i].id, mapped: mapped, data: resultStatutes.values[i].fields, cols: ["country", "jurisdiction", "state", "name", "category", "subcategory", "jurisdiction"], extraFields: extraFields });
                         }
                         console.log('clicked', jsonData);
-                        this.renderMappingTable(this._SfOnboardingStatutesListContainer, jsonData, [{ prev: initCursor, next: resultStatutes.cursor }], this.fetchSearchStatutes, searchString, mappedStatutes, resultStatutes.found, this.uploadStatutesMapping, this.loadOnboardingStatutes, ["Client remarks", "Entity applicability", "Locations applicability", "Reporters", "Approvers", "Functionheads", "Auditors", "Viewers", "FlaggGRC response"], -1, 1, "statutes", "");
+                        this.renderMappingTable(this._SfOnboardingStatutesListContainer, jsonData, [{ prev: initCursor, next: resultStatutes.cursor }], this.fetchSearchStatutes, searchString, mappedStatutes, resultStatutes.found, this.uploadStatutesMapping, this.loadOnboardingStatutes, ["Client remarks", "Entity applicability", "Locations applicability", "Reporters", "Approvers", "Functionheads", "Auditors", "Viewers", "FlaggGRC response"], -1, 1, "statutes", "", "name");
                     }
                 }
             });

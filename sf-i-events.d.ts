@@ -403,12 +403,12 @@ export declare class SfIEvents extends LitElement {
     renderRiskGraph: (divContainer: HTMLDivElement) => void;
     renderEventDetail: (event: any, mmddyyyy: any, currentColumnButton: HTMLButtonElement | null) => void;
     renderCalendar: () => void;
-    matchesOnBoardingFilter: (country: string, state: string, subcategory: string) => boolean;
+    matchesOnBoardingFilter: (country: string, state: string, subcategory: string, statute: string) => boolean;
     applyAndReloadTagging: (e: any, colName: string, taggingArray: any, sourceArray: any, divElement: any) => void;
     saveMapping: (divElement: any, uploadBlock: number, jsonData: any, extraFields: any, searchString: string, uploadFunction: any, refreshFunction: any, saveInBackground?: boolean) => Promise<void>;
     saveTagging: (mapping: any, uploadFunction: any, refreshFunction: any, saveInBackground: boolean) => Promise<void>;
     renderTaggingTable: (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any, mandatoryFields: any, jobs: any, anotherProjection: any, extraFields: Array<string>, arrFeedbackReference: any, proposedUsersLabel: string, subfilter: string) => void;
-    renderMappingTable: (divElement: any, jsonData: Array<any>, cursor: Array<any>, fetchFunction: any, searchString: string, mappedArray: any, found: number, uploadFunction: any, refreshFunction: any, extraFields: Array<string>, uploadBlock: number, extraFieldPosition: number, colName: string, subfilter: string) => void;
+    renderMappingTable: (divElement: any, jsonData: Array<any>, cursor: Array<any>, fetchFunction: any, searchString: string, mappedArray: any, found: number, uploadFunction: any, refreshFunction: any, extraFields: Array<string>, uploadBlock: number, extraFieldPosition: number, colName: string, subfilter: string, statuteColName: string) => void;
     refreshCalendar: () => Promise<void>;
     renderNewOnboarding: () => void;
     renderOnboardingSignoff: (signoff: any) => void;
