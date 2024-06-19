@@ -1,7 +1,7 @@
 {
   "name": "sf-i-events",
   "private": false,
-  "version": "1.0.433",
+  "version": "1.0.484",
   "description": "Superflows Navigation Component",
   "main": "sf-i-events.js",
   "module": "sf-i-events.js",
@@ -60,6 +60,7 @@
     "sf-i-select": "^1.0.80",
     "sf-i-sub-select": "^1.0.68",
     "sf-i-uploader": "^1.0.58",
+    "sf-i-multitextarea": "^1.0.7",
     "sinon": "^15.0.1"
   },
   "devDependencies": {
