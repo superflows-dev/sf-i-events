@@ -4236,7 +4236,7 @@ export class SfIEvents extends LitElement {
 
 
     csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate' 
-    htmlCols += '<tr><th>Id</th><th>Country</th><th>State</th><th>Status</th><th>Jurisdiction</th><th>Category</th><th>Subcategory</th><th>Statute</th><th>Reference</th><th>Applicability</th><th>ObligationType</th><th>ObligationTitle</th><th>Obligation</th><th>Firstlineofdefence</th><th>Secondlineofdefence</th><th>Thirdlineofdefence</th><th>InternalControls</th><th>Penalty</th><th>Form</th><th>Authority</th><th>RiskSeverity</th><th>RiskAreas</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th><th>ReportParameter</th></tr>'
+    htmlCols += '<tr><th>Id</th><th>Status</th><th>Country</th><th>State</th><th>Jurisdiction</th><th>Category</th><th>Subcategory</th><th>Statute</th><th>Reference</th><th>Applicability</th><th>ObligationType</th><th>ObligationTitle</th><th>Obligation</th><th>Firstlineofdefence</th><th>Secondlineofdefence</th><th>Thirdlineofdefence</th><th>InternalControls</th><th>Penalty</th><th>Form</th><th>Additional URL</th><th>Definition</th><th>Authority</th><th>RiskSeverity</th><th>RiskAreas</th><th>Frequency</th><th>SubFrequency</th><th>DueDate</th><th>ReportParameter</th></tr>'
     
     for(var i = iInit; i <= iLast; i++) {
 
@@ -4328,6 +4328,8 @@ export class SfIEvents extends LitElement {
             + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["internalcontrols"]+'</td>'
             + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["penalty"]+'</td>'
             + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["form"]+'</td>'
+            + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["additionalurls"]+'</td>'
+            + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["definition"]+'</td>'
             + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["authority"]+'</td>'
             + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["risk"]+'</td>'
             + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +'">'+this.events[mmdd][j]["riskarea"]+'</td>'
