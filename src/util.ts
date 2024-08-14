@@ -255,7 +255,7 @@ async function callApi(url: string, data: string, authorization: any) {
             }
         });
         xhr.open("POST", url);
-        xhr.timeout = 600000;
+        xhr.timeout = 1800000;
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); 
         if(authorization != null) {
@@ -266,6 +266,80 @@ async function callApi(url: string, data: string, authorization: any) {
         return xhr;
 
     })
+
+}
+
+
+async function callApiPresignedDelete(url: string) {
+
+  return new Promise((resolve: any) => {
+
+      var xhr = new XMLHttpRequest();
+      xhr.addEventListener("readystatechange", () => {
+          if(xhr != null) {
+              if(xhr.readyState === 4) {
+                  resolve(xhr);
+              }
+          }
+      });
+      xhr.open("DELETE", url);
+      xhr.timeout = 1800000;
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); 
+      xhr.send(null);
+
+      return xhr;
+
+  })
+
+}
+
+async function callApiPresignedGet(url: string) {
+
+  return new Promise((resolve: any) => {
+
+      var xhr = new XMLHttpRequest();
+      xhr.addEventListener("readystatechange", () => {
+          if(xhr != null) {
+              if(xhr.readyState === 4) {
+                  resolve(xhr);
+              }
+          }
+      });
+      xhr.open("GET", url);
+      xhr.timeout = 1800000;
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); 
+      xhr.send(null);
+
+      return xhr;
+
+  })
+
+}
+
+async function callApiPresigned(url: string, data: string) {
+
+  return new Promise((resolve: any) => {
+
+      const jsonData = JSON.stringify(data);
+      var xhr = new XMLHttpRequest();
+      xhr.addEventListener("readystatechange", () => {
+          if(xhr != null) {
+              if(xhr.readyState === 4) {
+                  resolve(xhr);
+              }
+          }
+      });
+      xhr.open("PUT", url);
+      xhr.timeout = 1800000;
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); 
+      xhr.send(jsonData);
+
+      return xhr;
+
+  })
 
 }
 
@@ -288,8 +362,26 @@ function clearListeners(old_element: HTMLElement) {
   return new_element;
 }
 
+function jsonObjectToHtml(json: any) {
+
+  var html = '';
+
+  
+  for(var i = 0; i < Object.keys(json).length; i++) {
+    var key = Object.keys(json)[i];
+    html += '<div>';
+    html += ('<span style="margin-left: 0px; padding-left: 0px">' + key + ':</span>&nbsp;');
+    html += ('<span class="td-body" part="td-head"><sf-i-elastic-text text="' + json[key].replace(/"/g,'') + '" lineSize="6" minLength="10"></sf-i-elastic-text></span>');
+    html += '</div>';
+  }
+  
+
+  return html;
+
+}
+
 const exportFunctions = {
-  clearListeners, isInteger, callApi, validateName, readCookie, timeSince, createDiagonalPattern1, createDiagonalPattern2, createDiagonalPattern3, getRandomColor
+  callApiPresignedDelete, callApiPresignedGet, callApiPresigned, jsonObjectToHtml, clearListeners, isInteger, callApi, validateName, readCookie, timeSince, createDiagonalPattern1, createDiagonalPattern2, createDiagonalPattern3, getRandomColor
 };
 
 export default exportFunctions;

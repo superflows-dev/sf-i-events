@@ -3,10 +3,18 @@ declare function createDiagonalPattern2(color: string): CanvasPattern | null;
 declare function createDiagonalPattern3(color: string): CanvasPattern | null;
 declare function readCookie(key: string): string;
 declare function callApi(url: string, data: string, authorization: any): Promise<unknown>;
+declare function callApiPresignedDelete(url: string): Promise<unknown>;
+declare function callApiPresignedGet(url: string): Promise<unknown>;
+declare function callApiPresigned(url: string, data: string): Promise<unknown>;
 declare function getRandomColor(): string;
 declare function isInteger(value: string): boolean;
 declare function clearListeners(old_element: HTMLElement): Node;
+declare function jsonObjectToHtml(json: any): string;
 declare const exportFunctions: {
+    callApiPresignedDelete: typeof callApiPresignedDelete;
+    callApiPresignedGet: typeof callApiPresignedGet;
+    callApiPresigned: typeof callApiPresigned;
+    jsonObjectToHtml: typeof jsonObjectToHtml;
     clearListeners: typeof clearListeners;
     isInteger: typeof isInteger;
     callApi: typeof callApi;
