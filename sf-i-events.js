@@ -2284,7 +2284,16 @@ let SfIEvents = class SfIEvents extends LitElement {
                 html += '';
                 html += '</th>';
             }
+            if (event.obligationtype[0].toLowerCase() == "quality indicator confirmatory"
+                || event.obligationtype[0].toLowerCase() == "quality indicator percentage") {
+                if (event.comments != null && (event.comments).length > 0) {
+                    html += '<th part="td-head">';
+                    html += '';
+                    html += '</th>';
+                }
+            }
             html += '</thead>';
+            console.log('event.obligationtype', event.obligationtype[0].toLowerCase());
             return html;
         };
         this.renderCalendarRowDivItemDivTableBody = (event, partStatus, lateStatus, complianceStatus, mmdd, i, j) => {
@@ -2343,6 +2352,41 @@ let SfIEvents = class SfIEvents extends LitElement {
                 html += '<th part="td-body">';
                 html += '<span class="material-symbols-outlined muted">scan_delete</span>';
                 html += '</th>';
+            }
+            if (event.obligationtype[0].toLowerCase() == "quality indicator confirmatory"
+                || event.obligationtype[0].toLowerCase() == "quality indicator percentage") {
+                if (event.comments != null && (event.comments).length > 0) {
+                    html += '<th part="td-head">';
+                    for (var n = (event.comments.length - 1); n >= 0; n--) {
+                        if (event.comments[n].author == "Reporter") {
+                            const reportedValue = ((event.comments[n].comment).replace(/ *\([^)]*\) */g, "").trim());
+                            console.log((event.comments[n].comment).replace(/ *\([^)]*\) */g, "").trim(), reportedValue, event.comments[n]);
+                            let badge = "";
+                            if (event.obligationtype[0].toLowerCase() == "quality indicator percentage") {
+                                if (parseInt(reportedValue) > 98) {
+                                    badge = "badge-success";
+                                }
+                                else if (parseInt(reportedValue) > 90) {
+                                    badge = "badge-warning";
+                                }
+                                else {
+                                    badge = "badge-error";
+                                }
+                            }
+                            else {
+                                if (reportedValue.toLowerCase() == "yes") {
+                                    badge = "badge-success";
+                                }
+                                else {
+                                    badge = "badge-error";
+                                }
+                            }
+                            html += ('<span class="' + badge + '">' + reportedValue + '</span>');
+                            break;
+                        }
+                    }
+                    html += '</th>';
+                }
             }
             html += '</tbody>';
             html += '</table>';
@@ -14558,6 +14602,36 @@ SfIEvents.styles = css `
       background-color: #ffe505;
       height: 100%;
       width: 100%;
+    }
+
+    .badge-success {
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-top: 2px;
+      padding-bottom: 2px;
+      border-radius: 7px;
+      color: white;
+      background-color: #50cf01;
+    }
+
+    .badge-warning {
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-top: 2px;
+      padding-bottom: 2px;
+      border-radius: 7px;
+      color: black;
+      background-color: #ffe505;
+    }
+
+    .badge-eror {
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-top: 2px;
+      padding-bottom: 2px;
+      border-radius: 7px;
+      color: black;
+      background-color: #C80036;
     }
 
     input:not([type='radio']) {
