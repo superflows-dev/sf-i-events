@@ -1862,7 +1862,7 @@ export class SfIEvents extends LitElement {
     .badge-success {
       padding-left: 5px;
       padding-right: 5px;
-      padding-top: 2px;
+      padding-top: 5px;
       padding-bottom: 2px;
       border-radius: 7px;
       color: white;
@@ -1872,20 +1872,20 @@ export class SfIEvents extends LitElement {
     .badge-warning {
       padding-left: 5px;
       padding-right: 5px;
-      padding-top: 2px;
+      padding-top: 5px;
       padding-bottom: 2px;
       border-radius: 7px;
       color: black;
       background-color: #ffe505;
     }
 
-    .badge-eror {
+    .badge-error {
       padding-left: 5px;
       padding-right: 5px;
-      padding-top: 2px;
+      padding-top: 5px;
       padding-bottom: 2px;
       border-radius: 7px;
-      color: black;
+      color: white;
       background-color: #C80036;
     }
 
@@ -4342,7 +4342,7 @@ export class SfIEvents extends LitElement {
     if(event.obligationtype[0].toLowerCase() == "quality indicator confirmatory"
     || event.obligationtype[0].toLowerCase() == "quality indicator percentage") {
       if(event.comments != null && (event.comments).length > 0) {
-        html += '<th part="td-head">';
+        html += '<td part="td-body">';
         for(var n = (event.comments.length - 1); n >= 0; n--) {
 
           if(event.comments[n].author == "Reporter") {
@@ -4373,7 +4373,7 @@ export class SfIEvents extends LitElement {
 
         }
         
-        html += '</th>'
+        html += '</td>'
       }
     }
     html += '</tbody>';
@@ -10979,11 +10979,11 @@ export class SfIEvents extends LitElement {
                 if(Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[j])) {
                   
                   for(var k = 0; k < JSON.parse(sourceArray.data.mappings.mappings[i].data)[j].length; k++) {
-                    html +=  ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j][k]+'" minLength="60" lineSize="4"></sf-i-elastic-text>');
+                    html +=  ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j][k]+'" minLength="100" lineSize="4"></sf-i-elastic-text>');
                   }
           
                 } else {
-                  html += ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j]+'" minLength="60" lineSize="4"></sf-i-elastic-text>')
+                  html += ('<sf-i-elastic-text text="'+JSON.parse(sourceArray.data.mappings.mappings[i].data)[j]+'" minLength="100" lineSize="4"></sf-i-elastic-text>')
                 }
       
                 html += '</div>';
@@ -12732,7 +12732,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingTagsContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingTagsListContainer as HTMLDivElement),mappedSerializedFunctions, mappedTags, ["obligationtype","firstlineofdefence", "obligation", "reference", "country", "statute"], this.uploadTagsMapping, this.loadOnboardingTags, "tags", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Tag", ["tags"], tagsJobs, "tagtype", ["Client remarks", "FlaggGRC response"], null, "", "");
+    this.renderTaggingTable((this._SfOnboardingTagsListContainer as HTMLDivElement),mappedSerializedFunctions, mappedTags, ["obligationtype","firstlineofdefence", "obligationtitle", "obligation", "reference", "country", "statute"], this.uploadTagsMapping, this.loadOnboardingTags, "tags", ["id", "countryname", "entityname", "locationname"], this.apiIdTags, "&Tag", ["tags"], tagsJobs, "tagtype", ["Client remarks", "FlaggGRC response"], null, "", "");
 
   }
 
