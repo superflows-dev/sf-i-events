@@ -838,6 +838,24 @@ export class SfIEvents extends LitElement {
 
   barCharDataSet4Arr: Array<any> = [];
 
+  @query('#decrypt-container')
+  _SfDecryptContainer: any;
+
+  @query('#sf-i-project-decrypt')
+  _SfDecryptProjectInput: any;
+
+  @query('#input-decrypt')
+  _SfDecryptFileInput: any;
+
+  @query('#button-decrypt')
+  _SfDecryptButton: any;
+
+  @property()
+  decryptProjectId: string = "";
+
+  @property()
+  decryptFileName: string = "";
+
   @property()
   filteronboarding: string = '[]';
 
@@ -19378,6 +19396,98 @@ export class SfIEvents extends LitElement {
     
   }
 
+  isAdmin = () => {
+    return Util.readCookie('admin') == "true"
+  }
+
+  initDecryptView = () => {
+    if(this.isAdmin()){
+      let divsArr = this._SfDecryptContainer.querySelectorAll("#decrypt-container > div")
+      console.log('decrypt divs',divsArr);
+      for(let divElement of divsArr){
+        (divElement as HTMLElement).classList.remove('hide');
+      }
+      this.initDecryptListeners()
+    } else {
+      let divsArr = this._SfDecryptContainer.querySelectorAll("#decrypt-container > div")
+      console.log('decrypt divs',divsArr);
+      for(let divElement of divsArr){
+        (divElement as HTMLElement).classList.add('hide');
+      }
+    }
+  }
+
+  initDecryptListeners = () => {
+    (this._SfDecryptProjectInput as SfIForm).addEventListener('valueChanged',() => {
+      let projectId = (this._SfDecryptProjectInput as SfIForm).selectedValues()[0]
+      this.decryptProjectId = projectId.split(';')[projectId.split(';').length - 1];
+      this.evalDecrypt()
+    });
+    (this._SfDecryptFileInput as HTMLInputElement).addEventListener('keyup',() => {
+      console.log('keyup called');
+      this.decryptFileName = (this._SfDecryptFileInput as HTMLInputElement).value;
+      this.evalDecrypt()
+    });
+    (this._SfDecryptButton as HTMLButtonElement).addEventListener('click', () => {
+      console.log('decrypt clicked', this.decryptProjectId, this.decryptFileName);
+      this.submitDecrypt()
+    })
+  }
+
+  evalDecrypt = () => {
+    console.log((this._SfDecryptFileInput as HTMLInputElement))
+    console.log('evalDecrypt', this.decryptProjectId, this.decryptFileName)
+    if(this.decryptProjectId != null && this.decryptProjectId != "" && this.decryptFileName != null && this.decryptFileName.length > 3){
+      (this._SfDecryptContainer?.querySelector('#button-decrypt') as HTMLButtonElement).removeAttribute('disabled');
+    }else{
+      (this._SfDecryptContainer?.querySelector('#button-decrypt') as HTMLButtonElement).setAttribute('disabled', 'true');
+    }
+  }
+
+  submitDecrypt = async () => {
+
+    this.clearMessages();
+
+    console.log('submitDecrypt called');
+
+    const body: any = {};
+    let url = "https://"+this.apiId+"/getdecryptedjson";
+
+    body["projectid"] = this.decryptProjectId; 
+    body["key"] = this.decryptFileName + ".json"; 
+
+    console.log(body);
+    console.log(JSON.stringify(body));
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(body, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('decrypt response', jsonRespose)
+      this.setSuccess('Operation Successful!');
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jsonRespose.data));
+      a.download = this.decryptFileName + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a); 
+
+      setTimeout(() => {
+        this.clearMessages();
+      }, 2000);
+      
+    } else {
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+      setTimeout(() => {
+        this.clearMessages();
+      }, 5000);
+    }
+
+  }
+
   loadMode = async () => {
 
     Chart.register(...registerables);
@@ -19407,7 +19517,11 @@ export class SfIEvents extends LitElement {
       this.showChooseProject();
       this.initListenersAdmin();
 
-    } else {
+    } else if(this.mode == "downloader"){
+      setTimeout(()=>{
+        this.initDecryptView();
+      }, 500)
+    }  else {
 
       this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
       this.enableCalendar();
@@ -19766,6 +19880,57 @@ export class SfIEvents extends LitElement {
                 </div>
               </div>
               <div class="rb"></div>
+          </div>
+        </div>
+
+      `;
+
+    } else if(this.mode == "downloader") {
+
+      return html`
+          
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+        <div class="SfIEventsC">
+          <div class="d-flex justify-center">
+              <h1 part="title">${this.name}</h1>
+          </div>
+          <div id="decrypt-container" class="d-flex flex-col justify-center mt-20">
+            <div class="d-flex mb-10">
+              <div class="lb" part="lb"></div>
+              <div class="d-flex align-end justify-between flex-grow">
+                <div class="d-flex flex-col">
+                  <sf-i-form id="sf-i-project-decrypt" class="mr-10" name="Projects" label="Select Project *" apiid="dnytrdlrmxgsy.cloudfront.net/project" mode="multiselect-dropdown" selectprojection="name" searchphrase="" ignoreprojections="[&quot;locations&quot;,&quot;plan&quot;,&quot;logo&quot;,&quot;shortid&quot;,&quot;plan&quot;]" mandatory="">
+                  </sf-i-form>
+                </div>
+                <div class="d-flex flex-col">
+                  <label>Decrypt Utility</label>
+                  <div class="d-flex align-end">
+                    <input part="input" id="input-decrypt" type="text" placeholder="file key" />.json&nbsp;&nbsp;
+                    <button id="button-decrypt" part="button-icon-small" class="material-icons button-icon" disabled>download</button>
+                  </div>
+                  <div class="loader-element"></div>
+                </div>
+              </div>
+              <div class="rb" part="rb"></div>
+            </div>
+            <div class="d-flex justify-center">
+              <div class="lb" part="lb"></div>
+              <div class="d-flex flex-col">
+                <div class="d-flex justify-center gone">
+                </div>
+                <div class="div-row-error div-row-submit gone">
+                  <div part="errormsg" class="div-row-error-message"></div>
+                </div>
+                <div class="div-row-success div-row-submit">
+                  <div part="successmsg" class="div-row-success-message"></div>
+                </div>
+                <div class="div-row-notif div-row-submit">
+                  <div part="notifmsg" class="div-row-notif-message"></div>
+                </div>
+              </div>
+              <div class="rb" part="rb"></div>
+            </div>
           </div>
         </div>
 
