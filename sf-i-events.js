@@ -822,6 +822,8 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.barCharDataSet3Arr = [];
         this.barCharDataSet4 = [];
         this.barCharDataSet4Arr = [];
+        this.decryptProjectId = "";
+        this.decryptFileName = "";
         this.filteronboarding = '[]';
         this.getfilterOnboarding = () => {
             return JSON.parse(this.filteronboarding);
@@ -7373,10 +7375,10 @@ let SfIEvents = class SfIEvents extends LitElement {
                     html += '<div class="' + (!showSearch ? 'truncate' : '') + '">';
                     if (apiIdDropdown.length > 0) {
                         if (anotherProjection != null) {
-                            html += '<sf-i-form id="tags-' + i + '" class="tags-input tags-' + i + '" name="Tags" label="Select ' + colName + '" apiId="' + apiIdDropdown + '" mode="multiselect-dropdown" searchPhrase="' + this.projectName + ((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "") + '" selectProjection="name" selectAnotherProjection="' + anotherProjection + '" mandatory></sf-i-form>';
+                            html += '<sf-i-form id="tags-' + i + '" class="tags-input tags-' + i + '" name="Tags" label="Select ' + colName + '" apiId="' + apiIdDropdown + '" mode="multiselect-dropdown" searchPhrase="' + this.projectId + ((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "") + '" selectProjection="name" selectAnotherProjection="' + anotherProjection + '" mandatory></sf-i-form>';
                         }
                         else {
-                            html += '<sf-i-form id="tags-' + i + '" class="tags-input tags-' + i + '" name="Tags" label="Select ' + colName + '" apiId="' + apiIdDropdown + '" mode="multiselect-dropdown" searchPhrase="' + this.projectName + ((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "") + '" selectProjection="name" mandatory></sf-i-form>';
+                            html += '<sf-i-form id="tags-' + i + '" class="tags-input tags-' + i + '" name="Tags" label="Select ' + colName + '" apiId="' + apiIdDropdown + '" mode="multiselect-dropdown" searchPhrase="' + this.projectId + ((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "") + '" selectProjection="name" mandatory></sf-i-form>';
                         }
                     }
                     else {
@@ -13798,6 +13800,88 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this.fetchList();
             });
         };
+        this.isAdmin = () => {
+            return Util.readCookie('admin') == "true";
+        };
+        this.initDecryptView = () => {
+            if (this.isAdmin()) {
+                let divsArr = this._SfDecryptContainer.querySelectorAll("#decrypt-container > div");
+                console.log('decrypt divs', divsArr);
+                for (let divElement of divsArr) {
+                    divElement.classList.remove('hide');
+                }
+                this.initDecryptListeners();
+            }
+            else {
+                let divsArr = this._SfDecryptContainer.querySelectorAll("#decrypt-container > div");
+                console.log('decrypt divs', divsArr);
+                for (let divElement of divsArr) {
+                    divElement.classList.add('hide');
+                }
+            }
+        };
+        this.initDecryptListeners = () => {
+            this._SfDecryptProjectInput.addEventListener('valueChanged', () => {
+                let projectId = this._SfDecryptProjectInput.selectedValues()[0];
+                this.decryptProjectId = projectId.split(';')[projectId.split(';').length - 1];
+                this.evalDecrypt();
+            });
+            this._SfDecryptFileInput.addEventListener('keyup', () => {
+                console.log('keyup called');
+                this.decryptFileName = this._SfDecryptFileInput.value;
+                this.evalDecrypt();
+            });
+            this._SfDecryptButton.addEventListener('click', () => {
+                console.log('decrypt clicked', this.decryptProjectId, this.decryptFileName);
+                this.submitDecrypt();
+            });
+        };
+        this.evalDecrypt = () => {
+            var _a, _b;
+            console.log(this._SfDecryptFileInput);
+            console.log('evalDecrypt', this.decryptProjectId, this.decryptFileName);
+            if (this.decryptProjectId != null && this.decryptProjectId != "" && this.decryptFileName != null && this.decryptFileName.length > 3) {
+                ((_a = this._SfDecryptContainer) === null || _a === void 0 ? void 0 : _a.querySelector('#button-decrypt')).removeAttribute('disabled');
+            }
+            else {
+                ((_b = this._SfDecryptContainer) === null || _b === void 0 ? void 0 : _b.querySelector('#button-decrypt')).setAttribute('disabled', 'true');
+            }
+        };
+        this.submitDecrypt = async () => {
+            this.clearMessages();
+            console.log('submitDecrypt called');
+            const body = {};
+            let url = "https://" + this.apiId + "/getdecryptedjson";
+            body["projectid"] = this.decryptProjectId;
+            body["key"] = this.decryptFileName + ".json";
+            console.log(body);
+            console.log(JSON.stringify(body));
+            const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+            const xhr = (await this.prepareXhr(body, url, this._SfLoader, authorization));
+            this._SfLoader.innerHTML = '';
+            if (xhr.status == 200) {
+                const jsonRespose = JSON.parse(xhr.responseText);
+                console.log('decrypt response', jsonRespose);
+                this.setSuccess('Operation Successful!');
+                const a = document.createElement("a");
+                a.style.display = "none";
+                a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jsonRespose.data));
+                a.download = this.decryptFileName + ".json";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => {
+                    this.clearMessages();
+                }, 2000);
+            }
+            else {
+                const jsonRespose = JSON.parse(xhr.responseText);
+                this.setError(jsonRespose.error);
+                setTimeout(() => {
+                    this.clearMessages();
+                }, 5000);
+            }
+        };
         this.loadMode = async () => {
             var _a, _b;
             Chart.register(...registerables);
@@ -13819,6 +13903,11 @@ let SfIEvents = class SfIEvents extends LitElement {
             else if (this.mode == "admin") {
                 this.showChooseProject();
                 this.initListenersAdmin();
+            }
+            else if (this.mode == "downloader") {
+                setTimeout(() => {
+                    this.initDecryptView();
+                }, 500);
             }
             else {
                 this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
@@ -14193,6 +14282,56 @@ let SfIEvents = class SfIEvents extends LitElement {
                 </div>
               </div>
               <div class="rb"></div>
+          </div>
+        </div>
+
+      `;
+        }
+        else if (this.mode == "downloader") {
+            return html `
+          
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+        <div class="SfIEventsC">
+          <div class="d-flex justify-center">
+              <h1 part="title">${this.name}</h1>
+          </div>
+          <div id="decrypt-container" class="d-flex flex-col justify-center mt-20">
+            <div class="d-flex mb-10">
+              <div class="lb" part="lb"></div>
+              <div class="d-flex align-end justify-between flex-grow">
+                <div class="d-flex flex-col">
+                  <sf-i-form id="sf-i-project-decrypt" class="mr-10" name="Projects" label="Select Project *" apiid="dnytrdlrmxgsy.cloudfront.net/project" mode="multiselect-dropdown" selectprojection="name" searchphrase="" ignoreprojections="[&quot;locations&quot;,&quot;plan&quot;,&quot;logo&quot;,&quot;shortid&quot;,&quot;plan&quot;]" mandatory="">
+                  </sf-i-form>
+                </div>
+                <div class="d-flex flex-col">
+                  <label>Decrypt Utility</label>
+                  <div class="d-flex align-end">
+                    <input part="input" id="input-decrypt" type="text" placeholder="file key" />.json&nbsp;&nbsp;
+                    <button id="button-decrypt" part="button-icon-small" class="material-icons button-icon" disabled>download</button>
+                  </div>
+                  <div class="loader-element"></div>
+                </div>
+              </div>
+              <div class="rb" part="rb"></div>
+            </div>
+            <div class="d-flex justify-center">
+              <div class="lb" part="lb"></div>
+              <div class="d-flex flex-col">
+                <div class="d-flex justify-center gone">
+                </div>
+                <div class="div-row-error div-row-submit gone">
+                  <div part="errormsg" class="div-row-error-message"></div>
+                </div>
+                <div class="div-row-success div-row-submit">
+                  <div part="successmsg" class="div-row-success-message"></div>
+                </div>
+                <div class="div-row-notif div-row-submit">
+                  <div part="notifmsg" class="div-row-notif-message"></div>
+                </div>
+              </div>
+              <div class="rb" part="rb"></div>
+            </div>
           </div>
         </div>
 
@@ -15215,6 +15354,24 @@ SfIEvents.styles = css `
     
 
   `;
+__decorate([
+    query('#decrypt-container')
+], SfIEvents.prototype, "_SfDecryptContainer", void 0);
+__decorate([
+    query('#sf-i-project-decrypt')
+], SfIEvents.prototype, "_SfDecryptProjectInput", void 0);
+__decorate([
+    query('#input-decrypt')
+], SfIEvents.prototype, "_SfDecryptFileInput", void 0);
+__decorate([
+    query('#button-decrypt')
+], SfIEvents.prototype, "_SfDecryptButton", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "decryptProjectId", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "decryptFileName", void 0);
 __decorate([
     property()
 ], SfIEvents.prototype, "filteronboarding", void 0);

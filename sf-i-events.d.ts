@@ -100,6 +100,12 @@ export declare class SfIEvents extends LitElement {
     barCharDataSet3Arr: Array<any>;
     barCharDataSet4: Array<any>;
     barCharDataSet4Arr: Array<any>;
+    _SfDecryptContainer: any;
+    _SfDecryptProjectInput: any;
+    _SfDecryptFileInput: any;
+    _SfDecryptButton: any;
+    decryptProjectId: string;
+    decryptFileName: string;
     filteronboarding: string;
     getfilterOnboarding: () => any;
     getFilterOnboardingString: () => string;
@@ -400,7 +406,7 @@ export declare class SfIEvents extends LitElement {
     getApproverStringFromEvent: (event: any) => string;
     getApproverDetailStringFromEvent: (event: any) => string;
     renderLatestCompliance: (mmddyyyy: string, event: any) => any;
-    getCompletenessStatus: (event: any) => "rejected" | "approved" | "not-started" | "pending-approval";
+    getCompletenessStatus: (event: any) => "approved" | "not-started" | "pending-approval" | "rejected";
     getTimelinessStatus: (mmdd: string, event: any, completeness: string) => "late-executed" | "late-reported" | "late-approved" | "past-due-date" | "in-time";
     getComplianceStatus: (completeness: string, timeliness: string) => "scheduled" | "not-complied" | "partially-complied" | "complied";
     numcalled: number;
@@ -739,6 +745,11 @@ export declare class SfIEvents extends LitElement {
     showChosenMapping: () => void;
     truncate: (str: string, n: number, useWordBoundary: boolean, ellipsis?: boolean) => string;
     initListenersAdmin: () => void;
+    isAdmin: () => boolean;
+    initDecryptView: () => void;
+    initDecryptListeners: () => void;
+    evalDecrypt: () => void;
+    submitDecrypt: () => Promise<void>;
     loadMode: () => Promise<void>;
     constructor();
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void;
