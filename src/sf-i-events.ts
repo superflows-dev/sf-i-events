@@ -19464,11 +19464,13 @@ export class SfIEvents extends LitElement {
     this._SfLoader.innerHTML = '';
     if(xhr.status == 200) {
       const jsonRespose = JSON.parse(xhr.responseText);
+      let data = await this.fetchPresignedUrl(jsonRespose.signedUrlGet);
+      await this.fetchPresignedUrlDelete(jsonRespose.signedUrlDelete)
       console.log('decrypt response', jsonRespose)
       this.setSuccess('Operation Successful!');
       const a = document.createElement("a");
       a.style.display = "none";
-      a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jsonRespose.data));
+      a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
       a.download = this.decryptFileName + ".json";
       document.body.appendChild(a);
       a.click();
