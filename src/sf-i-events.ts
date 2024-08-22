@@ -10210,7 +10210,7 @@ export class SfIEvents extends LitElement {
 
   matchesOnBoardingFilter = (country: string, state: string, subcategory: string, statute: string) => {
 
-    console.log('matchingonboarding','country=' + country, 'state=' + state, 'subcategory=' + subcategory, '-' + statute + '-');
+    // console.log('matchingonboarding','country=' + country, 'state=' + state, 'subcategory=' + subcategory, '-' + statute + '-');
 
     let matchesCountry = false;
 
@@ -10669,7 +10669,7 @@ export class SfIEvents extends LitElement {
         // html += '<div class="d-flex justify-end"><button part="button" class="align-center button-download-backups hide" style="position: absolute; margin-top: 5px;"><span class="material-symbols-outlined mr-10">file_save</span><span>Download Backups</span></button></div>'
         html += '<div style="position: absolute; margin-top: 5px;"><button part="button" class="hide d-flex align-center button-download-backups" style="margin-left: -80px"><span class="material-symbols-outlined mr-10">file_save</span><span>Download Backups</span></button><button part="button" class="mt-10 hide d-flex align-center button-export-mapping" style="margin-left: -80px"><span class="material-symbols-outlined mr-10">export_notes</span><span>Export Mapping</span></button></div>'
       html += '</div>';
-      console.log('jobs', jobs);
+      // console.log('jobs', jobs);
       html += ((jobs == null || jobs.data == null) ? '<button part="button" class="button-apply d-flex align-center mr-10"><span class="material-symbols-outlined mr-10">touch_app</span><span>Apply</span></button><button part="button" class="button-save d-flex align-center"><span class="material-symbols-outlined mr-10">save</span><span>Save</span></button>' : ((jobs.data.status == "1" || jobs.data.status == "0" ) ? '<button part="button" class="button-cancel">Cancel Job</button>' : (this.disablesave == "yes" ? '' : '<button part="button" class="button-apply d-flex align-center mr-10"><span class="material-symbols-outlined mr-10">touch_app</span><span>Apply</span></button><button part="button" class="button-save d-flex align-center"><span class="material-symbols-outlined mr-10">save</span><span>Save</span></button>')));
     html += '</div>';
 
@@ -10952,7 +10952,7 @@ export class SfIEvents extends LitElement {
  
         // }
         for(var l = 0; l < uniqCols.length; l++) {
-          console.log('uniqcolval', uniqCols[l], sourceArray.data.mappings.mappings[i], sourceArray.data.mappings.mappings[i][uniqCols[l]]);
+          // console.log('uniqcolval', uniqCols[l], sourceArray.data.mappings.mappings[i], sourceArray.data.mappings.mappings[i][uniqCols[l]]);
           html += '<td class="td-body '+classBg+'" part="td-key">'
           html += '<div class="'+(!showSearch ? 'truncate' : '')+'">';
           html += '<sf-i-elastic-text text="'+sourceArray.data.mappings.mappings[i][uniqCols[l]].replace(/ *\([^)]*\) */g, "")+'" minLength="20"></sf-i-elastic-text>';
@@ -11285,7 +11285,7 @@ export class SfIEvents extends LitElement {
 
     const buttonApply = (divElement as HTMLDivElement).querySelector('.button-apply') as HTMLButtonElement;
     buttonApply.addEventListener('click', () => {
-      console.log('applied');
+      // console.log('applied');
       // this.applyAndReloadTagging(e,colName, taggingArray, sourceArray, divElement);
       this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection, extraFields, _arrFeedbackReference, proposedUsersLabel, subfilter)
     })
@@ -12020,7 +12020,7 @@ export class SfIEvents extends LitElement {
     for(var i = 0; i < extraFields.length; i++) {
 
       const arrExtraFields = (divElement as HTMLDivElement).querySelectorAll('.extra-field-' + i) as NodeListOf<HTMLInputElement>;
-      console.log('i='+i, arrExtraFields.length)
+      // console.log('i='+i, arrExtraFields.length)
       for(var j = 0; j < arrExtraFields.length; j++) {
 
         // console.log('j='+j, jsonData[j], arrExtraFields.length)
