@@ -17157,7 +17157,7 @@ export class SfIEvents extends LitElement {
 
       const jsonRespose = JSON.parse(xhr.responseText);
       console.log('jsonResponse sync', jsonRespose);
-      this.setSuccess("Trigger retracted successfully!");
+      this.setSuccess("Your trigger has been retracted successfully. The changes will reflect in your calendar shortly.");
       setTimeout(() => {
         this.clearMessages();
       }, 3000);
@@ -17231,7 +17231,7 @@ export class SfIEvents extends LitElement {
 
       const jsonRespose = JSON.parse(xhr.responseText);
       console.log('jsonResponse sync', jsonRespose);
-      this.setSuccess("Triggers deployed successfully!");
+      this.setSuccess("Your trigger request is registered successfully. The associated compliances will be available in your calendar shortly.");
       setTimeout(() => {
         this.clearMessages();
       }, 3000);
