@@ -10210,7 +10210,7 @@ export class SfIEvents extends LitElement {
 
   matchesOnBoardingFilter = (country: string, state: string, subcategory: string, statute: string) => {
 
-    console.log('matchingonboarding',country, state, subcategory, '-' + statute + '-');
+    console.log('matchingonboarding','country=' + country, 'state=' + state, 'subcategory=' + subcategory, '-' + statute + '-');
 
     let matchesCountry = false;
 
@@ -11568,7 +11568,7 @@ export class SfIEvents extends LitElement {
 
     for(var i = 0; i < JSON.parse(jsonData[0].data.cols).length; i++) {
       if(JSON.parse(jsonData[0].data.cols)[i].toLowerCase() == "country") {
-        //console.log('colstate country', JSON.parse(jsonData[0].data.cols)[i].toLowerCase(), i);
+        console.log('colstate country', JSON.parse(jsonData[0].data.cols)[i].toLowerCase(), i);
         colCountry = i;
       }
       if(JSON.parse(jsonData[0].data.cols)[i].toLowerCase() == "state") {
@@ -11598,7 +11598,38 @@ export class SfIEvents extends LitElement {
 
         //console.log('subfilter value before', subfiltered);
 
-        if(JSON.parse(jsonData[i].data.data)[colCountry].length === 0 && level === 1) {
+        let tempColCountry = -1;
+        let tempColState = -1;
+        let tempColStatute = -1;
+        let tempColSubcategory = -1;
+
+        if(JSON.parse(jsonData[0].data.cols)[0] == ('lastModifiedBy')) {
+          if(JSON.parse(jsonData[i].data.cols)[0] != ('lastModifiedBy')) {
+            tempColCountry = colCountry - 2;
+            tempColState = colState - 2;
+            tempColStatute = colStatute - 2;
+            tempColSubcategory = colSubcategory - 2;
+          } else {
+            tempColCountry = colCountry;
+            tempColState = colState;
+            tempColStatute = colStatute;
+            tempColSubcategory = colSubcategory;
+          }
+        } else {
+          if(JSON.parse(jsonData[i].data.cols)[0] == ('lastModifiedBy')) {
+            tempColCountry = colCountry + 2;
+            tempColState = colState + 2;
+            tempColStatute = colStatute + 2;
+            tempColSubcategory = colSubcategory + 2;
+          } else {
+            tempColCountry = colCountry;
+            tempColState = colState;
+            tempColStatute = colStatute;
+            tempColSubcategory = colSubcategory;
+          }
+        }
+
+        if(JSON.parse(jsonData[i].data.data)[tempColCountry].length === 0 && level === 1) {
 
           html += '<tr id="tablerow-'+i+'" class="tablerow" style="display: none">';
 
@@ -11745,11 +11776,11 @@ export class SfIEvents extends LitElement {
 
           let locationsForThisItem: any = [];
 
-          if(JSON.parse(jsonData[i].data.data)[colState].length > 0) {
-            locationsForThisItem = this.getLocationsByState(JSON.parse(jsonData[i].data.data)[colCountry][0], JSON.parse(jsonData[i].data.data)[colState][0], JSON.parse(jsonData[i].data.data)[colStatute]);
+          if(JSON.parse(jsonData[i].data.data)[tempColState].length > 0) {
+            locationsForThisItem = this.getLocationsByState(JSON.parse(jsonData[i].data.data)[tempColCountry][0], JSON.parse(jsonData[i].data.data)[tempColState][0], JSON.parse(jsonData[i].data.data)[tempColStatute]);
           } else {
             //console.log(JSON.parse(jsonData[i].data.data)[colStatute]);
-            locationsForThisItem = this.getLocationsByCountry(JSON.parse(jsonData[i].data.data)[colCountry][0], JSON.parse(jsonData[i].data.data)[colStatute]);
+            locationsForThisItem = this.getLocationsByCountry(JSON.parse(jsonData[i].data.data)[tempColCountry][0], JSON.parse(jsonData[i].data.data)[tempColStatute]);
           }
 
           if(extraFieldPosition === 0) {
@@ -11829,7 +11860,12 @@ export class SfIEvents extends LitElement {
               html += '<td part="td-body" class="td-body '+classBg+' ' + (jsonData[i].mapped ? 'chosen' : '') + ' ' + (statuteColName.toLowerCase() == JSON.parse(jsonData[i].data.cols)[j].toLowerCase() ? 'left-sticky' : '') + '">';
               html += '<div class="'+(!showSearch ? 'truncate' : '')+'">'
                 html += '<div class="d-flex align-center">';
-                const filterMatch = this.matchesOnBoardingFilter(JSON.parse(jsonData[i].data.data)[colCountry][0], JSON.parse(jsonData[i].data.data)[colState].length > 0 ? JSON.parse(jsonData[i].data.data)[colState][0] : "", JSON.parse(jsonData[i].data.data)[colSubcategory].length > 0 ? JSON.parse(jsonData[i].data.data)[colSubcategory][0] : "", Array.isArray(JSON.parse(jsonData[i].data.data)[colStatute]) ? JSON.parse(jsonData[i].data.data)[colStatute][0] : JSON.parse(jsonData[i].data.data)[colStatute]);
+
+                let filterMatch: any = null;
+
+                filterMatch = this.matchesOnBoardingFilter(JSON.parse(jsonData[i].data.data)[tempColCountry][0], JSON.parse(jsonData[i].data.data)[tempColState].length > 0 ? JSON.parse(jsonData[i].data.data)[tempColState][0] : "", JSON.parse(jsonData[i].data.data)[tempColSubcategory].length > 0 ? JSON.parse(jsonData[i].data.data)[tempColSubcategory][0] : "", Array.isArray(JSON.parse(jsonData[i].data.data)[tempColStatute]) ? JSON.parse(jsonData[i].data.data)[tempColStatute][0] : JSON.parse(jsonData[i].data.data)[tempColStatute]);
+                
+                
                 if(jsonData[i].id == "f724e2b9-451a-49ec-85ba-2b099f433c73") {
                   console.log('filtermatch', filterMatch);
                 }
@@ -11902,11 +11938,11 @@ export class SfIEvents extends LitElement {
               html += '<td part="td-body" class="'+classBg+' ' + (jsonData[i].mapped ? 'chosen' : '') + '">';
               let locationsForThisItem: any = [];
 
-              if(JSON.parse(jsonData[i].data.data)[colState].length > 0) {
-                locationsForThisItem = this.getLocationsByState(JSON.parse(jsonData[i].data.data)[colCountry][0], JSON.parse(jsonData[i].data.data)[colState][0], JSON.parse(jsonData[i].data.data)[colStatute]);
+              if(JSON.parse(jsonData[i].data.data)[tempColState].length > 0) {
+                locationsForThisItem = this.getLocationsByState(JSON.parse(jsonData[i].data.data)[tempColCountry][0], JSON.parse(jsonData[i].data.data)[tempColState][0], JSON.parse(jsonData[i].data.data)[tempColStatute]);
               } else {
                 //console.log(JSON.parse(jsonData[i].data.data)[colStatute]);
-                locationsForThisItem = this.getLocationsByCountry(JSON.parse(jsonData[i].data.data)[colCountry][0], JSON.parse(jsonData[i].data.data)[colStatute]);
+                locationsForThisItem = this.getLocationsByCountry(JSON.parse(jsonData[i].data.data)[tempColCountry][0], JSON.parse(jsonData[i].data.data)[tempColStatute]);
               }
 
               const strLocationsForThisItem = JSON.stringify(locationsForThisItem).replace(/"/g,'&quot;');
@@ -11984,19 +12020,21 @@ export class SfIEvents extends LitElement {
     for(var i = 0; i < extraFields.length; i++) {
 
       const arrExtraFields = (divElement as HTMLDivElement).querySelectorAll('.extra-field-' + i) as NodeListOf<HTMLInputElement>;
+      console.log('i='+i, arrExtraFields.length)
       for(var j = 0; j < arrExtraFields.length; j++) {
 
-        const extraField = (divElement as HTMLDivElement).querySelector('#extra-field-' + jsonData[j].id + '-' + i);
-        extraField?.addEventListener('focusout', () => {
-          ((divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement).disabled = false;
-        });
+        // console.log('j='+j, jsonData[j], arrExtraFields.length)
+        // const extraField = (divElement as HTMLDivElement).querySelector('#extra-field-' + jsonData[j].id + '-' + i);
+        // extraField?.addEventListener('focusout', () => {
+        //   ((divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement).disabled = false;
+        // });
 
-        extraField?.addEventListener('keyup', async (_e:any) => {
-          if(extraFieldPosition === 1) {
-            await this.saveMapping (divElement, uploadBlock, jsonData, extraFields, searchString, uploadFunction, refreshFunction, true)
-          }
+        // extraField?.addEventListener('keyup', async (_e:any) => {
+        //   if(extraFieldPosition === 1) {
+        //     await this.saveMapping (divElement, uploadBlock, jsonData, extraFields, searchString, uploadFunction, refreshFunction, true)
+        //   }
           
-        });
+        // });
 
       }
 
