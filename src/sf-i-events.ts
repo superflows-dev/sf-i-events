@@ -820,7 +820,7 @@ export class SfIEvents extends LitElement {
 
   AUTOSAVE_FLAG = true;
 
-  EXCLUDE_COLS_FROM_REGS: Array<string> = ["updatetype", "question", "invalidations", "activations", "alertschedule", "clientquestion", "shortid", "countryname", "countryid", "entityname", "entityid", "locationname", "locationid", "reporters", "approvers", "timeframe", "responsedays", "execmodule", "functions", "shortnumid", "countries", "entities", "locations","tagsmap","reportersmap","approversmap","functionheadsmap","auditorsmap","viewersmap","approved","documents","comments","lastupdated","dateofcompletion","mmdd","completeness","timeliness","compliance","delta","triggers"]
+  EXCLUDE_COLS_FROM_REGS: Array<string> = ["updatetype", "question", "invalidations", "activations", "alertschedule", "clientquestion", "countryname", "countryid", "entityname", "entityid", "locationname", "locationid", "reporters", "approvers", "timeframe", "responsedays", "execmodule", "functions", "shortid", "shortnumid", "countries", "entities", "locations","tagsmap","reportersmap","approversmap","functionheadsmap","auditorsmap","viewersmap","approved","documents","comments","lastupdated","dateofcompletion","mmdd","completeness","timeliness","compliance","delta","triggers"]
 
   chartSelectedLegend: Array<number>= [];
 
@@ -9081,6 +9081,8 @@ export class SfIEvents extends LitElement {
     
     `;
 
+    let shortId : string = "";
+
     html += '<div class="accordian-container m-20 pb-20" part="accordian-container">';
 
       html += '<div class="accordian-section section-basic pl-20 pr-20" part="accordian-section">';
@@ -9100,7 +9102,14 @@ export class SfIEvents extends LitElement {
               html += '</div>';
 
             }
+            if(cols[k].toLowerCase() == "shortid") {
+
+              shortId = (data[k])[0];
+
+            }
           }
+
+          console.log('shortid', shortId);
         
         html += '</div>';
 
@@ -9203,7 +9212,7 @@ export class SfIEvents extends LitElement {
         const data = JSON.parse(compliance.data)
         console.log(compliance, cols, data);
         this.uploadTriggerMyEvent(
-          compliance.id, 
+          compliance.id + ";" + shortId, 
           feedbackMessage.value, 
           compliance.countries.join(",").replace(/ *\([^)]*\) */g, ""), 
           compliance.entities.join(',').replace(/ *\([^)]*\) */g, ""), 
@@ -12909,7 +12918,13 @@ export class SfIEvents extends LitElement {
             }
             
             for(j = 0; j < mappedStatutes.data.mappings.mappings.length; j++) {
-             
+
+              // console.log('mappedStatutes.data.mappings.mappings[j]', mappedStatutes.data.mappings.mappings[j]);
+              if(Array.isArray(mappedStatutes.data.mappings.mappings[j].statutename)) {
+                // sometimes this error occurs
+                continue;
+
+              }
               
               if(mappedStatutes.data.mappings.mappings[j].statutename.trim() == JSON.parse(resultCompliances.values[i].fields.data[0])[6][0].trim()) {
 
@@ -18829,7 +18844,7 @@ export class SfIEvents extends LitElement {
   fetchGetMappedCalendar = async(year: string) => {
 
     // let url = "https://"+this.apiId+"/getmappedcalendar";
-    let url = "https://"+this.apiId+"/getcalendar";
+    let url = "https://3mefupehxkw4pwsq3oyk7lf2pq0pisdx.lambda-url.us-east-1.on.aws/getcalendar";
     const body : any = {"projectid": this.projectId, "year": year};
     if(this.contractStartDate != "") {
       body.contractstartdate = this.contractStartDate;
@@ -19079,7 +19094,7 @@ export class SfIEvents extends LitElement {
 
     //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
 
-    let url = "https://"+this.apiId+"/getcalendar";
+    let url = "https://3mefupehxkw4pwsq3oyk7lf2pq0pisdx.lambda-url.us-east-1.on.aws/getcalendar";
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]}, url, this._SfLoader, authorization)) as any;

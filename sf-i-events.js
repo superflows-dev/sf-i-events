@@ -813,7 +813,7 @@ let SfIEvents = class SfIEvents extends LitElement {
   
   `;
         this.AUTOSAVE_FLAG = true;
-        this.EXCLUDE_COLS_FROM_REGS = ["updatetype", "question", "invalidations", "activations", "alertschedule", "clientquestion", "shortid", "countryname", "countryid", "entityname", "entityid", "locationname", "locationid", "reporters", "approvers", "timeframe", "responsedays", "execmodule", "functions", "shortnumid", "countries", "entities", "locations", "tagsmap", "reportersmap", "approversmap", "functionheadsmap", "auditorsmap", "viewersmap", "approved", "documents", "comments", "lastupdated", "dateofcompletion", "mmdd", "completeness", "timeliness", "compliance", "delta", "triggers"];
+        this.EXCLUDE_COLS_FROM_REGS = ["updatetype", "question", "invalidations", "activations", "alertschedule", "clientquestion", "countryname", "countryid", "entityname", "entityid", "locationname", "locationid", "reporters", "approvers", "timeframe", "responsedays", "execmodule", "functions", "shortid", "shortnumid", "countries", "entities", "locations", "tagsmap", "reportersmap", "approversmap", "functionheadsmap", "auditorsmap", "viewersmap", "approved", "documents", "comments", "lastupdated", "dateofcompletion", "mmdd", "completeness", "timeliness", "compliance", "delta", "triggers"];
         this.chartSelectedLegend = [];
         this.selectedFilter = null;
         this.barCharDataSet2 = [];
@@ -6021,6 +6021,7 @@ let SfIEvents = class SfIEvents extends LitElement {
       </div>
     
     `;
+            let shortId = "";
             html += '<div class="accordian-container m-20 pb-20" part="accordian-container">';
             html += '<div class="accordian-section section-basic pl-20 pr-20" part="accordian-section">';
             html += '<div class="d-flex flex-wrap accordian-body body-basic" part="accordian-body">';
@@ -6034,7 +6035,11 @@ let SfIEvents = class SfIEvents extends LitElement {
                     html += '<sf-i-elastic-text text="' + data[k] + '" minLength="80" lineSize="6"></sf-i-elastic-text>';
                     html += '</div>';
                 }
+                if (cols[k].toLowerCase() == "shortid") {
+                    shortId = (data[k])[0];
+                }
             }
+            console.log('shortid', shortId);
             html += '</div>';
             html += '<div class="d-flex justify-end flex-wrap">';
             html += '<div class="d-flex justify-end w-100 mb-10">';
@@ -6109,7 +6114,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const cols = JSON.parse(compliance.cols);
                     const data = JSON.parse(compliance.data);
                     console.log(compliance, cols, data);
-                    this.uploadTriggerMyEvent(compliance.id, feedbackMessage.value, compliance.countries.join(",").replace(/ *\([^)]*\) */g, ""), compliance.entities.join(',').replace(/ *\([^)]*\) */g, ""), compliance.locations.join(',').replace(/ *\([^)]*\) */g, ""), data[cols.indexOf('statute')][0], data[cols.indexOf('subcategory')][0]);
+                    this.uploadTriggerMyEvent(compliance.id + ";" + shortId, feedbackMessage.value, compliance.countries.join(",").replace(/ *\([^)]*\) */g, ""), compliance.entities.join(',').replace(/ *\([^)]*\) */g, ""), compliance.locations.join(',').replace(/ *\([^)]*\) */g, ""), data[cols.indexOf('statute')][0], data[cols.indexOf('subcategory')][0]);
                     buttonCancel.click();
                     buttonClose.click();
                 }
@@ -8822,6 +8827,11 @@ let SfIEvents = class SfIEvents extends LitElement {
                                 }
                             }
                             for (j = 0; j < mappedStatutes.data.mappings.mappings.length; j++) {
+                                // console.log('mappedStatutes.data.mappings.mappings[j]', mappedStatutes.data.mappings.mappings[j]);
+                                if (Array.isArray(mappedStatutes.data.mappings.mappings[j].statutename)) {
+                                    // sometimes this error occurs
+                                    continue;
+                                }
                                 if (mappedStatutes.data.mappings.mappings[j].statutename.trim() == JSON.parse(resultCompliances.values[i].fields.data[0])[6][0].trim()) {
                                     if (mappedStatutes.data.mappings.mappings[j].statutename.trim() == "Corporation Act, 2001") {
                                         //console.log('pushpreviousvalues', mappedStatutes.data.mappings.mappings[j], Object.keys(mappedStatutes.data.mappings.mappings[j].extraFields[0]));
@@ -12183,7 +12193,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             if (xhr.status == 200) {
                 const jsonRespose = JSON.parse(xhr.responseText);
                 console.log('jsonResponse sync', jsonRespose);
-                this.setSuccess("Trigger retracted successfully!");
+                this.setSuccess("Your trigger has been retracted successfully. The changes will reflect in your calendar shortly.");
                 setTimeout(() => {
                     this.clearMessages();
                 }, 3000);
@@ -12243,7 +12253,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             if (xhr.status == 200) {
                 const jsonRespose = JSON.parse(xhr.responseText);
                 console.log('jsonResponse sync', jsonRespose);
-                this.setSuccess("Triggers deployed successfully!");
+                this.setSuccess("Your trigger request is registered successfully. The associated compliances will be available in your calendar shortly.");
                 setTimeout(() => {
                     this.clearMessages();
                 }, 3000);
@@ -13378,7 +13388,7 @@ let SfIEvents = class SfIEvents extends LitElement {
         };
         this.fetchGetMappedCalendar = async (year) => {
             // let url = "https://"+this.apiId+"/getmappedcalendar";
-            let url = "https://" + this.apiId + "/getcalendar";
+            let url = "https://3mefupehxkw4pwsq3oyk7lf2pq0pisdx.lambda-url.us-east-1.on.aws/getcalendar";
             const body = { "projectid": this.projectId, "year": year };
             if (this.contractStartDate != "") {
                 body.contractstartdate = this.contractStartDate;
@@ -13559,7 +13569,7 @@ let SfIEvents = class SfIEvents extends LitElement {
         };
         this.fetchCalendar = async () => {
             //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
-            let url = "https://" + this.apiId + "/getcalendar";
+            let url = "https://3mefupehxkw4pwsq3oyk7lf2pq0pisdx.lambda-url.us-east-1.on.aws/getcalendar";
             const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
             const xhr = (await this.prepareXhr({ "projectid": this._SfProject[0].querySelector('#sf-i-project').selectedValues()[0] }, url, this._SfLoader, authorization));
             this._SfLoader.innerHTML = '';
