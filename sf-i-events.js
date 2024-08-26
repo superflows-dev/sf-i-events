@@ -13446,8 +13446,13 @@ let SfIEvents = class SfIEvents extends LitElement {
             this._SfLoader.innerHTML = '';
             if (xhr.status == 200) {
                 const jsonRespose = JSON.parse(xhr.responseText);
+                console.log('jsonRespose', jsonRespose);
+                const registers = (await this.fetchPresignedUrl(jsonRespose.signedUrlGet));
+                await this.fetchPresignedUrlDelete(jsonRespose.signedUrlDelete);
+                // this.renderAppropriateStream(startDate, endDate);
+                // const jsonRespose = JSON.parse(xhr.responseText);
                 //console.log(jsonRespose);
-                return jsonRespose.data;
+                return registers;
             }
         };
         this.fetchAndYearlyRenderUserCalendar_2 = async (startDate = "", endDate = "", searchString = "") => {
