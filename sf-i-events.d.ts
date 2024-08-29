@@ -123,6 +123,7 @@ export declare class SfIEvents extends LitElement {
     disablesignoff: string;
     apiId: string;
     apiIdStatutes: string;
+    apiIdDefinitions: string;
     apiIdProjects: string;
     apiIdCompliances: string;
     apiIdList: string;
@@ -657,6 +658,8 @@ export declare class SfIEvents extends LitElement {
     fetchUpdateRcmLock: (complianceId: string) => Promise<any>;
     fetchDetailProject: (projectId: string) => Promise<any>;
     fetchDeleteReview: (eventId: string, mmddyyyy: string, entityId: string, locationId: string) => Promise<any>;
+    fetchStatuteDefinitionDetails: (statuteName: string) => Promise<void>;
+    fetchSearchDefinitions: (searchString: string, cursor?: string) => Promise<any>;
     fetchSearchStatutes: (searchString: string, cursor?: string) => Promise<any>;
     fetchSearchCompliances: (searchString: string, cursor: string | undefined, count: number, length: number) => Promise<any>;
     fetchMappedProjects: () => Promise<any>;

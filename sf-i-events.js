@@ -6131,6 +6131,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             let comments, docs, approved, dateOfCompletion, makercheckers, docsOptional, documentType;
             let entityId = "";
             let locationId = "";
+            let statuteName = "";
             entityId = event.entityid;
             locationId = event.locationid;
             comments = event['comments'] == null ? [] : (event['comments']);
@@ -6140,7 +6141,8 @@ let SfIEvents = class SfIEvents extends LitElement {
             makercheckers = event['makercheckers'] == null ? [] : event['makercheckers'] == null ? [] : event['makercheckers'];
             docsOptional = event['docs'] == null ? [] : event['docs'] == null ? [] : event['docs'];
             documentType = event['documenttype'] == null ? null : event['documenttype'][0] == null ? null : event['documenttype'][0].split(" ")[0];
-            console.log('event detail', event);
+            statuteName = event['statute'][0].trim();
+            console.log('event detail', event, statuteName);
             //console.log('event detail comments', comments);
             //console.log('event dateofcompletion', dateOfCompletion);
             //console.log('event detail documenttype', documentType);
@@ -6248,6 +6250,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                     }
                 }
             }
+            html += '<div id="container-definition" class="w-100"></div>';
             html += '</div>';
             html += '</div>';
             html += '<div class="accordian-section section-compliance pl-20 pr-20" part="accordian-section">';
@@ -6834,6 +6837,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                     }
                 }
             }
+            this.fetchStatuteDefinitionDetails(statuteName);
         };
         this.renderCalendar = () => {
             //console.log('redering calendar', this.events);
@@ -7120,7 +7124,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             if (taggingArray.length === 0 || sourceArray.length === 0)
                 return;
             const foundArr = [];
-            if (taggingArray.data.mappings != null) {
+            if (taggingArray.data.mappings != null && taggingArray.data.mappings.mappings != null) {
                 for (var i = 0; i < taggingArray.data.mappings.mappings.length; i++) {
                     var found = false;
                     for (var j = 0; j < sourceArray.data.mappings.mappings.length; j++) {
@@ -7205,7 +7209,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             html += '<div style="position: absolute; margin-top: 5px;"><button part="button" class="hide d-flex align-center button-download-backups" style="margin-left: -80px"><span class="material-symbols-outlined mr-10">file_save</span><span>Download Backups</span></button><button part="button" class="mt-10 hide d-flex align-center button-export-mapping" style="margin-left: -80px"><span class="material-symbols-outlined mr-10">export_notes</span><span>Export Mapping</span></button></div>';
             html += '</div>';
             // console.log('jobs', jobs);
-            html += ((jobs == null || jobs.data == null) ? '<button part="button" class="button-apply d-flex align-center mr-10"><span class="material-symbols-outlined mr-10">touch_app</span><span>Apply</span></button><button part="button" class="button-save d-flex align-center"><span class="material-symbols-outlined mr-10">save</span><span>Save</span></button>' : ((jobs.data.status == "1" || jobs.data.status == "0") ? '<button part="button" class="button-cancel">Cancel Job</button>' : (this.disablesave == "yes" ? '' : '<button part="button" class="button-apply d-flex align-center mr-10"><span class="material-symbols-outlined mr-10">touch_app</span><span>Apply</span></button><button part="button" class="button-save d-flex align-center"><span class="material-symbols-outlined mr-10">save</span><span>Save</span></button>')));
+            html += ((jobs == null || jobs.data == null) ? '<button part="button" class="button-apply d-flex align-center mr-10"><span class="material-symbols-outlined mr-10">touch_app</span><span>Apply</span></button><input id="fileInput" type="file" style="display:none;" /><button part="button" class="button-local-load d-flex align-center mr-10"><span class="material-symbols-outlined mr-10">upload_file</span><span>Load From Local</span></button><button part="button" class="button-local-save d-flex align-center mr-10"><span class="material-symbols-outlined mr-10">save</span><span>Save Locally</span></button><button part="button" class="button-save d-flex align-center"><span class="material-symbols-outlined mr-10">save</span><span>Save On Cloud</span></button>' : ((jobs.data.status == "1" || jobs.data.status == "0") ? '<button part="button" class="button-cancel">Cancel Job</button>' : (this.disablesave == "yes" ? '' : '<button part="button" class="button-apply d-flex align-center mr-10"><span class="material-symbols-outlined mr-10">touch_app</span><span>Apply</span></button><input id="fileInput" type="file" style="display:none;" /><button part="button" class="button-local-load d-flex align-center mr-10"><span class="material-symbols-outlined mr-10">upload_file</span><span>Load From Local</span></button><button part="button" class="button-local-save d-flex align-center mr-10"><span class="material-symbols-outlined mr-10">save</span><span>Save Locally</span></button><button part="button" class="button-save d-flex align-center"><span class="material-symbols-outlined mr-10">save</span><span>Save On Cloud</span></button>')));
             html += '</div>';
             html += '</div>';
             html += '<div>';
@@ -7387,7 +7391,12 @@ let SfIEvents = class SfIEvents extends LitElement {
                         }
                     }
                     else {
-                        html += '<input id="tags-' + i + '" type="text" part="input" class="tags-input"/>';
+                        if (colName.toLowerCase() == "internalcontrols") {
+                            html += '<textarea id="tags-' + i + '" type="text" part="input" class="tags-input"></textarea>';
+                        }
+                        else {
+                            html += '<input id="tags-' + i + '" type="text" part="input" class="tags-input"/>';
+                        }
                     }
                     html += '</div>';
                     html += '</td>';
@@ -7705,6 +7714,31 @@ let SfIEvents = class SfIEvents extends LitElement {
                 const buttonDownloadBackups = divElement.querySelector('.button-download-backups');
                 buttonDownloadBackups.style.display = 'none';
             });
+            const buttonLoadLocal = divElement.querySelector('.button-local-load');
+            buttonLoadLocal === null || buttonLoadLocal === void 0 ? void 0 : buttonLoadLocal.addEventListener('click', async () => {
+                console.log('load-local');
+                divElement.querySelector('#fileInput').click();
+            });
+            const fileInput = divElement.querySelector('#fileInput');
+            fileInput.addEventListener('change', (e) => {
+                var fr = new FileReader();
+                fr.onload = () => {
+                    this.renderTaggingTable(divElement, sourceArray, JSON.parse(fr.result + ""), sourceCols, uploadFunction, refreshFunction, colName, uniqCols, apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection, extraFields, _arrFeedbackReference, proposedUsersLabel, subfilter);
+                };
+                if (e.target.files[0].name.toLowerCase().indexOf(colName.toLowerCase()) >= 0) {
+                    fr.readAsText(e.target.files[0]);
+                }
+            });
+            const buttonSaveLocal = divElement.querySelector('.button-local-save');
+            buttonSaveLocal === null || buttonSaveLocal === void 0 ? void 0 : buttonSaveLocal.addEventListener('click', async () => {
+                console.log('save-local');
+                const blob = new Blob([JSON.stringify(taggingArray)], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.setAttribute('href', url);
+                a.setAttribute('download', 'mapping_' + colName + '_' + new Date().toLocaleString() + '.txt');
+                a.click();
+            });
             const buttonSave = divElement.querySelector('.button-save');
             buttonSave === null || buttonSave === void 0 ? void 0 : buttonSave.addEventListener('click', async () => {
                 await this.saveTagging(taggingArray.data.mappings, uploadFunction, refreshFunction, false);
@@ -7863,6 +7897,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             var countextra = [];
             var subfiltered = 0;
             html += '<tbody>';
+            var mappedCount = 0;
             for (let level = 0; level < 2; level++) {
                 for (var i = 0; i < jsonData.length; i++) {
                     //console.log('subfilter value before', subfiltered);
@@ -7993,6 +8028,9 @@ let SfIEvents = class SfIEvents extends LitElement {
                         this.selectedCbs.push(i);
                     }
                     if ((level == 0 && jsonData[i].mapped) || (level == 1 && !jsonData[i].mapped)) {
+                        if ((level == 0 && jsonData[i].mapped)) {
+                            mappedCount++;
+                        }
                         if (arrCompliancesFrequencies[jsonData[i].id] == null) {
                             arrCompliancesFrequencies[jsonData[i].id] = 0;
                         }
@@ -8434,6 +8472,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             // }
             // (divElement as HTMLDivElement).querySelector("#span-extra-filled")!.innerHTML = "Fields: " + filledFields + "/" + totalFields + " completed";
             //console.log('Total fields = ' + totalFields + ', filled fields = ' + filledFields);
+            console.log('totalmapped', mappedCount, this.selectedCbs.length, this.selectedCbs);
         };
         this.getPreviousExtraFields = (i, previousExtraFields, locationsForThisItem, showSearch) => {
             var userHtml = '';
@@ -8794,17 +8833,36 @@ let SfIEvents = class SfIEvents extends LitElement {
                 //console.log('searchstring', searchString);
                 if (searchString.length > 0) {
                     const arrSearchString = searchString.split('|');
+                    const arrSearchStringProcessed = [];
+                    arrSearchString.forEach((complianceId) => {
+                        if (complianceId.length === 36) {
+                            arrSearchStringProcessed.push(complianceId);
+                        }
+                    });
                     var resultCompliances = {};
                     resultCompliances.values = [];
                     const chunkSize = 20;
-                    for (let k = 0; k < arrSearchString.length; k += chunkSize) {
-                        const chunk = arrSearchString.slice(k, k + chunkSize);
+                    for (let k = 0; k < arrSearchStringProcessed.length; k += chunkSize) {
+                        const chunk = arrSearchStringProcessed.slice(k, k + chunkSize);
+                        console.log('chunk', chunk);
                         // do whatever
-                        const tempResultCompliances = await this.fetchSearchCompliances(chunk.join('|'), "", k, arrSearchString.length);
-                        //console.log(tempResultCompliances)
+                        const tempResultCompliances = await this.fetchSearchCompliances(chunk.join('|'), "", k, arrSearchStringProcessed.length);
+                        console.log(tempResultCompliances);
                         resultCompliances.values.push(...tempResultCompliances.values);
                         //console.log(resultCompliances);
                     }
+                    // var resultCompliances : any = {};
+                    // resultCompliances.values = [];
+                    // const chunkSize = 20;
+                    // for (let k = 0; k < arrSearchString.length; k += chunkSize) {
+                    //   const chunk = arrSearchString.slice(k, k + chunkSize);
+                    //   console.log('chunk', chunk);
+                    //     // do whatever
+                    //   const tempResultCompliances = await this.fetchSearchCompliances(chunk.join('|'), "", k, arrSearchString.length);
+                    //   console.log(tempResultCompliances)
+                    //   resultCompliances.values.push(...tempResultCompliances.values);
+                    //   //console.log(resultCompliances);
+                    // }
                     if (resultCompliances != null) {
                         const jsonData = [];
                         const arrCompliancesFrequencies = {};
@@ -8922,7 +8980,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                             jsonData.push({ id: resultStatutes.values[i].id, mapped: mapped, data: resultStatutes.values[i].fields, cols: ["country", "jurisdiction", "state", "name", "category", "subcategory", "applicability"], extraFields: extraFields });
                         }
                         //console.log('clicked', jsonData);
-                        this.renderMappingTable(this._SfOnboardingStatutesListContainer, jsonData, [{ prev: initCursor, next: resultStatutes.cursor }], this.fetchSearchStatutes, searchString, mappedStatutes, resultStatutes.found, this.uploadStatutesMapping, this.loadOnboardingStatutes, ["Client remarks<br ><span class=\"title-byline\">(mention your queries, else leave blank)<span>", "Entity applicability<br /><span class=\"title-byline\">(only applicable in case of multiple corporate entities, else leave blank)<span>", "Locations applicability<br /><span class=\"title-byline\">(mention in case there is location-wise variance of applicability, else leave blank)<span>", "Reporters<br /><span class=\"title-byline\">(details of personnel who have the reponsibility of reporting)<span>", "Approvers<br /><span class=\"title-byline\">(details of personnel who have the reponsibility of approving)", "Functionheads<br /><span class=\"title-byline\">(details of personnel who head the function)", "Auditors<br /><span class=\"title-byline\">(mention details of auditors in case they are known)</span>", "Viewers<br /><span class=\"title-byline\">(mention details personnel who need to be given readonly access)</span>", "FlaggGRC response"], -1, 1, "statutes", "", "name", ["optional", "optional", "optional", "name - email@company.com", "name - email@company.com", "optional", "optional", "optional", "optional"]);
+                        this.renderMappingTable(this._SfOnboardingStatutesListContainer, jsonData, [{ prev: initCursor, next: resultStatutes.cursor }], this.fetchSearchStatutes, searchString, mappedStatutes, jsonData.length, this.uploadStatutesMapping, this.loadOnboardingStatutes, ["Client remarks<br ><span class=\"title-byline\">(mention your queries, else leave blank)<span>", "Entity applicability<br /><span class=\"title-byline\">(only applicable in case of multiple corporate entities, else leave blank)<span>", "Locations applicability<br /><span class=\"title-byline\">(mention in case there is location-wise variance of applicability, else leave blank)<span>", "Reporters<br /><span class=\"title-byline\">(details of personnel who have the reponsibility of reporting)<span>", "Approvers<br /><span class=\"title-byline\">(details of personnel who have the reponsibility of approving)", "Functionheads<br /><span class=\"title-byline\">(details of personnel who head the function)", "Auditors<br /><span class=\"title-byline\">(mention details of auditors in case they are known)</span>", "Viewers<br /><span class=\"title-byline\">(mention details personnel who need to be given readonly access)</span>", "FlaggGRC response"], -1, 1, "statutes", "", "name", ["optional", "optional", "optional", "name - email@company.com", "name - email@company.com", "optional", "optional", "optional", "optional"]);
                     }
                 }
             });
@@ -9278,7 +9336,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             this.renderOnboardingStatus(statusOnboarding.result);
             this.renderClearOnboardingContent();
             if (initialLoad) {
-                this._SfOnboardingTabContainer.querySelector('#onboarding-tab-statutes').click();
+                //   ((this._SfOnboardingTabContainer as HTMLDivElement).querySelector('#onboarding-tab-statutes') as HTMLButtonElement).click();
             }
         };
         this.renderRcmProceed = (div, button) => {
@@ -12636,6 +12694,76 @@ let SfIEvents = class SfIEvents extends LitElement {
                 this.setError(jsonRespose.error);
             }
         };
+        this.fetchStatuteDefinitionDetails = async (statuteName) => {
+            const statuteDetails = await this.fetchSearchStatutes(statuteName);
+            console.log('statuteDetails', statuteDetails);
+            statuteDetails.values.forEach(async (statute) => {
+                const nameIndex = JSON.parse(statute.fields.cols[0]).indexOf('name');
+                const statuteNameFound = JSON.parse(statute.fields.data[0])[nameIndex];
+                if (statuteNameFound == statuteName) {
+                    if (statute.fields.cols[0].indexOf('definitions') >= 0) {
+                        const definitionsIndex = JSON.parse(statute.fields.cols[0]).indexOf('definitions');
+                        const definitionsFound = JSON.parse(statute.fields.data[0])[definitionsIndex];
+                        const definitionsName = JSON.parse(statute.fields.data[0])[definitionsIndex][0].trim();
+                        console.log('statute', statute, JSON.parse(statute.fields.cols[0]), nameIndex, statuteNameFound, definitionsFound, definitionsName);
+                        const definitionDetails = await this.fetchSearchDefinitions(definitionsName);
+                        definitionDetails.values.forEach(async (definition) => {
+                            const definitionNameIndex = JSON.parse(definition.fields.cols[0]).indexOf('name');
+                            const definitionNameFound = JSON.parse(definition.fields.data[0])[definitionNameIndex];
+                            if (definitionNameFound == definitionsName) {
+                                const attachmentIndex = JSON.parse(definition.fields.cols[0]).indexOf('attachment');
+                                const attachmentKey = JSON.parse(definition.fields.data[0])[attachmentIndex][0];
+                                console.log('definition', definition, attachmentKey);
+                                this._SfDetailContainer.querySelector('#container-definition').innerHTML = '<div class="m-20"><div part="detail-head"><strong>Definitions</strong></div><button part="button" id="button-show-definition" class="mt-5">View</button></div>';
+                                this._SfDetailContainer.querySelector('#button-show-definition').addEventListener('click', (_e) => {
+                                    this._SfDetailContainer.querySelector('#container-definition').innerHTML = '<div  class="m-20"><div part="detail-head" class="mb-10"><strong>Definitions</strong></div><sf-i-uploader class="gone" id="sf-i-definitions" max="10" apiid="1peg5170d3" allowedextensions="[&quot;jpg&quot;,&quot;png&quot;,&quot;pdf&quot;]" extract="no" mandatory="" mode="view" maximize="yes"></sf-i-uploader></div>';
+                                    this._SfDetailContainer.querySelector('#sf-i-definitions').classList.remove('gone');
+                                    this._SfDetailContainer.querySelector('#sf-i-definitions').prepopulatedInputArr = JSON.stringify(JSON.parse('[' + attachmentKey + ']'));
+                                    this._SfDetailContainer.querySelector('#sf-i-definitions').loadMode();
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        };
+        this.fetchSearchDefinitions = async (searchString, cursor = "") => {
+            let url = "https://" + this.apiIdDefinitions + "/listlarge";
+            let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+            let xhr = (await this.prepareXhr({ "searchstring": searchString, "cursor": cursor }, url, this._SfLoader, authorization));
+            this._SfLoader.innerHTML = '';
+            if (xhr.status == 200) {
+                const jsonRespose = JSON.parse(xhr.responseText);
+                //console.log('searchstatutes', jsonRespose);
+                let newCursor = jsonRespose.cursor;
+                let i = 0;
+                while (true) {
+                    url = "https://" + this.apiIdDefinitions + "/listlarge";
+                    authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+                    xhr = (await this.prepareXhr({ "searchstring": searchString, "cursor": newCursor }, url, this._SfLoader, authorization, "" + parseInt(((i) * 100 / jsonRespose.found) + "") + "%"));
+                    this._SfLoader.innerHTML = '';
+                    if (xhr.status == 200) {
+                        const jsonRespose1 = JSON.parse(xhr.responseText);
+                        //console.log('found', jsonRespose1.values);
+                        jsonRespose.values.push(...jsonRespose1.values);
+                        if (newCursor == jsonRespose1.cursor) {
+                            break;
+                        }
+                        newCursor = jsonRespose1.cursor;
+                        //console.log('newcursor', i, jsonRespose1.cursor);
+                        i += jsonRespose1.values.length;
+                    }
+                    else {
+                        break;
+                    }
+                }
+                return jsonRespose;
+            }
+            else {
+                const jsonRespose = JSON.parse(xhr.responseText);
+                this.setError(jsonRespose.error);
+            }
+        };
         this.fetchSearchStatutes = async (searchString, cursor = "") => {
             let url = "https://" + this.apiIdStatutes + "/listlarge";
             let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
@@ -14469,6 +14597,18 @@ SfIEvents.styles = css `
 
     }
 
+    sf-i-uploader::part(button-icon) {
+      border-width: 0px;      
+      border-radius: 5px;
+      color: #fff;
+      background: #c15c83;
+      box-shadow: 1px 1px 10px 0 rgba(0, 0, 0, 0.25), -1px -1px 10px 0 rgba(255, 255, 255, 0.6);
+      border-top: solid 1px rgba(255, 255, 255, 0.3);
+      border-left: solid 1px rgba(255, 255, 255, 0.3);
+      border-bottom: solid 1px rgba(0, 0, 0, 0.1);
+      border-right: solid 1px rgba(0, 0, 0, 0.1);
+    }
+
     #calendar-tab-next span {
       font-size: 80%;
     }
@@ -15460,6 +15600,9 @@ __decorate([
 __decorate([
     property()
 ], SfIEvents.prototype, "apiIdStatutes", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "apiIdDefinitions", void 0);
 __decorate([
     property()
 ], SfIEvents.prototype, "apiIdProjects", void 0);
