@@ -19776,7 +19776,7 @@ export class SfIEvents extends LitElement {
   }
 
   renderNextEvents = (eventsData: any) => {
-
+    if(Object.keys(eventsData).length > 0){
     var notStarted = 0, approved = 0, pendingApproval = 0, rejected = 0, inTime = 0, pastDueDate = 0, lateExecuted = 0, lateApproved = 0, lateReported = 0, scheduled = 0, partiallyComplied = 0, notComplied = 0, complied = 0;
     var html = '';
     this.selectedItems = [];
@@ -19884,6 +19884,7 @@ export class SfIEvents extends LitElement {
     html += '</div>';
 
     (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).innerHTML = html;
+    (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).style.display = "flex";
 
     const buttonArr = this._SfIEventsC.querySelectorAll('.button-expand') as NodeListOf<HTMLButtonElement>;
 
@@ -19995,6 +19996,11 @@ export class SfIEvents extends LitElement {
 
     }
     // return html;
+    }else{
+      (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).innerHTML = "";
+      (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).style.display = "none";
+    }
+
 
   }
 
