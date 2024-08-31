@@ -19999,12 +19999,15 @@ export class SfIEvents extends LitElement {
         }
   
       })
-
+      let changeEvent = new CustomEvent('valueChanged',{bubbles:true});
+      this.dispatchEvent(changeEvent);
     }
     // return html;
     }else{
       (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).innerHTML = "";
       (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).style.display = "none";
+      let emptyEvent = new CustomEvent('valueChanged',{bubbles:false});
+      this.dispatchEvent(emptyEvent);
     }
 
 
