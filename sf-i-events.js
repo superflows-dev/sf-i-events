@@ -1182,6 +1182,8 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.restrictToMapping = "";
         this.enableDeleteLatestReport = "";
         this.stream = this.TAB_STREAM;
+        this.myroles = "[]";
+        this.blocksize = "5";
         this.isSelectedLegend = (value) => {
             return this.chartSelectedLegend.includes(value);
         };
@@ -6342,7 +6344,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             //     }
             //   }
             // }
-            if (this.mode == "consumer") {
+            if (this.mode == "consumer" || this.mode == "next") {
                 //console.log('docs received', event['documents']);
                 //console.log('docs received', comments);
                 //console.log('docs received', approved);
@@ -7629,6 +7631,11 @@ let SfIEvents = class SfIEvents extends LitElement {
                             this.applyAndReloadTagging(e, colName, taggingArray, sourceArray, divElement);
                             // this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection, extraFields, arrFeedbackReference, proposedUsersLabel, subfilter)
                         }
+                    });
+                    multiArr[i].addEventListener('focusout', async (e) => {
+                        divElement.querySelector('.button-save').disabled = false;
+                        this.applyAndReloadTagging(e, colName, taggingArray, sourceArray, divElement);
+                        // this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection, extraFields, arrFeedbackReference, proposedUsersLabel, subfilter)
                     });
                 }
             }
@@ -14062,6 +14069,204 @@ let SfIEvents = class SfIEvents extends LitElement {
                 }, 5000);
             }
         };
+        this.fetchNext = async () => {
+            //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
+            let url = "https://" + this.apiId + "/getnextuserevents";
+            const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+            console.log('this.myroles', this.myroles);
+            const xhr = (await this.prepareXhr({ "projectid": this.projectId, "userprofileid": this.userProfileId, "roles": JSON.parse(this.myroles), "year": new Date().getFullYear() + "", "blocksize": parseInt(this.blocksize) }, url, this._SfLoader, authorization));
+            this._SfLoader.innerHTML = '';
+            if (xhr.status == 200) {
+                const jsonRespose = JSON.parse(xhr.responseText);
+                console.log('next response', jsonRespose);
+                // this.renderChosenProject(events);
+                this.renderNextEvents(jsonRespose.data);
+            }
+            else {
+                if (xhr.status === 404) {
+                    const jsonRespose = JSON.parse(xhr.responseText);
+                    this.setError(jsonRespose.error);
+                }
+            }
+        };
+        this.clearButtonSelectionNext = () => {
+            const buttonSelect = this._SfIEventsC.querySelectorAll('.button-select');
+            for (var i = 0; i < buttonSelect.length; i++) {
+                buttonSelect[i].checked = false;
+            }
+        };
+        this.renderNextEvents = (eventsData) => {
+            if (Object.keys(eventsData).length > 0) {
+                var notStarted = 0, approved = 0, pendingApproval = 0, rejected = 0, inTime = 0, pastDueDate = 0, lateExecuted = 0, lateApproved = 0, lateReported = 0, scheduled = 0, partiallyComplied = 0, notComplied = 0, complied = 0;
+                var html = '';
+                this.selectedItems = [];
+                this.selectedStatus = "";
+                html += '<div id="stream-event-next" part="stream-event-list" class="stream-event-list">';
+                for (var i = 0; i < Object.keys(eventsData).length; i++) {
+                    let mmdd = Object.keys(eventsData)[i];
+                    //console.log('mmdd', mmdd);
+                    //console.log('mmddevent', mmdd,eventsData[mmdd]);
+                    if (eventsData[mmdd] != null) {
+                        html += '<div part="stream-event-selected" class="d-flex stream-event-selected">';
+                        html += '<div part="stream-event-selected-date">' + (mmdd.split("/")[1] + "/" + mmdd.split("/")[0]) + ' |</div>';
+                        html += '<div class="stream-event-list-container flex-grow">';
+                        for (var j = 0; j < eventsData[mmdd].length; j++) {
+                            eventsData[mmdd][j]['mmdd'] = mmdd;
+                            var partStatus = "";
+                            var lateStatus = "";
+                            var complianceStatus = "";
+                            // const tempEvents1 = JSON.parse(JSON.stringify(eventsData));
+                            // //console.log('eventlog1', tempEvents1['06/30'][7].comments, mmdd, j);
+                            partStatus = this.getCompletenessStatus(JSON.parse(JSON.stringify(eventsData[mmdd][j])));
+                            lateStatus = this.getTimelinessStatus(mmdd, JSON.parse(JSON.stringify(eventsData[mmdd][j])), partStatus);
+                            complianceStatus = this.getComplianceStatus(partStatus, lateStatus);
+                            // const tempEvents2 = JSON.parse(JSON.stringify(eventsData));
+                            // //console.log('eventlog2', tempEvents2['06/30'][7].comments, mmdd, j);
+                            notStarted = notStarted + (partStatus == "not-started" ? 1 : 0);
+                            pendingApproval = pendingApproval + (partStatus == "pending-approval" ? 1 : 0);
+                            rejected = rejected + (partStatus == "rejected" ? 1 : 0);
+                            approved = approved + (partStatus == "approved" ? 1 : 0);
+                            inTime = inTime + (lateStatus == "in-time" ? 1 : 0);
+                            pastDueDate = pastDueDate + (lateStatus == "past-due-date" ? 1 : 0);
+                            lateReported = lateReported + (lateStatus == "late-reported" ? 1 : 0);
+                            lateApproved = lateApproved + (lateStatus == "late-approved" ? 1 : 0);
+                            lateExecuted = lateExecuted + (lateStatus == "late-executed" ? 1 : 0);
+                            scheduled = scheduled + (complianceStatus == "scheduled" ? 1 : 0);
+                            partiallyComplied = partiallyComplied + (complianceStatus == "partially-complied" ? 1 : 0);
+                            notComplied = notComplied + (complianceStatus == "not-complied" ? 1 : 0);
+                            complied = complied + (complianceStatus == "complied" ? 1 : 0);
+                            eventsData[mmdd][j][this.FLOW_GRAPH_COMPLETENESS] = partStatus;
+                            eventsData[mmdd][j][this.FLOW_GRAPH_TIMELINESS] = lateStatus;
+                            eventsData[mmdd][j][this.FLOW_GRAPH_COMPLIANCE] = complianceStatus;
+                            var remarks = "";
+                            var occurrenceDate = "";
+                            const arrMmdd = mmdd.split("/");
+                            const ddmm = arrMmdd[1] + "/" + arrMmdd[0];
+                            if (eventsData[mmdd][j].triggers.length > 0 && eventsData[mmdd][j].triggers != "[]") {
+                                const arrTriggers = JSON.parse(eventsData[mmdd][j].triggers);
+                                for (var i = 0; i < arrTriggers.length; i++) {
+                                    const targetDates = arrTriggers[i].targetDates;
+                                    for (var j = 0; j < targetDates.length; j++) {
+                                        console.log('comparing', targetDates[j], ddmm);
+                                        if (targetDates[j].indexOf(ddmm) >= 0) {
+                                            remarks = arrTriggers[i].remarks;
+                                            occurrenceDate = arrTriggers[i].occurrenceDate;
+                                            console.log('remarks', mmdd);
+                                        }
+                                    }
+                                }
+                            }
+                            let lastUpdated = '';
+                            console.log('lastUpdated', eventsData[mmdd][j].lastupdated);
+                            if (eventsData[mmdd][j].lastupdated != null && eventsData[mmdd][j].lastupdated.length > 0) {
+                                lastUpdated = eventsData[mmdd][j].lastupdated;
+                            }
+                            html += '<div class="stream-events-container flex-grow">';
+                            html += '<div class="hidden-tags hide">' + JSON.stringify(eventsData[mmdd][j]['tags']) + '</div>';
+                            html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>';
+                            html += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5">' + ('<input id="button-select-' + mmdd.replace('/', '-') + '-' + j + '-' + (((eventsData[mmdd][j].makercheckers != null && (eventsData[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((eventsData[mmdd][j].docs != null && (eventsData[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + eventsData[mmdd][j].entityid.replace(/-/g, '_') + '-' + eventsData[mmdd][j].locationid.replace(/-/g, '_') + '-' + eventsData[mmdd][j].id.replace(/-/g, '_') + '-' + eventsData[mmdd][j].duedate.split('/')[1] + '-' + eventsData[mmdd][j].duedate.split('/')[0] + '-' + eventsData[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g, '_') + '" class="button-select mr-10" type="checkbox" />') + '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>' + '<sf-i-elastic-text text="' + eventsData[mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + (lastUpdated.length > 0 ? ('&nbsp;&nbsp;<div part="event-last-updated-time" class="d-flex align-center">' + lastUpdated + '</div>') : "") + '&nbsp;&nbsp;<sf-i-elastic-text text="' + eventsData[mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "") + '" minLength="10"></sf-i-elastic-text></div>';
+                            if (remarks.length > 0) {
+                                html += '<div part="stream-events-event-subtitle" class="stream-events-event-subtitle">' + remarks + ', occurred on ' + occurrenceDate + '</div>';
+                            }
+                            html += '</div>';
+                        }
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                }
+                html += '</div>';
+                this._SfIEventsC.querySelector('#next-calendar-data').innerHTML = html;
+                this._SfIEventsC.querySelector('#next-calendar-data').style.display = "flex";
+                const buttonArr = this._SfIEventsC.querySelectorAll('.button-expand');
+                for (var i = 0; i < buttonArr.length; i++) {
+                    buttonArr[i].addEventListener('click', (ev) => {
+                        const id = ev.target.id;
+                        const idArr = id.split("-");
+                        const mmdd = idArr[3] + "/" + idArr[4];
+                        const j = idArr[5];
+                        let found = false;
+                        for (var k = 0; k < this.selectedItems.length; k++) {
+                            if (this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+                                found = true;
+                            }
+                        }
+                        if (!found) {
+                            this.selectedItems = [];
+                            this.clearButtonSelectionNext();
+                        }
+                        this._SfDetailContainer.style.display = 'block';
+                        var yyyy = this.getCurrentYear(idArr[3]);
+                        console.log(eventsData[mmdd][j]);
+                        if (JSON.stringify(eventsData[mmdd][j]['viewers']).indexOf(this.userProfileId) >= 0) {
+                            this.myRole = this.TAB_VIEWER;
+                        }
+                        if (JSON.stringify(eventsData[mmdd][j]['auditors']).indexOf(this.userProfileId) >= 0) {
+                            this.myRole = this.TAB_AUDITOR;
+                        }
+                        if (JSON.stringify(eventsData[mmdd][j]['functionheads']).indexOf(this.userProfileId) >= 0) {
+                            this.myRole = this.TAB_FUNCTION_HEAD;
+                        }
+                        if (JSON.stringify(eventsData[mmdd][j]['approvers']).indexOf(this.userProfileId) >= 0) {
+                            this.myRole = this.TAB_APPROVER;
+                        }
+                        if (JSON.stringify(eventsData[mmdd][j]['reporters']).indexOf(this.userProfileId) >= 0) {
+                            this.myRole = this.TAB_REPORTER;
+                        }
+                        this.renderEventDetail(eventsData[mmdd][j], mmdd + "/" + yyyy, null);
+                    });
+                }
+                const streamEventsContainer = this._SfIEventsC.querySelectorAll('.stream-events-container');
+                const buttonSelect = this._SfIEventsC.querySelectorAll('.button-select');
+                for (i = 0; i < buttonSelect.length; i++) {
+                    buttonSelect[i].addEventListener('click', (ev) => {
+                        //console.log('eventscontainer', streamEventsContainer.length, buttonSelect.length);
+                        const id = ev.target.id;
+                        const idArr = id.split("-");
+                        // const mmdd = idArr[2] + "/" + idArr[3];
+                        // const j = idArr[4];
+                        // const makercheckers = idArr[5];
+                        const docs = idArr[6];
+                        if (ev.target.checked) {
+                            this.selectedItems.push(id);
+                        }
+                        else {
+                            this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+                        }
+                        if (this.selectedItems.length === 0) {
+                            for (var k = 0; k < buttonSelect.length; k++) {
+                                buttonSelect[k].style.display = 'block';
+                                streamEventsContainer[k].style.display = 'block';
+                            }
+                        }
+                        else {
+                            if (this.selectedItems.length === 1) {
+                                const id1 = id;
+                                const idArr1 = id1.split("-");
+                                const status = idArr1[13].replace(/_/g, '-');
+                                this.selectedStatus = status;
+                            }
+                            for (var k = 0; k < buttonSelect.length; k++) {
+                                const id1 = buttonSelect[k].id;
+                                const idArr1 = id1.split("-");
+                                const docs1 = idArr1[6];
+                                const status = idArr1[13].replace(/_/g, '-');
+                                if (docs == docs1 && status == this.selectedStatus) {
+                                }
+                                else {
+                                    buttonSelect[k].style.display = 'none';
+                                    streamEventsContainer[k].style.display = 'none';
+                                }
+                            }
+                        }
+                    });
+                }
+                // return html;
+            }
+            else {
+                this._SfIEventsC.querySelector('#next-calendar-data').innerHTML = "";
+                this._SfIEventsC.querySelector('#next-calendar-data').style.display = "none";
+            }
+        };
         this.loadMode = async () => {
             var _a, _b;
             Chart.register(...registerables);
@@ -14088,6 +14293,9 @@ let SfIEvents = class SfIEvents extends LitElement {
                 setTimeout(() => {
                     this.initDecryptView();
                 }, 500);
+            }
+            else if (this.mode == "next") {
+                this.fetchNext();
             }
             else {
                 this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
@@ -14512,6 +14720,36 @@ let SfIEvents = class SfIEvents extends LitElement {
               </div>
               <div class="rb" part="rb"></div>
             </div>
+          </div>
+        </div>
+
+      `;
+        }
+        else if (this.mode == "next") {
+            return html `
+          
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+        <div class="SfIEventsC">
+          
+          <div class="d-flex justify-center">
+              <div class="loader-element"></div>
+          </div>
+          <div id="next-calendar-data" class="calendar-right-data d-flex flex-col w-100">
+          </div>
+          <div id="detail-container" class="hide" part="detail-container">
+          </div>
+          <div class="d-flex justify-between">
+              <div class="lb"></div>
+              <div>
+                <div class="div-row-error div-row-submit gone">
+                  <div part="errormsg" class="div-row-error-message"></div>
+                </div>
+                <div class="div-row-success div-row-submit gone">
+                  <div part="successmsg" class="div-row-success-message"></div>
+                </div>
+              </div>
+              <div class="rb"></div>
           </div>
         </div>
 
@@ -15936,6 +16174,12 @@ __decorate([
 __decorate([
     property()
 ], SfIEvents.prototype, "stream", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "myroles", void 0);
+__decorate([
+    property()
+], SfIEvents.prototype, "blocksize", void 0);
 __decorate([
     query('.SfIEventsC')
 ], SfIEvents.prototype, "_SfIEventsC", void 0);

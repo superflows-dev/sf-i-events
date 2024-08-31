@@ -11320,6 +11320,14 @@ export class SfIEvents extends LitElement {
 
         });
 
+        multiArr[i].addEventListener('focusout', async (e: any) => {
+
+            ((divElement as HTMLDivElement).querySelector('.button-save') as HTMLButtonElement).disabled = false;
+            this.applyAndReloadTagging(e,colName, taggingArray, sourceArray, divElement);
+            // this.renderTaggingTable(divElement, sourceArray, taggingArray, sourceCols, uploadFunction, refreshFunction, colName, uniqCols,apiIdDropdown, dropdownSearchPhrase, mandatoryFields, jobs, anotherProjection, extraFields, arrFeedbackReference, proposedUsersLabel, subfilter)
+
+        });
+
 
       }
 
