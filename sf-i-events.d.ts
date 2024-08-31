@@ -241,6 +241,8 @@ export declare class SfIEvents extends LitElement {
     restrictToMapping: string;
     enableDeleteLatestReport: string;
     stream: string;
+    myroles: string;
+    blocksize: string;
     static styles: import("lit").CSSResult;
     _SfIEventsC: any;
     _SfRowError: any;
@@ -407,7 +409,7 @@ export declare class SfIEvents extends LitElement {
     getApproverStringFromEvent: (event: any) => string;
     getApproverDetailStringFromEvent: (event: any) => string;
     renderLatestCompliance: (mmddyyyy: string, event: any) => any;
-    getCompletenessStatus: (event: any) => "rejected" | "approved" | "not-started" | "pending-approval";
+    getCompletenessStatus: (event: any) => "approved" | "not-started" | "pending-approval" | "rejected";
     getTimelinessStatus: (mmdd: string, event: any, completeness: string) => "late-executed" | "late-reported" | "late-approved" | "past-due-date" | "in-time";
     getComplianceStatus: (completeness: string, timeliness: string) => "scheduled" | "not-complied" | "partially-complied" | "complied";
     numcalled: number;
@@ -753,6 +755,9 @@ export declare class SfIEvents extends LitElement {
     initDecryptListeners: () => void;
     evalDecrypt: () => void;
     submitDecrypt: () => Promise<void>;
+    fetchNext: () => Promise<void>;
+    clearButtonSelectionNext: () => void;
+    renderNextEvents: (eventsData: any) => void;
     loadMode: () => Promise<void>;
     constructor();
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void;
