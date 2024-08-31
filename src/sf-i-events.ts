@@ -12768,7 +12768,7 @@ export class SfIEvents extends LitElement {
 
     (this._SfOnboardingDuedatesContainer as HTMLDivElement).innerHTML = html;
 
-    this.renderTaggingTable((this._SfOnboardingDuedatesListContainer as HTMLDivElement),mappedSerializedMakerCheckers, mappedDuedates, ["duedate", "firstlineofdefence", "obligation", "country", "statute"], this.uploadDuedatesMapping, this.loadOnboardingDuedates, "duedates", ["id", "entityname", "locationname"], '', "", ["duedates"], duedatesJobs, null, ["Client remarks", "FlaggGRC response"], null, "", "");
+    this.renderTaggingTable((this._SfOnboardingDuedatesListContainer as HTMLDivElement),mappedSerializedMakerCheckers, mappedDuedates, ["duedate", "firstlineofdefence", "frequency", "obligation", "country", "statute"], this.uploadDuedatesMapping, this.loadOnboardingDuedates, "duedates", ["id", "entityname", "locationname"], '', "", ["duedates"], duedatesJobs, null, ["Client remarks", "FlaggGRC response"], null, "", "");
 
   }
 
