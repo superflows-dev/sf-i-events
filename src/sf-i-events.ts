@@ -19863,7 +19863,7 @@ export class SfIEvents extends LitElement {
     if(page != 0){
       html += '<button id="button-prev" part="icon-button-small" class="material-symbols-outlined mr-10">keyboard_arrow_left</button>';
     }
-    html += 'Page ' + (page + 1)
+    html += '<p part="page-next">Page ' + (page + 1) + '</p>'
     html += '<button id="button-next" part="icon-button-small" class="material-symbols-outlined ml-10">keyboard_arrow_right</button>';
     html += '</div>';
     html += '</div>';
