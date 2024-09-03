@@ -19158,7 +19158,7 @@ export class SfIEvents extends LitElement {
       view = "entity";
     }
 
-    path = "getallcountryevents1";
+    path = "getallcountryevents";
 
     let sDate = "";
     let eDate = "";
@@ -19850,15 +19850,15 @@ export class SfIEvents extends LitElement {
           eventsData[mmdd][j][this.FLOW_GRAPH_TIMELINESS] = lateStatus;
           eventsData[mmdd][j][this.FLOW_GRAPH_COMPLIANCE] = complianceStatus;
           let role = ""
-          if ((JSON.stringify(eventsData[mmdd][j].reporters)).indexOf(this.userProfileId)){
+          if ((JSON.stringify(eventsData[mmdd][j].reporters)).indexOf(this.userProfileId) >= 0){
             role = 'Reporter'
-          } else if ((JSON.stringify(eventsData[mmdd][j].approvers)).indexOf(this.userProfileId)){
+          } else if ((JSON.stringify(eventsData[mmdd][j].approvers)).indexOf(this.userProfileId) >= 0){
             role = 'Approver'
-          } else if ((JSON.stringify(eventsData[mmdd][j].functionheads)).indexOf(this.userProfileId)){
+          } else if ((JSON.stringify(eventsData[mmdd][j].functionheads)).indexOf(this.userProfileId) >= 0){
             role = 'Functionhead'
-          } else if ((JSON.stringify(eventsData[mmdd][j].auditors)).indexOf(this.userProfileId)){
+          } else if ((JSON.stringify(eventsData[mmdd][j].auditors)).indexOf(this.userProfileId) >= 0){
             role = 'Auditor'
-          } else if ((JSON.stringify(eventsData[mmdd][j].viewers)).indexOf(this.userProfileId)){
+          } else if ((JSON.stringify(eventsData[mmdd][j].viewers)).indexOf(this.userProfileId) >= 0){
             role = 'Viewer'
           } 
           eventHtml += '<div class="stream-events-container flex-grow">';
