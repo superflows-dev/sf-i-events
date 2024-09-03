@@ -12674,16 +12674,20 @@ export class SfIEvents extends LitElement {
     (this._SfOnboardingCalendarContainer as HTMLDivElement).querySelector('.button-submit')?.addEventListener('click', async () => {
       const year = ((this._SfOnboardingCalendarContainer as HTMLDivElement).querySelector('#select-year') as HTMLSelectElement).value;
       //console.log(year);
-      const usermap = await this.fetchGetMappedCalendar(year);
-      
-      if(usermap == null || usermap.usermap == null) {
-        this.setError(usermap.error);
-        setTimeout(() => {
-          this.clearMessages()
-        }, 10000);
-      } else {
-        await this.fetchUpdateUsermap(usermap.usermap);
-      }
+      await this.fetchGetMappedCalendar(year);
+      // const usermap = await this.fetchGetMappedCalendar(year);
+      this.setSuccess('Calendar Job scheduled. Please check back after a few minutes.')
+      setTimeout(()=>{
+        this.clearMessages()
+      },5000)
+      // if(usermap == null || usermap.usermap == null) {
+      //   this.setError(usermap.error);
+      //   setTimeout(() => {
+      //     this.clearMessages()
+      //   }, 10000);
+      // } else {
+      //   await this.fetchUpdateUsermap(usermap.usermap);
+      // }
       
     });
 
@@ -19053,7 +19057,7 @@ export class SfIEvents extends LitElement {
   fetchGetMappedCalendar = async(year: string) => {
 
     // let url = "https://"+this.apiId+"/getmappedcalendar";
-    let url = "https://3mefupehxkw4pwsq3oyk7lf2pq0pisdx.lambda-url.us-east-1.on.aws/getcalendar";
+    let url = "https://3mefupehxkw4pwsq3oyk7lf2pq0pisdx.lambda-url.us-east-1.on.aws/schedulegetcalendarjob";
     const body : any = {"projectid": this.projectId, "year": year};
     if(this.contractStartDate != "") {
       body.contractstartdate = this.contractStartDate;
@@ -19154,7 +19158,7 @@ export class SfIEvents extends LitElement {
       view = "entity";
     }
 
-    path = "getallcountryevents";
+    path = "getallcountryevents1";
 
     let sDate = "";
     let eDate = "";
@@ -19309,7 +19313,7 @@ export class SfIEvents extends LitElement {
 
     //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
 
-    let url = "https://3mefupehxkw4pwsq3oyk7lf2pq0pisdx.lambda-url.us-east-1.on.aws/getcalendar";
+    let url = "https://3mefupehxkw4pwsq3oyk7lf2pq0pisdx.lambda-url.us-east-1.on.aws/schedulegetcalendarjob";
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     const xhr : any = (await this.prepareXhr({"projectid": (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]}, url, this._SfLoader, authorization)) as any;
@@ -19845,11 +19849,22 @@ export class SfIEvents extends LitElement {
           eventsData[mmdd][j][this.FLOW_GRAPH_COMPLETENESS] = partStatus;
           eventsData[mmdd][j][this.FLOW_GRAPH_TIMELINESS] = lateStatus;
           eventsData[mmdd][j][this.FLOW_GRAPH_COMPLIANCE] = complianceStatus;
-
+          let role = ""
+          if ((JSON.stringify(eventsData[mmdd][j].reporters)).indexOf(this.userProfileId)){
+            role = 'Reporter'
+          } else if ((JSON.stringify(eventsData[mmdd][j].approvers)).indexOf(this.userProfileId)){
+            role = 'Approver'
+          } else if ((JSON.stringify(eventsData[mmdd][j].functionheads)).indexOf(this.userProfileId)){
+            role = 'Functionhead'
+          } else if ((JSON.stringify(eventsData[mmdd][j].auditors)).indexOf(this.userProfileId)){
+            role = 'Auditor'
+          } else if ((JSON.stringify(eventsData[mmdd][j].viewers)).indexOf(this.userProfileId)){
+            role = 'Viewer'
+          } 
           eventHtml += '<div class="stream-events-container flex-grow">';
           eventHtml += '<div class="hidden-tags hide">'+JSON.stringify(eventsData[mmdd][j]['tags'])+'</div>'
           eventHtml += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>'
-          eventHtml += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5 mb-10">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((eventsData[mmdd][j].makercheckers != null && (eventsData[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((eventsData[mmdd][j].docs != null && (eventsData[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + eventsData[mmdd][j].entityid.replace(/-/g, '_') + '-' + eventsData[mmdd][j].locationid.replace(/-/g, '_') + '-' + eventsData[mmdd][j].id.replace(/-/g, '_') +  '-' + eventsData[mmdd][j].duedate.split('/')[1] + '-' + eventsData[mmdd][j].duedate.split('/')[0] + '-' + eventsData[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>' +  '<sf-i-elastic-text text="'+eventsData[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;'  + '<div part="td-body"><sf-i-elastic-text text="'+eventsData[mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "")+'" minLength="30"></sf-i-elastic-text></div>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + '</div>';
+          eventHtml += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5 mb-10">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((eventsData[mmdd][j].makercheckers != null && (eventsData[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((eventsData[mmdd][j].docs != null && (eventsData[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + eventsData[mmdd][j].entityid.replace(/-/g, '_') + '-' + eventsData[mmdd][j].locationid.replace(/-/g, '_') + '-' + eventsData[mmdd][j].id.replace(/-/g, '_') +  '-' + eventsData[mmdd][j].duedate.split('/')[1] + '-' + eventsData[mmdd][j].duedate.split('/')[0] + '-' + eventsData[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>' +  '<sf-i-elastic-text text="'+eventsData[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;'  + '<div part="td-body"><sf-i-elastic-text text="'+eventsData[mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "")+'" minLength="30"></sf-i-elastic-text></div>&nbsp;&nbsp;<p part="role-next">' + role + '</p>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + '</div>';
           eventHtml += '</div>';
           html += eventHtml
           
