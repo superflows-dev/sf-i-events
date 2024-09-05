@@ -9559,6 +9559,7 @@ export class SfIEvents extends LitElement {
             html += '<div class="m-20">';
             html += '<label part="input-label">Supporting Documents</label>';
             html += '<slot name="uploader"></slot>';
+            html += '<div part="uploader-analysis-message" class="uploader-analysis-message mt-20">The analysis is running in the background. You can proceed further.</div>'
             html += '</div>';  
           }
 
@@ -9622,6 +9623,7 @@ export class SfIEvents extends LitElement {
             // if(docsOptional.length === 0) {
               html += '<label part="input-label">Supporting Documents' + ((docsOptional.length > 0) ? '' : '*') + '</label>';
               html += '<slot name="uploader"></slot>';
+              html += '<div part="uploader-analysis-message" class="uploader-analysis-message mt-20">The analysis is running in the background. You can proceed further.</div>'
             // }
             html += '<br />';
             if(makercheckers.length > 0) {
@@ -9664,6 +9666,7 @@ export class SfIEvents extends LitElement {
           if(docs.length > 0) {
             html += '<label part="input-label">Supporting Documents</label>';
             html += '<slot name="uploader"></slot>';
+            html += '<div part="uploader-analysis-message" class="uploader-analysis-message mt-20">The analysis is running in the background. You can proceed further.</div>'
           }
         html += '</div>';
         html += '</div>';
@@ -9689,6 +9692,7 @@ export class SfIEvents extends LitElement {
           if(docs.length === 0) {
             html += '<label part="input-label">Supporting Documents</label>';
             html += '<slot name="uploader"></slot>';
+            html += '<div part="uploader-analysis-message" class="uploader-analysis-message mt-20">The analysis is running in the background. You can proceed further.</div>'
           }
         html += '</div>';
         html += '</div>';
@@ -10118,9 +10122,14 @@ export class SfIEvents extends LitElement {
       }
       
       if(this._SfUploader[0] != null) {
-
-        this._SfUploader[0].querySelector('#uploader').addEventListener('uploadCompleted', (_ev: any) => {
-          //console.log(ev);
+        (this._SfDetailContainer.querySelector('.uploader-analysis-message') as HTMLDivElement).style.display = "none"
+        this._SfUploader[0].querySelector('#uploader').addEventListener('analysisInProgress', (_ev: any) => {
+          console.log('uploader analysisInProgress', _ev);
+          (this._SfDetailContainer.querySelector('.uploader-analysis-message') as HTMLDivElement).style.display = "block"
+        });  
+        this._SfUploader[0].querySelector('#uploader').addEventListener('analysisCompleted', (_ev: any) => {
+          console.log('uploader analysisInProgress', _ev);
+          (this._SfDetailContainer.querySelector('.uploader-analysis-message') as HTMLDivElement).style.display = "none"
         });  
 
 
