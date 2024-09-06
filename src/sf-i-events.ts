@@ -63,6 +63,7 @@ export class SfIEvents extends LitElement {
   TAB_CUSTOM = "custom";
   TAB_ADHOC = "adhoc";
   TAB_REGISTERS = "registers";
+  TAB_ALL_ROLES = "allroles";
   TAB_REPORTER = "reporter";
   TAB_APPROVER = "approver";
   TAB_FUNCTION_HEAD = "functionhead";
@@ -1264,7 +1265,7 @@ export class SfIEvents extends LitElement {
 
   @property()
   myRole: string = "";
-
+  
   @property()
   chart: any = null;
 
@@ -1549,6 +1550,8 @@ export class SfIEvents extends LitElement {
   blocksize: string = "5";
 
   nextPage: number = 0;
+
+  nextTabRole: string = "";
 
   static override styles = css`
 
@@ -9904,7 +9907,8 @@ export class SfIEvents extends LitElement {
         }
         
         if(this.mode == "next"){
-          this.fetchNext(this.nextPage)
+          // this.fetchNext(this.nextPage)
+          this.renderRoleTabsNext(this.nextPage)
         }else{
           if(this.getCurrentTab() == this.TAB_CUSTOM) {
             this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
@@ -9962,7 +9966,7 @@ export class SfIEvents extends LitElement {
           });
           ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
           if(this.mode == "next"){
-            this.fetchNext(this.nextPage)
+            this.fetchNext(this.nextPage, this.nextTabRole)
           }else{
             if(this.getCurrentTab() == this.TAB_CUSTOM) {
               this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
@@ -10096,7 +10100,7 @@ export class SfIEvents extends LitElement {
                     }
 
                     if(this.mode == "next"){
-                      this.fetchNext(this.nextPage)
+                      this.fetchNext(this.nextPage, this.nextTabRole)
                     }else{
                       if(this.getCurrentTab() == this.TAB_CUSTOM) {
                         this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
@@ -19771,22 +19775,23 @@ export class SfIEvents extends LitElement {
 
   }
 
-  fetchNext = async(page: number) => {
+  fetchNext = async(page: number, role: string) => {
 
     //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
     this.nextPage = page;
-    let url = "https://"+this.apiId+"/getnextuserevents";
+    let url = "https://"+this.apiId+"/getnextuserevents1";
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     console.log('this.myroles', this.myroles)
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId,"userprofileid": this.userProfileId, "roles": JSON.parse(this.myroles) , "year": new Date().getFullYear() + "", "page": this.nextPage, "blocksize": parseInt(this.blocksize)}, url, this._SfLoader, authorization)) as any;
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId,"userprofileid": this.userProfileId, "roles": [role] , "year": new Date().getFullYear() + "", "page": this.nextPage, "blocksize": parseInt(this.blocksize)}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
     if(xhr.status == 200) {
 
       const jsonRespose = JSON.parse(xhr.responseText);
       console.log('next response',jsonRespose)
       // this.renderChosenProject(events);
-      this.renderNextEvents(jsonRespose.data, page)
+      // this.renderRoleTabsNext(jsonRespose.data, page)
+      this.renderNextEvents(jsonRespose.data, page, role);
     } else {
 
       if(xhr.status === 404) {
@@ -19810,222 +19815,322 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderNextEvents = (eventsData: any, page: number) => {
-    if(Object.keys(eventsData).length > 0){
-    var notStarted = 0, approved = 0, pendingApproval = 0, rejected = 0, inTime = 0, pastDueDate = 0, lateExecuted = 0, lateApproved = 0, lateReported = 0, scheduled = 0, partiallyComplied = 0, notComplied = 0, complied = 0;
+  renderRoleTabsNext = (page: number) => {
+
+    //console.log('render role tabs');
+
+    (this._SfRoleTabContainer as HTMLDivElement).innerHTML = '';
+    if(this.nextTabRole == ""){
+      // if(JSON.parse(this.myroles).length > 1){
+      //   this.nextTabRole = this.TAB_ALL_ROLES
+      // }else{
+        this.nextTabRole = JSON.parse(this.myroles)[0]
+      // }
+    }
+    console.log('rendering tabs', this.nextTabRole);
     var html = '';
-    this.selectedItems = [];
-    this.selectedStatus = "";
-    html += '<div id="stream-event-next" part="stream-event-list" class="stream-event-list">';
-    for(var i = 0; i < Object.keys(eventsData).length; i++) {
-
-      let mmdd : string = Object.keys(eventsData)[i];
-
-      //console.log('mmdd', mmdd);
-      //console.log('mmddevent', mmdd,eventsData[mmdd]);
-
-
-      if(eventsData[mmdd] != null) {
-        html += '<div part="stream-event-selected" class="d-flex stream-event-selected mb-5">';
-        html += '<div part="stream-event-selected-date">'+ (mmdd.split("/")[1] + "/" + mmdd.split("/")[0])+' |</div>';
-        html += '<div class="stream-event-list-container flex-grow" id="date-' + mmdd.replace(/\//g,'-') + '">'
-        
-        
-        for(var j = 0; j < (eventsData[mmdd] as Array<any>).length; j++) {
-          let eventHtml = '';
-          eventsData[mmdd][j]['mmdd'] = mmdd
-
-          var partStatus = "";
-          var lateStatus = "";
-          var complianceStatus = "";
-          partStatus = this.getCompletenessStatus(JSON.parse(JSON.stringify(eventsData[mmdd][j])));
-          lateStatus = this.getTimelinessStatus(mmdd, JSON.parse(JSON.stringify(eventsData[mmdd][j])), partStatus);
-          complianceStatus = this.getComplianceStatus(partStatus, lateStatus);
-          notStarted = notStarted + (partStatus == "not-started" ? 1 : 0);
-          pendingApproval = pendingApproval + (partStatus == "pending-approval" ? 1 : 0);
-          rejected = rejected + (partStatus == "rejected" ? 1 : 0);
-          approved = approved + (partStatus == "approved" ? 1 : 0);
-          inTime = inTime + (lateStatus == "in-time" ? 1 : 0); 
-          pastDueDate = pastDueDate + (lateStatus == "past-due-date" ? 1 : 0);
-          lateReported = lateReported + (lateStatus == "late-reported" ? 1 : 0);
-          lateApproved = lateApproved + (lateStatus == "late-approved" ? 1 : 0);
-          lateExecuted = lateExecuted + (lateStatus == "late-executed" ? 1 : 0);
-          scheduled = scheduled + (complianceStatus == "scheduled" ? 1 : 0);
-          partiallyComplied = partiallyComplied + (complianceStatus == "partially-complied" ? 1 : 0);
-          notComplied = notComplied + (complianceStatus == "not-complied" ? 1 : 0);
-          complied = complied + (complianceStatus == "complied" ? 1 : 0);
-
-          eventsData[mmdd][j][this.FLOW_GRAPH_COMPLETENESS] = partStatus;
-          eventsData[mmdd][j][this.FLOW_GRAPH_TIMELINESS] = lateStatus;
-          eventsData[mmdd][j][this.FLOW_GRAPH_COMPLIANCE] = complianceStatus;
-          let role = ""
-          if ((JSON.stringify(eventsData[mmdd][j].reporters)).indexOf(this.userProfileId) >= 0){
-            role = 'Reporter'
-          } else if ((JSON.stringify(eventsData[mmdd][j].approvers)).indexOf(this.userProfileId) >= 0){
-            role = 'Approver'
-          } else if ((JSON.stringify(eventsData[mmdd][j].functionheads)).indexOf(this.userProfileId) >= 0){
-            role = 'Functionhead'
-          } else if ((JSON.stringify(eventsData[mmdd][j].auditors)).indexOf(this.userProfileId) >= 0){
-            role = 'Auditor'
-          } else if ((JSON.stringify(eventsData[mmdd][j].viewers)).indexOf(this.userProfileId) >= 0){
-            role = 'Viewer'
-          } 
-          eventHtml += '<div class="stream-events-container flex-grow">';
-          eventHtml += '<div class="hidden-tags hide">'+JSON.stringify(eventsData[mmdd][j]['tags'])+'</div>'
-          eventHtml += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>'
-          eventHtml += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5 mb-10">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((eventsData[mmdd][j].makercheckers != null && (eventsData[mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((eventsData[mmdd][j].docs != null && (eventsData[mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + eventsData[mmdd][j].entityid.replace(/-/g, '_') + '-' + eventsData[mmdd][j].locationid.replace(/-/g, '_') + '-' + eventsData[mmdd][j].id.replace(/-/g, '_') +  '-' + eventsData[mmdd][j].duedate.split('/')[1] + '-' + eventsData[mmdd][j].duedate.split('/')[0] + '-' + eventsData[mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>' +  '<sf-i-elastic-text text="'+eventsData[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;'  + '<div part="td-body"><sf-i-elastic-text text="'+eventsData[mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "")+'" minLength="30"></sf-i-elastic-text></div>&nbsp;&nbsp;<p part="role-next">' + role + '</p>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + '</div>';
-          eventHtml += '</div>';
-          html += eventHtml
-          
-        }
-        html += '</div>';
-        html += '</div>';
-      }
-    }
-    
-    html += '<div class="d-flex align-center mt-10">'
-    if(page != 0){
-      html += '<button id="button-prev" part="icon-button-small" class="material-symbols-outlined mr-10">keyboard_arrow_left</button>';
-    }
-    html += '<p part="page-next">Page ' + (page + 1) + '</p>'
-    html += '<button id="button-next" part="icon-button-small" class="material-symbols-outlined ml-10">keyboard_arrow_right</button>';
-    html += '</div>';
-    html += '</div>';
-    (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).innerHTML = html;
-    (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).style.display = "flex";
-    // }else{
-    //   let innerDivHtml = (this._SfIEventsC.querySelector('#stream-event-next') as HTMLDivElement).innerHTML;
-    //   innerDivHtml.replace('<button id="button-expand" part="icon-button-small" class="material-symbols-outlined">keyboard_arrow_down</button>','');
-    //   console.log('innerDivHtml', innerDivHtml)
-    //   innerDivHtml += html;
-    //   innerDivHtml += '<button id="button-expand" part="icon-button-small" class="material-symbols-outlined">keyboard_arrow_down</button>';
-    //   (this._SfIEventsC.querySelector('#stream-event-next') as HTMLDivElement).innerHTML = innerDivHtml;
+    // if(JSON.parse(this.myroles).length > 1 && eventsData[this.TAB_ALL_ROLES] != null){
+    //   html += '<button class="tab-button" id="consumer-tab-all-roles" part="'+(this.nextTabRole == this.TAB_ALL_ROLES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">All Roles</button>';
     // }
-    if(page != 0){
-      let buttonPrev = this._SfIEventsC.querySelector('#button-prev') as HTMLButtonElement;
-      buttonPrev.addEventListener('click', () => {
-        this.fetchNext(page - 1)
-      });
+    // if(JSON.parse(this.myroles).indexOf(this.TAB_REPORTER) >= 0 && eventsData[this.TAB_REPORTER] != null){
+    if(JSON.parse(this.myroles).indexOf(this.TAB_REPORTER) >= 0){
+      html += '<button class="tab-button" id="consumer-tab-reporter" part="'+(this.nextTabRole == this.TAB_REPORTER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Reporter</button>';
     }
-    let buttonNext = this._SfIEventsC.querySelector('#button-next') as HTMLButtonElement;
+    // if(JSON.parse(this.myroles).indexOf(this.TAB_APPROVER) >= 0 && eventsData[this.TAB_APPROVER] != null){
+    if(JSON.parse(this.myroles).indexOf(this.TAB_APPROVER) >= 0){
+      html += '<button class="tab-button" id="consumer-tab-approver" part="'+(this.nextTabRole == this.TAB_APPROVER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Approver</button>';
+    }
+    // if(JSON.parse(this.myroles).indexOf(this.TAB_FUNCTION_HEAD) >= 0 && eventsData[this.TAB_FUNCTION_HEAD] != null){
+    if(JSON.parse(this.myroles).indexOf(this.TAB_FUNCTION_HEAD) >= 0){
+      html += '<button class="tab-button" id="consumer-tab-functionhead" part="'+(this.nextTabRole == this.TAB_FUNCTION_HEAD ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Function Head</button>';
+    }
+    // if(JSON.parse(this.myroles).indexOf(this.TAB_AUDITOR) >= 0 && eventsData[this.TAB_AUDITOR] != null){
+    if(JSON.parse(this.myroles).indexOf(this.TAB_AUDITOR) >= 0){
+      html += '<button class="tab-button" id="consumer-tab-auditor" part="'+(this.nextTabRole == this.TAB_AUDITOR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Auditor</button>';
+    }
+    // if(JSON.parse(this.myroles).indexOf(this.TAB_VIEWER) >= 0 && eventsData[this.TAB_VIEWER] != null){
+    if(JSON.parse(this.myroles).indexOf(this.TAB_VIEWER) >= 0){
+      html += '<button class="tab-button" id="consumer-tab-viewer" part="'+(this.nextTabRole == this.TAB_VIEWER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Viewer</button>';
+    }
+
+    (this._SfRoleTabContainer as HTMLDivElement).innerHTML = html;
+
+    (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-all-roles')?.addEventListener('click', async () => {
+
+      this.nextTabRole = this.TAB_ALL_ROLES;
+      // this.fetchNext(0, this.nextTabRole);
+      this.renderRoleTabsNext(0);
+
+    });
+    (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-reporter')?.addEventListener('click', async () => {
+
+      this.nextTabRole = this.TAB_REPORTER;
+      // this.fetchNext(0, this.nextTabRole);
+      this.renderRoleTabsNext(0);
+      
+    });
+
+    (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-approver')?.addEventListener('click', async () => {
+
+      this.nextTabRole = this.TAB_APPROVER;
+      // this.fetchNext(0, this.nextTabRole);
+      this.renderRoleTabsNext(0);
+
+    });
+
+    (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-functionhead')?.addEventListener('click', async () => {
+
+      this.nextTabRole = this.TAB_FUNCTION_HEAD;
+      // this.fetchNext(0, this.nextTabRole);
+      this.renderRoleTabsNext(0);
+
+    });
+
+    (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-auditor')?.addEventListener('click', async () => {
+
+      this.nextTabRole = this.TAB_AUDITOR;
+      // this.fetchNext(0, this.nextTabRole);
+      this.renderRoleTabsNext(0);
+
+    });
+
+
+    (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-viewer')?.addEventListener('click', async () => {
+
+      this.nextTabRole = this.TAB_VIEWER;
+      // this.fetchNext(0, this.nextTabRole);
+      this.renderRoleTabsNext(0);
+
+    });
     
-    // buttonExpand = Util.clearListeners(buttonExpand) as HTMLButtonElement;
+    this.fetchNext(page, this.nextTabRole);
+  }
 
-    buttonNext.addEventListener('click',()=>{
-      this.fetchNext(page + 1)
-    })
-    const buttonArr = this._SfIEventsC.querySelectorAll('.button-expand') as NodeListOf<HTMLButtonElement>;
+  renderNextEvents = (eventsData: any, page: number, role:string) => {
+    console.log('eventsData', eventsData)
+    console.log('role', role)
+    if(Object.keys(eventsData[role]).length > 0){
+      var notStarted = 0, approved = 0, pendingApproval = 0, rejected = 0, inTime = 0, pastDueDate = 0, lateExecuted = 0, lateApproved = 0, lateReported = 0, scheduled = 0, partiallyComplied = 0, notComplied = 0, complied = 0;
+      var html = '';
+      this.selectedItems = [];
+      this.selectedStatus = "";
+      html += '<div id="stream-event-next" part="stream-event-list" class="stream-event-list">';
+      for(var i = 0; i < Object.keys(eventsData[role]).length; i++) {
 
-    for(var i = 0; i < buttonArr.length; i++) {
+        let mmdd : string = Object.keys(eventsData[role])[i];
 
-      buttonArr[i].addEventListener('click', (ev: any) => {
+        //console.log('mmdd', mmdd);
+        //console.log('mmddevent', mmdd,eventsData[role][mmdd]);
 
-        const id = ev.target.id;
-        const idArr = id.split("-")
-        const mmdd = idArr[3] + "/" + idArr[4];
-        const j = idArr[5];
 
-        let found = false;
-        for(var k = 0; k < this.selectedItems.length; k++) {
-          if(this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
-            found = true;
-          }
-        }
-        if(!found) {
-          this.selectedItems = [];
-          this.clearButtonSelectionNext();
-        }
-
-        (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
-
-        var yyyy = this.getCurrentYear(idArr[3]);
-        console.log('yyyy', yyyy, idArr[3]);
-        console.log(eventsData[mmdd][j])
-        if(JSON.stringify(eventsData[mmdd][j]['viewers']).indexOf(this.userProfileId) >= 0){
-          this.myRole = this.TAB_VIEWER
-        }
-        if(JSON.stringify(eventsData[mmdd][j]['auditors']).indexOf(this.userProfileId) >= 0){
-          this.myRole = this.TAB_AUDITOR
-        }
-        if(JSON.stringify(eventsData[mmdd][j]['functionheads']).indexOf(this.userProfileId) >= 0){
-          this.myRole = this.TAB_FUNCTION_HEAD
-        }
-        if(JSON.stringify(eventsData[mmdd][j]['approvers']).indexOf(this.userProfileId) >= 0){
-          this.myRole = this.TAB_APPROVER
-        }
-        if(JSON.stringify(eventsData[mmdd][j]['reporters']).indexOf(this.userProfileId) >= 0){
-          this.myRole = this.TAB_REPORTER
-        }
-        console.log('redering detail', this.myRole)
-        this.renderEventDetail(eventsData[mmdd][j], mmdd + "/" + yyyy, null);
-  
-      })
-
-    }
-
-    const streamEventsContainer = this._SfIEventsC.querySelectorAll('.stream-events-container') as NodeListOf<HTMLDivElement>;
-    const buttonSelect = this._SfIEventsC.querySelectorAll('.button-select') as NodeListOf<HTMLButtonElement>;
-
-    for(i = 0; i < buttonSelect.length; i++) {
-
-      buttonSelect[i].addEventListener('click', (ev: any) => {
-
-        //console.log('eventscontainer', streamEventsContainer.length, buttonSelect.length);
-
-        const id = ev.target.id;
-        const idArr = id.split("-")
-        // const mmdd = idArr[2] + "/" + idArr[3];
-        // const j = idArr[4];
-        // const makercheckers = idArr[5];
-        const docs = idArr[6];
-
-        if((ev.target as HTMLInputElement).checked) {
-          this.selectedItems.push(id);
-        } else {
-          this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
-        }
-
-        if(this.selectedItems.length === 0) {
-
-          for(var k = 0; k < buttonSelect.length; k++) {
-
-            (buttonSelect[k] as HTMLInputElement).style.display = 'block';
-            (streamEventsContainer[k] as HTMLDivElement).style.display = 'block';
-  
-          }
-
-        } else {
-
-          if(this.selectedItems.length === 1) {
-
-            const id1 = id;
-            const idArr1 = id1.split("-")
-            const status = idArr1[13].replace(/_/g, '-');
-            this.selectedStatus = status;
-
-          }
-
-          for(var k = 0; k < buttonSelect.length; k++) {
-
-            const id1 = buttonSelect[k].id;
-            const idArr1 = id1.split("-")
-            const docs1 = idArr1[6];
-            const status = idArr1[13].replace(/_/g, '-');
-  
-            if(docs == docs1 && status == this.selectedStatus) {
-            } else {
-              (buttonSelect[k] as HTMLInputElement).style.display = 'none';
-              (streamEventsContainer[k] as HTMLDivElement).style.display = 'none';
-            }
-  
-          }  
+        if(eventsData[role][mmdd] != null) {
+          html += '<div part="stream-event-selected" class="d-flex stream-event-selected mb-5">';
+          html += '<div part="stream-event-selected-date">'+ (mmdd.split("/")[1] + "/" + mmdd.split("/")[0])+' |</div>';
+          html += '<div class="stream-event-list-container flex-grow" id="date-' + mmdd.replace(/\//g,'-') + '">'
           
+          
+          for(var j = 0; j < (eventsData[role][mmdd] as Array<any>).length; j++) {
+            let eventHtml = '';
+            eventsData[role][mmdd][j]['mmdd'] = mmdd
+
+            var partStatus = "";
+            var lateStatus = "";
+            var complianceStatus = "";
+            partStatus = this.getCompletenessStatus(JSON.parse(JSON.stringify(eventsData[role][mmdd][j])));
+            lateStatus = this.getTimelinessStatus(mmdd, JSON.parse(JSON.stringify(eventsData[role][mmdd][j])), partStatus);
+            complianceStatus = this.getComplianceStatus(partStatus, lateStatus);
+            notStarted = notStarted + (partStatus == "not-started" ? 1 : 0);
+            pendingApproval = pendingApproval + (partStatus == "pending-approval" ? 1 : 0);
+            rejected = rejected + (partStatus == "rejected" ? 1 : 0);
+            approved = approved + (partStatus == "approved" ? 1 : 0);
+            inTime = inTime + (lateStatus == "in-time" ? 1 : 0); 
+            pastDueDate = pastDueDate + (lateStatus == "past-due-date" ? 1 : 0);
+            lateReported = lateReported + (lateStatus == "late-reported" ? 1 : 0);
+            lateApproved = lateApproved + (lateStatus == "late-approved" ? 1 : 0);
+            lateExecuted = lateExecuted + (lateStatus == "late-executed" ? 1 : 0);
+            scheduled = scheduled + (complianceStatus == "scheduled" ? 1 : 0);
+            partiallyComplied = partiallyComplied + (complianceStatus == "partially-complied" ? 1 : 0);
+            notComplied = notComplied + (complianceStatus == "not-complied" ? 1 : 0);
+            complied = complied + (complianceStatus == "complied" ? 1 : 0);
+
+            eventsData[role][mmdd][j][this.FLOW_GRAPH_COMPLETENESS] = partStatus;
+            eventsData[role][mmdd][j][this.FLOW_GRAPH_TIMELINESS] = lateStatus;
+            eventsData[role][mmdd][j][this.FLOW_GRAPH_COMPLIANCE] = complianceStatus;
+            let thisRole = ""
+            if ((JSON.stringify(eventsData[role][mmdd][j].reporters)).indexOf(this.userProfileId) >= 0){
+              thisRole = 'Reporter'
+            } else if ((JSON.stringify(eventsData[role][mmdd][j].approvers)).indexOf(this.userProfileId) >= 0){
+              thisRole = 'Approver'
+            } else if ((JSON.stringify(eventsData[role][mmdd][j].functionheads)).indexOf(this.userProfileId) >= 0){
+              thisRole = 'Functionhead'
+            } else if ((JSON.stringify(eventsData[role][mmdd][j].auditors)).indexOf(this.userProfileId) >= 0){
+              thisRole = 'Auditor'
+            } else if ((JSON.stringify(eventsData[role][mmdd][j].viewers)).indexOf(this.userProfileId) >= 0){
+              thisRole = 'Viewer'
+            } 
+            eventHtml += '<div class="stream-events-container flex-grow">';
+            eventHtml += '<div class="hidden-tags hide">'+JSON.stringify(eventsData[role][mmdd][j]['tags'])+'</div>'
+            eventHtml += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>'
+            eventHtml += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5 mb-10">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((eventsData[role][mmdd][j].makercheckers != null && (eventsData[role][mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((eventsData[role][mmdd][j].docs != null && (eventsData[role][mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + eventsData[role][mmdd][j].entityid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].locationid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].id.replace(/-/g, '_') +  '-' + eventsData[role][mmdd][j].duedate.split('/')[1] + '-' + eventsData[role][mmdd][j].duedate.split('/')[0] + '-' + eventsData[role][mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>' +  '<sf-i-elastic-text text="'+eventsData[role][mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;'  + '<div part="td-body"><sf-i-elastic-text text="'+eventsData[role][mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "")+'" minLength="30"></sf-i-elastic-text></div>&nbsp;&nbsp;<p>' + thisRole + '</p>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + '</div>';
+            eventHtml += '</div>';
+            html += eventHtml
+            
+          }
+          html += '</div>';
+          html += '</div>';
         }
-  
+      }
+      
+      html += '<div class="d-flex align-center mt-10">'
+      if(page != 0){
+        html += '<button id="button-prev" part="icon-button-small" class="material-symbols-outlined mr-10">keyboard_arrow_left</button>';
+      }
+      html += '<p part="page-next">Page ' + (page + 1) + '</p>'
+      html += '<button id="button-next" part="icon-button-small" class="material-symbols-outlined ml-10">keyboard_arrow_right</button>';
+      html += '</div>';
+      html += '</div>';
+
+      (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).innerHTML = html;
+      (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).style.display = "flex";
+      // }else{
+      //   let innerDivHtml = (this._SfIEventsC.querySelector('#stream-event-next') as HTMLDivElement).innerHTML;
+      //   innerDivHtml.replace('<button id="button-expand" part="icon-button-small" class="material-symbols-outlined">keyboard_arrow_down</button>','');
+      //   console.log('innerDivHtml', innerDivHtml)
+      //   innerDivHtml += html;
+      //   innerDivHtml += '<button id="button-expand" part="icon-button-small" class="material-symbols-outlined">keyboard_arrow_down</button>';
+      //   (this._SfIEventsC.querySelector('#stream-event-next') as HTMLDivElement).innerHTML = innerDivHtml;
+      // }
+      if(page != 0){
+        let buttonPrev = this._SfIEventsC.querySelector('#button-prev') as HTMLButtonElement;
+        buttonPrev.addEventListener('click', () => {
+          this.myRole = role;
+          this.fetchNext(page - 1, this.nextTabRole)
+        });
+      }
+      let buttonNext = this._SfIEventsC.querySelector('#button-next') as HTMLButtonElement;
+      
+      // buttonExpand = Util.clearListeners(buttonExpand) as HTMLButtonElement;
+
+      buttonNext.addEventListener('click',()=>{
+        this.myRole = role;
+        this.fetchNext(page + 1, this.nextTabRole)
       })
-      let changeEvent = new CustomEvent('valueChanged',{bubbles:true});
-      this.dispatchEvent(changeEvent);
-    }
+      const buttonArr = this._SfIEventsC.querySelectorAll('.button-expand') as NodeListOf<HTMLButtonElement>;
+
+      for(var i = 0; i < buttonArr.length; i++) {
+
+        buttonArr[i].addEventListener('click', (ev: any) => {
+
+          const id = ev.target.id;
+          const idArr = id.split("-")
+          const mmdd = idArr[3] + "/" + idArr[4];
+          const j = idArr[5];
+
+          let found = false;
+          for(var k = 0; k < this.selectedItems.length; k++) {
+            if(this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+              found = true;
+            }
+          }
+          if(!found) {
+            this.selectedItems = [];
+            this.clearButtonSelectionNext();
+          }
+
+          (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+
+          var yyyy = this.getCurrentYear(idArr[3]);
+          console.log('yyyy', yyyy, idArr[3]);
+          console.log(eventsData[role][mmdd][j])
+          if(role == this.TAB_ALL_ROLES){
+            if(JSON.stringify(eventsData[role][mmdd][j]['viewers']).indexOf(this.userProfileId) >= 0){
+              this.myRole = this.TAB_VIEWER
+            }
+            if(JSON.stringify(eventsData[role][mmdd][j]['auditors']).indexOf(this.userProfileId) >= 0){
+              this.myRole = this.TAB_AUDITOR
+            }
+            if(JSON.stringify(eventsData[role][mmdd][j]['functionheads']).indexOf(this.userProfileId) >= 0){
+              this.myRole = this.TAB_FUNCTION_HEAD
+            }
+            if(JSON.stringify(eventsData[role][mmdd][j]['approvers']).indexOf(this.userProfileId) >= 0){
+              this.myRole = this.TAB_APPROVER
+            }
+            if(JSON.stringify(eventsData[role][mmdd][j]['reporters']).indexOf(this.userProfileId) >= 0){
+              this.myRole = this.TAB_REPORTER
+            }
+          }else{
+            this.myRole = this.nextTabRole
+          }
+          console.log('redering detail', this.myRole)
+          this.renderEventDetail(eventsData[role][mmdd][j], mmdd + "/" + yyyy, null);
+    
+        })
+
+      }
+
+      const streamEventsContainer = this._SfIEventsC.querySelectorAll('.stream-events-container') as NodeListOf<HTMLDivElement>;
+      const buttonSelect = this._SfIEventsC.querySelectorAll('.button-select') as NodeListOf<HTMLButtonElement>;
+
+      for(i = 0; i < buttonSelect.length; i++) {
+
+        buttonSelect[i].addEventListener('click', (ev: any) => {
+
+          //console.log('eventscontainer', streamEventsContainer.length, buttonSelect.length);
+
+          const id = ev.target.id;
+          const idArr = id.split("-")
+          // const mmdd = idArr[2] + "/" + idArr[3];
+          // const j = idArr[4];
+          // const makercheckers = idArr[5];
+          const docs = idArr[6];
+
+          if((ev.target as HTMLInputElement).checked) {
+            this.selectedItems.push(id);
+          } else {
+            this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+          }
+
+          if(this.selectedItems.length === 0) {
+
+            for(var k = 0; k < buttonSelect.length; k++) {
+
+              (buttonSelect[k] as HTMLInputElement).style.display = 'block';
+              (streamEventsContainer[k] as HTMLDivElement).style.display = 'block';
+    
+            }
+
+          } else {
+
+            if(this.selectedItems.length === 1) {
+
+              const id1 = id;
+              const idArr1 = id1.split("-")
+              const status = idArr1[13].replace(/_/g, '-');
+              this.selectedStatus = status;
+
+            }
+
+            for(var k = 0; k < buttonSelect.length; k++) {
+
+              const id1 = buttonSelect[k].id;
+              const idArr1 = id1.split("-")
+              const docs1 = idArr1[6];
+              const status = idArr1[13].replace(/_/g, '-');
+    
+              if(docs == docs1 && status == this.selectedStatus) {
+              } else {
+                (buttonSelect[k] as HTMLInputElement).style.display = 'none';
+                (streamEventsContainer[k] as HTMLDivElement).style.display = 'none';
+              }
+    
+            }  
+            
+          }
+    
+        })
+        let changeEvent = new CustomEvent('valueChanged',{bubbles:true});
+        this.dispatchEvent(changeEvent);
+      }
     // return html;
     }else{
       (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).innerHTML = "";
@@ -20071,7 +20176,8 @@ export class SfIEvents extends LitElement {
         this.initDecryptView();
       }, 500)
     } else if(this.mode == "next"){
-      this.fetchNext(0)
+      // this.fetchNext(0)
+      this.renderRoleTabsNext(0)
     } else {
 
       this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
@@ -20497,6 +20603,8 @@ export class SfIEvents extends LitElement {
           
           <div class="d-flex justify-center">
               <div class="loader-element"></div>
+          </div>
+          <div class="d-flex mb-20" id="role-tab-container">
           </div>
           <div id="next-calendar-data" class="calendar-right-data d-flex flex-col w-100">
           </div>
