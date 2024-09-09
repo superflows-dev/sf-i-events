@@ -19933,6 +19933,11 @@ export class SfIEvents extends LitElement {
             let eventHtml = '';
             eventsData[role][mmdd][j]['mmdd'] = mmdd
 
+            let functionStr = eventsData[role][mmdd][j]['functions'][0]
+            if(functionStr.indexOf(';') >= 0){
+              functionStr = functionStr.split(';')[0].replace(/\([^)]*\)/g,"");
+            }
+            console.log('function', functionStr)
             var partStatus = "";
             var lateStatus = "";
             var complianceStatus = "";
@@ -19956,22 +19961,22 @@ export class SfIEvents extends LitElement {
             eventsData[role][mmdd][j][this.FLOW_GRAPH_COMPLETENESS] = partStatus;
             eventsData[role][mmdd][j][this.FLOW_GRAPH_TIMELINESS] = lateStatus;
             eventsData[role][mmdd][j][this.FLOW_GRAPH_COMPLIANCE] = complianceStatus;
-            let thisRole = ""
-            if ((JSON.stringify(eventsData[role][mmdd][j].reporters)).indexOf(this.userProfileId) >= 0){
-              thisRole = 'Reporter'
-            } else if ((JSON.stringify(eventsData[role][mmdd][j].approvers)).indexOf(this.userProfileId) >= 0){
-              thisRole = 'Approver'
-            } else if ((JSON.stringify(eventsData[role][mmdd][j].functionheads)).indexOf(this.userProfileId) >= 0){
-              thisRole = 'Functionhead'
-            } else if ((JSON.stringify(eventsData[role][mmdd][j].auditors)).indexOf(this.userProfileId) >= 0){
-              thisRole = 'Auditor'
-            } else if ((JSON.stringify(eventsData[role][mmdd][j].viewers)).indexOf(this.userProfileId) >= 0){
-              thisRole = 'Viewer'
-            } 
+            // let thisRole = ""
+            // if ((JSON.stringify(eventsData[role][mmdd][j].reporters)).indexOf(this.userProfileId) >= 0){
+            //   thisRole = 'Reporter'
+            // } else if ((JSON.stringify(eventsData[role][mmdd][j].approvers)).indexOf(this.userProfileId) >= 0){
+            //   thisRole = 'Approver'
+            // } else if ((JSON.stringify(eventsData[role][mmdd][j].functionheads)).indexOf(this.userProfileId) >= 0){
+            //   thisRole = 'Functionhead'
+            // } else if ((JSON.stringify(eventsData[role][mmdd][j].auditors)).indexOf(this.userProfileId) >= 0){
+            //   thisRole = 'Auditor'
+            // } else if ((JSON.stringify(eventsData[role][mmdd][j].viewers)).indexOf(this.userProfileId) >= 0){
+            //   thisRole = 'Viewer'
+            // } 
             eventHtml += '<div class="stream-events-container flex-grow">';
             eventHtml += '<div class="hidden-tags hide">'+JSON.stringify(eventsData[role][mmdd][j]['tags'])+'</div>'
             eventHtml += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>'
-            eventHtml += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5 mb-10">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((eventsData[role][mmdd][j].makercheckers != null && (eventsData[role][mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((eventsData[role][mmdd][j].docs != null && (eventsData[role][mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + eventsData[role][mmdd][j].entityid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].locationid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].id.replace(/-/g, '_') +  '-' + eventsData[role][mmdd][j].duedate.split('/')[1] + '-' + eventsData[role][mmdd][j].duedate.split('/')[0] + '-' + eventsData[role][mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>' +  '<sf-i-elastic-text text="'+eventsData[role][mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;'  + '<div part="td-body"><sf-i-elastic-text text="'+eventsData[role][mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "")+'" minLength="30"></sf-i-elastic-text></div>&nbsp;&nbsp;<p>' + thisRole + '</p>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + '</div>';
+            eventHtml += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5 mb-10">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((eventsData[role][mmdd][j].makercheckers != null && (eventsData[role][mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((eventsData[role][mmdd][j].docs != null && (eventsData[role][mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + eventsData[role][mmdd][j].entityid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].locationid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].id.replace(/-/g, '_') +  '-' + eventsData[role][mmdd][j].duedate.split('/')[1] + '-' + eventsData[role][mmdd][j].duedate.split('/')[0] + '-' + eventsData[role][mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>' +  '<sf-i-elastic-text text="'+eventsData[role][mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;'  + '<div part="td-body"><sf-i-elastic-text text="'+eventsData[role][mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "")+'" minLength="30"></sf-i-elastic-text></div>&nbsp;&nbsp;<div part="upcoming-function">' + functionStr + '</div>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + '</div>';
             eventHtml += '</div>';
             html += eventHtml
             
@@ -20142,6 +20147,323 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchReports = async() => {
+    let url = "https://"+this.apiId+"/getreports";
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    console.log('this.myroles', this.myroles)
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      let arrReports = (await this.fetchPresignedUrl(jsonRespose.signedUrlGet));
+      await this.fetchPresignedUrlDelete(jsonRespose.signedUrlDelete)
+      console.log('reports response',arrReports);
+      console.log('report',arrReports['3/31/*,30;c989a44e-7d3d-427e-b712-90eacf585075;38dc8c53-643f-4fee-83fe-f15239606277;0a5fb99f-c36f-46c0-85b4-7fa3d48fa134']);
+      this.renderReports(arrReports)
+    } else {
+
+      if(xhr.status === 404) {
+        const jsonRespose = JSON.parse(xhr.responseText);
+        this.setError(jsonRespose.error);
+      }
+
+    }
+
+  }
+
+  renderReports = (reportsData: any) => {
+    let html = '<div class="d-flex flex-col w-100-m-0">'
+    html += '<div class="d-flex flex-col align-stretch"><div class="d-flex justify-between"><div></div><div>mm/dd/yyyy</div><div>docs</div><div>comments</div><div>Last Updated</div><div>Completion Date</div></div>'
+    for(let reportKey of Object.keys(reportsData)){
+      if(reportKey == '3/31/*,30;c989a44e-7d3d-427e-b712-90eacf585075;38dc8c53-643f-4fee-83fe-f15239606277;0a5fb99f-c36f-46c0-85b4-7fa3d48fa134'){ continue;}
+      let report = JSON.parse(reportsData[reportKey])
+      console.log('report date', reportKey)
+      html += '<div class="d-flex justify-between"><div class="flex-grow"><button id="button-select-'+ reportKey.replace(/-/g,'_') + '" class="button-submit mr-10">Select</button></div>'
+      html += `<div class="flex-grow">${reportKey.split(';')[0]}</div>`
+      html += `<div class="flex-grow">${JSON.parse(report['docs']).length} docs</div>`
+      html += `<div class="d-flex flex-col">`
+      for(let comment of report['comments']){
+        html += 'Author: ' + comment.author
+        html += '<br />Comment: <sf-i-elastic-text text="'+comment.comment+'" minlength="50"></sf-i-elastic-text>'
+        html += '<br />Time: ' + new Date(comment.timestamp).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata'}) + ' - ' +new Date(comment.timestamp).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata'})
+        html += '<br /><br />'
+      }
+      html += `</div><div class="flex-grow">${new Date(report['lastupdated']).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata'})} - ${new Date(report['lastupdated']).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata'})}</div>`
+      html += `<div class="flex-grow">${new Date(parseInt(report['dateofcompletion'])).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata'})}</div>`
+      // html += `</div>`
+      html += `</div>`
+      if(report.event != null) {
+
+        html += '<div class="w-100-m-0">'
+        html += '<div class="m-20">';
+
+          html += '<div class="w-100 scroll-x">';
+
+            const jsonReportEvent = JSON.parse(report.event);
+
+            html += '<table class="report-event-table">';
+            html += '<tr>';
+            for(let i = 0; i < Object.keys(jsonReportEvent).length; i++) {              
+
+              if(!this.EXCLUDE_COLS_FROM_REGS.includes(Object.keys(jsonReportEvent)[i].toLowerCase())) {
+
+                html += '<td part="td-body-register">';
+                  html += ('<span part="td-head" style="padding-left: 0px !important">'+Object.keys(jsonReportEvent)[i]+'</span>');
+                  html += ('<span part="td-body"><sf-i-elastic-text text="'+jsonReportEvent[Object.keys(jsonReportEvent)[i]]+'" lineSize="4" minLength="60"></sf-i-elastic-text>'+'</span>');
+                html += '</td>';
+
+              }
+
+            }
+            html += '</tr>';
+            html += '</table>';
+            
+          html += '</div>';
+
+        html += '</div>';
+        html += '</div></div>';
+      }
+    }
+
+    html += '</div></div>';
+    html += '</div>';
+
+    (this._SfIEventsC.querySelector('#reports-data') as HTMLDivElement).innerHTML = html;
+
+    const arrButtonSelect = this._SfIEventsC.querySelectorAll('.button-select') as NodeListOf<HTMLButtonElement>;
+
+    for(let buttonSelect of arrButtonSelect){
+      buttonSelect.addEventListener('click', (ev:any) => {
+        const id = ev.target.id;
+        console.log('id', id)
+        const idArr = id.split("-")
+        console.log('idArr', idArr)
+        const sortid = idArr[2].replace(/_/g,'-')
+        console.log('selected sortid', sortid)
+        this.renderDateSelector(sortid);
+      })
+    }
+
+  }
+  renderDateSelector = (sortid: string) => {
+    let html = ''
+    html += '<div class="w-100-m-0 d-flex flex-col justify-center">'
+      html += '<div class="w-100-m-0 d-flex justify-end">'
+        html += '<button id="button-reports-date-selector-back" part="button-icon" class="button-icon"><span class="material-icons">keyboard_backspace</span></button>'
+      html += '</div>'
+      html += '<label part="input-label">Select Date</label><br>'
+      html += '<input part="input" id="input-compliance-date" type="date" class="w-100-m-0" mandatory="" autocomplete="off" style="display: block;">'
+      // html += '<button id="button-reports-date-selector-back" class="button-back" part="button">back</button>';
+    html += '</div>';
+    (this._SfIEventsC.querySelector('#reports-data') as HTMLDivElement).innerHTML = html;
+    let inputComplianceDate = (this._SfIEventsC.querySelector('#input-compliance-date') as HTMLInputElement)
+    inputComplianceDate.addEventListener('change', (ev:any) => {
+      let selectedDate = new Date((ev.target as HTMLInputElement).value)
+      this.fetchReportCompliances(selectedDate, sortid)
+    })
+    let buttonBack = (this._SfIEventsC.querySelector('#button-reports-date-selector-back') as HTMLButtonElement)
+    buttonBack.addEventListener('click', () => {
+      this.fetchReports()
+    })
+    
+  }
+
+  fetchReportCompliances = async (selectedDate: Date, sortid:string) => {
+    console.log('fetching compliances', sortid)
+    let complianceEntityId = sortid.split(';')[1]
+    let complianceLocationId = sortid.split(';')[2]
+    let url = "https://"+this.apiId+"/getallcountryevents1";
+    let sDateObj  = selectedDate
+    sDateObj.setDate(selectedDate.getDate() - 1)
+    let day = '' + sDateObj.getDate();
+    let month = '' + (sDateObj.getMonth() + 1);
+    let year = '' + sDateObj.getFullYear();
+    if (month.length < 2) 
+      month = '0' + month;
+    if (day.length < 2) 
+      day = '0' + day;
+    let sDate = month + "/" + day + "/" + year
+    let eDateObj  = selectedDate
+    eDateObj.setDate(selectedDate.getDate() + 2)
+    day = '' + eDateObj.getDate();
+    month = '' + (eDateObj.getMonth() + 1);
+    year = '' + eDateObj.getFullYear();
+    if (month.length < 2) 
+      month = '0' + month;
+    if (day.length < 2) 
+      day = '0' + day;
+    let eDate = month + "/" + day + "/" + year
+    //console.log('fetch calendar url', url);
+    let urlBody :any = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": complianceEntityId, "countryid": "", "functionid": "", "locationid": complianceLocationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": 0, "sdate": sDate, "edate": eDate, "view": "location", "year": this.calendarStartYYYY};
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(urlBody, url, this._SfLoader, authorization, 'Preparing')) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonRespose', jsonRespose);
+      let arrCompliances = (await this.fetchPresignedUrl(jsonRespose.signedUrlGet));
+      await this.fetchPresignedUrlDelete(jsonRespose.signedUrlDelete);
+      console.log('receivedCompliacnes', arrCompliances)
+      this.renderReportsComplainces(arrCompliances, sortid);
+    } else {
+
+      if(xhr.status === 404) {
+
+        this.showChosenProject();
+        (this._SfTitleChosenProject as HTMLElement).innerHTML = (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedTexts()[0];
+        this.renderChosenProject();
+
+      } else {
+        const jsonRespose = JSON.parse(xhr.responseText);
+        this.setError(jsonRespose.error);
+      }
+
+    }
+  }
+
+  renderReportsComplainces = (compliancesData: any, sortid: string) => {
+    let eventsData: any = {}
+    let complianceId = sortid.split(';')[3]
+    for(let dateStr of Object.keys(compliancesData)){
+      for(var j = 0; j < (compliancesData[dateStr] as Array<any>).length; j++){
+        if(compliancesData[dateStr][j].id == complianceId && this.getCompletenessStatus(JSON.parse(JSON.stringify(compliancesData[dateStr][j]))) == "not-started"){
+          console.log(compliancesData[dateStr][j])
+        // if(compliancesData[dateStr][j].id == complianceId){
+          if(eventsData[dateStr] == null){
+            eventsData[dateStr] = []
+          }
+          eventsData[dateStr].push(compliancesData[dateStr][j])
+        }
+      }
+    }
+    console.log('eventsData', eventsData)
+    let html = '';
+    html += '<div class="w-100-m-0 d-flex justify-end">'
+        html += '<button id="button-reports-date-selector-back" part="button-icon" class="button-icon"><span class="material-icons">keyboard_backspace</span></button>'
+      html += '</div>'
+    html += '<div id="stream-event-next" part="stream-event-list" class="stream-event-list">';
+      
+    for(var i = 0; i < Object.keys(eventsData).length; i++) {
+
+      let mmdd : string = Object.keys(eventsData)[i];
+
+      //console.log('mmdd', mmdd);
+      //console.log('mmddevent', mmdd,eventsData[role][mmdd]);
+
+
+      if(eventsData[mmdd] != null) {
+        html += '<div part="stream-event-selected" class="d-flex stream-event-selected mb-5">';
+        html += '<div part="stream-event-selected-date">'+ (mmdd.split("/")[1] + "/" + mmdd.split("/")[0])+' |</div>';
+        html += '<div class="stream-event-list-container flex-grow" id="date-' + mmdd.replace(/\//g,'-') + '">'
+        
+        
+        for(var j = 0; j < (eventsData[mmdd] as Array<any>).length; j++) {
+          let eventHtml = '';
+          eventsData[mmdd][j]['mmdd'] = mmdd
+
+          let functionStr = eventsData[mmdd][j]['functions'][0]
+          if(functionStr.indexOf(';') >= 0){
+            functionStr = functionStr.split(';')[0].replace(/\([^)]*\)/g,"");
+          }
+          console.log('function', functionStr)
+          var partStatus = "";
+          var lateStatus = "";
+          var complianceStatus = "";
+          partStatus = this.getCompletenessStatus(JSON.parse(JSON.stringify(eventsData[mmdd][j])));
+          if(partStatus != "not-started"){ continue; }
+          lateStatus = this.getTimelinessStatus(mmdd, JSON.parse(JSON.stringify(eventsData[mmdd][j])), partStatus);
+          complianceStatus = this.getComplianceStatus(partStatus, lateStatus);
+          // notStarted = notStarted + (partStatus == "not-started" ? 1 : 0);
+          // pendingApproval = pendingApproval + (partStatus == "pending-approval" ? 1 : 0);
+          // rejected = rejected + (partStatus == "rejected" ? 1 : 0);
+          // approved = approved + (partStatus == "approved" ? 1 : 0);
+          // inTime = inTime + (lateStatus == "in-time" ? 1 : 0); 
+          // pastDueDate = pastDueDate + (lateStatus == "past-due-date" ? 1 : 0);
+          // lateReported = lateReported + (lateStatus == "late-reported" ? 1 : 0);
+          // lateApproved = lateApproved + (lateStatus == "late-approved" ? 1 : 0);
+          // lateExecuted = lateExecuted + (lateStatus == "late-executed" ? 1 : 0);
+          // scheduled = scheduled + (complianceStatus == "scheduled" ? 1 : 0);
+          // partiallyComplied = partiallyComplied + (complianceStatus == "partially-complied" ? 1 : 0);
+          // notComplied = notComplied + (complianceStatus == "not-complied" ? 1 : 0);
+          // complied = complied + (complianceStatus == "complied" ? 1 : 0);
+
+          eventsData[mmdd][j][this.FLOW_GRAPH_COMPLETENESS] = partStatus;
+          eventsData[mmdd][j][this.FLOW_GRAPH_TIMELINESS] = lateStatus;
+          eventsData[mmdd][j][this.FLOW_GRAPH_COMPLIANCE] = complianceStatus;
+          // let thisRole = ""
+          // if ((JSON.stringify(eventsData[role][mmdd][j].reporters)).indexOf(this.userProfileId) >= 0){
+          //   thisRole = 'Reporter'
+          // } else if ((JSON.stringify(eventsData[role][mmdd][j].approvers)).indexOf(this.userProfileId) >= 0){
+          //   thisRole = 'Approver'
+          // } else if ((JSON.stringify(eventsData[role][mmdd][j].functionheads)).indexOf(this.userProfileId) >= 0){
+          //   thisRole = 'Functionhead'
+          // } else if ((JSON.stringify(eventsData[role][mmdd][j].auditors)).indexOf(this.userProfileId) >= 0){
+          //   thisRole = 'Auditor'
+          // } else if ((JSON.stringify(eventsData[role][mmdd][j].viewers)).indexOf(this.userProfileId) >= 0){
+          //   thisRole = 'Viewer'
+          // } 
+          eventHtml += '<div class="stream-events-container flex-grow">';
+          eventHtml += '<div class="hidden-tags hide">'+JSON.stringify(eventsData[mmdd][j]['tags'])+'</div>'
+          eventHtml += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>'
+          eventHtml += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5 mb-10">' + '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">check</button>' +  '<sf-i-elastic-text text="'+eventsData[mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;'  + '<div part="td-body"><sf-i-elastic-text text="'+eventsData[mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "")+'" minLength="30"></sf-i-elastic-text></div>&nbsp;&nbsp;<div part="upcoming-function">' + functionStr + '</div>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + '</div>';
+          eventHtml += '</div>';
+          html += eventHtml
+          
+        }
+        html += '</div>';
+        html += '</div>';
+      }
+    }
+    html += '</div>';
+
+    (this._SfIEventsC.querySelector('#reports-data') as HTMLDivElement).innerHTML = html;
+
+    const arrButtonSelect = this._SfIEventsC.querySelectorAll('.button-expand') as NodeListOf<HTMLButtonElement>;
+
+    for(let buttonSelect of arrButtonSelect){
+      buttonSelect.addEventListener('click', (ev:any) => {
+        const id = ev.target.id;
+        const idArr = id.split("-")
+        const mmdd = idArr[3] + "/" + idArr[4];
+        // const j = idArr[5];
+        console.log('move reporting', mmdd + '/' + this.calendarStartYYYY, sortid)
+        this.submitUpdateReporting(mmdd + '/' + this.calendarStartYYYY, sortid);
+      })
+    }
+
+    let buttonBack = (this._SfIEventsC.querySelector('#button-reports-date-selector-back') as HTMLButtonElement)
+    buttonBack.addEventListener('click', () => {
+      this.renderDateSelector(sortid)
+    })
+  }
+
+  submitUpdateReporting = async (mmddyyyy: string, sortid: string) => {
+    let url = "https://"+this.apiId+"/updatereportdate";
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    console.log('this.myroles', this.myroles)
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId, "mmddyyyy": mmddyyyy, "sortid": sortid}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+      this.setSuccess("update successful!");
+      setTimeout(() => {
+        this.clearMessages();
+        this.fetchReports();
+      }, 3000)
+      
+    } else {
+
+      if(xhr.status === 404) {
+        const jsonRespose = JSON.parse(xhr.responseText);
+        this.setError(jsonRespose.error);
+      }
+
+    }
+  }
+
   loadMode = async () => {
 
     Chart.register(...registerables);
@@ -20178,6 +20500,8 @@ export class SfIEvents extends LitElement {
     } else if(this.mode == "next"){
       // this.fetchNext(0)
       this.renderRoleTabsNext(0)
+    } else if(this.mode == "reports"){
+      this.fetchReports();
     } else {
 
       this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
@@ -20609,6 +20933,34 @@ export class SfIEvents extends LitElement {
           <div id="next-calendar-data" class="calendar-right-data d-flex flex-col w-100">
           </div>
           <div id="detail-container" class="hide" part="detail-container">
+          </div>
+          <div class="d-flex justify-between">
+              <div class="lb"></div>
+              <div>
+                <div class="div-row-error div-row-submit gone">
+                  <div part="errormsg" class="div-row-error-message"></div>
+                </div>
+                <div class="div-row-success div-row-submit gone">
+                  <div part="successmsg" class="div-row-success-message"></div>
+                </div>
+              </div>
+              <div class="rb"></div>
+          </div>
+        </div>
+
+      `;
+    } else if(this.mode == "reports"){
+
+      return html`
+          
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+        <div class="SfIEventsC">
+          
+          <div class="d-flex justify-center">
+              <div class="loader-element"></div>
+          </div>
+          <div id="reports-data" class="calendar-right-data d-flex flex-col w-100">
           </div>
           <div class="d-flex justify-between">
               <div class="lb"></div>
