@@ -19779,7 +19779,7 @@ export class SfIEvents extends LitElement {
 
     //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
     this.nextPage = page;
-    let url = "https://"+this.apiId+"/getnextuserevents1";
+    let url = "https://"+this.apiId+"/getnextuserevents";
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     console.log('this.myroles', this.myroles)
@@ -20152,7 +20152,7 @@ export class SfIEvents extends LitElement {
 
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     console.log('this.myroles', this.myroles)
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId,"userprofileid": this.userProfileId}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
     if(xhr.status == 200) {
 
@@ -20175,43 +20175,52 @@ export class SfIEvents extends LitElement {
 
   renderReports = (reportsData: any) => {
     let html = '<div class="d-flex flex-col w-100-m-0">'
-    html += '<div class="d-flex flex-col align-stretch"><div class="d-flex justify-between"><div></div><div>mm/dd/yyyy</div><div>docs</div><div>comments</div><div>Last Updated</div><div>Completion Date</div></div>'
+    html += '<div part="stream-event-list" class="d-flex flex-col align-stretch">'
     for(let reportKey of Object.keys(reportsData)){
+
       if(reportKey == '3/31/*,30;c989a44e-7d3d-427e-b712-90eacf585075;38dc8c53-643f-4fee-83fe-f15239606277;0a5fb99f-c36f-46c0-85b4-7fa3d48fa134'){ continue;}
+      
       let report = JSON.parse(reportsData[reportKey])
-      console.log('report date', reportKey)
-      html += '<div class="d-flex justify-between"><div class="flex-grow"><button id="button-select-'+ reportKey.replace(/-/g,'_') + '" class="button-submit mr-10">Select</button></div>'
-      html += `<div class="flex-grow">${reportKey.split(';')[0]}</div>`
-      html += `<div class="flex-grow">${JSON.parse(report['docs']).length} docs</div>`
-      html += `<div class="d-flex flex-col">`
-      for(let comment of report['comments']){
-        html += 'Author: ' + comment.author
-        html += '<br />Comment: <sf-i-elastic-text text="'+comment.comment+'" minlength="50"></sf-i-elastic-text>'
-        html += '<br />Time: ' + new Date(comment.timestamp).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata'}) + ' - ' +new Date(comment.timestamp).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata'})
-        html += '<br /><br />'
+      if(report['event'] == null) {
+        continue;
       }
-      html += `</div><div class="flex-grow">${new Date(report['lastupdated']).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata'})} - ${new Date(report['lastupdated']).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata'})}</div>`
-      html += `<div class="flex-grow">${new Date(parseInt(report['dateofcompletion'])).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata'})}</div>`
-      // html += `</div>`
-      html += `</div>`
-      if(report.event != null) {
+      
+      html += '<div part="stream-event-selected" class="w-100 scroll-x mr-10 ml-10 mt-10">'
+      html += '<table>';
 
-        html += '<div class="w-100-m-0">'
-        html += '<div class="m-20">';
+      html += '<tr>';
+        html += '<th part="td-head">Select</th>'
+        html += '<th part="td-head">Zombie</th>'
+        html += '<th part="td-head">Date</th>'
+        html += '<th part="td-head">Docs</th>'
+        html += '<th part="td-head">Comments</th>'
+        html += '<th part="td-head">LastUpdated</th>'
+        html += '<th part="td-head">CompletionDate</th>'
+        html += '<th part="td-head">Compliance</th>'
+      html += '</tr>';
 
-          html += '<div class="w-100 scroll-x">';
+      html += '<tr>';
+        html += '<td part="td-body"><button id="button-select-'+ reportKey.replace(/-/g,'_') + '"  part="button-icon-small" class="material-icons button-expand mr-10 button-select">check</button></td>'
+        html += '<td part="td-body"><button id="button-check-'+ reportKey.replace(/-/g,'_') + '"  part="button-icon-small" class="material-symbols-outlined button-expand mr-10 button-check">search_check</button></td>'
+        html += `<td part="td-body">${reportKey.split(';')[0]}</td>`;
+        html += `<td part="td-body">${JSON.parse(report['docs']).length}</td>`;
+        html += `<td part="td-body">${report['comments'].length}</td>`;
+        html += `<td part="td-body">${new Date(report['lastupdated']).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata'})} - ${new Date(report['lastupdated']).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata'})}</td>`;
+        html += `<td part="td-body">${new Date(parseInt(report['dateofcompletion'])).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata'})}</td>`;
+        html += '<th part="td-head">';
 
-            const jsonReportEvent = JSON.parse(report.event);
-
-            html += '<table class="report-event-table">';
+          // const jsonReportEvent = JSON.parse(report['comments'].reportevent);
+          console.log('jsonReportEvent',report['event']);
+          if(report['event'] != null) {
+            html += '<table>';
             html += '<tr>';
-            for(let i = 0; i < Object.keys(jsonReportEvent).length; i++) {              
+            for(var i = 0; i < Object.keys(JSON.parse(report['event'])).length; i++) {              
 
-              if(!this.EXCLUDE_COLS_FROM_REGS.includes(Object.keys(jsonReportEvent)[i].toLowerCase())) {
+              if(!this.EXCLUDE_COLS_FROM_REGS.includes(Object.keys(JSON.parse(report['event']))[i].toLowerCase())) {
 
                 html += '<td part="td-body-register">';
-                  html += ('<span part="td-head" style="padding-left: 0px !important">'+Object.keys(jsonReportEvent)[i]+'</span>');
-                  html += ('<span part="td-body"><sf-i-elastic-text text="'+jsonReportEvent[Object.keys(jsonReportEvent)[i]]+'" lineSize="4" minLength="60"></sf-i-elastic-text>'+'</span>');
+                  html += ('<span part="td-head" style="padding-left: 0px !important">'+Object.keys(JSON.parse(report['event']))[i]+'</span>');
+                  html += ('<span part="td-body"><sf-i-elastic-text text="'+JSON.parse(report['event'])[Object.keys(JSON.parse(report['event']))[i]]+'" lineSize="4" minLength="60"></sf-i-elastic-text>'+'</span>');
                 html += '</td>';
 
               }
@@ -20219,15 +20228,18 @@ export class SfIEvents extends LitElement {
             }
             html += '</tr>';
             html += '</table>';
-            
-          html += '</div>';
+          }
+          
 
-        html += '</div>';
-        html += '</div></div>';
-      }
+        html += '</th>';
+      html += '</tr>';
+
+      html += '</table>';
+      html += '</div>';
+
     }
 
-    html += '</div></div>';
+    html += '</div>';
     html += '</div>';
 
     (this._SfIEventsC.querySelector('#reports-data') as HTMLDivElement).innerHTML = html;
@@ -20246,14 +20258,115 @@ export class SfIEvents extends LitElement {
       })
     }
 
+    const arrButtonCheck = this._SfIEventsC.querySelectorAll('.button-check') as NodeListOf<HTMLButtonElement>;
+    for(let buttonCheck of arrButtonCheck){
+      buttonCheck.addEventListener('click', async (ev:any) => {
+        
+        const id = ev.target.id;
+        console.log('id', id)
+        const idArr = id.split("-")
+        console.log('idArr', idArr)
+        const sortid = idArr[2].replace(/_/g,'-')
+        console.log('selected sortid', sortid)
+        let complianceEntityId = sortid.split(';')[1]
+        let complianceLocationId = sortid.split(';')[2]
+        let complianceId = sortid.split(';')[3]
+        let mmddyyyy = sortid.split(';')[0];
+        let mm = mmddyyyy.split('/')[0];
+        let dd = mmddyyyy.split('/')[1];
+        let yyyy = mmddyyyy.split('/')[2];
+        let date = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
+        let sDateObj  = date
+        sDateObj.setDate(date.getDate() - 3)
+        let day = '' + sDateObj.getDate();
+        let month = '' + (sDateObj.getMonth() + 1);
+        let year = '' + sDateObj.getFullYear();
+        if (month.length < 2) 
+          month = '0' + month;
+        if (day.length < 2) 
+          day = '0' + day;
+        let sDate = month + "/" + day + "/" + year
+        let eDateObj  = date
+        eDateObj.setDate(date.getDate() + 6)
+        day = '' + eDateObj.getDate();
+        month = '' + (eDateObj.getMonth() + 1);
+        year = '' + eDateObj.getFullYear();
+        if (month.length < 2) 
+          month = '0' + month;
+        if (day.length < 2) 
+          day = '0' + day;
+        let eDate = month + "/" + day + "/" + year
+        let urlBody :any = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": complianceEntityId, "countryid": "", "functionid": "", "locationid": complianceLocationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": 0, "sdate": sDate, "edate": eDate, "view": "location", "year": this.calendarStartYYYY};
+        let url = "https://"+this.apiId+"/getallcountryevents";
+        const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+        const xhr : any = (await this.prepareXhr(urlBody, url, this._SfLoader, authorization, 'Preparing')) as any;
+        this._SfLoader.innerHTML = '';
+        if(xhr.status == 200) {
+
+          const jsonRespose = JSON.parse(xhr.responseText);
+          console.log('jsonRespose', jsonRespose);
+          let arrCompliances = (await this.fetchPresignedUrl(jsonRespose.signedUrlGet));
+          if(arrCompliances == null || Object.keys(arrCompliances).length === 0) {
+            this.setSuccess('Zombie detected!')
+            setTimeout(() => {this.clearMessages()}, 5000);
+          } else {
+
+            let zombie: boolean = true;
+            Object.keys(arrCompliances).forEach((key: string) => {
+              console.log('checking', key, mm + "/" + dd);
+              if(key == mm + "/" + dd) {
+                const compliances = arrCompliances[key] as Array<any>;
+                compliances.forEach((compliance: any) => {
+                  console.log('checking', compliance.id, complianceId);
+                  if(compliance.id == complianceId) {
+                    zombie = false;
+                  }
+                })
+                
+              }
+              
+            });
+
+            if(zombie) {
+              this.setSuccess('Zombie detected!')
+              setTimeout(() => {this.clearMessages()}, 5000);
+            } else {
+              this.setSuccess('Not a Zombie!')
+              setTimeout(() => {this.clearMessages()}, 5000);
+            }
+
+          }
+          await this.fetchPresignedUrlDelete(jsonRespose.signedUrlDelete);
+          console.log('receivedCompliacnes', arrCompliances)
+          // this.renderReportsComplainces(arrCompliances, sortid);
+        } else {
+
+          if(xhr.status === 404) {
+
+            this.showChosenProject();
+            (this._SfTitleChosenProject as HTMLElement).innerHTML = (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedTexts()[0];
+            this.renderChosenProject();
+
+          } else {
+            const jsonRespose = JSON.parse(xhr.responseText);
+            this.setError(jsonRespose.error);
+            setTimeout(() => {
+              this.clearMessages();
+            }, 5000);
+          }
+
+        }
+      })
+    }
+
   }
   renderDateSelector = (sortid: string) => {
     let html = ''
     html += '<div class="w-100-m-0 d-flex flex-col justify-center">'
-      html += '<div class="w-100-m-0 d-flex justify-end">'
+      html += '<div class="w-100-m-0 d-flex justify-start">'
         html += '<button id="button-reports-date-selector-back" part="button-icon" class="button-icon"><span class="material-icons">keyboard_backspace</span></button>'
       html += '</div>'
-      html += '<label part="input-label">Select Date</label><br>'
+      html += '<label part="input-label" class="mt-20">Select Date</label>'
       html += '<input part="input" id="input-compliance-date" type="date" class="w-100-m-0" mandatory="" autocomplete="off" style="display: block;">'
       // html += '<button id="button-reports-date-selector-back" class="button-back" part="button">back</button>';
     html += '</div>';
@@ -20274,9 +20387,9 @@ export class SfIEvents extends LitElement {
     console.log('fetching compliances', sortid)
     let complianceEntityId = sortid.split(';')[1]
     let complianceLocationId = sortid.split(';')[2]
-    let url = "https://"+this.apiId+"/getallcountryevents1";
+    let url = "https://"+this.apiId+"/getallcountryevents";
     let sDateObj  = selectedDate
-    sDateObj.setDate(selectedDate.getDate() - 1)
+    sDateObj.setDate(selectedDate.getDate() - 3)
     let day = '' + sDateObj.getDate();
     let month = '' + (sDateObj.getMonth() + 1);
     let year = '' + sDateObj.getFullYear();
@@ -20286,7 +20399,7 @@ export class SfIEvents extends LitElement {
       day = '0' + day;
     let sDate = month + "/" + day + "/" + year
     let eDateObj  = selectedDate
-    eDateObj.setDate(selectedDate.getDate() + 2)
+    eDateObj.setDate(selectedDate.getDate() + 6)
     day = '' + eDateObj.getDate();
     month = '' + (eDateObj.getMonth() + 1);
     year = '' + eDateObj.getFullYear();
@@ -20319,6 +20432,9 @@ export class SfIEvents extends LitElement {
       } else {
         const jsonRespose = JSON.parse(xhr.responseText);
         this.setError(jsonRespose.error);
+        setTimeout(() => {
+          this.clearMessages();
+        }, 5000);
       }
 
     }
@@ -20341,7 +20457,7 @@ export class SfIEvents extends LitElement {
     }
     console.log('eventsData', eventsData)
     let html = '';
-    html += '<div class="w-100-m-0 d-flex justify-end">'
+    html += '<div class="w-100-m-0 d-flex justify-start mb-20">'
         html += '<button id="button-reports-date-selector-back" part="button-icon" class="button-icon"><span class="material-icons">keyboard_backspace</span></button>'
       html += '</div>'
     html += '<div id="stream-event-next" part="stream-event-list" class="stream-event-list">';
@@ -20358,7 +20474,6 @@ export class SfIEvents extends LitElement {
         html += '<div part="stream-event-selected" class="d-flex stream-event-selected mb-5">';
         html += '<div part="stream-event-selected-date">'+ (mmdd.split("/")[1] + "/" + mmdd.split("/")[0])+' |</div>';
         html += '<div class="stream-event-list-container flex-grow" id="date-' + mmdd.replace(/\//g,'-') + '">'
-        
         
         for(var j = 0; j < (eventsData[mmdd] as Array<any>).length; j++) {
           let eventHtml = '';

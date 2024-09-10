@@ -41,6 +41,7 @@ export declare class SfIEvents extends LitElement {
     TAB_CUSTOM: string;
     TAB_ADHOC: string;
     TAB_REGISTERS: string;
+    TAB_ALL_ROLES: string;
     TAB_REPORTER: string;
     TAB_APPROVER: string;
     TAB_FUNCTION_HEAD: string;
@@ -243,6 +244,8 @@ export declare class SfIEvents extends LitElement {
     stream: string;
     myroles: string;
     blocksize: string;
+    nextPage: number;
+    nextTabRole: string;
     static styles: import("lit").CSSResult;
     _SfIEventsC: any;
     _SfRowError: any;
@@ -409,7 +412,7 @@ export declare class SfIEvents extends LitElement {
     getApproverStringFromEvent: (event: any) => string;
     getApproverDetailStringFromEvent: (event: any) => string;
     renderLatestCompliance: (mmddyyyy: string, event: any) => any;
-    getCompletenessStatus: (event: any) => "approved" | "not-started" | "pending-approval" | "rejected";
+    getCompletenessStatus: (event: any) => "rejected" | "approved" | "not-started" | "pending-approval";
     getTimelinessStatus: (mmdd: string, event: any, completeness: string) => "late-executed" | "late-reported" | "late-approved" | "past-due-date" | "in-time";
     getComplianceStatus: (completeness: string, timeliness: string) => "scheduled" | "not-complied" | "partially-complied" | "complied";
     numcalled: number;
@@ -604,7 +607,7 @@ export declare class SfIEvents extends LitElement {
     clickOnLegend: (hide: boolean, label: string) => void;
     clickOnPie: (callingFromBar: boolean, pieIndex: number) => void;
     clickOnBar: (callingFromPie: boolean, graphNumber: number, barIndex: number) => void;
-    getCurrentTab: () => string;
+    getCurrentTab: () => string | undefined;
     renderTabs: (selectedTab: string) => void;
     renderMappingTabs: (selectedTab: string) => void;
     renderExpandEvent: (events: any, index: any) => void;
@@ -755,9 +758,16 @@ export declare class SfIEvents extends LitElement {
     initDecryptListeners: () => void;
     evalDecrypt: () => void;
     submitDecrypt: () => Promise<void>;
-    fetchNext: () => Promise<void>;
+    fetchNext: (page: number, role: string) => Promise<void>;
     clearButtonSelectionNext: () => void;
-    renderNextEvents: (eventsData: any) => void;
+    renderRoleTabsNext: (page: number) => void;
+    renderNextEvents: (eventsData: any, page: number, role: string) => void;
+    fetchReports: () => Promise<void>;
+    renderReports: (reportsData: any) => void;
+    renderDateSelector: (sortid: string) => void;
+    fetchReportCompliances: (selectedDate: Date, sortid: string) => Promise<void>;
+    renderReportsComplainces: (compliancesData: any, sortid: string) => void;
+    submitUpdateReporting: (mmddyyyy: string, sortid: string) => Promise<void>;
     loadMode: () => Promise<void>;
     constructor();
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void;
