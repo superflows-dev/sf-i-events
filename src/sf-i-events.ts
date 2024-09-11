@@ -4018,12 +4018,12 @@ export class SfIEvents extends LitElement {
         html += '<div part="stream-event-chart-selection" class="mb-20">';
           html += '<div part="td-head" class="mb-5">Select Chart</div>';
           html += '<div class="mb-10 d-flex flex-wrap align-center">';
-            html += '<div part="chart-radio-item"><input type="radio" id="radio-compliance" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_COMPLIANCE) ? 'checked' : '') +'>';
-            html += '<label for="radio-compliance" part="input-label" class="mr-10">Compliance</label></div>';
             html += '<div part="chart-radio-item"><input type="radio" id="radio-completeness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_COMPLETENESS) ? 'checked' : '') +'>';
             html += '<label for="radio-completeness" part="input-label" class="mr-10">Completeness</label></div>';
             html += '<div part="chart-radio-item"><input type="radio" id="radio-timeliness" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_TIMELINESS) ? 'checked' : '') +'>';
             html += '<label for="radio-timeliness" part="input-label" class="mr-10">Timeliness</label></div>';            
+            html += '<div part="chart-radio-item"><input type="radio" id="radio-compliance" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_COMPLIANCE) ? 'checked' : '') +'>';
+            html += '<label for="radio-compliance" part="input-label" class="mr-10">Compliance</label></div>';
 
             html += '<div part="chart-radio-item" class="chart-radio-item-secondary '+(this.flowGraph == this.FLOW_GRAPH_RISKAREAS ? '' : 'hide')+'"><input type="radio" id="radio-risk" name="graph-type" part="radio-graph" '+ ((this.flowGraph == this.FLOW_GRAPH_RISKAREAS) ? 'checked' : '') +'>';
             html += '<label for="radio-risk" part="input-label" class="mr-10">Risk Areas</label></div>';
@@ -5606,6 +5606,17 @@ export class SfIEvents extends LitElement {
       
     });
 
+    const radioCompliance = eventContainer.querySelector('#radio-compliance') as HTMLButtonElement;
+    radioCompliance?.addEventListener('click', () => {
+
+      this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+      //console.log('setting flow graph to ', this.flowGraph);
+      this.renderRangeEvents(new Date(valueStart), (new Date(valueEnd).getTime() - new Date(valueStart).getTime())/(1000*60*60*24), eventContainer);
+      this.renderComplianceGraph(eventContainer)
+      this.attachHandlers(eventContainer, valueStart, valueEnd);
+      
+    });
+
     const radioRisk = eventContainer.querySelector('#radio-risk') as HTMLButtonElement;
     radioRisk?.addEventListener('click', () => {
 
@@ -5723,7 +5734,7 @@ export class SfIEvents extends LitElement {
 
     if(eventContainer.innerHTML.indexOf('myChart') >= 0) {
   
-      this.renderComplianceGraph(eventContainer);
+      this.renderCompletenessGraph(eventContainer);
 
     }
   }
@@ -5787,7 +5798,7 @@ export class SfIEvents extends LitElement {
 
     if(eventContainer.innerHTML.indexOf('myChart') >= 0) {
   
-      this.renderComplianceGraph(eventContainer);
+      this.renderCompletenessGraph(eventContainer);
 
     }
     
@@ -7659,25 +7670,25 @@ export class SfIEvents extends LitElement {
 
     (this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date')?.addEventListener('change', (_ev: any) => {
       //console.log('start-date', ev);
-      this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+      this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
       this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
     });
 
     (this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date')?.addEventListener('change', (_ev: any) => {
       //console.log('end-date', ev);
-      this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+      this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
       this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
     });
 
     (this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date-mobile')?.addEventListener('change', (_ev: any) => {
       //console.log('start-date', ev);
-      this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+      this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
       this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
     });
 
     (this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date-mobile')?.addEventListener('change', (_ev: any) => {
       //console.log('end-date', ev);
-      this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+      this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
       this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
     });
 
@@ -7825,6 +7836,24 @@ export class SfIEvents extends LitElement {
       
     });
 
+    const radioCompliance = (this._SfThisContainer as HTMLDivElement).querySelector('#radio-compliance') as HTMLButtonElement;
+    radioCompliance?.addEventListener('click', () => {
+
+      this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+      this.renderThis(index);
+      this.renderComplianceGraph((this._SfThisContainer as HTMLDivElement))
+      
+    });
+
+    // const radioCompliance = (this._SfThisContainer as HTMLDivElement).querySelector('#radio-compliance') as HTMLButtonElement;
+    // radioCompliance?.addEventListener('click', () => {
+
+    //   this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+    //   this.renderStream(index);
+    //   this.renderComplianceGraph((this._SfThisContainer as HTMLDivElement))
+      
+    // });
+
     const radioRisk = (this._SfThisContainer as HTMLDivElement).querySelector('#radio-risk') as HTMLButtonElement;
     radioRisk?.addEventListener('click', () => {
 
@@ -7914,7 +7943,7 @@ export class SfIEvents extends LitElement {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
         //console.log('clicked ', target);
         const dateResult = this.calculateStartAndEndDateOfThis(target);
-        this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+        this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
         this.currentColumnIndex = target + "";
         await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
         this.renderThis(target);
@@ -7923,7 +7952,7 @@ export class SfIEvents extends LitElement {
       (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-' + i + '-mobile')?.addEventListener('click', async (ev: any)=> {
         const target = parseInt((ev.target as HTMLDivElement).id.split('-')[2]);
         //console.log('clicked ', target);
-        this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+        this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
         this.currentColumnIndex = target + "";
         const dateResult = this.calculateStartAndEndDateOfThis(target);
         await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
@@ -8032,7 +8061,7 @@ export class SfIEvents extends LitElement {
     }
 
 
-    if(showGraph) this.renderComplianceGraph((this._SfThisContainer as HTMLDivElement));
+    if(showGraph) this.renderCompletenessGraph((this._SfThisContainer as HTMLDivElement));
     
   }
 
@@ -8240,7 +8269,7 @@ export class SfIEvents extends LitElement {
         if(dateResult != null) {
           await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
         }
-        this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+        this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
         this.renderStream(target);
 
       });
@@ -8252,7 +8281,7 @@ export class SfIEvents extends LitElement {
         if(dateResult != null) {
           await this.fetchAndYearlyRenderUserCalendar_2(dateResult.startDate, dateResult.endDate);
         }
-        this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+        this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
         this.currentColumnIndex = target + "";
         this.renderStream(target);
 
@@ -8362,7 +8391,7 @@ export class SfIEvents extends LitElement {
 
     }
 
-    if(showGraph) this.renderComplianceGraph((this._SfStreamContainer as HTMLDivElement));
+    if(showGraph) this.renderCompletenessGraph((this._SfStreamContainer as HTMLDivElement));
 
   }
 
@@ -16289,7 +16318,7 @@ export class SfIEvents extends LitElement {
 
     this.clearAllCalendars();
 
-    this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+    this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
 
     var html = '';
 
@@ -20389,7 +20418,7 @@ export class SfIEvents extends LitElement {
     let complianceLocationId = sortid.split(';')[2]
     let url = "https://"+this.apiId+"/getallcountryevents";
     let sDateObj  = selectedDate
-    sDateObj.setDate(selectedDate.getDate() - 3)
+    sDateObj.setDate(selectedDate.getDate() - 60)
     let day = '' + sDateObj.getDate();
     let month = '' + (sDateObj.getMonth() + 1);
     let year = '' + sDateObj.getFullYear();
@@ -20399,7 +20428,7 @@ export class SfIEvents extends LitElement {
       day = '0' + day;
     let sDate = month + "/" + day + "/" + year
     let eDateObj  = selectedDate
-    eDateObj.setDate(selectedDate.getDate() + 6)
+    eDateObj.setDate(selectedDate.getDate() + 120)
     day = '' + eDateObj.getDate();
     month = '' + (eDateObj.getMonth() + 1);
     year = '' + eDateObj.getFullYear();
@@ -20443,8 +20472,10 @@ export class SfIEvents extends LitElement {
   renderReportsComplainces = (compliancesData: any, sortid: string) => {
     let eventsData: any = {}
     let complianceId = sortid.split(';')[3]
+    console.log('renderReportsComplainces', compliancesData, complianceId);
     for(let dateStr of Object.keys(compliancesData)){
       for(var j = 0; j < (compliancesData[dateStr] as Array<any>).length; j++){
+        console.log('renderReportsComplainces comparing id', compliancesData[dateStr][j].id, complianceId);
         if(compliancesData[dateStr][j].id == complianceId && this.getCompletenessStatus(JSON.parse(JSON.stringify(compliancesData[dateStr][j]))) == "not-started"){
           console.log(compliancesData[dateStr][j])
         // if(compliancesData[dateStr][j].id == complianceId){
@@ -20619,7 +20650,7 @@ export class SfIEvents extends LitElement {
       this.fetchReports();
     } else {
 
-      this.flowGraph = this.FLOW_GRAPH_COMPLIANCE;
+      this.flowGraph = this.FLOW_GRAPH_COMPLETENESS;
       this.enableCalendar();
       this.initInputs();
       this.initCalendar();
