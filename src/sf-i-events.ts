@@ -19861,25 +19861,20 @@ export class SfIEvents extends LitElement {
     // if(JSON.parse(this.myroles).length > 1 && eventsData[this.TAB_ALL_ROLES] != null){
     //   html += '<button class="tab-button" id="consumer-tab-all-roles" part="'+(this.nextTabRole == this.TAB_ALL_ROLES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">All Roles</button>';
     // }
-    // if(JSON.parse(this.myroles).indexOf(this.TAB_REPORTER) >= 0 && eventsData[this.TAB_REPORTER] != null){
-    if(JSON.parse(this.myroles).indexOf(this.TAB_REPORTER) >= 0){
-      html += '<button class="tab-button" id="consumer-tab-reporter" part="'+(this.nextTabRole == this.TAB_REPORTER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Reporter</button>';
+    if(JSON.parse(this.myroles).indexOf(this.TAB_VIEWER) >= 0){
+      html += '<button class="tab-button" id="consumer-tab-viewer" part="'+(this.nextTabRole == this.TAB_VIEWER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Viewer</button>';
     }
-    // if(JSON.parse(this.myroles).indexOf(this.TAB_APPROVER) >= 0 && eventsData[this.TAB_APPROVER] != null){
     if(JSON.parse(this.myroles).indexOf(this.TAB_APPROVER) >= 0){
       html += '<button class="tab-button" id="consumer-tab-approver" part="'+(this.nextTabRole == this.TAB_APPROVER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Approver</button>';
     }
-    // if(JSON.parse(this.myroles).indexOf(this.TAB_FUNCTION_HEAD) >= 0 && eventsData[this.TAB_FUNCTION_HEAD] != null){
+    if(JSON.parse(this.myroles).indexOf(this.TAB_REPORTER) >= 0){
+      html += '<button class="tab-button" id="consumer-tab-reporter" part="'+(this.nextTabRole == this.TAB_REPORTER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Reporter</button>';
+    }
     if(JSON.parse(this.myroles).indexOf(this.TAB_FUNCTION_HEAD) >= 0){
       html += '<button class="tab-button" id="consumer-tab-functionhead" part="'+(this.nextTabRole == this.TAB_FUNCTION_HEAD ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Function Head</button>';
     }
-    // if(JSON.parse(this.myroles).indexOf(this.TAB_AUDITOR) >= 0 && eventsData[this.TAB_AUDITOR] != null){
     if(JSON.parse(this.myroles).indexOf(this.TAB_AUDITOR) >= 0){
       html += '<button class="tab-button" id="consumer-tab-auditor" part="'+(this.nextTabRole == this.TAB_AUDITOR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Auditor</button>';
-    }
-    // if(JSON.parse(this.myroles).indexOf(this.TAB_VIEWER) >= 0 && eventsData[this.TAB_VIEWER] != null){
-    if(JSON.parse(this.myroles).indexOf(this.TAB_VIEWER) >= 0){
-      html += '<button class="tab-button" id="consumer-tab-viewer" part="'+(this.nextTabRole == this.TAB_VIEWER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Viewer</button>';
     }
 
     (this._SfRoleTabContainer as HTMLDivElement).innerHTML = html;
