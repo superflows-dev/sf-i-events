@@ -21191,7 +21191,7 @@ export class SfIEvents extends LitElement {
           </div>
           <div class="d-flex" id="role-tab-container">
           </div>
-          <div class="d-flex mb-20" id="status-tab-container">
+          <div class="d-flex mb-20" id="status-tab-container" part="status-tab-container">
           </div>
           <div id="next-calendar-data" class="calendar-right-data d-flex flex-col w-100">
           </div>
