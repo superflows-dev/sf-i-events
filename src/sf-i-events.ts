@@ -20016,10 +20016,10 @@ export class SfIEvents extends LitElement {
       }
       
       html += '<div class="d-flex align-center mt-10">'
-      if(page != 0){
+      // if(page != 0){
         html += '<button id="button-prev" part="icon-button-small" class="material-symbols-outlined mr-10">keyboard_arrow_left</button>';
-      }
-      html += '<p part="page-next">Page ' + (page + 1) + '</p>'
+      // }
+      html += '<p part="page-next">Page ' + (page >= 0 ? (page + 1) : page) + '</p>'
       html += '<button id="button-next" part="icon-button-small" class="material-symbols-outlined ml-10">keyboard_arrow_right</button>';
       html += '</div>';
       html += '</div>';
@@ -20034,13 +20034,13 @@ export class SfIEvents extends LitElement {
       //   innerDivHtml += '<button id="button-expand" part="icon-button-small" class="material-symbols-outlined">keyboard_arrow_down</button>';
       //   (this._SfIEventsC.querySelector('#stream-event-next') as HTMLDivElement).innerHTML = innerDivHtml;
       // }
-      if(page != 0){
+      // if(page != 0){
         let buttonPrev = this._SfIEventsC.querySelector('#button-prev') as HTMLButtonElement;
         buttonPrev.addEventListener('click', () => {
           this.myRole = role;
           this.fetchNext(page - 1, this.nextTabRole)
         });
-      }
+      // }
       let buttonNext = this._SfIEventsC.querySelector('#button-next') as HTMLButtonElement;
       
       // buttonExpand = Util.clearListeners(buttonExpand) as HTMLButtonElement;
