@@ -97,6 +97,11 @@ export class SfIEvents extends LitElement {
   TAB_RCM_DATE = "date";
   TAB_RCM_CONFIRM = "confirm";
   TAB_RCM_JOBS = "jobs";
+  TAB_ALL = "all";
+  TAB_PENDING_ON_ME = "pending on me";
+  TAB_PENDING_ON_REPORTER = "pending on reporter";
+  TAB_PENDING_ON_APPROVER = "pending on approver";
+  TAB_DONE = "done";
   COLOR_APPROVED = "#50cf01";
   COLOR_NOT_STARTED = "#A4A9AD";
   COLOR_PENDING_APPROVAL = "#ffe505"
@@ -109,6 +114,10 @@ export class SfIEvents extends LitElement {
   COLOR_NOT_COMPLIED = "#C80036";
   COLOR_PARTIALLY_COMPLIED = "#F79256";
   COLOR_COMPLIED = "#50cf01";
+  STATUS_NOT_STARTED = "not-started";
+  STATUS_PENDING_APPROVAL = "pending-approval";
+  STATUS_REJECTED = "rejected";
+  STATUS_APPROVED = "approved";
   CERTIFICATE_HTML = `
   
   <html>
@@ -1553,6 +1562,8 @@ export class SfIEvents extends LitElement {
 
   nextTabRole: string = "";
 
+  nextTabStatus: string = "";
+
   static override styles = css`
 
     .bg-white {
@@ -2274,6 +2285,14 @@ export class SfIEvents extends LitElement {
       margin-left: 5px;
       margin-right: 5px;
     }
+    .tab-button-small {
+      padding: 5px;
+      padding-left: 7px;
+      padding-right: 7px;
+      font-size: 95%;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
 
     .td-body {
       padding: 5px;
@@ -2628,6 +2647,9 @@ export class SfIEvents extends LitElement {
 
   @query('#role-tab-container')
   _SfRoleTabContainer: any;
+
+  @query('#status-tab-container')
+  _SfStatusTabContainer: any;
 
   @query('#onboarding-tab-container')
   _SfOnboardingTabContainer: any;
@@ -9995,7 +10017,7 @@ export class SfIEvents extends LitElement {
           });
           ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
           if(this.mode == "next"){
-            this.fetchNext(this.nextPage, this.nextTabRole)
+            this.fetchNext(this.nextPage, this.nextTabRole, this.nextTabStatus)
           }else{
             if(this.getCurrentTab() == this.TAB_CUSTOM) {
               this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
@@ -10129,7 +10151,7 @@ export class SfIEvents extends LitElement {
                     }
 
                     if(this.mode == "next"){
-                      this.fetchNext(this.nextPage, this.nextTabRole)
+                      this.fetchNext(this.nextPage, this.nextTabRole, this.nextTabStatus)
                     }else{
                       if(this.getCurrentTab() == this.TAB_CUSTOM) {
                         this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
@@ -19804,15 +19826,31 @@ export class SfIEvents extends LitElement {
 
   }
 
-  fetchNext = async(page: number, role: string) => {
+  fetchNext = async(page: number, role: string, status: string) => {
 
     //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
     this.nextPage = page;
-    let url = "https://"+this.apiId+"/getnextuserevents";
-
+    let url = "https://"+this.apiId+"/getnextuserevents1";
+    let statusArr: string[] = []
+    if(status == this.TAB_ALL){
+      statusArr = [this.STATUS_NOT_STARTED, this.STATUS_PENDING_APPROVAL, this.STATUS_REJECTED, this.STATUS_APPROVED]
+    }else if(status == this.TAB_PENDING_ON_ME){
+      if(role == this.TAB_REPORTER){
+        statusArr = [this.STATUS_NOT_STARTED, this.STATUS_REJECTED]
+      }else if(role == this.TAB_APPROVER){
+        statusArr = [this.STATUS_PENDING_APPROVAL]
+      }
+    }else if(status == this.TAB_PENDING_ON_REPORTER){
+      statusArr = [this.STATUS_NOT_STARTED, this.STATUS_REJECTED]
+    }else if (status == this.TAB_PENDING_ON_APPROVER){
+      statusArr = [this.STATUS_PENDING_APPROVAL]
+    }else if(status == this.TAB_DONE){
+      statusArr = [this.STATUS_APPROVED]
+    }
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    console.log('this.myroles', this.myroles)
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId,"userprofileid": this.userProfileId, "roles": [role] , "year": new Date().getFullYear() + "", "page": this.nextPage, "blocksize": parseInt(this.blocksize)}, url, this._SfLoader, authorization)) as any;
+    console.log('params', JSON.stringify({"projectid": this.projectId,"userprofileid": this.userProfileId, "roles": [role] , "year": new Date().getFullYear() + "", "page": this.nextPage, "blocksize": parseInt(this.blocksize), "status": statusArr}))
+    console.log('authorization', authorization)
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId,"userprofileid": this.userProfileId, "roles": [role] , "year": new Date().getFullYear() + "", "page": this.nextPage, "blocksize": parseInt(this.blocksize), "status": statusArr}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
     if(xhr.status == 200) {
 
@@ -19882,6 +19920,7 @@ export class SfIEvents extends LitElement {
     (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-all-roles')?.addEventListener('click', async () => {
 
       this.nextTabRole = this.TAB_ALL_ROLES;
+      this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
       this.renderRoleTabsNext(0);
 
@@ -19889,6 +19928,7 @@ export class SfIEvents extends LitElement {
     (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-reporter')?.addEventListener('click', async () => {
 
       this.nextTabRole = this.TAB_REPORTER;
+      this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
       this.renderRoleTabsNext(0);
       
@@ -19897,6 +19937,7 @@ export class SfIEvents extends LitElement {
     (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-approver')?.addEventListener('click', async () => {
 
       this.nextTabRole = this.TAB_APPROVER;
+      this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
       this.renderRoleTabsNext(0);
 
@@ -19905,6 +19946,7 @@ export class SfIEvents extends LitElement {
     (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-functionhead')?.addEventListener('click', async () => {
 
       this.nextTabRole = this.TAB_FUNCTION_HEAD;
+      this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
       this.renderRoleTabsNext(0);
 
@@ -19913,6 +19955,7 @@ export class SfIEvents extends LitElement {
     (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-auditor')?.addEventListener('click', async () => {
 
       this.nextTabRole = this.TAB_AUDITOR;
+      this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
       this.renderRoleTabsNext(0);
 
@@ -19922,18 +19965,79 @@ export class SfIEvents extends LitElement {
     (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-viewer')?.addEventListener('click', async () => {
 
       this.nextTabRole = this.TAB_VIEWER;
+      this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
       this.renderRoleTabsNext(0);
 
     });
     
-    this.fetchNext(page, this.nextTabRole);
+    this.renderStatusTabsNext(page);
+  }
+
+  renderStatusTabsNext = (page: number) => {
+
+    (this._SfStatusTabContainer as HTMLDivElement).innerHTML = '';
+    if(this.nextTabStatus == ""){
+      this.nextTabStatus = this.TAB_ALL
+    }
+    console.log('rendering status tabs', this.nextTabStatus);
+    var html = '';
+
+    html += '<button class="tab-button-small" id="consumer-tab-status-all" part="'+(this.nextTabStatus == this.TAB_ALL ? 'calendar-tab-button-selected-small' : 'calendar-tab-button-not-selected-small')+'">All</button>';
+    if(this.nextTabRole == this.TAB_REPORTER || this.nextTabRole == this.TAB_APPROVER){
+      html += '<button class="tab-button-small" id="consumer-tab-status-pending-on-me" part="'+(this.nextTabStatus == this.TAB_PENDING_ON_ME ? 'calendar-tab-button-selected-small' : 'calendar-tab-button-not-selected-small')+'">Pending On Me</button>';
+    }
+    if(this.nextTabRole == this.TAB_APPROVER || this.nextTabRole == this.TAB_FUNCTION_HEAD || this.nextTabRole == this.TAB_AUDITOR || this.nextTabRole == this.TAB_VIEWER){
+      html += '<button class="tab-button-small" id="consumer-tab-status-pending-on-reporter" part="'+(this.nextTabStatus == this.TAB_PENDING_ON_REPORTER ? 'calendar-tab-button-selected-small' : 'calendar-tab-button-not-selected-small')+'">Pending On Reporter</button>';
+    }
+    if(this.nextTabRole == this.TAB_REPORTER || this.nextTabRole == this.TAB_FUNCTION_HEAD || this.nextTabRole == this.TAB_AUDITOR || this.nextTabRole == this.TAB_VIEWER){
+      html += '<button class="tab-button-small" id="consumer-tab-status-pending-on-approver" part="'+(this.nextTabStatus == this.TAB_PENDING_ON_APPROVER ? 'calendar-tab-button-selected-small' : 'calendar-tab-button-not-selected-small')+'">Pending On Approver</button>';
+    }
+    html += '<button class="tab-button-small" id="consumer-tab-status-done" part="'+(this.nextTabStatus == this.TAB_DONE ? 'calendar-tab-button-selected-small' : 'calendar-tab-button-not-selected-small')+'">Completed</button>';
+    
+    (this._SfStatusTabContainer as HTMLDivElement).innerHTML = html;
+
+    (this._SfStatusTabContainer as HTMLDivElement).querySelector('#consumer-tab-status-all')?.addEventListener('click', async () => {
+
+      this.nextTabStatus = this.TAB_ALL;
+      this.renderStatusTabsNext(0);
+
+    });
+    (this._SfStatusTabContainer as HTMLDivElement).querySelector('#consumer-tab-status-pending-on-me')?.addEventListener('click', async () => {
+
+      this.nextTabStatus = this.TAB_PENDING_ON_ME;
+      this.renderStatusTabsNext(0);
+      
+    });
+
+    (this._SfStatusTabContainer as HTMLDivElement).querySelector('#consumer-tab-status-pending-on-reporter')?.addEventListener('click', async () => {
+
+      this.nextTabStatus = this.TAB_PENDING_ON_REPORTER;
+      this.renderStatusTabsNext(0);
+
+    });
+
+    (this._SfStatusTabContainer as HTMLDivElement).querySelector('#consumer-tab-status-pending-on-approver')?.addEventListener('click', async () => {
+
+      this.nextTabStatus = this.TAB_PENDING_ON_APPROVER;
+      this.renderStatusTabsNext(0);
+
+    });
+
+    (this._SfStatusTabContainer as HTMLDivElement).querySelector('#consumer-tab-status-done')?.addEventListener('click', async () => {
+
+      this.nextTabStatus = this.TAB_DONE;
+      this.renderStatusTabsNext(0);
+
+    });
+    
+    this.fetchNext(page, this.nextTabRole, this.nextTabStatus);
   }
 
   renderNextEvents = (eventsData: any, page: number, role:string) => {
     console.log('eventsData', eventsData)
     console.log('role', role)
-    if(Object.keys(eventsData[role]).length > 0){
+    // if(Object.keys(eventsData[role]).length > 0){
       var notStarted = 0, approved = 0, pendingApproval = 0, rejected = 0, inTime = 0, pastDueDate = 0, lateExecuted = 0, lateApproved = 0, lateReported = 0, scheduled = 0, partiallyComplied = 0, notComplied = 0, complied = 0;
       var html = '';
       this.selectedItems = [];
@@ -20009,6 +20113,16 @@ export class SfIEvents extends LitElement {
           html += '</div>';
         }
       }
+      console.log('eventsData Role length', Object.keys(eventsData[role]).length)
+      if(Object.keys(eventsData[role]).length == 0){
+        html += `
+            <div class="dashboard-container d-flex-plain flex-col align-center justify-start section-start section-end">
+                <div class="no-donut d-flex justify-center flex-col align-center pl-10 pr-10">
+                    <h1 class="mb-5"><span class="material-symbols-outlined">check_circle</span></h1>
+                    <h5 class="mt-5">Nothing to show here.</h5>
+                </div>
+            </div>`;
+      }
       
       html += '<div class="d-flex align-center mt-10">'
       // if(page != 0){
@@ -20033,7 +20147,7 @@ export class SfIEvents extends LitElement {
         let buttonPrev = this._SfIEventsC.querySelector('#button-prev') as HTMLButtonElement;
         buttonPrev.addEventListener('click', () => {
           this.myRole = role;
-          this.fetchNext(page - 1, this.nextTabRole)
+          this.fetchNext(page - 1, this.nextTabRole, this.nextTabStatus)
         });
       // }
       let buttonNext = this._SfIEventsC.querySelector('#button-next') as HTMLButtonElement;
@@ -20042,7 +20156,7 @@ export class SfIEvents extends LitElement {
 
       buttonNext.addEventListener('click',()=>{
         this.myRole = role;
-        this.fetchNext(page + 1, this.nextTabRole)
+        this.fetchNext(page + 1, this.nextTabRole, this.nextTabStatus)
       })
       const buttonArr = this._SfIEventsC.querySelectorAll('.button-expand') as NodeListOf<HTMLButtonElement>;
 
@@ -20161,13 +20275,19 @@ export class SfIEvents extends LitElement {
         this.dispatchEvent(changeEvent);
       }
     // return html;
-    }else{
-      (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).innerHTML = "";
-      (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).style.display = "none";
-      let emptyEvent = new CustomEvent('valueChanged',{bubbles:false});
-      this.dispatchEvent(emptyEvent);
-    }
-
+    // }else{
+    //   let html = `
+    //         <div class="dashboard-container d-flex-plain flex-col align-center justify-start section-start section-end">
+    //             <div class="no-donut d-flex justify-center flex-col align-center pl-10 pr-10">
+    //                 <h1 class="mb-5"><span class="material-symbols-outlined">check_circle</span></h1>
+    //                 <h5 class="mt-5">All good! Nothing is due.</h5>
+    //             </div>
+    //         </div>`;
+    //   (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).innerHTML = html;
+    //   // (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).style.display = "none";
+    //   let emptyEvent = new CustomEvent('valueChanged',{bubbles:false});
+    //   this.dispatchEvent(emptyEvent);
+    // }
 
   }
 
@@ -21069,7 +21189,9 @@ export class SfIEvents extends LitElement {
           <div class="d-flex justify-center">
               <div class="loader-element"></div>
           </div>
-          <div class="d-flex mb-20" id="role-tab-container">
+          <div class="d-flex" id="role-tab-container">
+          </div>
+          <div class="d-flex mb-20" id="status-tab-container">
           </div>
           <div id="next-calendar-data" class="calendar-right-data d-flex flex-col w-100">
           </div>
