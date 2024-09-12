@@ -20122,15 +20122,14 @@ export class SfIEvents extends LitElement {
                     <h5 class="mt-5">Nothing to show here.</h5>
                 </div>
             </div>`;
-      }
+      }else{
       
-      html += '<div class="d-flex align-center mt-10">'
-      // if(page != 0){
+        html += '<div class="d-flex align-center mt-10">'
         html += '<button id="button-prev" part="icon-button-small" class="material-symbols-outlined mr-10">keyboard_arrow_left</button>';
-      // }
-      html += '<p part="page-next">Page ' + (page >= 0 ? (page + 1) : page) + '</p>'
-      html += '<button id="button-next" part="icon-button-small" class="material-symbols-outlined ml-10">keyboard_arrow_right</button>';
-      html += '</div>';
+        html += '<p part="page-next">Page ' + (page >= 0 ? (page + 1) : page) + '</p>'
+        html += '<button id="button-next" part="icon-button-small" class="material-symbols-outlined ml-10">keyboard_arrow_right</button>';
+        html += '</div>';
+      }
       html += '</div>';
 
       (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).innerHTML = html;
@@ -20145,7 +20144,7 @@ export class SfIEvents extends LitElement {
       // }
       // if(page != 0){
         let buttonPrev = this._SfIEventsC.querySelector('#button-prev') as HTMLButtonElement;
-        buttonPrev.addEventListener('click', () => {
+        buttonPrev?.addEventListener('click', () => {
           this.myRole = role;
           this.fetchNext(page - 1, this.nextTabRole, this.nextTabStatus)
         });
@@ -20154,7 +20153,7 @@ export class SfIEvents extends LitElement {
       
       // buttonExpand = Util.clearListeners(buttonExpand) as HTMLButtonElement;
 
-      buttonNext.addEventListener('click',()=>{
+      buttonNext?.addEventListener('click',()=>{
         this.myRole = role;
         this.fetchNext(page + 1, this.nextTabRole, this.nextTabStatus)
       })
