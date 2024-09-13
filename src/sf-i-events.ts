@@ -1401,6 +1401,9 @@ export class SfIEvents extends LitElement {
   htmlDataStats: string = "";
 
   @property()
+  htmlDataSummary: string = "";
+
+  @property()
   period: string = "";
 
   @property()
@@ -1644,7 +1647,8 @@ export class SfIEvents extends LitElement {
       opacity: 0.4;
     }
 
-    .detail-container {
+    .detail-container,
+    .report-summary-container {
       width: 60%;
       height: 400px;
       background-color: #efefef;
@@ -1655,7 +1659,8 @@ export class SfIEvents extends LitElement {
 
     @media (orientation: portrait) {
 
-      .detail-container {
+      .detail-container,
+      .report-summary-container {
         width: 80%;
         height: 400px;
         background-color: #efefef;
@@ -2047,6 +2052,10 @@ export class SfIEvents extends LitElement {
       margin-top: 5px;
     }
 
+    .ml-5 {
+      margin-left: 5px;
+    }
+    
     .ml-10 {
       margin-left: 10px;
     }
@@ -2358,6 +2367,10 @@ export class SfIEvents extends LitElement {
     .align-center {
       align-items: center;
     }
+
+    .align-self-start {
+      align-self: flex-start;
+    }
     
     .lds-text {
       position: absolute;
@@ -2614,6 +2627,9 @@ export class SfIEvents extends LitElement {
 
   @query('#detail-container')
   _SfDetailContainer: any;
+
+  @query('#report-summary-container')
+  _SfReportSummaryContainer: any;
 
   @query('#this-container')
   _SfThisContainer: any;
@@ -4533,8 +4549,8 @@ export class SfIEvents extends LitElement {
     var html = '';
     this.selectedItems = [];
     this.selectedStatus = "";
-    var csvCols = "", htmlCols = "";
-    var csvValues = "", htmlValues = "";
+    var csvCols = "", htmlCols = "", htmlSummaryCols = "";
+    var csvValues = "", htmlValues = "", htmlSummaryValues = "";
     var slice = 2;
     this.eventsInWindow = [];
 
@@ -4552,6 +4568,8 @@ export class SfIEvents extends LitElement {
     // csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate' 
     csvCols += 'Id,Country,State,Jurisdiction,Category,Subcategory,Statute,Reference,Applicability,ObligationType,ObligationTitle,Obligation,Firstlineofdefence,Secondlineofdefence,Thirdlineofdefence,Internalcontrols,Penalty,Form,AdditionalUrl,Definition,Authority,RiskSeverity,RiskAreas,Frequency,SubFrequency,DueDate,Status,ReportParameter' 
     htmlCols += '<tr><th class="td-thin">Id</th><th class="td-thin">Country</th><th class="td-thin">State</th><th class="td-thin">Jurisdiction</th><th class="td-thin">Category</th><th class="td-thin">Subcategory</th><th class="td-wide">Statute</th><th class="td-thin">Reference</th><th class="td-thin">Applicability</th><th class="td-thin">ObligationType</th><th class="td-wide">ObligationTitle</th><th class="td-wide">Obligation</th><th class="td-thin">Firstlineofdefence</th><th class="td-thin">Secondlineofdefence</th><th class="td-thin">Thirdlineofdefence</th><th>InternalControls</th><th class="td-wide">Penalty</th><th class="td-thin">Form</th><th class="td-thin">Additional URL</th><th class="td-thin">Definition</th><th class="td-thin">Authority</th><th class="td-thin">RiskSeverity</th><th class="td-wide">RiskAreas</th><th class="td-thin">Frequency</th><th class="td-thin">SubFrequency</th><th class="td-thin">DueDate</th><th class="td-wide">Status</th><th class="td-wide">ReportParameter</th></tr>'
+
+    htmlSummaryCols += '<tr><th class="td-thin">Id</th><th class="td-wide">ObligationTitle</th><th class="td-wide">Obligation</th><th class="td-wide">Status</th><th class="td-wide">Documents</th></tr>'
     
     for(var i = iInit; i <= iLast; i++) {
 
@@ -4696,6 +4714,17 @@ export class SfIEvents extends LitElement {
             + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' td-wide text-center status-format">'+ this.renderStatusString(partStatus, lateStatus, complianceStatus)+'</td>'
             + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' td-wide status-format">'+this.getGraphParam(this.events[mmdd][j])+'</td>'
             + '</tr>');
+          htmlSummaryValues += ('<tr><td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' td-thin"><sf-i-elastic-text text="'+this.events[mmdd][j]["id"]+'" minLength="10"></sf-i-elastic-text></td>'
+            + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' td-wide"><sf-i-elastic-text text="'+this.events[mmdd][j]["obligationtitle"]+'" minLength="100" lineSize="4"></sf-i-elastic-text></td>'
+            + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' td-wide"><sf-i-elastic-text text="'+this.events[mmdd][j]["obligation"]+'" minLength="100" lineSize="4"></sf-i-elastic-text></td>'
+            + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' td-wide"><sf-i-elastic-text text="'+this.renderStatusString(partStatus, lateStatus, complianceStatus)+'" minLength="100" lineSize="4"></sf-i-elastic-text></td>'
+            + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' td-wide">');
+          
+          for(let document of this.events[mmdd][j].documents){
+            htmlSummaryValues += `<sf-i-uploader class="summary-report-doc" max="10" apiid="1peg5170d3" allowedextensions="[&quot;jpg&quot;,&quot;png&quot;,&quot;pdf&quot;,&quot;xls&quot;,&quot;xlsx&quot;,&quot;doc&quot;,&quot;docx&quot;]" prepopulatedInputArr="${JSON.stringify([{"key":document.key,"ext":document.ext}]).replace(/"/g,'&quot;')}" projectid="${this.projectId} "extract="no" mode="view" maximize="yes"></sf-i-uploader><br />`
+          }
+          // htmlSummaryValues += this.renderCalendarAnnotations(this.events[mmdd][j]);
+          htmlSummaryValues += '</td></tr>'
 
           html += this.renderCalendarRowDivItemDivStart(mmdd, this.events[mmdd][j], j, partStatus);
           html += this.renderCalendarRowDivItemDivTableHead(this.events[mmdd][j], partStatus);
@@ -4728,6 +4757,7 @@ export class SfIEvents extends LitElement {
 
     this.csvDataCompliances = csvCols + "\n" + csvValues;
     this.htmlDataCompliances = '<table>' + htmlCols + htmlValues + '</table>';
+    this.htmlDataSummary = '<table class="w-100">' + htmlSummaryCols + htmlSummaryValues + '</table>';
 
     //console.log('renderevents htmlcols', this.htmlDataCompliances);
 
@@ -8676,7 +8706,7 @@ export class SfIEvents extends LitElement {
         }]
       }
 
-      this.renderChartSettings(divContainer, -1, ctx);
+      this.renderChartSettings(divContainer, -1, -1, ctx);
       this.renderChart(ctx, 'doughnut', data, "Completeness")
 
     }
@@ -8710,7 +8740,7 @@ export class SfIEvents extends LitElement {
     for(var i = 0; i < itemsCompliance.length; i++) {
       itemsCompliance[i].style.display = 'none';
     }
-    this.renderChartSettings(divContainer, -1, ctx);
+    this.renderChartSettings(divContainer, -1, -1, ctx);
     this.renderChart(ctx, 'doughnut', data, "Completeness")
 
   }
@@ -8772,7 +8802,7 @@ export class SfIEvents extends LitElement {
       itemsCompliance[i].style.display = 'flex';
     }
 
-    this.renderChartSettings(divContainer, -1, ctx);
+    this.renderChartSettings(divContainer, -1, -1, ctx);
     this.renderChart(ctx, 'doughnut', data, "Compliance")
 
   }
@@ -8833,7 +8863,7 @@ export class SfIEvents extends LitElement {
       itemsCompliance[i].style.display = 'none';
     }
 
-    this.renderChartSettings(divContainer, -1, ctx);
+    this.renderChartSettings(divContainer, -1, -1, ctx);
     this.renderChart(ctx, 'doughnut', data, "Timeliness")
 
   }
@@ -9098,7 +9128,7 @@ export class SfIEvents extends LitElement {
     this.csvGraphStats = this.renderPieCsv(pieData, this.csvGraphStats, param);
 
     const ctx = divContainer.querySelector('#myChart') as ChartItem;
-    this.renderChartSettings(divContainer, -1, ctx);
+    this.renderChartSettings(divContainer, -1, -1, ctx);
     this.renderChart(ctx, 'pie', data, param + " Distribution")
 
     // 2
@@ -14709,7 +14739,7 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderChartSettings = (container: HTMLDivElement, selectedTab: number = -1, ctx: any) => {
+  renderChartSettings = (container: HTMLDivElement, selectedTab: number = -1, selectedSummary: number = -1, ctx: any) => {
 
     var html = '';
 
@@ -14724,13 +14754,23 @@ export class SfIEvents extends LitElement {
     } else {
       html += '<button class="tab-button" id="chart-control-settings" part="calendar-tab-button-not-selected" class="mr-10"><span class="material-icons">cloud_download</span></button>';
     }
+    if (selectedSummary === 1) {
+      html += '<button class="tab-button" id="chart-control-summary" part="calendar-tab-button-selected" class="mr-10"><span class="material-icons">summarize</span></button>';
+    } else {
+      html += '<button class="tab-button" id="chart-control-summary" part="calendar-tab-button-not-selected" class="mr-10"><span class="material-icons">summarize</span></button>';
+    }
     html += '</div>';
 
     (container.querySelector('#chart-settings-controls') as HTMLDivElement).innerHTML = html;
 
     (container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-settings')?.addEventListener('click', () => {
 
-      this.renderChartSettings(container, 1, ctx);
+      this.renderChartSettings(container, 1, -1, ctx);
+
+    });
+    (container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-summary')?.addEventListener('click', () => {
+      console.log('summary clicked');
+      this.renderChartSummary();
 
     });
 
@@ -14756,7 +14796,7 @@ export class SfIEvents extends LitElement {
     (container.querySelector('#chart-settings') as HTMLDivElement).addEventListener('canceled', () => {
       //console.log('canceled');
       if(this.getCurrentTab() == this.TAB_STREAM) {
-        this.renderChartSettings(container, -1, ctx);
+        this.renderChartSettings(container, -1, -1, ctx);
         this.renderStream(this.streamIndex);
       }
       // if(this.getCurrentTab() == this.TAB_UPCOMING) {
@@ -14764,7 +14804,7 @@ export class SfIEvents extends LitElement {
       //   this.renderUpcoming(this.streamIndex);
       // }
       if(this.getCurrentTab() == this.TAB_THIS) {
-        this.renderChartSettings(container, -1, ctx);
+        this.renderChartSettings(container, -1, -1, ctx);
         this.renderThis(this.streamIndex);
       }
       // if(this.getCurrentTab() == this.TAB_PAST) {
@@ -14811,6 +14851,181 @@ export class SfIEvents extends LitElement {
 
     // })
 
+  }
+
+  renderChartSummary = () => {
+    var html = `
+      <style>
+        body {
+          font-family: DM Sans;
+          margin: 2px;
+          padding: 20px;
+        }
+        .status-format {
+          text-transform: uppercase;
+        }
+        .text-center {
+          text-align: center;
+        }
+        .d-flex {
+          display: flex;
+        }
+        .justify-center {
+          justify-content: center;
+        }
+        .justify-between {
+          justify-content: space-between;
+        }
+        .align-center {
+          align-items: center;
+        }
+        .mt-10 {
+          margin-top: 10px;
+        }
+        .w-25 {
+          width: 25%;
+        }
+        .w-16 {
+          width: 16%;
+        }
+        .w-14 {
+          width: 14%;
+        }
+        .w-12 {
+          width: 12%;
+        }
+        .w-100 {
+          width: 100%;
+        }
+        .w-200px {
+          width: 200px;
+        }
+        .text-center {
+          text-align: center;
+        }
+        table {
+          box-shadow: 1px 1px 10px 0 rgba(0, 0, 0, 0.25), -1px -1px 10px 0 rgba(255, 255, 255, 0.6);
+          border-top: solid 1px rgba(255, 255, 255, 0.8);
+          border-left: solid 1px rgba(255, 255, 255, 0.8);
+          border-bottom: solid 1px rgba(255, 255, 255, 0.8);
+          border-right: solid 1px rgba(255, 255, 255, 0.8);
+          overflow:auto;
+        }
+        th {
+          background-color: #6a6a6a;
+          color: white;
+          padding: 5px;
+        }
+        .td-thin {
+          min-width: 150px;
+        }
+        .td-wide {
+          min-width: 300px;
+        }
+        td {
+          padding: 5px;
+          font-size: 70%;
+          vertical-align: top;
+          min-width: 200px;
+        }
+        td span {
+          font-size: 130% !important;
+        }
+        .td-odd {
+          background-color: #efefef;
+          
+        }
+        .td-even {
+          background-color: #dedede;
+        }
+        .color-pending {
+          color: #ffe505;
+        }
+        .color-pending-approval {
+          color: #ffe505;
+        }
+        .color-not-started {
+          color: #888888;
+        }
+        .color-not-complied {
+          color: #C80036;
+        }
+        .color-partially-complied {
+          color: #F79256;
+        }
+        .color-complied {
+          color: #50cf01;
+        }
+        .color-scheduled {
+          color: #888888;
+        }
+        .color-done {
+          color: #50cf01;
+        }
+        .color-rejected {
+          color: #C80036;
+        }
+        .color-approved {
+          color: #50cf01;
+        }
+        .color-past-due-date {
+          color: #ffe505;
+        }
+        .color-late-executed {
+          color: #840B0F;
+        }
+        .color-late-approved {
+          color: #EE2F36;
+        }
+        .color-late-reported {
+          color: #Ef9C66;
+        }
+        .h-100 {
+          height: 100vh;
+        }
+        .abs {
+          position: absolute;
+        }
+        .watermark {
+          background-image: url(https://flagggrc-images.s3.amazonaws.com/logo.png);
+          background-position: center;
+          background-repeat: no-repeat;
+          opacity: 5%;
+          width: 100%;
+          height: 100vh;
+          position: fixed;
+        }
+        .scroll-x {
+          display: block;
+          overflow-x: auto;
+        }
+      </style>
+      <div class="d-flex justify-between m-20">
+        <button part="button-icon" class="material-icons invisible">close</button>
+        <h3 part="results-title" class="m-0">Reporting Summary</h3>
+        <button id="button-detail-close" part="button-icon" class="material-icons">close</button>
+      </div>
+    
+    `;
+    html += this.htmlDataStats;
+    html += '<div class="m-20"></div>';
+    html += this.getFilteredStringSummary();
+    // html += '<div class="m-20"></div>';
+    // html += this.htmlDataSummary;
+    (this._SfReportSummaryContainer as HTMLDivElement).innerHTML = html;
+    (this._SfReportSummaryContainer as HTMLDivElement).style.display = 'block';
+
+    (this._SfReportSummaryContainer as HTMLDivElement).querySelector('#button-detail-close')?.addEventListener('click', () => {
+
+      (this._SfReportSummaryContainer as HTMLDivElement).innerHTML = '';
+      (this._SfReportSummaryContainer as HTMLDivElement).style.display = 'none';
+
+    });
+
+    let summaryDocuments = (this._SfReportSummaryContainer as HTMLDivElement).querySelectorAll('.summary-report-doc') as NodeListOf<SfIUploader>;
+    for(let summaryDocument of summaryDocuments){
+      summaryDocument.loadMode();
+    }
   }
 
   csvToHtmlTable = (strCsv: string) => {
@@ -14939,6 +15154,95 @@ export class SfIEvents extends LitElement {
     //console.log('newArrList', newArrList);
 
     filteredHTML += '<br /><br /><div class="table-wrapper"><table>';
+    for(var i = 0; i < newArrList.length; i++) {
+      //console.log('htmlrender', (newArrList[i] as HTMLTableRowElement).outerHTML);
+      filteredHTML += (newArrList[i] as HTMLTableRowElement).outerHTML;
+    }
+    filteredHTML += '</table></div>';
+    return filteredHTML;
+  }
+
+  getFilteredStringSummary = () => {
+
+    console.log('selectedfilter', this.selectedFilter);
+
+    var tempDiv = document.createElement('div');
+    tempDiv.id = "div-filter-content";
+    tempDiv.innerHTML = this.htmlDataSummary;
+
+    const newArrList: Array<HTMLTableRowElement> = [];
+
+    //console.log('tempDiv', this.htmlDataCompliances);
+
+    const rows = tempDiv.querySelectorAll('tr');
+    for(var i = 0; i < rows.length; i++) {
+      let cols = rows[i].querySelectorAll('td');
+      if(cols.length === 0) {
+        cols = rows[i].querySelectorAll('th');
+      }
+      if(i === 0) {
+        newArrList.push(rows[i]);
+      } else {
+
+        if(cols.length > 0) {
+          if(this.selectedFilter == null) {
+            newArrList.push(rows[i]);
+          } else {
+
+            if(!this.selectedFilter.selected) {
+
+              var found = false;
+
+              for(var j = 0; j < this.selectedFilter.length; j++) {
+                if(cols[cols.length - 2].innerHTML.toLowerCase().replace(/&amp;/g, '&').indexOf(this.selectedFilter[j].value.toLowerCase().replace(/&amp;/g, '&')) >= 0) {
+                  found = true;
+                }  
+              }
+
+              if(!found){
+                newArrList.push(rows[i]);
+              }
+
+            } else {
+
+              console.log('selected filter', this.selectedFilter, cols[cols.length - 1].innerHTML.toLowerCase(), '*-*', this.selectedFilter.value.toLowerCase());
+
+              if(cols[cols.length - 2].innerHTML.toLowerCase().replace(/&amp;/g, '&').indexOf(this.selectedFilter.value.toLowerCase().replace(/&amp;/g, '&')) >= 0) {
+                newArrList.push(rows[i]);
+              }
+            }
+
+          }
+        }
+      }
+    }
+
+    console.log('newarrlist', newArrList);
+
+    let filteredHTML = '';
+
+    if(this.selectedFilter != null) {
+      if(this.selectedFilter.selected) {
+        filteredHTML += '<small>Filter (included parameters): ' + this.selectedFilter.value.charAt(0).toUpperCase() + this.selectedFilter.value.slice(1) + '</small>';
+      } else {
+
+        let params = "";
+        for(var i = 0; i < this.selectedFilter.length; i++) {
+
+          params += this.selectedFilter[i].value.charAt(0).toUpperCase() + this.selectedFilter[i].value.slice(1);
+          if(i < (this.selectedFilter.length - 1)) {
+            params += ',';
+          }
+
+        }
+
+        filteredHTML += '<small>Filter (excluded parameters): ' + params + '</small>';
+      }
+    }
+
+    //console.log('newArrList', newArrList);
+
+    filteredHTML += '<br /><br /><div class="table-wrapper"><table class="w-100">';
     for(var i = 0; i < newArrList.length; i++) {
       //console.log('htmlrender', (newArrList[i] as HTMLTableRowElement).outerHTML);
       filteredHTML += (newArrList[i] as HTMLTableRowElement).outerHTML;
@@ -19882,7 +20186,7 @@ export class SfIEvents extends LitElement {
 
   }
 
-  renderRoleTabsNext = (page: number) => {
+  renderRoleTabsNext = (page: number, loadData: boolean = true) => {
 
     //console.log('render role tabs');
 
@@ -19970,8 +20274,20 @@ export class SfIEvents extends LitElement {
       this.renderRoleTabsNext(0);
 
     });
-    
-    this.renderStatusTabsNext(page);
+    if(loadData){
+      this.renderStatusTabsNext(page);
+    }else{
+      (this._SfIEventsC.querySelector('#next-calendar-data').querySelector('#button-load-next') as HTMLButtonElement).addEventListener('click',()=>{
+        (this._SfIEventsC.querySelector('#next-calendar-data').querySelector('#button-load-next') as HTMLButtonElement).style.display = 'none';
+        this.renderRoleTabsNext(0)
+      })
+    }
+    // let roleChangeEvent = new CustomEvent("roleChanged",{
+    //   detail:{
+    //     selectedRole: this.nextTabRole
+    //   }
+    // });
+    // this.dispatchEvent(roleChangeEvent)
   }
 
   renderStatusTabsNext = (page: number) => {
@@ -20759,7 +21075,7 @@ export class SfIEvents extends LitElement {
       }, 500)
     } else if(this.mode == "next"){
       // this.fetchNext(0)
-      this.renderRoleTabsNext(0)
+      this.renderRoleTabsNext(0, false)
     } else if(this.mode == "reports"){
       this.fetchReports();
     } else {
@@ -21193,6 +21509,7 @@ export class SfIEvents extends LitElement {
           <div class="d-flex mb-20" id="status-tab-container" part="status-tab-container">
           </div>
           <div id="next-calendar-data" class="calendar-right-data d-flex flex-col w-100">
+            <button id="button-load-next" part="button-icon" class="material-icons button-icon align-self-start ml-5"><span class="material-symbols-outlined">keyboard_arrow_down</span></button>
           </div>
           <div id="detail-container" class="hide" part="detail-container">
           </div>
@@ -21287,6 +21604,8 @@ export class SfIEvents extends LitElement {
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="register-container">
               
             </div>
+          </div>
+          <div id="report-summary-container" class="hide" part="report-summary-container">
           </div>
           <div id="detail-container" class="hide" part="detail-container">
           </div>
