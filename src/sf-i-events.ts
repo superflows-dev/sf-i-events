@@ -5532,7 +5532,7 @@ export class SfIEvents extends LitElement {
               const cols = JSON.parse(compliance.cols);
               this.csvDataRegisters += ('"' + complianceId + '",');
               html += '<tr>';
-              html += ('<td class="td-body" part="td-body-register"><button part="button-icon" id="button-icon-country-'+index+'-'+i+'-'+j+'" class="button-icon-country"><span class="material-symbols-outlined">open_in_new</span></button></td>');
+              html += ('<td class="td-body left-sticky" part="td-body-register"><button part="button-icon" id="button-icon-country-'+index+'-'+i+'-'+j+'" class="button-icon-country"><span class="material-symbols-outlined">open_in_new</span></button></td>');
               html += ('<td class="td-body" part="td-body-register"><span part="td-head" style="padding-left: 0px !important">ID</span><br /><sf-i-elastic-text text="'+complianceId+'" minLength="10" lineSize="4"></sf-i-elastic-text></td>');
               for(var k = 0; k < cols.length; k++) {
                 if(!this.EXCLUDE_COLS_FROM_REGS.includes(cols[k].toLowerCase())) {
@@ -16650,11 +16650,11 @@ export class SfIEvents extends LitElement {
 
     html += '<button class="tab-button mb-10" id="calendar-tab-month" part="'+(selectedTab == this.TAB_STREAM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Month</button>';
     html += '<button class="tab-button mb-10" id="calendar-tab-custom" part="'+(selectedTab == this.TAB_CUSTOM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Range</button>';
-    html += '<button class="tab-button mb-10" id="calendar-tab-find" part="'+(selectedTab == this.TAB_FIND ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Search</button>';
+    html += '<button class="tab-button mb-10" id="calendar-tab-register" part="'+(selectedTab == this.TAB_REGISTERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Registers</button>';
+    html += '<button class="tab-button tab-button-secondary mb-10 '+(selectedTab == this.TAB_FIND ? '' : 'hide')+'" id="calendar-tab-find" part="'+(selectedTab == this.TAB_FIND ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Search</button>';
     html += '<button class="tab-button tab-button-secondary mb-10 '+(selectedTab == this.TAB_THIS ? '' : 'hide')+'" id="calendar-tab-this" part="'+(selectedTab == this.TAB_THIS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Current</button>';
     html += '<button class="tab-button tab-button-secondary mb-10 '+(selectedTab == this.TAB_YEAR ? '' : 'hide')+'" id="calendar-tab-year" part="'+(selectedTab == this.TAB_YEAR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Overview</button>';
     html += '<button class="tab-button tab-button-secondary mb-10 '+(selectedTab == this.TAB_ADHOC ? '' : 'hide')+'" id="calendar-tab-adhoc" part="'+(selectedTab == this.TAB_ADHOC ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Adhoc</button>';
-    html += '<button class="tab-button tab-button-secondary mb-10 '+(selectedTab == this.TAB_REGISTERS ? '' : 'hide')+'" id="calendar-tab-register" part="'+(selectedTab == this.TAB_REGISTERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Registers</button>';
     html += '<button class="tab-button mb-10" id="calendar-tab-next" part="calendar-tab-button-not-selected"><span class="material-symbols-outlined">arrow_forward_ios</span></button>';
     
 
@@ -20134,7 +20134,7 @@ export class SfIEvents extends LitElement {
 
     //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
     this.nextPage = page;
-    let url = "https://"+this.apiId+"/getnextuserevents1";
+    let url = "https://"+this.apiId+"/getnextuserevents";
     let statusArr: string[] = []
     if(status == this.TAB_ALL){
       statusArr = [this.STATUS_NOT_STARTED, this.STATUS_PENDING_APPROVAL, this.STATUS_REJECTED, this.STATUS_APPROVED]
@@ -20226,7 +20226,7 @@ export class SfIEvents extends LitElement {
       this.nextTabRole = this.TAB_ALL_ROLES;
       this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
-      this.renderRoleTabsNext(0);
+      this.renderRoleTabsNext(0, loadData);
 
     });
     (this._SfRoleTabContainer as HTMLDivElement).querySelector('#consumer-tab-reporter')?.addEventListener('click', async () => {
@@ -20234,7 +20234,7 @@ export class SfIEvents extends LitElement {
       this.nextTabRole = this.TAB_REPORTER;
       this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
-      this.renderRoleTabsNext(0);
+      this.renderRoleTabsNext(0, loadData);
       
     });
 
@@ -20243,7 +20243,7 @@ export class SfIEvents extends LitElement {
       this.nextTabRole = this.TAB_APPROVER;
       this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
-      this.renderRoleTabsNext(0);
+      this.renderRoleTabsNext(0, loadData);
 
     });
 
@@ -20252,7 +20252,7 @@ export class SfIEvents extends LitElement {
       this.nextTabRole = this.TAB_FUNCTION_HEAD;
       this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
-      this.renderRoleTabsNext(0);
+      this.renderRoleTabsNext(0, loadData);
 
     });
 
@@ -20261,7 +20261,7 @@ export class SfIEvents extends LitElement {
       this.nextTabRole = this.TAB_AUDITOR;
       this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
-      this.renderRoleTabsNext(0);
+      this.renderRoleTabsNext(0, loadData);
 
     });
 
@@ -20271,7 +20271,7 @@ export class SfIEvents extends LitElement {
       this.nextTabRole = this.TAB_VIEWER;
       this.nextTabStatus = this.TAB_ALL;
       // this.fetchNext(0, this.nextTabRole);
-      this.renderRoleTabsNext(0);
+      this.renderRoleTabsNext(0, loadData);
 
     });
     if(loadData){
@@ -20281,13 +20281,15 @@ export class SfIEvents extends LitElement {
         (this._SfIEventsC.querySelector('#next-calendar-data').querySelector('#button-load-next') as HTMLButtonElement).style.display = 'none';
         this.renderRoleTabsNext(0)
       })
+      let changeEvent = new CustomEvent('valueChanged',{bubbles:true});
+      this.dispatchEvent(changeEvent);
     }
-    // let roleChangeEvent = new CustomEvent("roleChanged",{
-    //   detail:{
-    //     selectedRole: this.nextTabRole
-    //   }
-    // });
-    // this.dispatchEvent(roleChangeEvent)
+    let roleChangeEvent = new CustomEvent("roleChanged",{
+      detail:{
+        selectedRole: this.nextTabRole
+      }
+    });
+    this.dispatchEvent(roleChangeEvent)
   }
 
   renderStatusTabsNext = (page: number) => {
