@@ -75,6 +75,11 @@ export declare class SfIEvents extends LitElement {
     TAB_RCM_DATE: string;
     TAB_RCM_CONFIRM: string;
     TAB_RCM_JOBS: string;
+    TAB_ALL: string;
+    TAB_PENDING_ON_ME: string;
+    TAB_PENDING_ON_REPORTER: string;
+    TAB_PENDING_ON_APPROVER: string;
+    TAB_DONE: string;
     COLOR_APPROVED: string;
     COLOR_NOT_STARTED: string;
     COLOR_PENDING_APPROVAL: string;
@@ -87,6 +92,10 @@ export declare class SfIEvents extends LitElement {
     COLOR_NOT_COMPLIED: string;
     COLOR_PARTIALLY_COMPLIED: string;
     COLOR_COMPLIED: string;
+    STATUS_NOT_STARTED: string;
+    STATUS_PENDING_APPROVAL: string;
+    STATUS_REJECTED: string;
+    STATUS_APPROVED: string;
     CERTIFICATE_HTML: string;
     COMPLIANCES_HTML: string;
     MAPPING_HTML: string;
@@ -192,6 +201,7 @@ export declare class SfIEvents extends LitElement {
     csvComplianceStats: string;
     htmlDataCompliances: string;
     htmlDataStats: string;
+    htmlDataSummary: string;
     period: string;
     mode: string;
     flowRcmNotification: number;
@@ -246,6 +256,7 @@ export declare class SfIEvents extends LitElement {
     blocksize: string;
     nextPage: number;
     nextTabRole: string;
+    nextTabStatus: string;
     static styles: import("lit").CSSResult;
     _SfIEventsC: any;
     _SfRowError: any;
@@ -274,6 +285,7 @@ export declare class SfIEvents extends LitElement {
     _SfStreamContainer: any;
     _SfUpcomingContainer: any;
     _SfDetailContainer: any;
+    _SfReportSummaryContainer: any;
     _SfThisContainer: any;
     _SfPastContainer: any;
     _SfCustomContainer: any;
@@ -285,6 +297,7 @@ export declare class SfIEvents extends LitElement {
     _SfTabContainer: any;
     _SfMappingTabContainer: any;
     _SfRoleTabContainer: any;
+    _SfStatusTabContainer: any;
     _SfOnboardingTabContainer: any;
     _SfOnboardingStatusContainer: any;
     _SfRcmContainer: any;
@@ -412,7 +425,7 @@ export declare class SfIEvents extends LitElement {
     getApproverStringFromEvent: (event: any) => string;
     getApproverDetailStringFromEvent: (event: any) => string;
     renderLatestCompliance: (mmddyyyy: string, event: any) => any;
-    getCompletenessStatus: (event: any) => "approved" | "not-started" | "pending-approval" | "rejected";
+    getCompletenessStatus: (event: any) => "not-started" | "pending-approval" | "rejected" | "approved";
     getTimelinessStatus: (mmdd: string, event: any, completeness: string) => "late-executed" | "late-reported" | "late-approved" | "past-due-date" | "in-time";
     getComplianceStatus: (completeness: string, timeliness: string) => "scheduled" | "not-complied" | "partially-complied" | "complied";
     numcalled: number;
@@ -592,9 +605,11 @@ export declare class SfIEvents extends LitElement {
     csvmaker: (data: any) => string;
     renderChartSettingsFilters: (container: HTMLDivElement, ctx: any) => void;
     renderChartSettingsSettings: (container: HTMLDivElement) => void;
-    renderChartSettings: (container: HTMLDivElement, selectedTab: number | undefined, ctx: any) => void;
+    renderChartSettings: (container: HTMLDivElement, selectedTab: number | undefined, selectedSummary: number | undefined, ctx: any) => void;
+    renderChartSummary: () => void;
     csvToHtmlTable: (strCsv: string) => string;
     getFilteredString: () => string;
+    getFilteredStringSummary: () => string;
     formatLabel: (str: string, maxwidth: number) => any;
     renderChart4: (ctx: any, type: any, data: any, title: string) => void;
     renderChart3: (ctx: any, type: any, data: any, title: string) => void;
@@ -758,9 +773,10 @@ export declare class SfIEvents extends LitElement {
     initDecryptListeners: () => void;
     evalDecrypt: () => void;
     submitDecrypt: () => Promise<void>;
-    fetchNext: (page: number, role: string) => Promise<void>;
+    fetchNext: (page: number, role: string, status: string) => Promise<void>;
     clearButtonSelectionNext: () => void;
-    renderRoleTabsNext: (page: number) => void;
+    renderRoleTabsNext: (page: number, loadData?: boolean) => void;
+    renderStatusTabsNext: (page: number) => void;
     renderNextEvents: (eventsData: any, page: number, role: string) => void;
     fetchReports: () => Promise<void>;
     renderReports: (reportsData: any) => void;

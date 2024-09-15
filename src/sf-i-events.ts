@@ -11065,9 +11065,9 @@ export class SfIEvents extends LitElement {
         html += '<div class="'+(!showSearch ? 'truncate' : '')+'">';
         if(apiIdDropdown.length > 0) {
           if(anotherProjection != null) {
-            html += '<sf-i-form id="tags-'+i+'" class="tags-input tags-'+i+'" name="Tags" label="Select '+colName+'" apiId="'+apiIdDropdown+'" mode="multiselect-dropdown" searchPhrase="'+this.projectId+((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "")+'" selectProjection="name" selectAnotherProjection="'+anotherProjection+'" mandatory></sf-i-form>';
+            html += '<sf-i-form id="tags-'+i+'" class="tags-input tags-'+i+'" name="Tags" label="Select '+colName+'" apiId="'+apiIdDropdown+'" mode="multiselect-dropdown" searchPhrase="'+this.projectName+((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "")+'" selectProjection="name" selectAnotherProjection="'+anotherProjection+'" mandatory></sf-i-form>';
           } else {
-            html += '<sf-i-form id="tags-'+i+'" class="tags-input tags-'+i+'" name="Tags" label="Select '+colName+'" apiId="'+apiIdDropdown+'" mode="multiselect-dropdown" searchPhrase="'+this.projectId+((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "")+'" selectProjection="name" mandatory></sf-i-form>';
+            html += '<sf-i-form id="tags-'+i+'" class="tags-input tags-'+i+'" name="Tags" label="Select '+colName+'" apiId="'+apiIdDropdown+'" mode="multiselect-dropdown" searchPhrase="'+this.projectName+((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "")+'" selectProjection="name" mandatory></sf-i-form>';
           }
           
         } else {

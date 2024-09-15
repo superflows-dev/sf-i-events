@@ -95,6 +95,11 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.TAB_RCM_DATE = "date";
         this.TAB_RCM_CONFIRM = "confirm";
         this.TAB_RCM_JOBS = "jobs";
+        this.TAB_ALL = "all";
+        this.TAB_PENDING_ON_ME = "pending on me";
+        this.TAB_PENDING_ON_REPORTER = "pending on reporter";
+        this.TAB_PENDING_ON_APPROVER = "pending on approver";
+        this.TAB_DONE = "done";
         this.COLOR_APPROVED = "#50cf01";
         this.COLOR_NOT_STARTED = "#A4A9AD";
         this.COLOR_PENDING_APPROVAL = "#ffe505";
@@ -107,6 +112,10 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.COLOR_NOT_COMPLIED = "#C80036";
         this.COLOR_PARTIALLY_COMPLIED = "#F79256";
         this.COLOR_COMPLIED = "#50cf01";
+        this.STATUS_NOT_STARTED = "not-started";
+        this.STATUS_PENDING_APPROVAL = "pending-approval";
+        this.STATUS_REJECTED = "rejected";
+        this.STATUS_APPROVED = "approved";
         this.CERTIFICATE_HTML = `
   
   <html>
@@ -1134,6 +1143,7 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.csvComplianceStats = "";
         this.htmlDataCompliances = "";
         this.htmlDataStats = "";
+        this.htmlDataSummary = "";
         this.period = "";
         this.flowRcmNotification = 0;
         this.flowGraph = "";
@@ -1187,6 +1197,7 @@ let SfIEvents = class SfIEvents extends LitElement {
         this.blocksize = "5";
         this.nextPage = 0;
         this.nextTabRole = "";
+        this.nextTabStatus = "";
         this.isSelectedLegend = (value) => {
             return this.chartSelectedLegend.includes(value);
         };
@@ -2459,8 +2470,8 @@ let SfIEvents = class SfIEvents extends LitElement {
             var html = '';
             this.selectedItems = [];
             this.selectedStatus = "";
-            var csvCols = "", htmlCols = "";
-            var csvValues = "", htmlValues = "";
+            var csvCols = "", htmlCols = "", htmlSummaryCols = "";
+            var csvValues = "", htmlValues = "", htmlSummaryValues = "";
             var slice = 2;
             this.eventsInWindow = [];
             var lastDay = iLast;
@@ -2473,6 +2484,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             // csvCols += 'Period,Status,Id,ObligationTitle,Obligation,Duedate' 
             csvCols += 'Id,Country,State,Jurisdiction,Category,Subcategory,Statute,Reference,Applicability,ObligationType,ObligationTitle,Obligation,Firstlineofdefence,Secondlineofdefence,Thirdlineofdefence,Internalcontrols,Penalty,Form,AdditionalUrl,Definition,Authority,RiskSeverity,RiskAreas,Frequency,SubFrequency,DueDate,Status,ReportParameter';
             htmlCols += '<tr><th class="td-thin">Id</th><th class="td-thin">Country</th><th class="td-thin">State</th><th class="td-thin">Jurisdiction</th><th class="td-thin">Category</th><th class="td-thin">Subcategory</th><th class="td-wide">Statute</th><th class="td-thin">Reference</th><th class="td-thin">Applicability</th><th class="td-thin">ObligationType</th><th class="td-wide">ObligationTitle</th><th class="td-wide">Obligation</th><th class="td-thin">Firstlineofdefence</th><th class="td-thin">Secondlineofdefence</th><th class="td-thin">Thirdlineofdefence</th><th>InternalControls</th><th class="td-wide">Penalty</th><th class="td-thin">Form</th><th class="td-thin">Additional URL</th><th class="td-thin">Definition</th><th class="td-thin">Authority</th><th class="td-thin">RiskSeverity</th><th class="td-wide">RiskAreas</th><th class="td-thin">Frequency</th><th class="td-thin">SubFrequency</th><th class="td-thin">DueDate</th><th class="td-wide">Status</th><th class="td-wide">ReportParameter</th></tr>';
+            htmlSummaryCols += '<tr><th class="td-thin">Id</th><th class="td-wide">ObligationTitle</th><th class="td-wide">Obligation</th><th class="td-wide">Status</th><th class="td-wide">Documents</th></tr>';
             for (var i = iInit; i <= iLast; i++) {
                 let mmdd = "";
                 if (firstDate == null) {
@@ -2594,6 +2606,16 @@ let SfIEvents = class SfIEvents extends LitElement {
                             + '<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' td-wide text-center status-format">' + this.renderStatusString(partStatus, lateStatus, complianceStatus) + '</td>'
                             + '<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' td-wide status-format">' + this.getGraphParam(this.events[mmdd][j]) + '</td>'
                             + '</tr>');
+                        htmlSummaryValues += ('<tr><td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' td-thin"><sf-i-elastic-text text="' + this.events[mmdd][j]["id"] + '" minLength="10"></sf-i-elastic-text></td>'
+                            + '<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' td-wide"><sf-i-elastic-text text="' + this.events[mmdd][j]["obligationtitle"] + '" minLength="100" lineSize="4"></sf-i-elastic-text></td>'
+                            + '<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' td-wide"><sf-i-elastic-text text="' + this.events[mmdd][j]["obligation"] + '" minLength="100" lineSize="4"></sf-i-elastic-text></td>'
+                            + '<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' td-wide"><sf-i-elastic-text text="' + this.renderStatusString(partStatus, lateStatus, complianceStatus) + '" minLength="100" lineSize="4"></sf-i-elastic-text></td>'
+                            + '<td class="' + (total % 2 === 0 ? 'td-odd' : 'td-even') + ' td-wide">');
+                        for (let document of this.events[mmdd][j].documents) {
+                            htmlSummaryValues += `<sf-i-uploader class="summary-report-doc" max="10" apiid="1peg5170d3" allowedextensions="[&quot;jpg&quot;,&quot;png&quot;,&quot;pdf&quot;,&quot;xls&quot;,&quot;xlsx&quot;,&quot;doc&quot;,&quot;docx&quot;]" prepopulatedInputArr="${JSON.stringify([{ "key": document.key, "ext": document.ext }]).replace(/"/g, '&quot;')}" projectid="${this.projectId} "extract="no" mode="view" maximize="yes"></sf-i-uploader><br />`;
+                        }
+                        // htmlSummaryValues += this.renderCalendarAnnotations(this.events[mmdd][j]);
+                        htmlSummaryValues += '</td></tr>';
                         html += this.renderCalendarRowDivItemDivStart(mmdd, this.events[mmdd][j], j, partStatus);
                         html += this.renderCalendarRowDivItemDivTableHead(this.events[mmdd][j], partStatus);
                         html += this.renderCalendarRowDivItemDivTableBody(this.events[mmdd][j], partStatus, lateStatus, complianceStatus, mmdd, i, j);
@@ -2615,6 +2637,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             this.period = period;
             this.csvDataCompliances = csvCols + "\n" + csvValues;
             this.htmlDataCompliances = '<table>' + htmlCols + htmlValues + '</table>';
+            this.htmlDataSummary = '<table class="w-100">' + htmlSummaryCols + htmlSummaryValues + '</table>';
             //console.log('renderevents htmlcols', this.htmlDataCompliances);
             //console.log('progress', this.period, total, notStarted, approved)
             html = html.replace("DASHBOARD_TOTAL", total + "");
@@ -3227,7 +3250,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         const cols = JSON.parse(compliance.cols);
                         this.csvDataRegisters += ('"' + complianceId + '",');
                         html += '<tr>';
-                        html += ('<td class="td-body" part="td-body-register"><button part="button-icon" id="button-icon-country-' + index + '-' + i + '-' + j + '" class="button-icon-country"><span class="material-symbols-outlined">open_in_new</span></button></td>');
+                        html += ('<td class="td-body left-sticky" part="td-body-register"><button part="button-icon" id="button-icon-country-' + index + '-' + i + '-' + j + '" class="button-icon-country"><span class="material-symbols-outlined">open_in_new</span></button></td>');
                         html += ('<td class="td-body" part="td-body-register"><span part="td-head" style="padding-left: 0px !important">ID</span><br /><sf-i-elastic-text text="' + complianceId + '" minLength="10" lineSize="4"></sf-i-elastic-text></td>');
                         for (var k = 0; k < cols.length; k++) {
                             if (!this.EXCLUDE_COLS_FROM_REGS.includes(cols[k].toLowerCase())) {
@@ -5674,7 +5697,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                             ]
                         }]
                 };
-                this.renderChartSettings(divContainer, -1, ctx);
+                this.renderChartSettings(divContainer, -1, -1, ctx);
                 this.renderChart(ctx, 'doughnut', data, "Completeness");
             }
             const data = {
@@ -5705,7 +5728,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             for (var i = 0; i < itemsCompliance.length; i++) {
                 itemsCompliance[i].style.display = 'none';
             }
-            this.renderChartSettings(divContainer, -1, ctx);
+            this.renderChartSettings(divContainer, -1, -1, ctx);
             this.renderChart(ctx, 'doughnut', data, "Completeness");
         };
         this.renderComplianceGraph = (divContainer) => {
@@ -5755,7 +5778,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             for (var i = 0; i < itemsCompliance.length; i++) {
                 itemsCompliance[i].style.display = 'flex';
             }
-            this.renderChartSettings(divContainer, -1, ctx);
+            this.renderChartSettings(divContainer, -1, -1, ctx);
             this.renderChart(ctx, 'doughnut', data, "Compliance");
         };
         this.renderTimelinessGraph = (divContainer) => {
@@ -5805,7 +5828,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             for (var i = 0; i < itemsCompliance.length; i++) {
                 itemsCompliance[i].style.display = 'none';
             }
-            this.renderChartSettings(divContainer, -1, ctx);
+            this.renderChartSettings(divContainer, -1, -1, ctx);
             this.renderChart(ctx, 'doughnut', data, "Timeliness");
         };
         this.renderRiskSeverityGraph = (divContainer) => {
@@ -6000,7 +6023,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             const data = this.populateGraphDataPie(pieData);
             this.csvGraphStats = this.renderPieCsv(pieData, this.csvGraphStats, param);
             const ctx = divContainer.querySelector('#myChart');
-            this.renderChartSettings(divContainer, -1, ctx);
+            this.renderChartSettings(divContainer, -1, -1, ctx);
             this.renderChart(ctx, 'pie', data, param + " Distribution");
             // 2
             const dataBar = this.populateGraphDataBarPart(partData);
@@ -6703,7 +6726,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                         });
                         this._SfDetailContainer.querySelector('#button-detail-close').dispatchEvent(clickEvent);
                         if (this.mode == "next") {
-                            this.fetchNext(this.nextPage, this.nextTabRole);
+                            this.fetchNext(this.nextPage, this.nextTabRole, this.nextTabStatus);
                         }
                         else {
                             if (this.getCurrentTab() == this.TAB_CUSTOM) {
@@ -6793,7 +6816,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                                                 }
                                             }
                                             if (this.mode == "next") {
-                                                this.fetchNext(this.nextPage, this.nextTabRole);
+                                                this.fetchNext(this.nextPage, this.nextTabRole, this.nextTabStatus);
                                             }
                                             else {
                                                 if (this.getCurrentTab() == this.TAB_CUSTOM) {
@@ -7436,10 +7459,10 @@ let SfIEvents = class SfIEvents extends LitElement {
                     html += '<div class="' + (!showSearch ? 'truncate' : '') + '">';
                     if (apiIdDropdown.length > 0) {
                         if (anotherProjection != null) {
-                            html += '<sf-i-form id="tags-' + i + '" class="tags-input tags-' + i + '" name="Tags" label="Select ' + colName + '" apiId="' + apiIdDropdown + '" mode="multiselect-dropdown" searchPhrase="' + this.projectId + ((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "") + '" selectProjection="name" selectAnotherProjection="' + anotherProjection + '" mandatory></sf-i-form>';
+                            html += '<sf-i-form id="tags-' + i + '" class="tags-input tags-' + i + '" name="Tags" label="Select ' + colName + '" apiId="' + apiIdDropdown + '" mode="multiselect-dropdown" searchPhrase="' + this.projectName + ((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "") + '" selectProjection="name" selectAnotherProjection="' + anotherProjection + '" mandatory></sf-i-form>';
                         }
                         else {
-                            html += '<sf-i-form id="tags-' + i + '" class="tags-input tags-' + i + '" name="Tags" label="Select ' + colName + '" apiId="' + apiIdDropdown + '" mode="multiselect-dropdown" searchPhrase="' + this.projectId + ((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "") + '" selectProjection="name" mandatory></sf-i-form>';
+                            html += '<sf-i-form id="tags-' + i + '" class="tags-input tags-' + i + '" name="Tags" label="Select ' + colName + '" apiId="' + apiIdDropdown + '" mode="multiselect-dropdown" searchPhrase="' + this.projectName + ((dropdownSearchPhrase != null && dropdownSearchPhrase != "") ? dropdownSearchPhrase : "") + '" selectProjection="name" mandatory></sf-i-form>';
                         }
                     }
                     else {
@@ -10179,8 +10202,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                 }
             });
         };
-        this.renderChartSettings = (container, selectedTab = -1, ctx) => {
-            var _a;
+        this.renderChartSettings = (container, selectedTab = -1, selectedSummary = -1, ctx) => {
+            var _a, _b;
             var html = '';
             html += '<div class="d-flex justify-end align-start">';
             if (selectedTab === 0) {
@@ -10195,10 +10218,20 @@ let SfIEvents = class SfIEvents extends LitElement {
             else {
                 html += '<button class="tab-button" id="chart-control-settings" part="calendar-tab-button-not-selected" class="mr-10"><span class="material-icons">cloud_download</span></button>';
             }
+            if (selectedSummary === 1) {
+                html += '<button class="tab-button" id="chart-control-summary" part="calendar-tab-button-selected" class="mr-10"><span class="material-icons">summarize</span></button>';
+            }
+            else {
+                html += '<button class="tab-button" id="chart-control-summary" part="calendar-tab-button-not-selected" class="mr-10"><span class="material-icons">summarize</span></button>';
+            }
             html += '</div>';
             container.querySelector('#chart-settings-controls').innerHTML = html;
             (_a = container.querySelector('#chart-settings-controls').querySelector('#chart-control-settings')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
-                this.renderChartSettings(container, 1, ctx);
+                this.renderChartSettings(container, 1, -1, ctx);
+            });
+            (_b = container.querySelector('#chart-settings-controls').querySelector('#chart-control-summary')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
+                console.log('summary clicked');
+                this.renderChartSummary();
             });
             // (container.querySelector('#chart-settings-controls') as HTMLDivElement).querySelector('#chart-control-filters')?.addEventListener('click', () => {
             //   this.renderChartSettings(container, 0, ctx);
@@ -10216,7 +10249,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             container.querySelector('#chart-settings').addEventListener('canceled', () => {
                 //console.log('canceled');
                 if (this.getCurrentTab() == this.TAB_STREAM) {
-                    this.renderChartSettings(container, -1, ctx);
+                    this.renderChartSettings(container, -1, -1, ctx);
                     this.renderStream(this.streamIndex);
                 }
                 // if(this.getCurrentTab() == this.TAB_UPCOMING) {
@@ -10224,7 +10257,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 //   this.renderUpcoming(this.streamIndex);
                 // }
                 if (this.getCurrentTab() == this.TAB_THIS) {
-                    this.renderChartSettings(container, -1, ctx);
+                    this.renderChartSettings(container, -1, -1, ctx);
                     this.renderThis(this.streamIndex);
                 }
                 // if(this.getCurrentTab() == this.TAB_PAST) {
@@ -10257,6 +10290,177 @@ let SfIEvents = class SfIEvents extends LitElement {
             //   (container.querySelector('#chart-settings') as HTMLDivElement).innerHTML = '';
             //   this.renderChartSettingsFilters((container.querySelector('#chart-settings') as HTMLDivElement));
             // })
+        };
+        this.renderChartSummary = () => {
+            var _a;
+            var html = `
+      <style>
+        body {
+          font-family: DM Sans;
+          margin: 2px;
+          padding: 20px;
+        }
+        .status-format {
+          text-transform: uppercase;
+        }
+        .text-center {
+          text-align: center;
+        }
+        .d-flex {
+          display: flex;
+        }
+        .justify-center {
+          justify-content: center;
+        }
+        .justify-between {
+          justify-content: space-between;
+        }
+        .align-center {
+          align-items: center;
+        }
+        .mt-10 {
+          margin-top: 10px;
+        }
+        .w-25 {
+          width: 25%;
+        }
+        .w-16 {
+          width: 16%;
+        }
+        .w-14 {
+          width: 14%;
+        }
+        .w-12 {
+          width: 12%;
+        }
+        .w-100 {
+          width: 100%;
+        }
+        .w-200px {
+          width: 200px;
+        }
+        .text-center {
+          text-align: center;
+        }
+        table {
+          box-shadow: 1px 1px 10px 0 rgba(0, 0, 0, 0.25), -1px -1px 10px 0 rgba(255, 255, 255, 0.6);
+          border-top: solid 1px rgba(255, 255, 255, 0.8);
+          border-left: solid 1px rgba(255, 255, 255, 0.8);
+          border-bottom: solid 1px rgba(255, 255, 255, 0.8);
+          border-right: solid 1px rgba(255, 255, 255, 0.8);
+          overflow:auto;
+        }
+        th {
+          background-color: #6a6a6a;
+          color: white;
+          padding: 5px;
+        }
+        .td-thin {
+          min-width: 150px;
+        }
+        .td-wide {
+          min-width: 300px;
+        }
+        td {
+          padding: 5px;
+          font-size: 70%;
+          vertical-align: top;
+          min-width: 200px;
+        }
+        td span {
+          font-size: 130% !important;
+        }
+        .td-odd {
+          background-color: #efefef;
+          
+        }
+        .td-even {
+          background-color: #dedede;
+        }
+        .color-pending {
+          color: #ffe505;
+        }
+        .color-pending-approval {
+          color: #ffe505;
+        }
+        .color-not-started {
+          color: #888888;
+        }
+        .color-not-complied {
+          color: #C80036;
+        }
+        .color-partially-complied {
+          color: #F79256;
+        }
+        .color-complied {
+          color: #50cf01;
+        }
+        .color-scheduled {
+          color: #888888;
+        }
+        .color-done {
+          color: #50cf01;
+        }
+        .color-rejected {
+          color: #C80036;
+        }
+        .color-approved {
+          color: #50cf01;
+        }
+        .color-past-due-date {
+          color: #ffe505;
+        }
+        .color-late-executed {
+          color: #840B0F;
+        }
+        .color-late-approved {
+          color: #EE2F36;
+        }
+        .color-late-reported {
+          color: #Ef9C66;
+        }
+        .h-100 {
+          height: 100vh;
+        }
+        .abs {
+          position: absolute;
+        }
+        .watermark {
+          background-image: url(https://flagggrc-images.s3.amazonaws.com/logo.png);
+          background-position: center;
+          background-repeat: no-repeat;
+          opacity: 5%;
+          width: 100%;
+          height: 100vh;
+          position: fixed;
+        }
+        .scroll-x {
+          display: block;
+          overflow-x: auto;
+        }
+      </style>
+      <div class="d-flex justify-between m-20">
+        <button part="button-icon" class="material-icons invisible">close</button>
+        <h3 part="results-title" class="m-0">Reporting Summary</h3>
+        <button id="button-detail-close" part="button-icon" class="material-icons">close</button>
+      </div>
+    
+    `;
+            html += this.htmlDataStats;
+            html += '<div class="m-20"></div>';
+            html += this.getFilteredStringSummary();
+            // html += '<div class="m-20"></div>';
+            // html += this.htmlDataSummary;
+            this._SfReportSummaryContainer.innerHTML = html;
+            this._SfReportSummaryContainer.style.display = 'block';
+            (_a = this._SfReportSummaryContainer.querySelector('#button-detail-close')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
+                this._SfReportSummaryContainer.innerHTML = '';
+                this._SfReportSummaryContainer.style.display = 'none';
+            });
+            let summaryDocuments = this._SfReportSummaryContainer.querySelectorAll('.summary-report-doc');
+            for (let summaryDocument of summaryDocuments) {
+                summaryDocument.loadMode();
+            }
         };
         this.csvToHtmlTable = (strCsv) => {
             var html = '';
@@ -10347,6 +10551,75 @@ let SfIEvents = class SfIEvents extends LitElement {
             }
             //console.log('newArrList', newArrList);
             filteredHTML += '<br /><br /><div class="table-wrapper"><table>';
+            for (var i = 0; i < newArrList.length; i++) {
+                //console.log('htmlrender', (newArrList[i] as HTMLTableRowElement).outerHTML);
+                filteredHTML += newArrList[i].outerHTML;
+            }
+            filteredHTML += '</table></div>';
+            return filteredHTML;
+        };
+        this.getFilteredStringSummary = () => {
+            console.log('selectedfilter', this.selectedFilter);
+            var tempDiv = document.createElement('div');
+            tempDiv.id = "div-filter-content";
+            tempDiv.innerHTML = this.htmlDataSummary;
+            const newArrList = [];
+            //console.log('tempDiv', this.htmlDataCompliances);
+            const rows = tempDiv.querySelectorAll('tr');
+            for (var i = 0; i < rows.length; i++) {
+                let cols = rows[i].querySelectorAll('td');
+                if (cols.length === 0) {
+                    cols = rows[i].querySelectorAll('th');
+                }
+                if (i === 0) {
+                    newArrList.push(rows[i]);
+                }
+                else {
+                    if (cols.length > 0) {
+                        if (this.selectedFilter == null) {
+                            newArrList.push(rows[i]);
+                        }
+                        else {
+                            if (!this.selectedFilter.selected) {
+                                var found = false;
+                                for (var j = 0; j < this.selectedFilter.length; j++) {
+                                    if (cols[cols.length - 2].innerHTML.toLowerCase().replace(/&amp;/g, '&').indexOf(this.selectedFilter[j].value.toLowerCase().replace(/&amp;/g, '&')) >= 0) {
+                                        found = true;
+                                    }
+                                }
+                                if (!found) {
+                                    newArrList.push(rows[i]);
+                                }
+                            }
+                            else {
+                                console.log('selected filter', this.selectedFilter, cols[cols.length - 1].innerHTML.toLowerCase(), '*-*', this.selectedFilter.value.toLowerCase());
+                                if (cols[cols.length - 2].innerHTML.toLowerCase().replace(/&amp;/g, '&').indexOf(this.selectedFilter.value.toLowerCase().replace(/&amp;/g, '&')) >= 0) {
+                                    newArrList.push(rows[i]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            console.log('newarrlist', newArrList);
+            let filteredHTML = '';
+            if (this.selectedFilter != null) {
+                if (this.selectedFilter.selected) {
+                    filteredHTML += '<small>Filter (included parameters): ' + this.selectedFilter.value.charAt(0).toUpperCase() + this.selectedFilter.value.slice(1) + '</small>';
+                }
+                else {
+                    let params = "";
+                    for (var i = 0; i < this.selectedFilter.length; i++) {
+                        params += this.selectedFilter[i].value.charAt(0).toUpperCase() + this.selectedFilter[i].value.slice(1);
+                        if (i < (this.selectedFilter.length - 1)) {
+                            params += ',';
+                        }
+                    }
+                    filteredHTML += '<small>Filter (excluded parameters): ' + params + '</small>';
+                }
+            }
+            //console.log('newArrList', newArrList);
+            filteredHTML += '<br /><br /><div class="table-wrapper"><table class="w-100">';
             for (var i = 0; i < newArrList.length; i++) {
                 //console.log('htmlrender', (newArrList[i] as HTMLTableRowElement).outerHTML);
                 filteredHTML += newArrList[i].outerHTML;
@@ -11529,11 +11802,11 @@ let SfIEvents = class SfIEvents extends LitElement {
             var html = '';
             html += '<button class="tab-button mb-10" id="calendar-tab-month" part="' + (selectedTab == this.TAB_STREAM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Month</button>';
             html += '<button class="tab-button mb-10" id="calendar-tab-custom" part="' + (selectedTab == this.TAB_CUSTOM ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Range</button>';
-            html += '<button class="tab-button mb-10" id="calendar-tab-find" part="' + (selectedTab == this.TAB_FIND ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Search</button>';
+            html += '<button class="tab-button mb-10" id="calendar-tab-register" part="' + (selectedTab == this.TAB_REGISTERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Registers</button>';
+            html += '<button class="tab-button tab-button-secondary mb-10 ' + (selectedTab == this.TAB_FIND ? '' : 'hide') + '" id="calendar-tab-find" part="' + (selectedTab == this.TAB_FIND ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Search</button>';
             html += '<button class="tab-button tab-button-secondary mb-10 ' + (selectedTab == this.TAB_THIS ? '' : 'hide') + '" id="calendar-tab-this" part="' + (selectedTab == this.TAB_THIS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Current</button>';
             html += '<button class="tab-button tab-button-secondary mb-10 ' + (selectedTab == this.TAB_YEAR ? '' : 'hide') + '" id="calendar-tab-year" part="' + (selectedTab == this.TAB_YEAR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Overview</button>';
             html += '<button class="tab-button tab-button-secondary mb-10 ' + (selectedTab == this.TAB_ADHOC ? '' : 'hide') + '" id="calendar-tab-adhoc" part="' + (selectedTab == this.TAB_ADHOC ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Adhoc</button>';
-            html += '<button class="tab-button tab-button-secondary mb-10 ' + (selectedTab == this.TAB_REGISTERS ? '' : 'hide') + '" id="calendar-tab-register" part="' + (selectedTab == this.TAB_REGISTERS ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Registers</button>';
             html += '<button class="tab-button mb-10" id="calendar-tab-next" part="calendar-tab-button-not-selected"><span class="material-symbols-outlined">arrow_forward_ios</span></button>';
             // html += '<button class="tab-button mb-10" id="calendar-tab-upcoming" part="'+(selectedTab == this.TAB_UPCOMING ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Upcoming</button>';
             // html += '<button class="tab-button mb-10" id="calendar-tab-past" part="'+(selectedTab == this.TAB_PAST ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">Past</button>';
@@ -14126,13 +14399,35 @@ let SfIEvents = class SfIEvents extends LitElement {
                 }, 5000);
             }
         };
-        this.fetchNext = async (page, role) => {
+        this.fetchNext = async (page, role, status) => {
             //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
             this.nextPage = page;
             let url = "https://" + this.apiId + "/getnextuserevents";
+            let statusArr = [];
+            if (status == this.TAB_ALL) {
+                statusArr = [this.STATUS_NOT_STARTED, this.STATUS_PENDING_APPROVAL, this.STATUS_REJECTED, this.STATUS_APPROVED];
+            }
+            else if (status == this.TAB_PENDING_ON_ME) {
+                if (role == this.TAB_REPORTER) {
+                    statusArr = [this.STATUS_NOT_STARTED, this.STATUS_REJECTED];
+                }
+                else if (role == this.TAB_APPROVER) {
+                    statusArr = [this.STATUS_PENDING_APPROVAL];
+                }
+            }
+            else if (status == this.TAB_PENDING_ON_REPORTER) {
+                statusArr = [this.STATUS_NOT_STARTED, this.STATUS_REJECTED];
+            }
+            else if (status == this.TAB_PENDING_ON_APPROVER) {
+                statusArr = [this.STATUS_PENDING_APPROVAL];
+            }
+            else if (status == this.TAB_DONE) {
+                statusArr = [this.STATUS_APPROVED];
+            }
             const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-            console.log('this.myroles', this.myroles);
-            const xhr = (await this.prepareXhr({ "projectid": this.projectId, "userprofileid": this.userProfileId, "roles": [role], "year": new Date().getFullYear() + "", "page": this.nextPage, "blocksize": parseInt(this.blocksize) }, url, this._SfLoader, authorization));
+            console.log('params', JSON.stringify({ "projectid": this.projectId, "userprofileid": this.userProfileId, "roles": [role], "year": new Date().getFullYear() + "", "page": this.nextPage, "blocksize": parseInt(this.blocksize), "status": statusArr }));
+            console.log('authorization', authorization);
+            const xhr = (await this.prepareXhr({ "projectid": this.projectId, "userprofileid": this.userProfileId, "roles": [role], "year": new Date().getFullYear() + "", "page": this.nextPage, "blocksize": parseInt(this.blocksize), "status": statusArr }, url, this._SfLoader, authorization));
             this._SfLoader.innerHTML = '';
             if (xhr.status == 200) {
                 const jsonRespose = JSON.parse(xhr.responseText);
@@ -14154,7 +14449,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                 buttonSelect[i].checked = false;
             }
         };
-        this.renderRoleTabsNext = (page) => {
+        this.renderRoleTabsNext = (page, loadData = true) => {
             //console.log('render role tabs');
             var _a, _b, _c, _f, _g, _h;
             this._SfRoleTabContainer.innerHTML = '';
@@ -14170,260 +14465,335 @@ let SfIEvents = class SfIEvents extends LitElement {
             // if(JSON.parse(this.myroles).length > 1 && eventsData[this.TAB_ALL_ROLES] != null){
             //   html += '<button class="tab-button" id="consumer-tab-all-roles" part="'+(this.nextTabRole == this.TAB_ALL_ROLES ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected')+'">All Roles</button>';
             // }
-            // if(JSON.parse(this.myroles).indexOf(this.TAB_REPORTER) >= 0 && eventsData[this.TAB_REPORTER] != null){
-            if (JSON.parse(this.myroles).indexOf(this.TAB_REPORTER) >= 0) {
-                html += '<button class="tab-button" id="consumer-tab-reporter" part="' + (this.nextTabRole == this.TAB_REPORTER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Reporter</button>';
+            if (JSON.parse(this.myroles).indexOf(this.TAB_VIEWER) >= 0) {
+                html += '<button class="tab-button" id="consumer-tab-viewer" part="' + (this.nextTabRole == this.TAB_VIEWER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Viewer</button>';
             }
-            // if(JSON.parse(this.myroles).indexOf(this.TAB_APPROVER) >= 0 && eventsData[this.TAB_APPROVER] != null){
             if (JSON.parse(this.myroles).indexOf(this.TAB_APPROVER) >= 0) {
                 html += '<button class="tab-button" id="consumer-tab-approver" part="' + (this.nextTabRole == this.TAB_APPROVER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Approver</button>';
             }
-            // if(JSON.parse(this.myroles).indexOf(this.TAB_FUNCTION_HEAD) >= 0 && eventsData[this.TAB_FUNCTION_HEAD] != null){
+            if (JSON.parse(this.myroles).indexOf(this.TAB_REPORTER) >= 0) {
+                html += '<button class="tab-button" id="consumer-tab-reporter" part="' + (this.nextTabRole == this.TAB_REPORTER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Reporter</button>';
+            }
             if (JSON.parse(this.myroles).indexOf(this.TAB_FUNCTION_HEAD) >= 0) {
                 html += '<button class="tab-button" id="consumer-tab-functionhead" part="' + (this.nextTabRole == this.TAB_FUNCTION_HEAD ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Function Head</button>';
             }
-            // if(JSON.parse(this.myroles).indexOf(this.TAB_AUDITOR) >= 0 && eventsData[this.TAB_AUDITOR] != null){
             if (JSON.parse(this.myroles).indexOf(this.TAB_AUDITOR) >= 0) {
                 html += '<button class="tab-button" id="consumer-tab-auditor" part="' + (this.nextTabRole == this.TAB_AUDITOR ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Auditor</button>';
-            }
-            // if(JSON.parse(this.myroles).indexOf(this.TAB_VIEWER) >= 0 && eventsData[this.TAB_VIEWER] != null){
-            if (JSON.parse(this.myroles).indexOf(this.TAB_VIEWER) >= 0) {
-                html += '<button class="tab-button" id="consumer-tab-viewer" part="' + (this.nextTabRole == this.TAB_VIEWER ? 'calendar-tab-button-selected' : 'calendar-tab-button-not-selected') + '">Viewer</button>';
             }
             this._SfRoleTabContainer.innerHTML = html;
             (_a = this._SfRoleTabContainer.querySelector('#consumer-tab-all-roles')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', async () => {
                 this.nextTabRole = this.TAB_ALL_ROLES;
+                this.nextTabStatus = this.TAB_ALL;
                 // this.fetchNext(0, this.nextTabRole);
-                this.renderRoleTabsNext(0);
+                this.renderRoleTabsNext(0, loadData);
             });
             (_b = this._SfRoleTabContainer.querySelector('#consumer-tab-reporter')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', async () => {
                 this.nextTabRole = this.TAB_REPORTER;
+                this.nextTabStatus = this.TAB_ALL;
                 // this.fetchNext(0, this.nextTabRole);
-                this.renderRoleTabsNext(0);
+                this.renderRoleTabsNext(0, loadData);
             });
             (_c = this._SfRoleTabContainer.querySelector('#consumer-tab-approver')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', async () => {
                 this.nextTabRole = this.TAB_APPROVER;
+                this.nextTabStatus = this.TAB_ALL;
                 // this.fetchNext(0, this.nextTabRole);
-                this.renderRoleTabsNext(0);
+                this.renderRoleTabsNext(0, loadData);
             });
             (_f = this._SfRoleTabContainer.querySelector('#consumer-tab-functionhead')) === null || _f === void 0 ? void 0 : _f.addEventListener('click', async () => {
                 this.nextTabRole = this.TAB_FUNCTION_HEAD;
+                this.nextTabStatus = this.TAB_ALL;
                 // this.fetchNext(0, this.nextTabRole);
-                this.renderRoleTabsNext(0);
+                this.renderRoleTabsNext(0, loadData);
             });
             (_g = this._SfRoleTabContainer.querySelector('#consumer-tab-auditor')) === null || _g === void 0 ? void 0 : _g.addEventListener('click', async () => {
                 this.nextTabRole = this.TAB_AUDITOR;
+                this.nextTabStatus = this.TAB_ALL;
                 // this.fetchNext(0, this.nextTabRole);
-                this.renderRoleTabsNext(0);
+                this.renderRoleTabsNext(0, loadData);
             });
             (_h = this._SfRoleTabContainer.querySelector('#consumer-tab-viewer')) === null || _h === void 0 ? void 0 : _h.addEventListener('click', async () => {
                 this.nextTabRole = this.TAB_VIEWER;
+                this.nextTabStatus = this.TAB_ALL;
                 // this.fetchNext(0, this.nextTabRole);
-                this.renderRoleTabsNext(0);
+                this.renderRoleTabsNext(0, loadData);
             });
-            this.fetchNext(page, this.nextTabRole);
+            if (loadData) {
+                this.renderStatusTabsNext(page);
+            }
+            else {
+                this._SfIEventsC.querySelector('#next-calendar-data').querySelector('#button-load-next').addEventListener('click', () => {
+                    this._SfIEventsC.querySelector('#next-calendar-data').querySelector('#button-load-next').style.display = 'none';
+                    this.renderRoleTabsNext(0);
+                });
+                let changeEvent = new CustomEvent('valueChanged', { bubbles: true });
+                this.dispatchEvent(changeEvent);
+            }
+            let roleChangeEvent = new CustomEvent("roleChanged", {
+                detail: {
+                    selectedRole: this.nextTabRole
+                }
+            });
+            this.dispatchEvent(roleChangeEvent);
+        };
+        this.renderStatusTabsNext = (page) => {
+            var _a, _b, _c, _f, _g;
+            this._SfStatusTabContainer.innerHTML = '';
+            if (this.nextTabStatus == "") {
+                this.nextTabStatus = this.TAB_ALL;
+            }
+            console.log('rendering status tabs', this.nextTabStatus);
+            var html = '';
+            html += '<button class="tab-button-small" id="consumer-tab-status-all" part="' + (this.nextTabStatus == this.TAB_ALL ? 'calendar-tab-button-selected-small' : 'calendar-tab-button-not-selected-small') + '">All</button>';
+            if (this.nextTabRole == this.TAB_REPORTER || this.nextTabRole == this.TAB_APPROVER) {
+                html += '<button class="tab-button-small" id="consumer-tab-status-pending-on-me" part="' + (this.nextTabStatus == this.TAB_PENDING_ON_ME ? 'calendar-tab-button-selected-small' : 'calendar-tab-button-not-selected-small') + '">Pending On Me</button>';
+            }
+            if (this.nextTabRole == this.TAB_APPROVER || this.nextTabRole == this.TAB_FUNCTION_HEAD || this.nextTabRole == this.TAB_AUDITOR || this.nextTabRole == this.TAB_VIEWER) {
+                html += '<button class="tab-button-small" id="consumer-tab-status-pending-on-reporter" part="' + (this.nextTabStatus == this.TAB_PENDING_ON_REPORTER ? 'calendar-tab-button-selected-small' : 'calendar-tab-button-not-selected-small') + '">Pending On Reporter</button>';
+            }
+            if (this.nextTabRole == this.TAB_REPORTER || this.nextTabRole == this.TAB_FUNCTION_HEAD || this.nextTabRole == this.TAB_AUDITOR || this.nextTabRole == this.TAB_VIEWER) {
+                html += '<button class="tab-button-small" id="consumer-tab-status-pending-on-approver" part="' + (this.nextTabStatus == this.TAB_PENDING_ON_APPROVER ? 'calendar-tab-button-selected-small' : 'calendar-tab-button-not-selected-small') + '">Pending On Approver</button>';
+            }
+            html += '<button class="tab-button-small" id="consumer-tab-status-done" part="' + (this.nextTabStatus == this.TAB_DONE ? 'calendar-tab-button-selected-small' : 'calendar-tab-button-not-selected-small') + '">Completed</button>';
+            this._SfStatusTabContainer.innerHTML = html;
+            (_a = this._SfStatusTabContainer.querySelector('#consumer-tab-status-all')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', async () => {
+                this.nextTabStatus = this.TAB_ALL;
+                this.renderStatusTabsNext(0);
+            });
+            (_b = this._SfStatusTabContainer.querySelector('#consumer-tab-status-pending-on-me')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', async () => {
+                this.nextTabStatus = this.TAB_PENDING_ON_ME;
+                this.renderStatusTabsNext(0);
+            });
+            (_c = this._SfStatusTabContainer.querySelector('#consumer-tab-status-pending-on-reporter')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', async () => {
+                this.nextTabStatus = this.TAB_PENDING_ON_REPORTER;
+                this.renderStatusTabsNext(0);
+            });
+            (_f = this._SfStatusTabContainer.querySelector('#consumer-tab-status-pending-on-approver')) === null || _f === void 0 ? void 0 : _f.addEventListener('click', async () => {
+                this.nextTabStatus = this.TAB_PENDING_ON_APPROVER;
+                this.renderStatusTabsNext(0);
+            });
+            (_g = this._SfStatusTabContainer.querySelector('#consumer-tab-status-done')) === null || _g === void 0 ? void 0 : _g.addEventListener('click', async () => {
+                this.nextTabStatus = this.TAB_DONE;
+                this.renderStatusTabsNext(0);
+            });
+            this.fetchNext(page, this.nextTabRole, this.nextTabStatus);
         };
         this.renderNextEvents = (eventsData, page, role) => {
             console.log('eventsData', eventsData);
             console.log('role', role);
-            if (Object.keys(eventsData[role]).length > 0) {
-                var notStarted = 0, approved = 0, pendingApproval = 0, rejected = 0, inTime = 0, pastDueDate = 0, lateExecuted = 0, lateApproved = 0, lateReported = 0, scheduled = 0, partiallyComplied = 0, notComplied = 0, complied = 0;
-                var html = '';
-                this.selectedItems = [];
-                this.selectedStatus = "";
-                html += '<div id="stream-event-next" part="stream-event-list" class="stream-event-list">';
-                for (var i = 0; i < Object.keys(eventsData[role]).length; i++) {
-                    let mmdd = Object.keys(eventsData[role])[i];
-                    //console.log('mmdd', mmdd);
-                    //console.log('mmddevent', mmdd,eventsData[role][mmdd]);
-                    if (eventsData[role][mmdd] != null) {
-                        html += '<div part="stream-event-selected" class="d-flex stream-event-selected mb-5">';
-                        html += '<div part="stream-event-selected-date">' + (mmdd.split("/")[1] + "/" + mmdd.split("/")[0]) + ' |</div>';
-                        html += '<div class="stream-event-list-container flex-grow" id="date-' + mmdd.replace(/\//g, '-') + '">';
-                        for (var j = 0; j < eventsData[role][mmdd].length; j++) {
-                            let eventHtml = '';
-                            eventsData[role][mmdd][j]['mmdd'] = mmdd;
-                            let functionStr = eventsData[role][mmdd][j]['functions'][0];
-                            if (functionStr.indexOf(';') >= 0) {
-                                functionStr = functionStr.split(';')[0].replace(/\([^)]*\)/g, "");
-                            }
-                            console.log('function', functionStr);
-                            var partStatus = "";
-                            var lateStatus = "";
-                            var complianceStatus = "";
-                            partStatus = this.getCompletenessStatus(JSON.parse(JSON.stringify(eventsData[role][mmdd][j])));
-                            lateStatus = this.getTimelinessStatus(mmdd, JSON.parse(JSON.stringify(eventsData[role][mmdd][j])), partStatus);
-                            complianceStatus = this.getComplianceStatus(partStatus, lateStatus);
-                            notStarted = notStarted + (partStatus == "not-started" ? 1 : 0);
-                            pendingApproval = pendingApproval + (partStatus == "pending-approval" ? 1 : 0);
-                            rejected = rejected + (partStatus == "rejected" ? 1 : 0);
-                            approved = approved + (partStatus == "approved" ? 1 : 0);
-                            inTime = inTime + (lateStatus == "in-time" ? 1 : 0);
-                            pastDueDate = pastDueDate + (lateStatus == "past-due-date" ? 1 : 0);
-                            lateReported = lateReported + (lateStatus == "late-reported" ? 1 : 0);
-                            lateApproved = lateApproved + (lateStatus == "late-approved" ? 1 : 0);
-                            lateExecuted = lateExecuted + (lateStatus == "late-executed" ? 1 : 0);
-                            scheduled = scheduled + (complianceStatus == "scheduled" ? 1 : 0);
-                            partiallyComplied = partiallyComplied + (complianceStatus == "partially-complied" ? 1 : 0);
-                            notComplied = notComplied + (complianceStatus == "not-complied" ? 1 : 0);
-                            complied = complied + (complianceStatus == "complied" ? 1 : 0);
-                            eventsData[role][mmdd][j][this.FLOW_GRAPH_COMPLETENESS] = partStatus;
-                            eventsData[role][mmdd][j][this.FLOW_GRAPH_TIMELINESS] = lateStatus;
-                            eventsData[role][mmdd][j][this.FLOW_GRAPH_COMPLIANCE] = complianceStatus;
-                            // let thisRole = ""
-                            // if ((JSON.stringify(eventsData[role][mmdd][j].reporters)).indexOf(this.userProfileId) >= 0){
-                            //   thisRole = 'Reporter'
-                            // } else if ((JSON.stringify(eventsData[role][mmdd][j].approvers)).indexOf(this.userProfileId) >= 0){
-                            //   thisRole = 'Approver'
-                            // } else if ((JSON.stringify(eventsData[role][mmdd][j].functionheads)).indexOf(this.userProfileId) >= 0){
-                            //   thisRole = 'Functionhead'
-                            // } else if ((JSON.stringify(eventsData[role][mmdd][j].auditors)).indexOf(this.userProfileId) >= 0){
-                            //   thisRole = 'Auditor'
-                            // } else if ((JSON.stringify(eventsData[role][mmdd][j].viewers)).indexOf(this.userProfileId) >= 0){
-                            //   thisRole = 'Viewer'
-                            // } 
-                            eventHtml += '<div class="stream-events-container flex-grow">';
-                            eventHtml += '<div class="hidden-tags hide">' + JSON.stringify(eventsData[role][mmdd][j]['tags']) + '</div>';
-                            eventHtml += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>';
-                            eventHtml += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5 mb-10">' + ('<input id="button-select-' + mmdd.replace('/', '-') + '-' + j + '-' + (((eventsData[role][mmdd][j].makercheckers != null && (eventsData[role][mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((eventsData[role][mmdd][j].docs != null && (eventsData[role][mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + eventsData[role][mmdd][j].entityid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].locationid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].id.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].duedate.split('/')[1] + '-' + eventsData[role][mmdd][j].duedate.split('/')[0] + '-' + eventsData[role][mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g, '_') + '" class="button-select mr-10" type="checkbox" />') + '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>' + '<sf-i-elastic-text text="' + eventsData[role][mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;' + '<div part="td-body"><sf-i-elastic-text text="' + eventsData[role][mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "") + '" minLength="30"></sf-i-elastic-text></div>&nbsp;&nbsp;<div part="upcoming-function">' + functionStr + '</div>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + '</div>';
-                            eventHtml += '</div>';
-                            html += eventHtml;
+            // if(Object.keys(eventsData[role]).length > 0){
+            var notStarted = 0, approved = 0, pendingApproval = 0, rejected = 0, inTime = 0, pastDueDate = 0, lateExecuted = 0, lateApproved = 0, lateReported = 0, scheduled = 0, partiallyComplied = 0, notComplied = 0, complied = 0;
+            var html = '';
+            this.selectedItems = [];
+            this.selectedStatus = "";
+            html += '<div id="stream-event-next" part="stream-event-list" class="stream-event-list">';
+            for (var i = 0; i < Object.keys(eventsData[role]).length; i++) {
+                let mmdd = Object.keys(eventsData[role])[i];
+                //console.log('mmdd', mmdd);
+                //console.log('mmddevent', mmdd,eventsData[role][mmdd]);
+                if (eventsData[role][mmdd] != null) {
+                    html += '<div part="stream-event-selected" class="d-flex stream-event-selected mb-5">';
+                    html += '<div part="stream-event-selected-date">' + (mmdd.split("/")[1] + "/" + mmdd.split("/")[0]) + ' |</div>';
+                    html += '<div class="stream-event-list-container flex-grow" id="date-' + mmdd.replace(/\//g, '-') + '">';
+                    for (var j = 0; j < eventsData[role][mmdd].length; j++) {
+                        let eventHtml = '';
+                        eventsData[role][mmdd][j]['mmdd'] = mmdd;
+                        let functionStr = eventsData[role][mmdd][j]['functions'][0];
+                        if (functionStr.indexOf(';') >= 0) {
+                            functionStr = functionStr.split(';')[0].replace(/\([^)]*\)/g, "");
                         }
-                        html += '</div>';
-                        html += '</div>';
+                        console.log('function', functionStr);
+                        var partStatus = "";
+                        var lateStatus = "";
+                        var complianceStatus = "";
+                        partStatus = this.getCompletenessStatus(JSON.parse(JSON.stringify(eventsData[role][mmdd][j])));
+                        lateStatus = this.getTimelinessStatus(mmdd, JSON.parse(JSON.stringify(eventsData[role][mmdd][j])), partStatus);
+                        complianceStatus = this.getComplianceStatus(partStatus, lateStatus);
+                        notStarted = notStarted + (partStatus == "not-started" ? 1 : 0);
+                        pendingApproval = pendingApproval + (partStatus == "pending-approval" ? 1 : 0);
+                        rejected = rejected + (partStatus == "rejected" ? 1 : 0);
+                        approved = approved + (partStatus == "approved" ? 1 : 0);
+                        inTime = inTime + (lateStatus == "in-time" ? 1 : 0);
+                        pastDueDate = pastDueDate + (lateStatus == "past-due-date" ? 1 : 0);
+                        lateReported = lateReported + (lateStatus == "late-reported" ? 1 : 0);
+                        lateApproved = lateApproved + (lateStatus == "late-approved" ? 1 : 0);
+                        lateExecuted = lateExecuted + (lateStatus == "late-executed" ? 1 : 0);
+                        scheduled = scheduled + (complianceStatus == "scheduled" ? 1 : 0);
+                        partiallyComplied = partiallyComplied + (complianceStatus == "partially-complied" ? 1 : 0);
+                        notComplied = notComplied + (complianceStatus == "not-complied" ? 1 : 0);
+                        complied = complied + (complianceStatus == "complied" ? 1 : 0);
+                        eventsData[role][mmdd][j][this.FLOW_GRAPH_COMPLETENESS] = partStatus;
+                        eventsData[role][mmdd][j][this.FLOW_GRAPH_TIMELINESS] = lateStatus;
+                        eventsData[role][mmdd][j][this.FLOW_GRAPH_COMPLIANCE] = complianceStatus;
+                        // let thisRole = ""
+                        // if ((JSON.stringify(eventsData[role][mmdd][j].reporters)).indexOf(this.userProfileId) >= 0){
+                        //   thisRole = 'Reporter'
+                        // } else if ((JSON.stringify(eventsData[role][mmdd][j].approvers)).indexOf(this.userProfileId) >= 0){
+                        //   thisRole = 'Approver'
+                        // } else if ((JSON.stringify(eventsData[role][mmdd][j].functionheads)).indexOf(this.userProfileId) >= 0){
+                        //   thisRole = 'Functionhead'
+                        // } else if ((JSON.stringify(eventsData[role][mmdd][j].auditors)).indexOf(this.userProfileId) >= 0){
+                        //   thisRole = 'Auditor'
+                        // } else if ((JSON.stringify(eventsData[role][mmdd][j].viewers)).indexOf(this.userProfileId) >= 0){
+                        //   thisRole = 'Viewer'
+                        // } 
+                        eventHtml += '<div class="stream-events-container flex-grow">';
+                        eventHtml += '<div class="hidden-tags hide">' + JSON.stringify(eventsData[role][mmdd][j]['tags']) + '</div>';
+                        eventHtml += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>';
+                        eventHtml += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5 mb-10">' + ('<input id="button-select-' + mmdd.replace('/', '-') + '-' + j + '-' + (((eventsData[role][mmdd][j].makercheckers != null && (eventsData[role][mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((eventsData[role][mmdd][j].docs != null && (eventsData[role][mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + eventsData[role][mmdd][j].entityid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].locationid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].id.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].duedate.split('/')[1] + '-' + eventsData[role][mmdd][j].duedate.split('/')[0] + '-' + eventsData[role][mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g, '_') + '" class="button-select mr-10" type="checkbox" />') + '<button id="button-unmapped-expand-' + mmdd.replace('/', '-') + '-' + j + '" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>' + '<sf-i-elastic-text text="' + eventsData[role][mmdd][j]['obligationtitle'] + '" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;' + '<div part="td-body"><sf-i-elastic-text text="' + eventsData[role][mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "") + '" minLength="30"></sf-i-elastic-text></div>&nbsp;&nbsp;<div part="upcoming-function">' + functionStr + '</div>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + '</div>';
+                        eventHtml += '</div>';
+                        html += eventHtml;
                     }
+                    html += '</div>';
+                    html += '</div>';
                 }
-                html += '<div class="d-flex align-center mt-10">';
-                if (page != 0) {
-                    html += '<button id="button-prev" part="icon-button-small" class="material-symbols-outlined mr-10">keyboard_arrow_left</button>';
-                }
-                html += '<p part="page-next">Page ' + (page + 1) + '</p>';
-                html += '<button id="button-next" part="icon-button-small" class="material-symbols-outlined ml-10">keyboard_arrow_right</button>';
-                html += '</div>';
-                html += '</div>';
-                this._SfIEventsC.querySelector('#next-calendar-data').innerHTML = html;
-                this._SfIEventsC.querySelector('#next-calendar-data').style.display = "flex";
-                // }else{
-                //   let innerDivHtml = (this._SfIEventsC.querySelector('#stream-event-next') as HTMLDivElement).innerHTML;
-                //   innerDivHtml.replace('<button id="button-expand" part="icon-button-small" class="material-symbols-outlined">keyboard_arrow_down</button>','');
-                //   console.log('innerDivHtml', innerDivHtml)
-                //   innerDivHtml += html;
-                //   innerDivHtml += '<button id="button-expand" part="icon-button-small" class="material-symbols-outlined">keyboard_arrow_down</button>';
-                //   (this._SfIEventsC.querySelector('#stream-event-next') as HTMLDivElement).innerHTML = innerDivHtml;
-                // }
-                if (page != 0) {
-                    let buttonPrev = this._SfIEventsC.querySelector('#button-prev');
-                    buttonPrev.addEventListener('click', () => {
-                        this.myRole = role;
-                        this.fetchNext(page - 1, this.nextTabRole);
-                    });
-                }
-                let buttonNext = this._SfIEventsC.querySelector('#button-next');
-                // buttonExpand = Util.clearListeners(buttonExpand) as HTMLButtonElement;
-                buttonNext.addEventListener('click', () => {
-                    this.myRole = role;
-                    this.fetchNext(page + 1, this.nextTabRole);
-                });
-                const buttonArr = this._SfIEventsC.querySelectorAll('.button-expand');
-                for (var i = 0; i < buttonArr.length; i++) {
-                    buttonArr[i].addEventListener('click', (ev) => {
-                        const id = ev.target.id;
-                        const idArr = id.split("-");
-                        const mmdd = idArr[3] + "/" + idArr[4];
-                        const j = idArr[5];
-                        let found = false;
-                        for (var k = 0; k < this.selectedItems.length; k++) {
-                            if (this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
-                                found = true;
-                            }
-                        }
-                        if (!found) {
-                            this.selectedItems = [];
-                            this.clearButtonSelectionNext();
-                        }
-                        this._SfDetailContainer.style.display = 'block';
-                        var yyyy = this.getCurrentYear(idArr[3]);
-                        console.log('yyyy', yyyy, idArr[3]);
-                        console.log(eventsData[role][mmdd][j]);
-                        if (role == this.TAB_ALL_ROLES) {
-                            if (JSON.stringify(eventsData[role][mmdd][j]['viewers']).indexOf(this.userProfileId) >= 0) {
-                                this.myRole = this.TAB_VIEWER;
-                            }
-                            if (JSON.stringify(eventsData[role][mmdd][j]['auditors']).indexOf(this.userProfileId) >= 0) {
-                                this.myRole = this.TAB_AUDITOR;
-                            }
-                            if (JSON.stringify(eventsData[role][mmdd][j]['functionheads']).indexOf(this.userProfileId) >= 0) {
-                                this.myRole = this.TAB_FUNCTION_HEAD;
-                            }
-                            if (JSON.stringify(eventsData[role][mmdd][j]['approvers']).indexOf(this.userProfileId) >= 0) {
-                                this.myRole = this.TAB_APPROVER;
-                            }
-                            if (JSON.stringify(eventsData[role][mmdd][j]['reporters']).indexOf(this.userProfileId) >= 0) {
-                                this.myRole = this.TAB_REPORTER;
-                            }
-                        }
-                        else {
-                            this.myRole = this.nextTabRole;
-                        }
-                        console.log('redering detail', this.myRole);
-                        this.renderEventDetail(eventsData[role][mmdd][j], mmdd + "/" + yyyy, null);
-                    });
-                }
-                const streamEventsContainer = this._SfIEventsC.querySelectorAll('.stream-events-container');
-                const buttonSelect = this._SfIEventsC.querySelectorAll('.button-select');
-                for (i = 0; i < buttonSelect.length; i++) {
-                    buttonSelect[i].addEventListener('click', (ev) => {
-                        //console.log('eventscontainer', streamEventsContainer.length, buttonSelect.length);
-                        const id = ev.target.id;
-                        const idArr = id.split("-");
-                        // const mmdd = idArr[2] + "/" + idArr[3];
-                        // const j = idArr[4];
-                        // const makercheckers = idArr[5];
-                        const docs = idArr[6];
-                        if (ev.target.checked) {
-                            this.selectedItems.push(id);
-                        }
-                        else {
-                            this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
-                        }
-                        if (this.selectedItems.length === 0) {
-                            for (var k = 0; k < buttonSelect.length; k++) {
-                                buttonSelect[k].style.display = 'block';
-                                streamEventsContainer[k].style.display = 'block';
-                            }
-                        }
-                        else {
-                            if (this.selectedItems.length === 1) {
-                                const id1 = id;
-                                const idArr1 = id1.split("-");
-                                const status = idArr1[13].replace(/_/g, '-');
-                                this.selectedStatus = status;
-                            }
-                            for (var k = 0; k < buttonSelect.length; k++) {
-                                const id1 = buttonSelect[k].id;
-                                const idArr1 = id1.split("-");
-                                const docs1 = idArr1[6];
-                                const status = idArr1[13].replace(/_/g, '-');
-                                if (docs == docs1 && status == this.selectedStatus) {
-                                }
-                                else {
-                                    buttonSelect[k].style.display = 'none';
-                                    streamEventsContainer[k].style.display = 'none';
-                                }
-                            }
-                        }
-                    });
-                    let changeEvent = new CustomEvent('valueChanged', { bubbles: true });
-                    this.dispatchEvent(changeEvent);
-                }
-                // return html;
+            }
+            console.log('eventsData Role length', Object.keys(eventsData[role]).length);
+            if (Object.keys(eventsData[role]).length == 0) {
+                html += `
+            <div class="dashboard-container d-flex-plain flex-col align-center justify-start section-start section-end">
+                <div class="no-donut d-flex justify-center flex-col align-center pl-10 pr-10">
+                    <h1 class="mb-5"><span class="material-symbols-outlined">check_circle</span></h1>
+                    <h5 class="mt-5">Nothing to show here.</h5>
+                </div>
+            </div>`;
             }
             else {
-                this._SfIEventsC.querySelector('#next-calendar-data').innerHTML = "";
-                this._SfIEventsC.querySelector('#next-calendar-data').style.display = "none";
-                let emptyEvent = new CustomEvent('valueChanged', { bubbles: false });
-                this.dispatchEvent(emptyEvent);
+                html += '<div class="d-flex align-center mt-10">';
+                html += '<button id="button-prev" part="icon-button-small" class="material-symbols-outlined mr-10">keyboard_arrow_left</button>';
+                html += '<p part="page-next">Page ' + (page >= 0 ? (page + 1) : page) + '</p>';
+                html += '<button id="button-next" part="icon-button-small" class="material-symbols-outlined ml-10">keyboard_arrow_right</button>';
+                html += '</div>';
             }
+            html += '</div>';
+            this._SfIEventsC.querySelector('#next-calendar-data').innerHTML = html;
+            this._SfIEventsC.querySelector('#next-calendar-data').style.display = "flex";
+            // }else{
+            //   let innerDivHtml = (this._SfIEventsC.querySelector('#stream-event-next') as HTMLDivElement).innerHTML;
+            //   innerDivHtml.replace('<button id="button-expand" part="icon-button-small" class="material-symbols-outlined">keyboard_arrow_down</button>','');
+            //   console.log('innerDivHtml', innerDivHtml)
+            //   innerDivHtml += html;
+            //   innerDivHtml += '<button id="button-expand" part="icon-button-small" class="material-symbols-outlined">keyboard_arrow_down</button>';
+            //   (this._SfIEventsC.querySelector('#stream-event-next') as HTMLDivElement).innerHTML = innerDivHtml;
+            // }
+            // if(page != 0){
+            let buttonPrev = this._SfIEventsC.querySelector('#button-prev');
+            buttonPrev === null || buttonPrev === void 0 ? void 0 : buttonPrev.addEventListener('click', () => {
+                this.myRole = role;
+                this.fetchNext(page - 1, this.nextTabRole, this.nextTabStatus);
+            });
+            // }
+            let buttonNext = this._SfIEventsC.querySelector('#button-next');
+            // buttonExpand = Util.clearListeners(buttonExpand) as HTMLButtonElement;
+            buttonNext === null || buttonNext === void 0 ? void 0 : buttonNext.addEventListener('click', () => {
+                this.myRole = role;
+                this.fetchNext(page + 1, this.nextTabRole, this.nextTabStatus);
+            });
+            const buttonArr = this._SfIEventsC.querySelectorAll('.button-expand');
+            for (var i = 0; i < buttonArr.length; i++) {
+                buttonArr[i].addEventListener('click', (ev) => {
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    const mmdd = idArr[3] + "/" + idArr[4];
+                    const j = idArr[5];
+                    let found = false;
+                    for (var k = 0; k < this.selectedItems.length; k++) {
+                        if (this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        this.selectedItems = [];
+                        this.clearButtonSelectionNext();
+                    }
+                    this._SfDetailContainer.style.display = 'block';
+                    var yyyy = this.getCurrentYear(idArr[3]);
+                    console.log('yyyy', yyyy, idArr[3]);
+                    console.log(eventsData[role][mmdd][j]);
+                    if (role == this.TAB_ALL_ROLES) {
+                        if (JSON.stringify(eventsData[role][mmdd][j]['viewers']).indexOf(this.userProfileId) >= 0) {
+                            this.myRole = this.TAB_VIEWER;
+                        }
+                        if (JSON.stringify(eventsData[role][mmdd][j]['auditors']).indexOf(this.userProfileId) >= 0) {
+                            this.myRole = this.TAB_AUDITOR;
+                        }
+                        if (JSON.stringify(eventsData[role][mmdd][j]['functionheads']).indexOf(this.userProfileId) >= 0) {
+                            this.myRole = this.TAB_FUNCTION_HEAD;
+                        }
+                        if (JSON.stringify(eventsData[role][mmdd][j]['approvers']).indexOf(this.userProfileId) >= 0) {
+                            this.myRole = this.TAB_APPROVER;
+                        }
+                        if (JSON.stringify(eventsData[role][mmdd][j]['reporters']).indexOf(this.userProfileId) >= 0) {
+                            this.myRole = this.TAB_REPORTER;
+                        }
+                    }
+                    else {
+                        this.myRole = this.nextTabRole;
+                    }
+                    console.log('redering detail', this.myRole);
+                    this.renderEventDetail(eventsData[role][mmdd][j], mmdd + "/" + yyyy, null);
+                });
+            }
+            const streamEventsContainer = this._SfIEventsC.querySelectorAll('.stream-events-container');
+            const buttonSelect = this._SfIEventsC.querySelectorAll('.button-select');
+            for (i = 0; i < buttonSelect.length; i++) {
+                buttonSelect[i].addEventListener('click', (ev) => {
+                    //console.log('eventscontainer', streamEventsContainer.length, buttonSelect.length);
+                    const id = ev.target.id;
+                    const idArr = id.split("-");
+                    // const mmdd = idArr[2] + "/" + idArr[3];
+                    // const j = idArr[4];
+                    // const makercheckers = idArr[5];
+                    const docs = idArr[6];
+                    if (ev.target.checked) {
+                        this.selectedItems.push(id);
+                    }
+                    else {
+                        this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+                    }
+                    if (this.selectedItems.length === 0) {
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            buttonSelect[k].style.display = 'block';
+                            streamEventsContainer[k].style.display = 'block';
+                        }
+                    }
+                    else {
+                        if (this.selectedItems.length === 1) {
+                            const id1 = id;
+                            const idArr1 = id1.split("-");
+                            const status = idArr1[13].replace(/_/g, '-');
+                            this.selectedStatus = status;
+                        }
+                        for (var k = 0; k < buttonSelect.length; k++) {
+                            const id1 = buttonSelect[k].id;
+                            const idArr1 = id1.split("-");
+                            const docs1 = idArr1[6];
+                            const status = idArr1[13].replace(/_/g, '-');
+                            if (docs == docs1 && status == this.selectedStatus) {
+                            }
+                            else {
+                                buttonSelect[k].style.display = 'none';
+                                streamEventsContainer[k].style.display = 'none';
+                            }
+                        }
+                    }
+                });
+                let changeEvent = new CustomEvent('valueChanged', { bubbles: true });
+                this.dispatchEvent(changeEvent);
+            }
+            // return html;
+            // }else{
+            //   let html = `
+            //         <div class="dashboard-container d-flex-plain flex-col align-center justify-start section-start section-end">
+            //             <div class="no-donut d-flex justify-center flex-col align-center pl-10 pr-10">
+            //                 <h1 class="mb-5"><span class="material-symbols-outlined">check_circle</span></h1>
+            //                 <h5 class="mt-5">All good! Nothing is due.</h5>
+            //             </div>
+            //         </div>`;
+            //   (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).innerHTML = html;
+            //   // (this._SfIEventsC.querySelector('#next-calendar-data') as HTMLDivElement).style.display = "none";
+            //   let emptyEvent = new CustomEvent('valueChanged',{bubbles:false});
+            //   this.dispatchEvent(emptyEvent);
+            // }
         };
         this.fetchReports = async () => {
             let url = "https://" + this.apiId + "/getreports";
@@ -14836,7 +15206,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             }
             else if (this.mode == "next") {
                 // this.fetchNext(0)
-                this.renderRoleTabsNext(0);
+                this.renderRoleTabsNext(0, false);
             }
             else if (this.mode == "reports") {
                 this.fetchReports();
@@ -15279,9 +15649,12 @@ let SfIEvents = class SfIEvents extends LitElement {
           <div class="d-flex justify-center">
               <div class="loader-element"></div>
           </div>
-          <div class="d-flex mb-20" id="role-tab-container">
+          <div class="d-flex" id="role-tab-container">
+          </div>
+          <div class="d-flex mb-20" id="status-tab-container" part="status-tab-container">
           </div>
           <div id="next-calendar-data" class="calendar-right-data d-flex flex-col w-100">
+            <button id="button-load-next" part="button-icon" class="material-icons button-icon align-self-start ml-5"><span class="material-symbols-outlined">keyboard_arrow_down</span></button>
           </div>
           <div id="detail-container" class="hide" part="detail-container">
           </div>
@@ -15376,6 +15749,8 @@ let SfIEvents = class SfIEvents extends LitElement {
             <div class="d-flex flex-grow flex-wrap justify-start align-stretch scroll-x" id="register-container">
               
             </div>
+          </div>
+          <div id="report-summary-container" class="hide" part="report-summary-container">
           </div>
           <div id="detail-container" class="hide" part="detail-container">
           </div>
@@ -15477,7 +15852,8 @@ SfIEvents.styles = css `
       opacity: 0.4;
     }
 
-    .detail-container {
+    .detail-container,
+    .report-summary-container {
       width: 60%;
       height: 400px;
       background-color: #efefef;
@@ -15488,7 +15864,8 @@ SfIEvents.styles = css `
 
     @media (orientation: portrait) {
 
-      .detail-container {
+      .detail-container,
+      .report-summary-container {
         width: 80%;
         height: 400px;
         background-color: #efefef;
@@ -15880,6 +16257,10 @@ SfIEvents.styles = css `
       margin-top: 5px;
     }
 
+    .ml-5 {
+      margin-left: 5px;
+    }
+    
     .ml-10 {
       margin-left: 10px;
     }
@@ -16118,6 +16499,14 @@ SfIEvents.styles = css `
       margin-left: 5px;
       margin-right: 5px;
     }
+    .tab-button-small {
+      padding: 5px;
+      padding-left: 7px;
+      padding-right: 7px;
+      font-size: 95%;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
 
     .td-body {
       padding: 5px;
@@ -16182,6 +16571,10 @@ SfIEvents.styles = css `
 
     .align-center {
       align-items: center;
+    }
+
+    .align-self-start {
+      align-self: flex-start;
     }
     
     .lds-text {
@@ -16600,6 +16993,9 @@ __decorate([
 ], SfIEvents.prototype, "htmlDataStats", void 0);
 __decorate([
     property()
+], SfIEvents.prototype, "htmlDataSummary", void 0);
+__decorate([
+    property()
 ], SfIEvents.prototype, "period", void 0);
 __decorate([
     property()
@@ -16836,6 +17232,9 @@ __decorate([
     query('#detail-container')
 ], SfIEvents.prototype, "_SfDetailContainer", void 0);
 __decorate([
+    query('#report-summary-container')
+], SfIEvents.prototype, "_SfReportSummaryContainer", void 0);
+__decorate([
     query('#this-container')
 ], SfIEvents.prototype, "_SfThisContainer", void 0);
 __decorate([
@@ -16868,6 +17267,9 @@ __decorate([
 __decorate([
     query('#role-tab-container')
 ], SfIEvents.prototype, "_SfRoleTabContainer", void 0);
+__decorate([
+    query('#status-tab-container')
+], SfIEvents.prototype, "_SfStatusTabContainer", void 0);
 __decorate([
     query('#onboarding-tab-container')
 ], SfIEvents.prototype, "_SfOnboardingTabContainer", void 0);
