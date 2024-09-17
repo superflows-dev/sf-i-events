@@ -4899,11 +4899,12 @@ export class SfIEvents extends LitElement {
           this.clearButtonSelection();
         }
 
-        (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+        // (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
 
         var yyyy = this.getCurrentYear(idArr[3]);
 
-        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, null);
+        // this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, null);
+        this.fetchEventDetails(this.events[mmdd][j], mmdd + "/" + yyyy, null);
   
       })
 
@@ -7177,13 +7178,13 @@ export class SfIEvents extends LitElement {
       html += '<div id="compliance-list-body-'+i+'" class="hide">'
       html += '<table class="mb-20">';
       html += '<tr>';
-      html += '<td part="td-head">ComplianceId</td><td part="td-head">Location</td><td part="td-head">Obligation</td>';
+      html += '<td part="td-head">ComplianceId</td><td part="td-head">Location</td><td part="td-head">Obligation Title</td><td part="td-head">Obligation</td>';
       html += '</tr>'
       for(var j = 0; j < adhocQuestions[Object.keys(adhocQuestions)[i]].length; j++) {
         const compliance =  adhocQuestions[Object.keys(adhocQuestions)[i]][j];
         
         html += '<tr>';
-        html += ('<td part="td-body"><sf-i-elastic-text text="'+compliance.id+'" minLength="10" lineSize="6"></sf-i-elastic-text></td><td part="td-body"><sf-i-elastic-text text="'+compliance.locationname.replace(/ *\([^)]*\) */g, "").trim()+'" minLength="80" lineSize="6"></sf-i-elastic-text></td><td part="td-body"><sf-i-elastic-text text="'+compliance.obligation+'" minLength="80" lineSize="6"></sf-i-elastic-text></td>');
+        html += ('<td part="td-body"><sf-i-elastic-text text="'+compliance.id+'" minLength="10" lineSize="6"></sf-i-elastic-text></td><td part="td-body"><sf-i-elastic-text text="'+compliance.locationname.replace(/ *\([^)]*\) */g, "").trim()+'" minLength="80" lineSize="6"></sf-i-elastic-text></td><td part="td-body"><sf-i-elastic-text text="'+compliance.obligationtitle.replace(/ *\([^)]*\) */g, "").trim()+'" minLength="80" lineSize="6"></sf-i-elastic-text></td><td part="td-body"><sf-i-elastic-text text="'+compliance.obligation+'" minLength="80" lineSize="6"></sf-i-elastic-text></td>');
         html += '</tr>'
       }
       html += '</table>'
@@ -8034,11 +8035,12 @@ export class SfIEvents extends LitElement {
           this.clearButtonSelection();
         }
 
-        (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+        // (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
 
         var yyyy = this.getCurrentYear(idArr[3]);
 
-        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
+        // this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
+        this.fetchEventDetails(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfThisContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
   
       })
 
@@ -8363,13 +8365,14 @@ export class SfIEvents extends LitElement {
           this.clearButtonSelection();
         }
 
-        (this._SfDetailContainer as HTMLDivElement).style.display = 'block';
+        // (this._SfDetailContainer as HTMLDivElement).style.display = 'block';
 
         //console.log('commentsinlist', (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement, this.events[mmdd][j].comments, mmdd, j);
 
         var yyyy = this.getCurrentYear(idArr[3]);
-
-        this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
+        
+        // this.renderEventDetail(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
+        this.fetchEventDetails(this.events[mmdd][j], mmdd + "/" + yyyy, (this._SfStreamContainer as HTMLDivElement).querySelector('#stream-month-'+this.currentColumnIndex) as HTMLButtonElement);
   
       })
 
@@ -9345,7 +9348,42 @@ export class SfIEvents extends LitElement {
 
   }
 
+  fetchEventDetails = async (listEvent: any, mmddyyyy: any, currentColumnButton: HTMLButtonElement | null) => {
+    console.log('listEvent', listEvent, listEvent.id)
+    let url = "https://"+this.apiId+"/getalleventdetails";
+    
+    //console.log('fetch calendar url', url);
+    let urlBody :any = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "eventid": listEvent.id, "entityid": listEvent.entityid, "locationid": listEvent.locationid, "mmddyyyy": mmddyyyy, "year": this.calendarStartYYYY};
+
+    //console.log('urlbody', urlBody);
+
+    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    const xhr : any = (await this.prepareXhr(urlBody, url, this._SfLoader, authorization, 'Preparing')) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      console.log('jsonRespose', jsonRespose);
+      this.renderEventDetail(jsonRespose.data,mmddyyyy, currentColumnButton);
+
+    } else {
+
+      if(xhr.status === 404) {
+
+        this.showChosenProject();
+        (this._SfTitleChosenProject as HTMLElement).innerHTML = (this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedTexts()[0];
+        this.renderChosenProject();
+
+      } else {
+        const jsonRespose = JSON.parse(xhr.responseText);
+        this.setError(jsonRespose.error);
+      }
+
+    }
+  }
+
   renderEventDetail = (event: any, mmddyyyy: any, currentColumnButton: HTMLButtonElement | null) => {
+    console.log('event details', event, mmddyyyy);
 
     let comments, docs, approved, dateOfCompletion, makercheckers: Array<string>, docsOptional, documentType;
     let entityId: string = "";
@@ -9865,7 +9903,7 @@ export class SfIEvents extends LitElement {
     }
 
     (this._SfDetailContainer as HTMLDivElement).innerHTML = html;
-
+    (this._SfDetailContainer as HTMLDivElement).style.display = 'block';
     (this._SfDetailContainer as HTMLDivElement).querySelector('.button-delete')?.addEventListener('click', async () => {
 
       await this.fetchDeleteReview(event["id"], mmddyyyy, entityId, locationId);
@@ -20498,7 +20536,7 @@ export class SfIEvents extends LitElement {
             this.clearButtonSelectionNext();
           }
 
-          (this._SfDetailContainer as HTMLDivElement).style.display = 'block'
+          // (this._SfDetailContainer as HTMLDivElement).style.display = 'block'`
 
           var yyyy = this.getCurrentYear(idArr[3]);
           console.log('yyyy', yyyy, idArr[3]);
