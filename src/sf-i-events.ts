@@ -15244,8 +15244,9 @@ export class SfIEvents extends LitElement {
 
     filteredHTML += '<br /><br /><div class="table-wrapper"><table class="w-100">';
     for(var i = 0; i < newArrList.length; i++) {
-      //console.log('htmlrender', (newArrList[i] as HTMLTableRowElement).outerHTML);
-      filteredHTML += (newArrList[i] as HTMLTableRowElement).outerHTML;
+      let tdClass = (i % 2 == 0) ? "td-even" : "td-odd";
+      console.log('tdClass', tdClass, i)
+      filteredHTML += (newArrList[i] as HTMLTableRowElement).outerHTML.replace(/td-odd/g, tdClass).replace(/td-even/g,tdClass);
     }
     filteredHTML += '</table></div>';
     return filteredHTML;
@@ -19526,7 +19527,7 @@ export class SfIEvents extends LitElement {
       view = "entity";
     }
 
-    path = "getallcountryevents";
+    path = "getallcountryevents1";
 
     let sDate = "";
     let eDate = "";
@@ -19545,7 +19546,7 @@ export class SfIEvents extends LitElement {
     let url = "https://"+this.apiId+"/"+ path;
     
     //console.log('fetch calendar url', url);
-    let urlBody :any = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": 0, "sdate": sDate, "edate": eDate, "view": view, "year": this.calendarStartYYYY};
+    let urlBody :any = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": 0, "sdate": sDate, "edate": eDate, "view": view, "year": this.calendarStartYYYY, "list":"yes"};
 
     if(searchString.length > 0) {
       urlBody["searchstring"] = searchString;
