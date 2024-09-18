@@ -1567,6 +1567,10 @@ export class SfIEvents extends LitElement {
 
   nextTabStatus: string = "";
 
+  sdate: string = "";
+
+  edate: string = "";
+
   static override styles = css`
 
     .bg-white {
@@ -4355,7 +4359,7 @@ export class SfIEvents extends LitElement {
     }
     html += '</thead>';
 
-    console.log('event.obligationtype', event.obligationtype[0].toLowerCase());
+    // console.log('event.obligationtype', event.obligationtype[0].toLowerCase());
 
     return html;
 
@@ -4544,7 +4548,6 @@ export class SfIEvents extends LitElement {
   }
 
   renderEvents = (_firstDay: any, _endDay: any, iInit: number, iLast: number, showGraph: boolean, index: number, month: number, period: string, firstDate: any = null) => {
-
     var total = 0, notStarted = 0, approved = 0, pendingApproval = 0, rejected = 0, inTime = 0, pastDueDate = 0, lateExecuted = 0, lateApproved = 0, lateReported = 0, scheduled = 0, partiallyComplied = 0, notComplied = 0, complied = 0;
     var html = '';
     this.selectedItems = [];
@@ -8120,7 +8123,6 @@ export class SfIEvents extends LitElement {
   }
 
   renderStream = (index: number = 0, showGraph: boolean = true) => {
-
     //console.log('flowgraph renderStream', this.flowGraph);
 
     this.streamIndex = index;
@@ -14595,8 +14597,8 @@ export class SfIEvents extends LitElement {
 
     });
 
-    container.querySelector('#button-download-stats')?.addEventListener('click', () => {
-
+    container.querySelector('#button-download-stats')?.addEventListener('click', async () => {
+      await this.fetchAndYearlyRenderUserCalendar_2(this.sdate, this.edate,"", "no")
       const radioCsv = (container.querySelector('#radio-csv') as HTMLInputElement);
       const radioImage = (container.querySelector('#radio-image') as HTMLInputElement);
       const radioStats = (container.querySelector('#radio-stats') as HTMLInputElement);
@@ -16235,7 +16237,7 @@ export class SfIEvents extends LitElement {
 
       (streamEventFilters as HTMLDivElement).style.display = 'block';
       (streamEventFilters as HTMLDivElement).innerHTML = '<div part="badge-dashboard" class="mr-10 mb-10 no-shrink d-flex justify-between align-center"><div><span>Filtered by</span>&nbsp;&nbsp;<span id="graph-total" part="badge-filter-name">excluding '+filterString+'</span></div><button id="button-filter-cancel" part="button-icon"><span class="material-symbols-outlined">close</span></button></div>';
-
+      console.log('processGraphHide called');
       (streamEventFilters as HTMLDivElement).querySelector('#button-filter-cancel')?.addEventListener('click', () => {
         this.clearSelectedLegend();
         this.clearSelectedGraphParam();
@@ -16386,7 +16388,7 @@ export class SfIEvents extends LitElement {
       };
       (streamEventFilters as HTMLDivElement).style.display = 'block';
       (streamEventFilters as HTMLDivElement).innerHTML = '<div part="badge-dashboard" class="d-flex align-center justify-between mr-10 mb-10 no-shrink"><div><span>Filtered by</span>&nbsp;&nbsp;<span id="graph-total" part="badge-filter-name">'+clickedValue+'</span></div><button id="button-filter-cancel" part="button-icon"><span class="material-symbols-outlined">close</span></button></div>';
-
+      console.log('processGraphFilter called');
       (streamEventFilters as HTMLDivElement).querySelector('#button-filter-cancel')?.addEventListener('click', () => {
         this.clearSelectedGraphParam();
       });
@@ -16561,7 +16563,7 @@ export class SfIEvents extends LitElement {
     //console.log('pieIndex', labelClicked);
 
     if(!callingFromBar) {
-      //console.log('pieIndex', labelClicked);
+      console.log('pieIndex', labelClicked);
       this.processGraphFilter(labelClicked);
     }
     
@@ -19491,17 +19493,17 @@ export class SfIEvents extends LitElement {
     });
   }
 
-  renderAppropriateStream = (startDate: string, endDate: string) => {
+  renderAppropriateStream = (startDate: string, endDate: string, showGraph: boolean = false) => {
     if(startDate == "" && endDate == "") this.renderCalendar(); // yearly
 
     if(this.selectedTab == this.TAB_STREAM) {
-      this.renderStream(parseInt(this.currentColumnIndex), false);
+      this.renderStream(parseInt(this.currentColumnIndex), showGraph);
     }
     // if(this.selectedTab == this.TAB_UPCOMING) {
     //   this.renderUpcoming(parseInt(this.currentColumnIndex), false);
     // }
     if(this.selectedTab == this.TAB_THIS) {
-      this.renderThis(parseInt(this.currentColumnIndex), false);
+      this.renderThis(parseInt(this.currentColumnIndex), showGraph);
     }
     // if(this.selectedTab == this.TAB_PAST) {
     //   this.renderPast(parseInt(this.currentColumnIndex), false);
@@ -19551,10 +19553,11 @@ export class SfIEvents extends LitElement {
 
   }
 
-  fetchAndYearlyRenderUserCalendar_2 = async(startDate: string = "", endDate: string = "", searchString: string = "") => {
+  fetchAndYearlyRenderUserCalendar_2 = async(startDate: string = "", endDate: string = "", searchString: string = "", list: string = "yes") => {
 
     let path = "", view = "";
-
+    this.sdate = startDate;
+    this.edate = endDate;
     if(this.tagId != null && this.tagId != "") {
       view = "tag";
     } else if(this.countryId != null && this.countryId != "") {
@@ -19584,7 +19587,7 @@ export class SfIEvents extends LitElement {
     let url = "https://"+this.apiId+"/"+ path;
     
     //console.log('fetch calendar url', url);
-    let urlBody :any = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": 0, "sdate": sDate, "edate": eDate, "view": view, "year": this.calendarStartYYYY, "list":"yes"};
+    let urlBody :any = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": this.entityId, "countryid": this.countryId, "functionid": this.functionId, "locationid": this.locationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": 0, "sdate": sDate, "edate": eDate, "view": view, "year": this.calendarStartYYYY, "list":list};
 
     if(searchString.length > 0) {
       urlBody["searchstring"] = searchString;
@@ -19602,7 +19605,7 @@ export class SfIEvents extends LitElement {
       this.events = (await this.fetchPresignedUrl(jsonRespose.signedUrlGet));
       await this.fetchPresignedUrlDelete(jsonRespose.signedUrlDelete)
 
-        this.renderAppropriateStream(startDate, endDate);
+        this.renderAppropriateStream(startDate, endDate, list == "no");
 
         // this.events = {}
         // this.events = {...JSON.parse(JSON.stringify(jsonRespose.data.events))};
