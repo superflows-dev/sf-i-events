@@ -4724,7 +4724,7 @@ export class SfIEvents extends LitElement {
             + '<td class="'+ (total%2 === 0 ? 'td-odd' : 'td-even') +' td-wide">');
           
           for(let document of this.events[mmdd][j].documents){
-            htmlSummaryValues += `<sf-i-uploader class="summary-report-doc" max="10" apiid="1peg5170d3" allowedextensions="[&quot;jpg&quot;,&quot;png&quot;,&quot;pdf&quot;,&quot;xls&quot;,&quot;xlsx&quot;,&quot;doc&quot;,&quot;docx&quot;]" prepopulatedInputArr="${JSON.stringify([{"key":document.key,"ext":document.ext}]).replace(/"/g,'&quot;')}" projectid="${this.projectId} "extract="no" mode="view" maximize="yes"></sf-i-uploader><br />`
+            htmlSummaryValues += `<sf-i-uploader class="summary-report-doc" max="10" apiid="1peg5170d3" allowedextensions="[&quot;jpg&quot;,&quot;png&quot;,&quot;pdf&quot;,&quot;xls&quot;,&quot;xlsx&quot;,&quot;doc&quot;,&quot;docx&quot;]" prepopulatedInputArr="${JSON.stringify([{"key":document.key,"ext":document.ext}]).replace(/"/g,'&quot;')}" projectid="${this.projectId} " extract="no" mode="view" maximize="yes" hidepreview="yes"></sf-i-uploader><br />`
           }
           // htmlSummaryValues += this.renderCalendarAnnotations(this.events[mmdd][j]);
           htmlSummaryValues += '</td></tr>'
