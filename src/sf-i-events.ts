@@ -9746,6 +9746,11 @@ export class SfIEvents extends LitElement {
             html += '<input id="input-reporter-doc" part="input" type="date" value="'+(dateOfCompletion == "" ? dateOfCompletion : new Date(parseInt(dateOfCompletion)).toISOString().substring(0,10))+'" max="'+(new Date().toISOString().substring(0, 10))+'"/><br />';
             // if(docsOptional.length === 0) {
               html += '<label part="input-label">Supporting Documents' + ((docsOptional.length > 0) ? '' : '*') + '</label>';
+
+              if(event['uploadguidance'] != null && event['uploadguidance'].length > 0) {
+                html += ('<div part="uploader-analysis-message">'+event['uploadguidance']+'</div>');
+              }
+
               html += '<slot name="uploader"></slot>';
               html += '<div part="uploader-analysis-message" class="uploader-analysis-message mt-20">The analysis is running in the background. You can proceed further.</div>'
             // }

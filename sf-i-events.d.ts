@@ -257,6 +257,8 @@ export declare class SfIEvents extends LitElement {
     nextPage: number;
     nextTabRole: string;
     nextTabStatus: string;
+    sdate: string;
+    edate: string;
     static styles: import("lit").CSSResult;
     _SfIEventsC: any;
     _SfRowError: any;
@@ -425,7 +427,7 @@ export declare class SfIEvents extends LitElement {
     getApproverStringFromEvent: (event: any) => string;
     getApproverDetailStringFromEvent: (event: any) => string;
     renderLatestCompliance: (mmddyyyy: string, event: any) => any;
-    getCompletenessStatus: (event: any) => "not-started" | "pending-approval" | "rejected" | "approved";
+    getCompletenessStatus: (event: any) => "rejected" | "not-started" | "pending-approval" | "approved";
     getTimelinessStatus: (mmdd: string, event: any, completeness: string) => "late-executed" | "late-reported" | "late-approved" | "past-due-date" | "in-time";
     getComplianceStatus: (completeness: string, timeliness: string) => "scheduled" | "not-complied" | "partially-complied" | "complied";
     numcalled: number;
@@ -548,6 +550,7 @@ export declare class SfIEvents extends LitElement {
     renderPieCsv: (pieData: any, csv: string, param: string) => string;
     renderGraph: (divContainer: HTMLDivElement, pieData: any, partData: any, lateData: any, complianceData: any, param: string) => void;
     renderEventDetailShort: (compliance: any) => void;
+    fetchEventDetails: (listEvent: any, mmddyyyy: any, currentColumnButton: HTMLButtonElement | null) => Promise<void>;
     renderEventDetail: (event: any, mmddyyyy: any, currentColumnButton: HTMLButtonElement | null) => void;
     renderCalendar: () => void;
     matchesOnBoardingFilter: (country: string, state: string, subcategory: string, statute: string) => boolean;
@@ -752,9 +755,9 @@ export declare class SfIEvents extends LitElement {
     fetchDetail: (value: any) => Promise<void>;
     fetchGetMappedCalendar: (year: string) => Promise<any>;
     sleepFunction: (ms: number) => Promise<unknown>;
-    renderAppropriateStream: (startDate: string, endDate: string) => void;
+    renderAppropriateStream: (startDate: string, endDate: string, showGraph?: boolean) => void;
     fetchRegisters: (searchString?: string) => Promise<any>;
-    fetchAndYearlyRenderUserCalendar_2: (startDate?: string, endDate?: string, searchString?: string) => Promise<void>;
+    fetchAndYearlyRenderUserCalendar_2: (startDate?: string, endDate?: string, searchString?: string, list?: string) => Promise<void>;
     fetchUserCalendar: () => Promise<void>;
     fetchCalendar: () => Promise<void>;
     fetchReprogramAdhoc: () => Promise<void>;
