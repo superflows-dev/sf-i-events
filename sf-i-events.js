@@ -7979,7 +7979,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             // }
             for (var j = 0; j < jsonData[0].cols.length; j++) {
                 html += '<th part="td-head" class="td-head ' + (statuteColName.toLowerCase() == JSON.parse(jsonData[0].data.cols)[j].toLowerCase() ? 'left-sticky' : '') + '">';
-                html += jsonData[0].cols[j];
+                // html += jsonData[0].cols[j]
                 html += '</th>';
             }
             if (extraFieldPosition === 1) {
@@ -8232,7 +8232,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                             if (jsonData[i].cols.includes(JSON.parse(jsonData[i].data.cols)[j])) {
                                 html += '<td part="td-body" class="td-body ' + classBg + ' ' + (jsonData[i].mapped ? 'chosen' : '') + ' ' + (statuteColName.toLowerCase() == JSON.parse(jsonData[i].data.cols)[j].toLowerCase() ? 'left-sticky' : '') + '">';
                                 html += '<div class="' + (!showSearch ? 'truncate' : '') + '">';
-                                html += '<div class="d-flex align-center">';
+                                html += '<div class="d-flex align-center flex-wrap">';
                                 let filterMatch = null;
                                 filterMatch = this.matchesOnBoardingFilter(JSON.parse(jsonData[i].data.data)[tempColCountry][0], JSON.parse(jsonData[i].data.data)[tempColState].length > 0 ? JSON.parse(jsonData[i].data.data)[tempColState][0] : "", JSON.parse(jsonData[i].data.data)[tempColSubcategory].length > 0 ? JSON.parse(jsonData[i].data.data)[tempColSubcategory][0] : "", Array.isArray(JSON.parse(jsonData[i].data.data)[tempColStatute]) ? JSON.parse(jsonData[i].data.data)[tempColStatute][0] : JSON.parse(jsonData[i].data.data)[tempColStatute]);
                                 if (jsonData[i].id == "f724e2b9-451a-49ec-85ba-2b099f433c73") {
@@ -8243,9 +8243,10 @@ let SfIEvents = class SfIEvents extends LitElement {
                                         unfilteredDict.push(i);
                                     }
                                 }
-                                if (JSON.parse(jsonData[i].data.cols)[j] == "statute") {
-                                    html += '<span class="material-symbols-outlined pr-5 plain-filter-icon">filter_list</span>';
-                                }
+                                // if(JSON.parse(jsonData[i].data.cols)[j] == "statute") {
+                                //   html += '<span class="material-symbols-outlined pr-5 plain-filter-icon">filter_list</span>';
+                                // }
+                                html += ('<div part="td-head" class="pl-0-imp w-100">' + JSON.parse(jsonData[i].data.cols)[j] + '</div>');
                                 if (Array.isArray(JSON.parse(jsonData[i].data.data)[j])) {
                                     for (var k = 0; k < JSON.parse(jsonData[i].data.data)[j].length; k++) {
                                         html += ('<sf-i-elastic-text text="' + JSON.parse(jsonData[i].data.data)[j][k] + '" minLength="80" lineSize="4"></sf-i-elastic-text>');
@@ -9017,7 +9018,7 @@ let SfIEvents = class SfIEvents extends LitElement {
                                     previousExtraFields = mappedStatutes.data.mappings.mappings[j].extraFields;
                                 }
                             }
-                            jsonData.push({ id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "jurisdiction", "state", "category", "subcategory", "statute", "applicability", "obligation", "risk", "riskarea", "frequency", "penalty", "reference", "form", "subfrequency", "obligationtype", "duedate"], extraFields: extraFields, previousExtraFields: previousExtraFields });
+                            jsonData.push({ id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "jurisdiction", "state", "category", "subcategory", "statute", "applicability", "obligationtitle", "obligation", "risk", "riskarea", "frequency", "penalty", "reference", "form", "subfrequency", "obligationtype", "duedate"], extraFields: extraFields, previousExtraFields: previousExtraFields });
                         }
                         this.renderMappingTable(this._SfOnboardingCompliancesListContainer, jsonData, [{ prev: initCursor, next: resultCompliances.cursor }], this.fetchSearchCompliances, searchString, mappedCompliances, resultCompliances.values.length, this.uploadCompliancesMapping, this.loadOnboardingCompliances, ["Client remarks", "FlaggGRC response"], -1, 0, "compliances", "", "statute", ["optional", "optional"]);
                     }
@@ -16111,6 +16112,10 @@ SfIEvents.styles = css `
 
     .mt-0 {
       margin-top: 0px;
+    }
+
+    .pl-0-imp {
+      padding-left: 0px !important;
     }
 
     .ml-0 {

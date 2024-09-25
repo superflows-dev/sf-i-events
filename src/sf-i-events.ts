@@ -1870,6 +1870,10 @@ export class SfIEvents extends LitElement {
       margin-top: 0px;
     }
 
+    .pl-0-imp {
+      padding-left: 0px !important;
+    }
+
     .ml-0 {
       margin-left: 0px;
     }
@@ -11782,7 +11786,7 @@ export class SfIEvents extends LitElement {
     for(var j = 0; j < jsonData[0].cols.length; j++) {
 
       html += '<th part="td-head" class="td-head ' + (statuteColName.toLowerCase() == JSON.parse(jsonData[0].data.cols)[j].toLowerCase() ? 'left-sticky' : '') + '">'
-      html += jsonData[0].cols[j]
+      // html += jsonData[0].cols[j]
       html += '</th>'
 
     }
@@ -12097,7 +12101,7 @@ export class SfIEvents extends LitElement {
 
               html += '<td part="td-body" class="td-body '+classBg+' ' + (jsonData[i].mapped ? 'chosen' : '') + ' ' + (statuteColName.toLowerCase() == JSON.parse(jsonData[i].data.cols)[j].toLowerCase() ? 'left-sticky' : '') + '">';
               html += '<div class="'+(!showSearch ? 'truncate' : '')+'">'
-                html += '<div class="d-flex align-center">';
+                html += '<div class="d-flex align-center flex-wrap">';
 
                 let filterMatch: any = null;
 
@@ -12112,10 +12116,11 @@ export class SfIEvents extends LitElement {
                     unfilteredDict.push(i);
                   }
                 }
-                if(JSON.parse(jsonData[i].data.cols)[j] == "statute") {
-                  html += '<span class="material-symbols-outlined pr-5 plain-filter-icon">filter_list</span>';
-                }
+                // if(JSON.parse(jsonData[i].data.cols)[j] == "statute") {
+                //   html += '<span class="material-symbols-outlined pr-5 plain-filter-icon">filter_list</span>';
+                // }
                 
+                html += ('<div part="td-head" class="pl-0-imp w-100">'+JSON.parse(jsonData[i].data.cols)[j]+'</div>');
                 if(Array.isArray(JSON.parse(jsonData[i].data.data)[j])) {
 
                   for(var k = 0; k < JSON.parse(jsonData[i].data.data)[j].length; k++) {
@@ -13195,7 +13200,7 @@ export class SfIEvents extends LitElement {
                 previousExtraFields = mappedStatutes.data.mappings.mappings[j].extraFields
               } 
             }
-            jsonData.push({id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "jurisdiction", "state", "category", "subcategory", "statute", "applicability", "obligation", "risk", "riskarea", "frequency", "penalty", "reference", "form", "subfrequency","obligationtype","duedate"], extraFields: extraFields, previousExtraFields: previousExtraFields})
+            jsonData.push({id: resultCompliances.values[i].id, mapped: mapped, data: resultCompliances.values[i].fields, cols: ["country", "jurisdiction", "state", "category", "subcategory", "statute", "applicability", "obligationtitle", "obligation", "risk", "riskarea", "frequency", "penalty", "reference", "form", "subfrequency","obligationtype","duedate"], extraFields: extraFields, previousExtraFields: previousExtraFields})
           }
 
 
