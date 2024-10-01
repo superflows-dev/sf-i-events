@@ -13,6 +13,7 @@ import {SfIUploader} from 'sf-i-uploader';
 import {Chart, ChartItem, registerables} from 'chart.js';
 import { SfIElasticText } from 'sf-i-elastic-text';
 import { SfIMultitextarea } from 'sf-i-multitextarea';
+import { SfIReporting } from 'sf-i-reporting';
 // import {LitElement, html, css} from 'lit';
 // import {customElement} from 'lit/decorators.js';
 
@@ -1187,6 +1188,9 @@ export class SfIEvents extends LitElement {
 
   @property()
   apiIdDefinitions!: string;
+  
+  @property()
+  apiidReportformats!: string;
 
   @property()
   apiIdProjects!: string;
@@ -2870,6 +2874,9 @@ export class SfIEvents extends LitElement {
   @queryAssignedElements({slot: 'uploader'})
   _SfUploader: any;
 
+  @queryAssignedElements({slot: 'reporting'})
+  _SfReporting: any;
+
   isSelectedLegend = (value: number) : any => {
     return this.chartSelectedLegend.includes(value);
   }
@@ -4250,7 +4257,7 @@ export class SfIEvents extends LitElement {
     html += '<div class="stream-events-container flex-grow">';
     html += '<div class="hidden-tags hide">'+JSON.stringify(event['tags'])+'</div>'
     html += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>'
-    html += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+itemNumber + '-' + (((event.makercheckers != null && (event.makercheckers).length > 0)) ? '1' : '0') + '-' + (((event.docs != null && (event.docs).length > 0)) ? '1' : '0') + '-' + event.entityid.replace(/-/g, '_') + '-' + event.locationid.replace(/-/g, '_') + '-' + event.id.replace(/-/g, '_') +  '-' + event.duedate.split('/')[1] + '-' + event.duedate.split('/')[0] + '-' + event.duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<sf-i-elastic-text text="'+event['obligationtitle']+'" minLength="100"></sf-i-elastic-text>' + (lastUpdated.length > 0 ? ('&nbsp;&nbsp;<div part="event-last-updated-time" class="d-flex align-center">' + lastUpdated + '</div>') : "") + '</div>';
+    html += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+itemNumber + '-' + (((event.makercheckers != null && (event.makercheckers).length > 0)) ? '1' : '0') + '-' + (((event.docs != null && (event.docs).length > 0)) ? '1' : '0') + '-' + event.entityid.replace(/-/g, '_') + '-' + event.locationid.replace(/-/g, '_') + '-' + event.id.replace(/-/g, '_') +  '-' + event.duedate.split('/')[1] + '-' + event.duedate.split('/')[0] + '-' + event.duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10 ' + ((event.reportformat != null && event.reportformat.length > 0) ? 'hide' : '') + '" type="checkbox"/>') + '<sf-i-elastic-text text="'+event['obligationtitle']+'" minLength="100"></sf-i-elastic-text>' + (lastUpdated.length > 0 ? ('&nbsp;&nbsp;<div part="event-last-updated-time" class="d-flex align-center">' + lastUpdated + '</div>') : "") + '</div>';
     if(remarks.length > 0) {
       html += '<div part="stream-events-event-subtitle" class="stream-events-event-subtitle">'+remarks+', occurred on '+occurrenceDate+'</div>';  
     }
@@ -9356,7 +9363,7 @@ export class SfIEvents extends LitElement {
 
   fetchEventDetails = async (listEvent: any, mmddyyyy: any, currentColumnButton: HTMLButtonElement | null) => {
     console.log('listEvent', listEvent, listEvent.id)
-    let url = "https://"+this.apiId+"/getalleventdetails";
+    let url = "https://"+this.apiId+"/getalleventdetails1";
     
     //console.log('fetch calendar url', url);
     let urlBody :any = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "eventid": listEvent.id, "entityid": listEvent.entityid, "locationid": listEvent.locationid, "mmddyyyy": mmddyyyy, "year": this.calendarStartYYYY};
@@ -9395,6 +9402,7 @@ export class SfIEvents extends LitElement {
     let entityId: string = "";
     let locationId: string = "";
     let statuteName: string = "";
+    let reportformatName: string = "";
 
     entityId = event.entityid;
     locationId = event.locationid;
@@ -9407,6 +9415,7 @@ export class SfIEvents extends LitElement {
     documentType = event['documenttype'] == null ? null : event['documenttype'][0] == null ? null : event['documenttype'][0].split(" ")[0];
 
     statuteName = event['statute'][0].trim();
+    reportformatName = (event['reportformat'][0] ?? "").trim();
 
     console.log('event detail', event, statuteName);
     //console.log('event detail comments', comments);
@@ -9758,6 +9767,11 @@ export class SfIEvents extends LitElement {
               html += '<slot name="uploader"></slot>';
               html += '<div part="uploader-analysis-message" class="uploader-analysis-message mt-20">The analysis is running in the background. You can proceed further.</div>'
             // }
+            html += '<br />';
+            if(event['reportformat'] != null && event['reportformat'].length > 0){
+              console.log('applying blank div report-format-0container')
+              html += '<div id="report-format-container"></div>'
+            }
             html += '<br />';
             if(makercheckers.length > 0) {
               html += '<div part="td-head" class="td-head d-flex justify-center align-center"><span class="material-symbols-outlined">check_small</span><div>&nbsp;Auto-approve Enabled</div></div>';
@@ -10145,6 +10159,8 @@ export class SfIEvents extends LitElement {
               // }
       
               //console.log('docs', docs);
+              let reportformatvalues:string = JSON.stringify((this._SfReporting[0].querySelector('#reporting-format') as SfIReporting)!.selectedValues()) ?? "";
+              let reportformatschema:string = (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting)!.configjson ?? "";
 
               if(docs.length === 0 && docsOptional.length === 0) {
 
@@ -10191,8 +10207,9 @@ export class SfIEvents extends LitElement {
                     if(this.selectedItems.length === 0) {
 
                       //console.log('makerscheckers', makercheckers, reportercomments);
-
-                      await this.uploadReport(entityId, locationId, mmddyyyy, event["id"], reportercomments, reporterdoc, docs, event)
+                      // console.log('reportformatvalues', reportformatvalues)
+                      // console.log('reportformatschema',reportformatschema)
+                      await this.uploadReport(entityId, locationId, mmddyyyy, event["id"], reportercomments, reporterdoc, docs, event, reportformatvalues, reportformatschema)
                       if(makercheckers.length > 0) {
 
                         await this.uploadReview(entityId, locationId, mmddyyyy, event["id"], "Auto approved", true);
@@ -10274,6 +10291,7 @@ export class SfIEvents extends LitElement {
         }
 
         (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.prepopulatedInputArr = JSON.stringify([]);
+        console.log('uploader', (this._SfUploader[0].querySelector('#uploader') as SfIUploader));
         (this._SfUploader[0].querySelector('#uploader') as SfIUploader)!.loadMode();
 
         if(docs.length > 0) {
@@ -10347,7 +10365,9 @@ export class SfIEvents extends LitElement {
 
     this.fetchStatuteDefinitionDetails(statuteName);
 
-
+    if(event['reportformat'] != null && event['reportformat'].length > 0){
+      this.fetchReportFormat(reportformatName, event['reportformatschema'] ?? "", event['reportformatvalues'] ?? "");
+    }
   }
 
   renderCalendar = () => {
@@ -17805,7 +17825,7 @@ export class SfIEvents extends LitElement {
   }
 
   uploadAudit = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => {
-    let url = "https://"+this.apiId+"/uploadaudit";
+    let url = "https://"+this.apiId+"/uploadaudit1";
 
     const body = { 
       "mmddyyyy": mmddyyyy,
@@ -17844,7 +17864,7 @@ export class SfIEvents extends LitElement {
   }
 
   uploadReview = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => {
-    let url = "https://"+this.apiId+"/uploadreview";
+    let url = "https://"+this.apiId+"/uploadreview1";
 
     const body = { 
       "mmddyyyy": mmddyyyy,
@@ -17884,8 +17904,8 @@ export class SfIEvents extends LitElement {
     }
   }
 
-  uploadReport = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, doc: string, docs: any, event: any) => {
-    let url = "https://"+this.apiId+"/uploadreport";
+  uploadReport = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, doc: string, docs: any, event: any, reportformatvalues: string = "", reportformatschema: string = "") => {
+    let url = "https://"+this.apiId+"/uploadreport1";
 
     const body = { 
       "mmddyyyy": mmddyyyy,
@@ -17898,7 +17918,9 @@ export class SfIEvents extends LitElement {
       "locationid": locationId,
       "event": JSON.stringify(event),
       "docs": JSON.stringify(docs),
-      "username": this.userName
+      "username": this.userName,
+      "reportformatvalues": reportformatvalues,
+      "reportformatschema": reportformatschema
     } 
 
     //console.log(body);
@@ -18346,6 +18368,78 @@ export class SfIEvents extends LitElement {
       while(true) {
 
         url = "https://"+this.apiIdDefinitions+"/listlarge";
+        authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+        xhr = (await this.prepareXhr({"searchstring": searchString, "cursor": newCursor}, url, this._SfLoader, authorization, "" + parseInt(((i)*100/jsonRespose.found) + "") + "%")) as any;
+        this._SfLoader.innerHTML = '';
+        if(xhr.status == 200) {
+          const jsonRespose1 = JSON.parse(xhr.responseText);
+          //console.log('found', jsonRespose1.values);
+          jsonRespose.values.push(...jsonRespose1.values);
+          if(newCursor == jsonRespose1.cursor) {
+            break;
+          }
+          newCursor = jsonRespose1.cursor;
+          //console.log('newcursor', i, jsonRespose1.cursor);
+          i+=jsonRespose1.values.length;
+        } else {
+          break;
+        }
+      }
+
+
+      return jsonRespose;
+      
+    } else {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      this.setError(jsonRespose.error);
+
+    }
+
+  }
+
+  fetchReportFormat = async(searchName: string, reportformatschema: string = "", reportformatvalues: string = "") => {
+    let josnContentFound:string;
+    if(reportformatschema == ""){
+      let reportformats = await this.fetchSearchReportformats(searchName);
+      if(reportformats.values == null || reportformats.values.length == 0){
+        return;
+      }
+      let reportformat = reportformats.values[0]
+      const jsonContentIndex = (JSON.parse(reportformat.fields.cols[0]) as Array<string>).indexOf('jsoncontent');
+      josnContentFound = JSON.parse(reportformat.fields.data[0])[jsonContentIndex];
+    }else{
+      josnContentFound = reportformatschema
+    }
+    console.log('format found', JSON.parse(josnContentFound));
+    (this._SfDetailContainer as HTMLDivElement).querySelector('#report-format-container')!.innerHTML = `<slot name="reporting"></slot>`;
+    console.log('innerhtml', (this._SfDetailContainer as HTMLDivElement).querySelector('#report-format-container')!.innerHTML);
+    (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting).name = searchName;
+    (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting).mode = reportformatvalues != "" ? "edit" : "new";
+    (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting).configjson = josnContentFound;
+    if(reportformatvalues != ""){
+      (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting).prepopulateValJson = reportformatvalues
+    }
+    (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting).loadMode();
+  }
+
+  fetchSearchReportformats = async (searchString: string, cursor: string = "") => {
+
+    let url = "https://"+this.apiidReportformats+"/listlarge";
+    let authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+    let xhr : any = (await this.prepareXhr({"searchstring": searchString, "cursor": cursor}, url, this._SfLoader, authorization)) as any;
+    this._SfLoader.innerHTML = '';
+    if(xhr.status == 200) {
+
+      const jsonRespose = JSON.parse(xhr.responseText);
+      //console.log('searchstatutes', jsonRespose);
+
+      let newCursor = jsonRespose.cursor;
+      let i = 0;
+
+      while(true) {
+
+        url = "https://"+this.apiidReportformats+"/listlarge";
         authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
         xhr = (await this.prepareXhr({"searchstring": searchString, "cursor": newCursor}, url, this._SfLoader, authorization, "" + parseInt(((i)*100/jsonRespose.found) + "") + "%")) as any;
         this._SfLoader.innerHTML = '';
@@ -19578,7 +19672,7 @@ export class SfIEvents extends LitElement {
       view = "entity";
     }
 
-    path = "getallcountryevents1";
+    path = "getallcountryevents2";
 
     let sDate = "";
     let eDate = "";
@@ -20186,7 +20280,7 @@ export class SfIEvents extends LitElement {
 
     //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
     this.nextPage = page;
-    let url = "https://"+this.apiId+"/getnextuserevents";
+    let url = "https://"+this.apiId+"/getnextuserevents1";
     let statusArr: string[] = []
     if(status == this.TAB_ALL){
       statusArr = [this.STATUS_NOT_STARTED, this.STATUS_PENDING_APPROVAL, this.STATUS_REJECTED, this.STATUS_APPROVED]
@@ -20474,7 +20568,7 @@ export class SfIEvents extends LitElement {
             eventHtml += '<div class="stream-events-container flex-grow">';
             eventHtml += '<div class="hidden-tags hide">'+JSON.stringify(eventsData[role][mmdd][j]['tags'])+'</div>'
             eventHtml += '<div class="hidden-title hide"><table><thead><th part="badge-filtered"><i>not filtered</i></th></thead></table></div>'
-            eventHtml += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5 mb-10">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((eventsData[role][mmdd][j].makercheckers != null && (eventsData[role][mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((eventsData[role][mmdd][j].docs != null && (eventsData[role][mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + eventsData[role][mmdd][j].entityid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].locationid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].id.replace(/-/g, '_') +  '-' + eventsData[role][mmdd][j].duedate.split('/')[1] + '-' + eventsData[role][mmdd][j].duedate.split('/')[0] + '-' + eventsData[role][mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10" type="checkbox" />') + '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>' +  '<sf-i-elastic-text text="'+eventsData[role][mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;'  + '<div part="td-body"><sf-i-elastic-text text="'+eventsData[role][mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "")+'" minLength="30"></sf-i-elastic-text></div>&nbsp;&nbsp;<div part="upcoming-function">' + functionStr + '</div>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + '</div>';
+            eventHtml += '<div part="stream-events-event-title" class="stream-events-event-title d-flex align-center pl-5 pb-5 mb-10">' + ('<input id="button-select-'+mmdd.replace('/', '-')+'-'+j + '-' + (((eventsData[role][mmdd][j].makercheckers != null && (eventsData[role][mmdd][j].makercheckers).length > 0)) ? '1' : '0') + '-' + (((eventsData[role][mmdd][j].docs != null && (eventsData[role][mmdd][j].docs).length > 0)) ? '1' : '0') + '-' + eventsData[role][mmdd][j].entityid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].locationid.replace(/-/g, '_') + '-' + eventsData[role][mmdd][j].id.replace(/-/g, '_') +  '-' + eventsData[role][mmdd][j].duedate.split('/')[1] + '-' + eventsData[role][mmdd][j].duedate.split('/')[0] + '-' + eventsData[role][mmdd][j].duedate.split('/')[2] + '-' + partStatus.replace(/-/g,'_') +  '" class="button-select mr-10 ' + ((eventsData[role][mmdd][j].reportformat != null && eventsData[role][mmdd][j].reportformat.length > 0) ? 'hide' : '') + '" type="checkbox" />') + '<button id="button-unmapped-expand-'+mmdd.replace('/', '-')+'-'+j+'" part="button-icon-small" class="material-icons button-expand mr-10">open_in_new</button>' +  '<sf-i-elastic-text text="'+eventsData[role][mmdd][j]['obligationtitle']+'" minLength="100"></sf-i-elastic-text>&nbsp;&nbsp;'  + '<div part="td-body"><sf-i-elastic-text text="'+eventsData[role][mmdd][j]["locationname"].replace(/ *\([^)]*\) */g, "")+'" minLength="30"></sf-i-elastic-text></div>&nbsp;&nbsp;<div part="upcoming-function">' + functionStr + '</div>&nbsp;&nbsp;' + this.renderStatusHtml(partStatus, lateStatus, complianceStatus, i) + '</div>';
             eventHtml += '</div>';
             html += eventHtml
             
@@ -20810,7 +20904,7 @@ export class SfIEvents extends LitElement {
           day = '0' + day;
         let eDate = month + "/" + day + "/" + year
         let urlBody :any = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": complianceEntityId, "countryid": "", "functionid": "", "locationid": complianceLocationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": 0, "sdate": sDate, "edate": eDate, "view": "location", "year": this.calendarStartYYYY};
-        let url = "https://"+this.apiId+"/getallcountryevents";
+        let url = "https://"+this.apiId+"/getallcountryevents2";
         const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
         const xhr : any = (await this.prepareXhr(urlBody, url, this._SfLoader, authorization, 'Preparing')) as any;
         this._SfLoader.innerHTML = '';
@@ -20900,7 +20994,7 @@ export class SfIEvents extends LitElement {
     console.log('fetching compliances', sortid)
     let complianceEntityId = sortid.split(';')[1]
     let complianceLocationId = sortid.split(';')[2]
-    let url = "https://"+this.apiId+"/getallcountryevents";
+    let url = "https://"+this.apiId+"/getallcountryevents2";
     let sDateObj  = selectedDate
     sDateObj.setDate(selectedDate.getDate() - 60)
     let day = '' + sDateObj.getDate();
