@@ -9415,7 +9415,9 @@ export class SfIEvents extends LitElement {
     documentType = event['documenttype'] == null ? null : event['documenttype'][0] == null ? null : event['documenttype'][0].split(" ")[0];
 
     statuteName = event['statute'][0].trim();
-    reportformatName = (event['reportformat'][0] ?? "").trim();
+    if(event['reportformat'] != null){
+      reportformatName = (event['reportformat'][0] ?? "").trim();
+    }
 
     console.log('event detail', event, statuteName);
     //console.log('event detail comments', comments);
@@ -10159,8 +10161,13 @@ export class SfIEvents extends LitElement {
               // }
       
               //console.log('docs', docs);
-              let reportformatvalues:string = JSON.stringify((this._SfReporting[0].querySelector('#reporting-format') as SfIReporting)!.selectedValues()) ?? "";
-              let reportformatschema:string = (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting)!.configjson ?? "";
+              let reportformatvalues:string = "";
+              let reportformatschema:string = "";
+              if(this._SfReporting[0] != null){
+                reportformatvalues = JSON.stringify((this._SfReporting[0].querySelector('#reporting-format') as SfIReporting)!.selectedValues()) ?? "";
+                reportformatschema = (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting)!.configjson ?? "";
+              }
+              
 
               if(docs.length === 0 && docsOptional.length === 0) {
 
@@ -20300,7 +20307,7 @@ export class SfIEvents extends LitElement {
     const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
     console.log('params', JSON.stringify({"projectid": this.projectId,"userprofileid": this.userProfileId, "roles": [role] , "year": new Date().getFullYear() + "", "page": this.nextPage, "blocksize": parseInt(this.blocksize), "status": statusArr}))
     console.log('authorization', authorization)
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId,"userprofileid": this.userProfileId, "roles": [role] , "year": new Date().getFullYear() + "", "page": this.nextPage, "blocksize": parseInt(this.blocksize), "status": statusArr}, url, this._SfLoader, authorization)) as any;
+    const xhr : any = (await this.prepareXhr({"projectid": this.projectId,"userprofileid": this.userProfileId, "roles": [role] , "year": new Date().getFullYear() + "", "page": this.nextPage, "blocksize": parseInt(this.blocksize), "status": statusArr, "list":"yes"}, url, this._SfLoader, authorization)) as any;
     this._SfLoader.innerHTML = '';
     if(xhr.status == 200) {
 
@@ -20668,7 +20675,8 @@ export class SfIEvents extends LitElement {
             this.myRole = this.nextTabRole
           }
           console.log('redering detail', this.myRole)
-          this.renderEventDetail(eventsData[role][mmdd][j], mmdd + "/" + yyyy, null);
+          // this.renderEventDetail(eventsData[role][mmdd][j], mmdd + "/" + yyyy, null);
+          this.fetchEventDetails(eventsData[role][mmdd][j], mmdd + "/" + yyyy, null);
     
         })
 
