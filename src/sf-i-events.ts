@@ -10101,6 +10101,9 @@ export class SfIEvents extends LitElement {
         }else{
           if(this.getCurrentTab() == this.TAB_CUSTOM) {
             this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
+          } else if(this.getCurrentTab() == this.TAB_FIND) {
+            const searchString = ((this._SfFindContainer as HTMLDivElement).querySelector('#stream-search') as HTMLInputElement).value;
+            this.processFindSelection((this._SfFindContainer as HTMLDivElement), searchString);
           } else {
             if(currentColumnButton != null) {
               currentColumnButton.click();
@@ -10159,6 +10162,9 @@ export class SfIEvents extends LitElement {
           }else{
             if(this.getCurrentTab() == this.TAB_CUSTOM) {
               this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
+            } else if(this.getCurrentTab() == this.TAB_FIND) {
+              const searchString = ((this._SfFindContainer as HTMLDivElement).querySelector('#stream-search') as HTMLInputElement).value;
+              this.processFindSelection((this._SfFindContainer as HTMLDivElement), searchString);
             } else {
               if(currentColumnButton != null) {
                 currentColumnButton.click();
@@ -10301,6 +10307,9 @@ export class SfIEvents extends LitElement {
                     }else{
                       if(this.getCurrentTab() == this.TAB_CUSTOM) {
                         this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
+                      } else if(this.getCurrentTab() == this.TAB_FIND) {
+                        const searchString = ((this._SfFindContainer as HTMLDivElement).querySelector('#stream-search') as HTMLInputElement).value;
+                        this.processFindSelection((this._SfFindContainer as HTMLDivElement), searchString);
                       } else {
                         if(currentColumnButton != null) {
                           currentColumnButton.click();
@@ -16760,6 +16769,10 @@ export class SfIEvents extends LitElement {
 
     if((this._SfCustomContainer as HTMLDivElement).style.display == 'flex') {
       return this.TAB_CUSTOM;
+    }
+
+    if((this._SfFindContainer as HTMLDivElement).style.display == 'flex') {
+      return this.TAB_FIND;
     }
     
     return "";
