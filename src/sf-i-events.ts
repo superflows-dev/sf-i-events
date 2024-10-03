@@ -7697,10 +7697,10 @@ export class SfIEvents extends LitElement {
         html += '<input id="stream-end-date-mobile" part="input" type="date" />'
       html += '</div>';
       html += '<div class="title-item-date">';
-        html += '<button part="button-lg-short-secondary">This Quarter</button>'
+        html += '<button id="button-this-quarter-mobile" part="button-lg-short-secondary">This Quarter</button>'
       html += '</div>';
       html += '<div class="title-item-date">';
-        html += '<button part="button-lg-short-secondary">This Year</button>'
+        html += '<button id="button-this-year-mobile" part="button-lg-short-secondary">This Year</button>'
       html += '</div>';
 
     html += '</div>';
@@ -7759,12 +7759,54 @@ export class SfIEvents extends LitElement {
       this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
     });
 
-    (this._SfCustomContainer as HTMLDivElement).querySelector('#button-this-year')?.addEventListener('click', () => {
+    (this._SfCustomContainer as HTMLDivElement).querySelector('#button-this-year-mobile')?.addEventListener('click', () => {
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date-mobile') as HTMLInputElement).value = this.calendarStartYYYY + '-' + this.calendarStartMM + '-' + this.calendarStartDD;
       ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date') as HTMLInputElement).value = this.calendarStartYYYY + '-' + this.calendarStartMM + '-' + this.calendarStartDD;
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date-mobile') as HTMLInputElement).value = (parseInt(this.calendarStartYYYY) + 1) + '-' + this.calendarStartMM + '-' + this.calendarStartDD;
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date') as HTMLInputElement).value = (parseInt(this.calendarStartYYYY) + 1) + '-' + this.calendarStartMM + '-' + this.calendarStartDD;
+      this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
+    });
+    (this._SfCustomContainer as HTMLDivElement).querySelector('#button-this-year')?.addEventListener('click', () => {
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date-mobile') as HTMLInputElement).value = this.calendarStartYYYY + '-' + this.calendarStartMM + '-' + this.calendarStartDD;
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date') as HTMLInputElement).value = this.calendarStartYYYY + '-' + this.calendarStartMM + '-' + this.calendarStartDD;
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date-mobile') as HTMLInputElement).value = (parseInt(this.calendarStartYYYY) + 1) + '-' + this.calendarStartMM + '-' + this.calendarStartDD;
       ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date') as HTMLInputElement).value = (parseInt(this.calendarStartYYYY) + 1) + '-' + this.calendarStartMM + '-' + this.calendarStartDD;
       this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
     });
 
+    (this._SfCustomContainer as HTMLDivElement).querySelector('#button-this-quarter-mobile')?.addEventListener('click', () => {
+
+      const mmCurrent = ((new Date().getMonth() + 1));
+
+      let startDate : string = "";
+      let endDate : string = "";
+
+      if(mmCurrent >=4 && mmCurrent <= 6) {
+
+        startDate = this.calendarStartYYYY + '-' + '04' + '-' + "01";
+        endDate = this.calendarStartYYYY + '-' + '07' + '-' + "01";
+
+      } else if(mmCurrent >=6 && mmCurrent <= 9) {
+
+        startDate = this.calendarStartYYYY + '-' + '07' + '-' + "01";
+        endDate = this.calendarStartYYYY + '-' + '10' + '-' + "01";
+
+      } else if(mmCurrent >=9 && mmCurrent <= 12) {
+
+        startDate = this.calendarStartYYYY + '-' + '10' + '-' + "01";
+        endDate = (parseInt(this.calendarStartYYYY) + 1) + '-' + '01' + '-' + "01";
+
+      } else {
+        startDate = this.calendarStartYYYY + '-' + '01' + '-' + "01";
+        endDate = (parseInt(this.calendarStartYYYY) + 1) + '-' + '04' + '-' + "01";
+      }
+
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date') as HTMLInputElement).value = startDate;
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date-mobile') as HTMLInputElement).value = startDate;
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date') as HTMLInputElement).value = endDate;
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date-mobile') as HTMLInputElement).value = endDate;
+      this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
+    });
     (this._SfCustomContainer as HTMLDivElement).querySelector('#button-this-quarter')?.addEventListener('click', () => {
 
       const mmCurrent = ((new Date().getMonth() + 1));
@@ -7793,7 +7835,9 @@ export class SfIEvents extends LitElement {
       }
 
       ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date') as HTMLInputElement).value = startDate;
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-start-date-mobile') as HTMLInputElement).value = startDate;
       ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date') as HTMLInputElement).value = endDate;
+      ((this._SfCustomContainer as HTMLDivElement).querySelector('#stream-end-date-mobile') as HTMLInputElement).value = endDate;
       this.processDateSelection((this._SfCustomContainer as HTMLDivElement));
     });
     
@@ -9771,8 +9815,7 @@ export class SfIEvents extends LitElement {
             // }
             html += '<br />';
             if(event['reportformat'] != null && event['reportformat'].length > 0){
-              console.log('applying blank div report-format-0container')
-              html += '<div id="report-format-container"></div>'
+              html += '<div id="report-format-container"><div class="box"></div></div>'
             }
             html += '<br />';
             if(makercheckers.length > 0) {
