@@ -4551,7 +4551,7 @@ export class SfIEvents extends LitElement {
     let approverStr = this.getApproverStringFromEvent(event);
 
     let graphParam = this.getGraphParam(event);
-
+    console.log("graphParam", graphParam.split(';')[0]);
     html += '<div class="d-flex"><div part="badge-filter-name" class="graphparamname graphparamname1 mb-20">' + graphParam.split(';')[0] + '</div>' + reporterStr + approverStr + '</div>';
 
     return html;
@@ -16436,8 +16436,15 @@ export class SfIEvents extends LitElement {
     for(var i = 0; i < divs.length; i++) {
 
       //console.log('processGraphFilter', graphparamnames1[i], (graphparamnames1[i] as HTMLDivElement).innerHTML.toLowerCase().replace('&amp;', '&').replace(/-/g, ' '), this.graphParam.toLowerCase().replace('&amp;', '&').replace(/-/g, ' '));
-
-      if((graphparamnames1[i] as HTMLDivElement).innerHTML.toLowerCase().replace('&amp;', '&').replace(/-/g, ' ') == this.graphParam.toLowerCase().replace('&amp;', '&').replace(/-/g, ' ') || this.graphParam.toLowerCase().replace('&amp;', '&').replace(/-/g, ' ') == "") {
+      let graphparamname1Arr = (graphparamnames1[i] as HTMLDivElement).innerHTML.toLowerCase().replace('&amp;', '&').replace(/-/g, ' ').split(' • ');
+      let filterFound = false;
+      for(let tempFilterStr of graphparamname1Arr){
+        if(tempFilterStr == this.graphParam.toLowerCase().replace('&amp;', '&').replace(/-/g, ' ') || this.graphParam.toLowerCase().replace('&amp;', '&').replace(/-/g, ' ') == ""){
+          filterFound = true;
+          break;
+        }
+      }
+      if(filterFound) {
         (tables[i] as HTMLDivElement).style.display = 'block';
         //(hiddenFilternames[i] as HTMLDivElement).style.display = 'block';
         (graphparamnames1[i] as HTMLDivElement).style.display = 'block';
@@ -18406,24 +18413,35 @@ export class SfIEvents extends LitElement {
   }
 
   fetchReportFormat = async(searchName: string, reportformatschema: string = "", reportformatvalues: string = "") => {
-    let josnContentFound:string;
+    let jsonContentIndex:number;
+    let jsonContentFound:string = "";
     if(reportformatschema == ""){
       let reportformats = await this.fetchSearchReportformats(searchName);
       if(reportformats.values == null || reportformats.values.length == 0){
         return;
       }
-      let reportformat = reportformats.values[0]
-      const jsonContentIndex = (JSON.parse(reportformat.fields.cols[0]) as Array<string>).indexOf('jsoncontent');
-      josnContentFound = JSON.parse(reportformat.fields.data[0])[jsonContentIndex];
+      for(let format of reportformats.values){
+        let data = JSON.parse(format.fields.data[0])
+        let cols = JSON.parse(format.fields.cols[0])
+        if(data[cols.indexOf('name')] == searchName){
+          jsonContentIndex = (JSON.parse(format.fields.cols[0]) as Array<string>).indexOf('jsoncontent');
+          jsonContentFound = JSON.parse(format.fields.data[0])[jsonContentIndex];
+          break;
+        }
+      }
     }else{
-      josnContentFound = reportformatschema
+      jsonContentFound = reportformatschema
     }
-    console.log('format found', JSON.parse(josnContentFound));
+    console.log('format found', JSON.parse(jsonContentFound));
+    if(jsonContentFound == ""){
+      console.log('format not found');
+      return;
+    }
     (this._SfDetailContainer as HTMLDivElement).querySelector('#report-format-container')!.innerHTML = `<slot name="reporting"></slot>`;
     console.log('innerhtml', (this._SfDetailContainer as HTMLDivElement).querySelector('#report-format-container')!.innerHTML);
     (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting).name = searchName;
     (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting).mode = reportformatvalues != "" ? "edit" : "new";
-    (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting).configjson = josnContentFound;
+    (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting).configjson = jsonContentFound;
     if(reportformatvalues != ""){
       (this._SfReporting[0].querySelector('#reporting-format') as SfIReporting).prepopulateValJson = reportformatvalues
     }
