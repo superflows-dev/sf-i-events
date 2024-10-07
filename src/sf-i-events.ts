@@ -1539,7 +1539,10 @@ export class SfIEvents extends LitElement {
   locationComplianceStatusData: any = null;
 
   @property()
-  selectedItems: Array<string> = [];
+  selectedItemIds: Array<string> = [];
+
+  @property()
+  selectedItems: Array<any> = [];
 
   @property()
   selectedStatus: string = "";
@@ -4561,6 +4564,7 @@ export class SfIEvents extends LitElement {
   renderEvents = (_firstDay: any, _endDay: any, iInit: number, iLast: number, showGraph: boolean, index: number, month: number, period: string, firstDate: any = null) => {
     var total = 0, notStarted = 0, approved = 0, pendingApproval = 0, rejected = 0, inTime = 0, pastDueDate = 0, lateExecuted = 0, lateApproved = 0, lateReported = 0, scheduled = 0, partiallyComplied = 0, notComplied = 0, complied = 0;
     var html = '';
+    this.selectedItemIds = [];
     this.selectedItems = [];
     this.selectedStatus = "";
     var csvCols = "", htmlCols = "", htmlSummaryCols = "";
@@ -4903,12 +4907,13 @@ export class SfIEvents extends LitElement {
         const j = idArr[5];
 
         let found = false;
-        for(var k = 0; k < this.selectedItems.length; k++) {
-          if(this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+        for(var k = 0; k < this.selectedItemIds.length; k++) {
+          if(this.selectedItemIds[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
             found = true;
           }
         }
         if(!found) {
+          this.selectedItemIds = [];
           this.selectedItems = [];
           this.clearButtonSelection();
         }
@@ -4941,12 +4946,12 @@ export class SfIEvents extends LitElement {
         const docs = idArr[6];
 
         if((ev.target as HTMLInputElement).checked) {
-          this.selectedItems.push(id);
+          this.selectedItemIds.push(id);
         } else {
-          this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+          this.selectedItemIds.splice(this.selectedItemIds.indexOf(id), 1);
         }
 
-        if(this.selectedItems.length === 0) {
+        if(this.selectedItemIds.length === 0) {
 
           for(var k = 0; k < buttonSelect.length; k++) {
 
@@ -4957,7 +4962,7 @@ export class SfIEvents extends LitElement {
 
         } else {
 
-          if(this.selectedItems.length === 1) {
+          if(this.selectedItemIds.length === 1) {
 
             const id1 = id;
             const idArr1 = id1.split("-")
@@ -7290,7 +7295,7 @@ export class SfIEvents extends LitElement {
           html += '<div part="results-title"><sf-i-elastic-text text="'+arrTriggerRemarks[j]+'" minLength="40"></sf-i-elastic-text></div>';
         html += '</div>'
         html += '<div part="td-body" class="d-flex align-center">'
-          html += '<div>Trigger Id: </div>&nbsp;&nbsp;<sf-i-elastic-text text="'+arrTriggerIds[j]+'" minLength="10" lineSize="6"></sf-i-elastic-text>&nbsp;&nbsp; <button id="adhoc-delete-start-'+i+'-'+j+'"  class="mr-10">Retract</button><button id="adhoc-delete-cancel-'+i+'-'+j+'" class="mr-10 hide">Cancel</button><button id="adhoc-delete-confirm-'+i+'-'+j+'" class="mr-10 hide">Confirm Retract</button>';
+          html += '<div>Trigger Id: </div>&nbsp;&nbsp;<sf-i-elastic-text text="'+arrTriggerIds[j]+'" minLength="10" lineSize="6"></sf-i-elastic-text>&nbsp;&nbsp; <button id="adhoc-delete-start-'+arrTriggerIds[j].replace(/-/g,"_")+'"  class="mr-10 adhoc-delete-start">Retract</button><button id="adhoc-delete-cancel-'+arrTriggerIds[j].replace(/-/g,"_")+'" class="mr-10 hide adhoc-delete-cancel">Cancel</button><button id="adhoc-delete-confirm-'+arrTriggerIds[j].replace(/-/g,"_")+'" class="mr-10 hide adhoc-delete-confirm">Confirm Retract</button>';
         html += '</div>'
         
 
@@ -7332,58 +7337,49 @@ export class SfIEvents extends LitElement {
 
     (this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-list')!.innerHTML = html;
     
-    for(i = 0; i < Object.keys(adhocQuestions).length; i++) {
+    let triggerDeleteStartButtons = ((this._SfAdhocContainer as HTMLDivElement).querySelectorAll('.adhoc-delete-start') as NodeListOf<HTMLButtonElement>);
+    for(let triggerDeleteStartButton of triggerDeleteStartButtons){
+      triggerDeleteStartButton.addEventListener('click',(e: any) => {
+        const _id = e.currentTarget.id;
+        const triggerid = _id.split('-')[3];
 
-      const firstCompliance = adhocQuestions[Object.keys(adhocQuestions)[i]][0];
-      const firstComplianceTriggers = firstCompliance.triggers == null ? [] : firstCompliance.triggers == "" ? [] : JSON.parse(firstCompliance.triggers);
+        ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-start-'+triggerid) as HTMLButtonElement).classList.add('hide');
+        ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-cancel-'+triggerid) as HTMLButtonElement).classList.remove('hide');
+        ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-confirm-'+triggerid) as HTMLButtonElement).classList.remove('hide');
 
-      for(var j = 0; j < firstComplianceTriggers.length; j++)  {
-
-        (this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-start-'+i+'-'+j)?.addEventListener('click', (e: any) => {
-
-          const _id = e.currentTarget.id;
-          const _i = _id.split('-')[3];
-          const _j = _id.split('-')[4];
-
-          ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-start-'+_i+'-'+_j) as HTMLButtonElement).classList.add('hide');
-          ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-cancel-'+_i+'-'+_j) as HTMLButtonElement).classList.remove('hide');
-          ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-confirm-'+_i+'-'+_j) as HTMLButtonElement).classList.remove('hide');
-
-        });
-
-        (this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-cancel-'+i+'-'+j)?.addEventListener('click', (e: any) => {
-
-          const _id = e.currentTarget.id;
-          const _i = _id.split('-')[3];
-          const _j = _id.split('-')[4];
-
-          ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-start-'+_i+'-'+_j) as HTMLButtonElement).classList.remove('hide');
-          ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-cancel-'+_i+'-'+_j) as HTMLButtonElement).classList.add('hide');
-          ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-confirm-'+_i+'-'+_j) as HTMLButtonElement).classList.add('hide');
-
-        });
-
-        (this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-confirm-'+i+'-'+j)?.addEventListener('click', async (e: any) => {
-
-          const _id = e.currentTarget.id;
-          const _i = _id.split('-')[3];
-          const _j = _id.split('-')[4];
-
-          const untrigger = {
-            projectid: this.projectId,
-            triggerid: arrAllTriggerIds[_i][_j]
-          }
-
-          console.log('untrigger', untrigger);
-          await this.uploadUnTriggerEvent(untrigger)
-          this.renderAdhoc();
-
-        });
-
-      }
-
+      })
     }
+    let triggerDeleteCancelButtons = ((this._SfAdhocContainer as HTMLDivElement).querySelectorAll('.adhoc-delete-cancel') as NodeListOf<HTMLButtonElement>);
+    for(let triggerDeleteCancelButton of triggerDeleteCancelButtons){
+      triggerDeleteCancelButton.addEventListener('click',(e: any) => {
+        const _id = e.currentTarget.id;
+        const triggerid = _id.split('-')[3];
 
+        ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-start-'+triggerid) as HTMLButtonElement).classList.remove('hide');
+        ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-cancel-'+triggerid) as HTMLButtonElement).classList.add('hide');
+        ((this._SfAdhocContainer as HTMLDivElement).querySelector('#adhoc-delete-confirm-'+triggerid) as HTMLButtonElement).classList.add('hide');
+
+
+      })
+    }
+    let triggerDeleteConfirmButtons = ((this._SfAdhocContainer as HTMLDivElement).querySelectorAll('.adhoc-delete-confirm') as NodeListOf<HTMLButtonElement>);
+    for(let triggerDeleteConfirmButton of triggerDeleteConfirmButtons){
+      triggerDeleteConfirmButton.addEventListener('click',async (e: any) => {
+        const _id = e.currentTarget.id;
+        const triggerid = _id.split('-')[3];
+
+        const untrigger = {
+          projectid: this.projectId,
+          triggerid: triggerid
+        }
+
+        console.log('untrigger', untrigger);
+        await this.uploadUnTriggerEvent(untrigger)
+        this.renderAdhoc();
+
+      })
+    }
+    
     for(i = 0; i < Object.keys(adhocQuestions).length; i++) {
       
       const radioYes = (this._SfAdhocContainer as HTMLDivElement).querySelector('#radio-yes-'+i) as HTMLInputElement;
@@ -8083,13 +8079,13 @@ export class SfIEvents extends LitElement {
         const j = idArr[5];
 
         let found = false;
-        for(var k = 0; k < this.selectedItems.length; k++) {
-          if(this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+        for(var k = 0; k < this.selectedItemIds.length; k++) {
+          if(this.selectedItemIds[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
             found = true;
           }
         }
         if(!found) {
-          this.selectedItems = [];
+          this.selectedItemIds = [];
           this.clearButtonSelection();
         }
 
@@ -8121,12 +8117,12 @@ export class SfIEvents extends LitElement {
         const docs = idArr[6];
 
         if((ev.target as HTMLInputElement).checked) {
-          this.selectedItems.push(id);
+          this.selectedItemIds.push(id);
         } else {
-          this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+          this.selectedItemIds.splice(this.selectedItemIds.indexOf(id), 1);
         }
 
-        if(this.selectedItems.length === 0) {
+        if(this.selectedItemIds.length === 0) {
 
           for(var k = 0; k < buttonSelect.length; k++) {
 
@@ -8137,7 +8133,7 @@ export class SfIEvents extends LitElement {
 
         } else {
 
-          if(this.selectedItems.length === 1) {
+          if(this.selectedItemIds.length === 1) {
 
             const id1 = id;
             const idArr1 = id1.split("-")
@@ -8411,14 +8407,14 @@ export class SfIEvents extends LitElement {
         const j = idArr[5];
 
         let found = false;
-        for(var k = 0; k < this.selectedItems.length; k++) {
-          console.log('selectedItems', this.selectedItems[k], idArr[3] + '-' + idArr[4] + '-' + idArr[5], this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]));
-          if(this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+        for(var k = 0; k < this.selectedItemIds.length; k++) {
+          console.log('selectedItems', this.selectedItemIds[k], idArr[3] + '-' + idArr[4] + '-' + idArr[5], this.selectedItemIds[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]));
+          if(this.selectedItemIds[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
             found = true;
           }
         }
         if(!found) {
-          this.selectedItems = [];
+          this.selectedItemIds = [];
           this.clearButtonSelection();
         }
 
@@ -8452,12 +8448,12 @@ export class SfIEvents extends LitElement {
         const docs = idArr[6];
 
         if((ev.target as HTMLInputElement).checked) {
-          this.selectedItems.push(id);
+          this.selectedItemIds.push(id);
         } else {
-          this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+          this.selectedItemIds.splice(this.selectedItemIds.indexOf(id), 1);
         }
 
-        if(this.selectedItems.length === 0) {
+        if(this.selectedItemIds.length === 0) {
 
           for(var k = 0; k < buttonSelect.length; k++) {
 
@@ -8468,7 +8464,7 @@ export class SfIEvents extends LitElement {
 
         } else {
 
-          if(this.selectedItems.length === 1) {
+          if(this.selectedItemIds.length === 1) {
 
             const id1 = id;
             const idArr1 = id1.split("-")
@@ -9460,7 +9456,7 @@ export class SfIEvents extends LitElement {
 
     statuteName = event['statute'][0].trim();
     if(event['reportformat'] != null){
-      reportformatName = (event['reportformat'][0] ?? "").trim();
+      reportformatName = (event['reportformat'][0] ?? "").trim().replace('&amp;','&');
     }
 
     console.log('event detail', event, statuteName);
@@ -9482,12 +9478,12 @@ export class SfIEvents extends LitElement {
     
     `;
 
-    if(this.selectedItems.length > 1) {
+    if(this.selectedItemIds.length > 1) {
       
       html += `
     
         <div class="d-flex justify-between m-20">
-          <h4 class="m-0">${this.selectedItems.length - 1} other ` + (this.selectedItems.length === 1 ? `item` : `items`) + ` also selected</h4>
+          <h4 class="m-0">${this.selectedItemIds.length - 1} other ` + (this.selectedItemIds.length === 1 ? `item` : `items`) + ` also selected</h4>
         </div>
     
       `;
@@ -9945,7 +9941,7 @@ export class SfIEvents extends LitElement {
         html += '<div class="m-20">';
 
           html += '<div class="w-100p scroll-x">';
-
+            console.log("reportevent",JSON.parse(event.reportevent));
             const jsonReportEvent = JSON.parse(event.reportevent);
 
             html += '<table>';
@@ -10068,15 +10064,15 @@ export class SfIEvents extends LitElement {
         
         // await this.uploadReview(entityId, locationId, mmddyyyy, event["id"], comments, approved)
 
-        if(this.selectedItems.length === 0) {
+        if(this.selectedItemIds.length === 0) {
           // console.log('mmddyyyy', mmddyyyy)
           await this.uploadReview(entityId, locationId, mmddyyyy, event["id"], comments, approved)
 
         } else {
 
-          for(var k = 0; k < this.selectedItems.length; k++) {
+          for(var k = 0; k < this.selectedItemIds.length; k++) {
             
-            const selectedId = this.selectedItems[k];
+            const selectedId = this.selectedItemIds[k];
             //console.log('selectedid', selectedId);
             entityId = selectedId.split('-')[7].replace(/_/g, '-');
             locationId = selectedId.split('-')[8].replace(/_/g, '-');
@@ -10087,7 +10083,7 @@ export class SfIEvents extends LitElement {
 
             await this.uploadReview(entityId, locationId, mmddyyyy, eventId, comments, approved)
 
-            this.setSuccess("Updating, please wait...");
+            this.setSuccess("Updating " + (k + 1) + "/" + this.selectedItemIds.length + ", please wait...");
             await this.sleep(2000);
             this.clearMessages();
 
@@ -10127,15 +10123,15 @@ export class SfIEvents extends LitElement {
 
         } else {
 
-          if(this.selectedItems.length === 0) {
+          if(this.selectedItemIds.length === 0) {
 
             await this.uploadAudit(entityId, locationId, mmddyyyy, event["id"], comments, approved)
           
           } else {
 
-            for(var k = 0; k < this.selectedItems.length; k++) {
+            for(var k = 0; k < this.selectedItemIds.length; k++) {
                       
-              const selectedId = this.selectedItems[k];
+              const selectedId = this.selectedItemIds[k];
               //console.log('selectedid', selectedId);
 
               entityId = selectedId.split('-')[7].replace(/_/g, '-');
@@ -10260,7 +10256,7 @@ export class SfIEvents extends LitElement {
 
                     ((this._SfDetailContainer as HTMLDivElement).querySelector('#button-detail-close') as HTMLButtonElement)!.dispatchEvent(clickEvent);
 
-                    if(this.selectedItems.length === 0) {
+                    if(this.selectedItemIds.length === 0) {
 
                       //console.log('makerscheckers', makercheckers, reportercomments);
                       // console.log('reportformatvalues', reportformatvalues)
@@ -10274,9 +10270,9 @@ export class SfIEvents extends LitElement {
 
                     } else {
 
-                      for(var k = 0; k < this.selectedItems.length; k++) {
+                      for(var k = 0; k < this.selectedItemIds.length; k++) {
                         
-                        const selectedId = this.selectedItems[k];
+                        const selectedId = this.selectedItemIds[k];
                         //console.log('selectedid', selectedId);
 
                         const makercheckersL = selectedId.split('-')[5];
@@ -10287,14 +10283,14 @@ export class SfIEvents extends LitElement {
 
                         //console.log(entityId, locationId, eventId, mmddyyyy);
 
-                        await this.uploadReport(entityId, locationId, mmddyyyy, eventId, reportercomments, reporterdoc, docs, event)
+                        await this.uploadReport(entityId, locationId, mmddyyyy, eventId, reportercomments, reporterdoc, docs, null)
                         if(parseInt(makercheckersL) > 0) {
 
                           await this.uploadReview(entityId, locationId, mmddyyyy, eventId, "Auto approved", true);
 
                         }
 
-                        this.setSuccess("Updating, please wait...");
+                        this.setSuccess("Updating " + (k + 1) + "/" + this.selectedItemIds.length + ", please wait...");
                         await this.sleep(2000);
                         this.clearMessages();
 
@@ -17971,13 +17967,13 @@ export class SfIEvents extends LitElement {
     } else {
       const jsonRespose = JSON.parse(xhr.responseText);
       this.setError(jsonRespose.error);
-    }
+    }``
   }
 
   uploadReport = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, doc: string, docs: any, event: any, reportformatvalues: string = "", reportformatschema: string = "") => {
     let url = "https://"+this.apiId+"/uploadreport1";
 
-    const body = { 
+    let body = { 
       "mmddyyyy": mmddyyyy,
       "projectid": this.projectId, 
       "type": "report",
@@ -17986,12 +17982,15 @@ export class SfIEvents extends LitElement {
       "dateofcompletion": doc,
       "entityid": entityId,
       "locationid": locationId,
-      "event": JSON.stringify(event),
+      "event": event == null ? null : JSON.stringify(event),
       "docs": JSON.stringify(docs),
       "username": this.userName,
       "reportformatvalues": reportformatvalues,
-      "reportformatschema": reportformatschema
-    } 
+      "reportformatschema": reportformatschema,
+      "userid": this.userProfileId,
+      "userrole": this.myRole,
+      "year": this.calendarStartYYYY
+    }
 
     //console.log(body);
 
@@ -20585,7 +20584,7 @@ export class SfIEvents extends LitElement {
     // if(Object.keys(eventsData[role]).length > 0){
       var notStarted = 0, approved = 0, pendingApproval = 0, rejected = 0, inTime = 0, pastDueDate = 0, lateExecuted = 0, lateApproved = 0, lateReported = 0, scheduled = 0, partiallyComplied = 0, notComplied = 0, complied = 0;
       var html = '';
-      this.selectedItems = [];
+      this.selectedItemIds = [];
       this.selectedStatus = "";
       html += '<div id="stream-event-next" part="stream-event-list" class="stream-event-list">';
       for(var i = 0; i < Object.keys(eventsData[role]).length; i++) {
@@ -20714,13 +20713,13 @@ export class SfIEvents extends LitElement {
           const j = idArr[5];
 
           let found = false;
-          for(var k = 0; k < this.selectedItems.length; k++) {
-            if(this.selectedItems[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
+          for(var k = 0; k < this.selectedItemIds.length; k++) {
+            if(this.selectedItemIds[k].indexOf(idArr[3] + '-' + idArr[4] + '-' + idArr[5]) >= 0) {
               found = true;
             }
           }
           if(!found) {
-            this.selectedItems = [];
+            this.selectedItemIds = [];
             this.clearButtonSelectionNext();
           }
 
@@ -20773,12 +20772,12 @@ export class SfIEvents extends LitElement {
           const docs = idArr[6];
 
           if((ev.target as HTMLInputElement).checked) {
-            this.selectedItems.push(id);
+            this.selectedItemIds.push(id);
           } else {
-            this.selectedItems.splice(this.selectedItems.indexOf(id), 1);
+            this.selectedItemIds.splice(this.selectedItemIds.indexOf(id), 1);
           }
 
-          if(this.selectedItems.length === 0) {
+          if(this.selectedItemIds.length === 0) {
 
             for(var k = 0; k < buttonSelect.length; k++) {
 
@@ -20789,7 +20788,7 @@ export class SfIEvents extends LitElement {
 
           } else {
 
-            if(this.selectedItems.length === 1) {
+            if(this.selectedItemIds.length === 1) {
 
               const id1 = id;
               const idArr1 = id1.split("-")
