@@ -9403,7 +9403,7 @@ export class SfIEvents extends LitElement {
 
   fetchEventDetails = async (listEvent: any, mmddyyyy: any, currentColumnButton: HTMLButtonElement | null) => {
     console.log('listEvent', listEvent, listEvent.id)
-    let url = "https://"+this.apiId+"/getalleventdetails1";
+    let url = "https://"+this.apiId+"/getalleventdetails";
     
     //console.log('fetch calendar url', url);
     let urlBody :any = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "eventid": listEvent.id, "entityid": listEvent.entityid, "locationid": listEvent.locationid, "mmddyyyy": mmddyyyy, "year": this.calendarStartYYYY};
@@ -17891,7 +17891,7 @@ export class SfIEvents extends LitElement {
   }
 
   uploadAudit = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => {
-    let url = "https://"+this.apiId+"/uploadaudit1";
+    let url = "https://"+this.apiId+"/uploadaudit";
 
     const body = { 
       "mmddyyyy": mmddyyyy,
@@ -17930,7 +17930,7 @@ export class SfIEvents extends LitElement {
   }
 
   uploadReview = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => {
-    let url = "https://"+this.apiId+"/uploadreview1";
+    let url = "https://"+this.apiId+"/uploadreview";
 
     const body = { 
       "mmddyyyy": mmddyyyy,
@@ -17971,7 +17971,7 @@ export class SfIEvents extends LitElement {
   }
 
   uploadReport = async (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, doc: string, docs: any, event: any, reportformatvalues: string = "", reportformatschema: string = "") => {
-    let url = "https://"+this.apiId+"/uploadreport1";
+    let url = "https://"+this.apiId+"/uploadreport";
 
     let body = { 
       "mmddyyyy": mmddyyyy,
@@ -20360,7 +20360,7 @@ export class SfIEvents extends LitElement {
 
     //this.apiBodyList = '{"id": "' +(this._SfProject[0].querySelector('#sf-i-project') as SfIForm).selectedValues()[0]+ '"}'
     this.nextPage = page;
-    let url = "https://"+this.apiId+"/getnextuserevents1";
+    let url = "https://"+this.apiId+"/getnextuserevents";
     let statusArr: string[] = []
     if(status == this.TAB_ALL){
       statusArr = [this.STATUS_NOT_STARTED, this.STATUS_PENDING_APPROVAL, this.STATUS_REJECTED, this.STATUS_APPROVED]
@@ -20985,7 +20985,7 @@ export class SfIEvents extends LitElement {
           day = '0' + day;
         let eDate = month + "/" + day + "/" + year
         let urlBody :any = {"projectid": this.projectId, "userprofileid": this.userProfileId, "role": this.myRole, "entityid": complianceEntityId, "countryid": "", "functionid": "", "locationid": complianceLocationId, "tagid": this.tagId, "adhoc": "false", "exclusivestartkey": 0, "sdate": sDate, "edate": eDate, "view": "location", "year": this.calendarStartYYYY};
-        let url = "https://"+this.apiId+"/getallcountryevents2";
+        let url = "https://"+this.apiId+"/getallcountryevents";
         const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
         const xhr : any = (await this.prepareXhr(urlBody, url, this._SfLoader, authorization, 'Preparing')) as any;
         this._SfLoader.innerHTML = '';
@@ -21075,7 +21075,7 @@ export class SfIEvents extends LitElement {
     console.log('fetching compliances', sortid)
     let complianceEntityId = sortid.split(';')[1]
     let complianceLocationId = sortid.split(';')[2]
-    let url = "https://"+this.apiId+"/getallcountryevents2";
+    let url = "https://"+this.apiId+"/getallcountryevents";
     let sDateObj  = selectedDate
     sDateObj.setDate(selectedDate.getDate() - 60)
     let day = '' + sDateObj.getDate();
