@@ -19793,7 +19793,7 @@ export class SfIEvents extends LitElement {
       view = "entity";
     }
 
-    path = "getallcountryevents2";
+    path = "getallcountryevents";
 
     let sDate = "";
     let eDate = "";
