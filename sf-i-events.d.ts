@@ -134,6 +134,7 @@ export declare class SfIEvents extends LitElement {
     apiId: string;
     apiIdStatutes: string;
     apiIdDefinitions: string;
+    apiidReportformats: string;
     apiIdProjects: string;
     apiIdCompliances: string;
     apiIdList: string;
@@ -245,7 +246,8 @@ export declare class SfIEvents extends LitElement {
     locationPartStatusData: any;
     locationLateStatusData: any;
     locationComplianceStatusData: any;
-    selectedItems: Array<string>;
+    selectedItemIds: Array<string>;
+    selectedItems: Array<any>;
     selectedStatus: string;
     selectedTab: string;
     selectedCountryTab: number;
@@ -365,6 +367,7 @@ export declare class SfIEvents extends LitElement {
     _SfOnboardingTabGroupButton3: any;
     _SfProject: any;
     _SfUploader: any;
+    _SfReporting: any;
     isSelectedLegend: (value: number) => any;
     removeFromSelectedLegend: (value: number) => void;
     clearSelectedLegend: () => void;
@@ -427,7 +430,7 @@ export declare class SfIEvents extends LitElement {
     getApproverStringFromEvent: (event: any) => string;
     getApproverDetailStringFromEvent: (event: any) => string;
     renderLatestCompliance: (mmddyyyy: string, event: any) => any;
-    getCompletenessStatus: (event: any) => "rejected" | "not-started" | "pending-approval" | "approved";
+    getCompletenessStatus: (event: any) => "not-started" | "pending-approval" | "rejected" | "approved";
     getTimelinessStatus: (mmdd: string, event: any, completeness: string) => "late-executed" | "late-reported" | "late-approved" | "past-due-date" | "in-time";
     getComplianceStatus: (completeness: string, timeliness: string) => "scheduled" | "not-complied" | "partially-complied" | "complied";
     numcalled: number;
@@ -668,7 +671,7 @@ export declare class SfIEvents extends LitElement {
     uploadTriggerEvent: (triggeredCompliances: any) => Promise<void>;
     uploadAudit: (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => Promise<void>;
     uploadReview: (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, approved: any) => Promise<void>;
-    uploadReport: (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, doc: string, docs: any, event: any) => Promise<void>;
+    uploadReport: (entityId: string, locationId: string, mmddyyyy: string, eventid: string, comments: string, doc: string, docs: any, event: any, reportformatvalues?: string, reportformatschema?: string) => Promise<void>;
     uploadMapping: () => Promise<void>;
     uploadEvents: () => Promise<void>;
     uploadReprogramTrigger: (eventid: string, timestamp: string) => Promise<void>;
@@ -683,6 +686,8 @@ export declare class SfIEvents extends LitElement {
     fetchDeleteReview: (eventId: string, mmddyyyy: string, entityId: string, locationId: string) => Promise<any>;
     fetchStatuteDefinitionDetails: (statuteName: string) => Promise<void>;
     fetchSearchDefinitions: (searchString: string, cursor?: string) => Promise<any>;
+    fetchReportFormat: (searchName: string, reportformatschema?: string, reportformatvalues?: string) => Promise<void>;
+    fetchSearchReportformats: (searchString: string, cursor?: string) => Promise<any>;
     fetchSearchStatutes: (searchString: string, cursor?: string) => Promise<any>;
     fetchSearchCompliances: (searchString: string, cursor: string | undefined, count: number, length: number) => Promise<any>;
     fetchMappedProjects: () => Promise<any>;

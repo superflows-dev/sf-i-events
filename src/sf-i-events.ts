@@ -11158,6 +11158,13 @@ export class SfIEvents extends LitElement {
           for(k = 0; k < taggingArray.data.mappings.mappings.length; k++) {
 
             if(taggingArray.data.mappings.mappings[k].id == sourceArray.data.mappings.mappings[i].id) {
+              if(taggingArray.data.mappings.mappings[k].id == "62330e24-298d-4ef2-9449-c0e400e37cac") {
+
+                console.log('found', taggingArray.data.mappings.mappings[k]);
+                //console.log('before before filtermatch',sourceCols[l],JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j], colCountry, (sourceArray.data.mappings.mappings[i]), (sourceArray.data.mappings.mappings[i].data), colState);
+                //console.log('before filtermatch', colCountry, JSON.parse(sourceArray.data.mappings.mappings[i].data)[colCountry], colState, JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState], JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory]);
+
+              }
               break;
             }
 
@@ -11246,13 +11253,15 @@ export class SfIEvents extends LitElement {
                 html += '<div class="'+(!showSearch ? 'truncate' : '')+'">';
 
 
-                if(sourceArray.data.mappings.mappings[i].id == "fdea6e4a-9d47-4042-916f-724c51f465c1") {
+                // if(sourceArray.data.mappings.mappings[i].id == "62330e24-298d-4ef2-9449-c0e400e37cac") {
+
+                //   console.log('found', sourceArray.data.mappings.mappings[i]);
                   
-                  //console.log('before before filtermatch',sourceCols[l],JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j], colCountry, (sourceArray.data.mappings.mappings[i]), (sourceArray.data.mappings.mappings[i].data), colState);
+                //   //console.log('before before filtermatch',sourceCols[l],JSON.parse(sourceArray.data.mappings.mappings[0].cols)[j], colCountry, (sourceArray.data.mappings.mappings[i]), (sourceArray.data.mappings.mappings[i].data), colState);
 
-                  //console.log('before filtermatch', colCountry, JSON.parse(sourceArray.data.mappings.mappings[i].data)[colCountry], colState, JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState], JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory]);
+                //   //console.log('before filtermatch', colCountry, JSON.parse(sourceArray.data.mappings.mappings[i].data)[colCountry], colState, JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState], JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory]);
 
-                }
+                // }
 
                 //const filterMatch = this.matchesOnBoardingFilter(JSON.parse(sourceArray.data.mappings.mappings[i].data)[colCountry][0], JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState].length > 0 ? JSON.parse(sourceArray.data.mappings.mappings[i].data)[colState][0] : "", JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory].length > 0 ? JSON.parse(sourceArray.data.mappings.mappings[i].data)[colSubcategory][0] : "", Array.isArray(JSON.parse(sourceArray.data.mappings.mappings[i].data)[colStatute]) ? JSON.parse(sourceArray.data.mappings.mappings[i].data)[colStatute][0] : JSON.parse(sourceArray.data.mappings.mappings[i].data)[colStatute]);
 
@@ -11458,6 +11467,7 @@ export class SfIEvents extends LitElement {
 
       if(apiIdDropdown.length > 0) {
 
+        
         for(var j = 0; j < taggingArray.data.mappings.mappings.length; j++) {
 
           var equal = true;
@@ -11472,9 +11482,11 @@ export class SfIEvents extends LitElement {
             
           }
 
-          if(taggingArray.data.mappings.mappings[j].id == "fdea6e4a-9d47-4042-916f-724c51f465c1" && equal) {
+          // if(taggingArray.data.mappings.mappings[j].id == "62330e24-298d-4ef2-9449-c0e400e37cac" && equal) {
+          if(taggingArray.data.mappings.mappings[j].id == "62330e24-298d-4ef2-9449-c0e400e37cac") {
 
-            //console.log('rendertagging', taggingArray.data.mappings.mappings[j], sourceArray.data.mappings.mappings[i]);
+            // console.log('rendertagging', taggingArray.data.mappings.mappings[j], sourceArray.data.mappings.mappings[i]);
+            console.log('rendertagging', taggingArray.data.mappings.mappings[j]);
 
           }
 
@@ -11534,9 +11546,38 @@ export class SfIEvents extends LitElement {
 
       } else {
 
-        if(taggingArray.data.mappings.mappings[i] != null) {
-          (multiArr[i] as HTMLInputElement).value = taggingArray.data.mappings.mappings[i][colName];
+        for(var j = 0; j < taggingArray.data.mappings.mappings.length; j++) {
+
+          var equal = true;
+
+          for(var k = 0; k < uniqCols.length; k++) {
+
+            if(sourceArray.data.mappings.mappings[i] != null && taggingArray.data.mappings.mappings[j] != null) {
+              if(sourceArray.data.mappings.mappings[i][uniqCols[k]] != taggingArray.data.mappings.mappings[j][uniqCols[k]]) {
+                equal = false;
+              }
+            }
+            
+          }
+
+          if(taggingArray.data.mappings.mappings[j].id == "89cbfcab-b1a9-4a33-a59b-da3c1210dfd2" && taggingArray.data.mappings.mappings[j].locationid == "a5fd6c0c-7743-4fd2-b8d9-1d5e53fbaefa" && equal) {
+
+            // console.log('rendertagging', taggingArray.data.mappings.mappings[j], sourceArray.data.mappings.mappings[i]);
+            console.log('rendertagging', i, j, taggingArray.data.mappings.mappings[j], equal);
+
+          }
+
+          if(equal) {
+
+            if(taggingArray.data.mappings.mappings[j] != null) {
+              (multiArr[i] as HTMLInputElement).value = taggingArray.data.mappings.mappings[j][colName];
+            }
+
+          }
+
         }
+
+        
 
         multiArr[i].addEventListener('keyup', async (e: any) => {
 
