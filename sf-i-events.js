@@ -3238,8 +3238,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                     const statute = Object.keys(objCountry)[i];
                     // this.csvDataRegisters += ('\n\n"' + statute + '"\n\n');
                     html += ('<h3 part="register-section-title-' + (i != 0 ? 'not-selected' : 'selected') + '" class="left-sticky register-statute" id="register-statute-' + i + '">' + statute + '</h3>');
-                    html += '<div class="w-100p scroll-x ' + (i != 0 ? 'hide' : '') + '" id="register-body-' + i + '" >';
-                    html += '<table>';
+                    // html += '<div class="w-100p scroll-x '+(i != 0 ? 'hide' : '')+'" id="register-body-'+i+'" >';
+                    //   html += '<table>';
                     if (i === 0) {
                         for (var k = 0; k < JSON.parse(objCountry[statute][Object.keys(objCountry[statute])[0]].cols).length; k++) {
                             if (!this.EXCLUDE_COLS_FROM_REGS.includes(JSON.parse(objCountry[statute][Object.keys(objCountry[statute])[0]].cols)[k].toLowerCase())) {
@@ -3256,6 +3256,8 @@ let SfIEvents = class SfIEvents extends LitElement {
                         const data = JSON.parse(compliance.data);
                         const cols = JSON.parse(compliance.cols);
                         this.csvDataRegisters += ('"' + complianceId + '",');
+                        html += '<div class="w-100p scroll-x ' + (i != 0 ? 'hide' : '') + ' register-body-' + i + '" >';
+                        html += '<table>';
                         html += '<tr>';
                         html += ('<td class="td-body left-sticky" part="td-body-register"><button part="button-icon" id="button-icon-country-' + index + '-' + i + '-' + j + '" class="button-icon-country"><span class="material-symbols-outlined">open_in_new</span></button></td>');
                         html += ('<td class="td-body" part="td-body-register"><span part="td-head" style="padding-left: 0px !important">ID</span><br /><sf-i-elastic-text text="' + complianceId + '" minLength="10" lineSize="4"></sf-i-elastic-text></td>');
@@ -3270,9 +3272,11 @@ let SfIEvents = class SfIEvents extends LitElement {
                         this.csvDataRegisters += ('\n');
                         console.log('enter');
                         html += '</tr>';
+                        html += '</table>';
+                        html += '</div>';
                     }
-                    html += '</table>';
-                    html += '</div>';
+                    //   html += '</table>';
+                    // html += '</div>';
                 }
                 divRegisterList.innerHTML = html;
                 console.log('csvdataregisters', this.csvDataRegisters);
@@ -3298,14 +3302,16 @@ let SfIEvents = class SfIEvents extends LitElement {
                         const button = e.currentTarget;
                         const index = e.currentTarget.id.split('-')[2];
                         console.log('index', index);
-                        const divBody = this._SfRegisterContainer.querySelector('.calendar-right-data').querySelector('#register-body-' + index);
-                        if (divBody.classList.contains('hide')) {
-                            divBody.classList.remove('hide');
-                            button.setAttribute('part', 'register-section-title-selected');
-                        }
-                        else {
-                            divBody.classList.add('hide');
-                            button.setAttribute('part', 'register-section-title-not-selected');
+                        const divBodys = this._SfRegisterContainer.querySelector('.calendar-right-data').querySelectorAll('.register-body-' + index);
+                        for (let divBody of divBodys) {
+                            if (divBody.classList.contains('hide')) {
+                                divBody.classList.remove('hide');
+                                button.setAttribute('part', 'register-section-title-selected');
+                            }
+                            else {
+                                divBody.classList.add('hide');
+                                button.setAttribute('part', 'register-section-title-not-selected');
+                            }
                         }
                     });
                 }
@@ -14165,7 +14171,7 @@ let SfIEvents = class SfIEvents extends LitElement {
             else {
                 view = "entity";
             }
-            path = "getallcountryevents2";
+            path = "getallcountryevents";
             let sDate = "";
             let eDate = "";
             //console.log('currenttab', this.getCurrentTab());

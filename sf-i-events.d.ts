@@ -430,7 +430,7 @@ export declare class SfIEvents extends LitElement {
     getApproverStringFromEvent: (event: any) => string;
     getApproverDetailStringFromEvent: (event: any) => string;
     renderLatestCompliance: (mmddyyyy: string, event: any) => any;
-    getCompletenessStatus: (event: any) => "not-started" | "pending-approval" | "rejected" | "approved";
+    getCompletenessStatus: (event: any) => "rejected" | "not-started" | "pending-approval" | "approved";
     getTimelinessStatus: (mmdd: string, event: any, completeness: string) => "late-executed" | "late-reported" | "late-approved" | "past-due-date" | "in-time";
     getComplianceStatus: (completeness: string, timeliness: string) => "scheduled" | "not-complied" | "partially-complied" | "complied";
     numcalled: number;
