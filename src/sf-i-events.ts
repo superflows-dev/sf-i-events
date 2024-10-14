@@ -6517,7 +6517,7 @@ export class SfIEvents extends LitElement {
   loadOnboardingCountries = async () => {
     this.hideTabContainers();
     (this._SfOnboardingCountriesContainer as HTMLDivElement).style.display = 'flex';
-    const countriesJobs = await this.fetchCountriesJobs();
+    // const countriesJobs = await this.fetchCountriesJobs();
     const mappedCountries = await this.fetchMappedCountries();
     const mappedCompliances = await this.fetchMappedCompliances();
     // const mappedStatutes = await this.fetchMappedStatutes();
@@ -6533,13 +6533,13 @@ export class SfIEvents extends LitElement {
       }
 
     }
-    this.renderOnboardingCountries(mappedCountries, mappedCompliances, countriesJobs);
+    this.renderOnboardingCountries(mappedCountries, mappedCompliances, null);
   }
 
   loadOnboardingEntities = async () => {
     this.hideTabContainers();
     (this._SfOnboardingEntitiesContainer as HTMLDivElement).style.display = 'flex';
-    const entitiesJobs = await this.fetchEntitiesJobs();
+    // const entitiesJobs = await this.fetchEntitiesJobs();
     const mappedEntities = await this.fetchMappedEntities();
     const mappedSerializedCountries = await this.fetchMappedSerializedCountries();
     const arrStatuteEntitiesApplicabilities = await this.loadProposedFromStatutes(1);
@@ -6547,41 +6547,41 @@ export class SfIEvents extends LitElement {
     //console.log('mappedSerializedCountries', mappedSerializedCountries);
     //console.log('mappedEntities', mappedEntities);
     //console.log('entitiesApplicabilities', arrStatuteEntitiesApplicabilities);
-    this.renderOnboardingEntities(mappedEntities, mappedSerializedCountries, entitiesJobs, arrStatuteEntitiesApplicabilities);
+    this.renderOnboardingEntities(mappedEntities, mappedSerializedCountries, null, arrStatuteEntitiesApplicabilities);
   }
 
   loadOnboardingLocations = async () => {
     this.hideTabContainers();
     (this._SfOnboardingLocationsContainer as HTMLDivElement).style.display = 'flex';
-    const locationsJobs = await this.fetchLocationsJobs();
+    // const locationsJobs = await this.fetchLocationsJobs();
     const mappedSerializedEntities = await this.fetchMappedSerializedEntities();
     const mappedLocations = await this.fetchMappedLocations();
     //console.log('mappedserializedentities', mappedSerializedEntities);
     //console.log('mappedlocations', mappedLocations);
-    this.renderOnboardingLocations(mappedLocations, mappedSerializedEntities, locationsJobs);
+    this.renderOnboardingLocations(mappedLocations, mappedSerializedEntities, null);
   }
 
   loadOnboardingFunctions = async () => {
     this.hideTabContainers();
     (this._SfOnboardingFunctionsContainer as HTMLDivElement).style.display = 'flex';
-    const functionsJobs = await this.fetchFunctionJobs();
+    // const functionsJobs = await this.fetchFunctionJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedFunctions = await this.fetchMappedFunctions();
     //console.log('functionjobs', functionsJobs);
     //console.log('mappedserializedlocations', mappedSerializedLocations);
     //console.log('mappedfunctions', mappedFunctions);
-    this.renderOnboardingFunctions(mappedFunctions, mappedSerializedLocations, functionsJobs);
+    this.renderOnboardingFunctions(mappedFunctions, mappedSerializedLocations, null);
   }
 
   loadOnboardingTags = async () => {
     this.hideTabContainers();
     (this._SfOnboardingTagsContainer as HTMLDivElement).style.display = 'flex';
-    const tagsJobs = await this.fetchTagsJobs();
+    // const tagsJobs = await this.fetchTagsJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedTags = await this.fetchMappedTags();
     //console.log('mappedSerializedLocations', mappedSerializedLocations);
     //console.log('mappedtags', mappedTags);
-    this.renderOnboardingTags(mappedTags, mappedSerializedLocations, tagsJobs);
+    this.renderOnboardingTags(mappedTags, mappedSerializedLocations, null);
   }
 
   loadProposedFromStatutes = async (fieldIndex: number) => {
@@ -6606,139 +6606,139 @@ export class SfIEvents extends LitElement {
   loadOnboardingReporters = async () => {
     this.hideTabContainers();
     (this._SfOnboardingReportersContainer as HTMLDivElement).style.display = 'flex';
-    const reportersJobs = await this.fetchReportersJobs();
+    // const reportersJobs = await this.fetchReportersJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedReporters = await this.fetchMappedReporters();
     // const arrStatuteReporters = await this.loadProposedFromStatutes(1);
     //console.log('mappedSerializedLocations', mappedSerializedLocations);
     //console.log('mappedreporters', mappedReporters);
     //console.log('arrstatutereporters', arrStatuteReporters);
-    this.renderOnboardingReporters(mappedReporters, mappedSerializedLocations, reportersJobs, null);
+    this.renderOnboardingReporters(mappedReporters, mappedSerializedLocations, null, null);
   }
 
   loadOnboardingApprovers = async () => {
     this.hideTabContainers();
     (this._SfOnboardingApproversContainer as HTMLDivElement).style.display = 'flex';
-    const approversJobs = await this.fetchApproversJobs();
+    // const approversJobs = await this.fetchApproversJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedApprovers = await this.fetchMappedApprovers();
     // const arrStatuteApprovers = await this.loadProposedFromStatutes(2);
     //console.log('mappedserializedlocations', mappedSerializedLocations);
     //console.log('mappedapprovers', mappedApprovers);
-    this.renderOnboardingApprovers(mappedApprovers, mappedSerializedLocations, approversJobs, null);
+    this.renderOnboardingApprovers(mappedApprovers, mappedSerializedLocations, null, null);
   }
 
   loadOnboardingFunctionHeads = async () => {
     this.hideTabContainers();
     (this._SfOnboardingFunctionHeadsContainer as HTMLDivElement).style.display = 'flex';
-    const functionHeadsJobs = await this.fetchFunctionHeadsJobs();
+    // const functionHeadsJobs = await this.fetchFunctionHeadsJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedFunctionHeads = await this.fetchMappedFunctionHeads();
     // const arrStatuteFunctionheads = await this.loadProposedFromStatutes(3);
     //console.log('mappedserializedlocations', mappedSerializedLocations);
     //console.log('mappedfunctionheads', mappedFunctionHeads);
-    this.renderOnboardingFunctionHeads(mappedFunctionHeads, mappedSerializedLocations, functionHeadsJobs, null);
+    this.renderOnboardingFunctionHeads(mappedFunctionHeads, mappedSerializedLocations, null, null);
   }
 
   loadOnboardingViewers = async () => {
     this.hideTabContainers();
     (this._SfOnboardingViewersContainer as HTMLDivElement).style.display = 'flex';
-    const makerViewersJobs = await this.fetchViewersJobs();
+    // const makerViewersJobs = await this.fetchViewersJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedViewers = await this.fetchMappedViewers();
     // const arrStatuteViewers = await this.loadProposedFromStatutes(5);
     //console.log('mappedSerializedLocations', mappedSerializedLocations);
     //console.log('mappedViewers', mappedViewers);
-    this.renderOnboardingViewers(mappedViewers, mappedSerializedLocations, makerViewersJobs, null);
+    this.renderOnboardingViewers(mappedViewers, mappedSerializedLocations, null, null);
   }
 
   loadOnboardingDocs = async () => {
     this.hideTabContainers();
     (this._SfOnboardingDocsContainer as HTMLDivElement).style.display = 'flex';
-    const docsJobs = await this.fetchDocsJobs();
+    // const docsJobs = await this.fetchDocsJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedDocs = await this.fetchMappedDocs();
     //console.log('mappedSerializedLocations', mappedSerializedLocations);
     //console.log('mappedDocs', mappedDocs);
-    this.renderOnboardingDocs(mappedDocs, mappedSerializedLocations, docsJobs);
+    this.renderOnboardingDocs(mappedDocs, mappedSerializedLocations, null);
   }
 
   loadOnboardingMakerCheckers = async () => {
     this.hideTabContainers();
     (this._SfOnboardingMakerCheckersContainer as HTMLDivElement).style.display = 'flex';
-    const makerCheckersJobs = await this.fetchMakerCheckersJobs();
+    // const makerCheckersJobs = await this.fetchMakerCheckersJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedMakerCheckers = await this.fetchMappedMakerCheckers();
     //console.log('mappedSerializedLocations', mappedSerializedLocations);
     //console.log('mappedMakerCheckers', mappedMakerCheckers);
-    this.renderOnboardingMakerCheckers(mappedMakerCheckers, mappedSerializedLocations, makerCheckersJobs);
+    this.renderOnboardingMakerCheckers(mappedMakerCheckers, mappedSerializedLocations, null);
   }
 
   loadOnboardingAuditors = async () => {
     this.hideTabContainers();
     (this._SfOnboardingAuditorsContainer as HTMLDivElement).style.display = 'flex';
-    const auditorsJobs = await this.fetchAuditorsJobs();
+    // const auditorsJobs = await this.fetchAuditorsJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedAuditors = await this.fetchMappedAuditors();
     // const arrStatuteAuditors = await this.loadProposedFromStatutes(4);
     //console.log('mappedSerializedFunctionheads', mappedSerializedLocations);
     //console.log('mappedAuditors', mappedAuditors);
-    this.renderOnboardingAuditors(mappedAuditors, mappedSerializedLocations, auditorsJobs, null);
+    this.renderOnboardingAuditors(mappedAuditors, mappedSerializedLocations, null, null);
   }
 
   loadOnboardingDuedates = async () => {
     this.hideTabContainers();
     (this._SfOnboardingDuedatesContainer as HTMLDivElement).style.display = 'flex';
-    const duedatesJobs = await this.fetchDueDatesJobs();
+    // const duedatesJobs = await this.fetchDueDatesJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedDuedates = await this.fetchMappedDuedates();
     //console.log('mappedSerializedLocations', mappedSerializedLocations);
     //console.log('mappedduedates', mappedDuedates);
-    this.renderOnboardingDuedates(mappedDuedates, mappedSerializedLocations, duedatesJobs);
+    this.renderOnboardingDuedates(mappedDuedates, mappedSerializedLocations, null);
   }
 
   loadOnboardingActivations = async () => {
     this.hideTabContainers();
     (this._SfOnboardingActivationsContainer as HTMLDivElement).style.display = 'flex';
-    const activationsJobs = await this.fetchExtensionsJobs();
+    // const activationsJobs = await this.fetchExtensionsJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedActivations = await this.fetchMappedActivations();
     //console.log('mappedserializedlocations', mappedSerializedLocations);
     //console.log('mappedactivations', mappedActivations);
-    this.renderOnboardingActivations(mappedActivations, mappedSerializedLocations, activationsJobs);
+    this.renderOnboardingActivations(mappedActivations, mappedSerializedLocations, null);
   }
 
   loadOnboardingInvalidations = async () => {
     this.hideTabContainers();
     (this._SfOnboardingInvalidationsContainer as HTMLDivElement).style.display = 'flex';
-    const invalidationsJobs = await this.fetchExtensionsJobs();
+    // const invalidationsJobs = await this.fetchExtensionsJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedInvalidations = await this.fetchMappedInvalidations();
     //console.log('mappedserializedlocations', mappedSerializedLocations);
     //console.log('mappedinvalidations', mappedInvalidations);
-    this.renderOnboardingInvalidations(mappedInvalidations, mappedSerializedLocations, invalidationsJobs);
+    this.renderOnboardingInvalidations(mappedInvalidations, mappedSerializedLocations, null);
   }
   
   loadOnboardingAlertSchedules = async () => {
     this.hideTabContainers();
     (this._SfOnboardingAlertSchedulesContainer as HTMLDivElement).style.display = 'flex';
-    const alertschedulesJobs = await this.fetchAlertSchedulesJobs();
+    // const alertschedulesJobs = await this.fetchAlertSchedulesJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedAlertSchedules = await this.fetchMappedAlertSchedules();
     //console.log('mappedserializedlocations', mappedSerializedLocations);
     //console.log('mappedalertschedules', mappedAlertSchedules);
-    this.renderOnboardingAlertSchedules(mappedAlertSchedules, mappedSerializedLocations, alertschedulesJobs);
+    this.renderOnboardingAlertSchedules(mappedAlertSchedules, mappedSerializedLocations, null);
   }
 
   loadOnboardingExtensions = async () => {
     this.hideTabContainers();
     (this._SfOnboardingExtensionsContainer as HTMLDivElement).style.display = 'flex';
-    const extensionsJobs = await this.fetchExtensionsJobs();
+    // const extensionsJobs = await this.fetchExtensionsJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedExtensions = await this.fetchMappedExtensions();
     //console.log('mappedserializedlocations', mappedSerializedLocations);
     //console.log('mappedextensions', mappedExtensions);
-    this.renderOnboardingExtensions(mappedExtensions, mappedSerializedLocations, extensionsJobs);
+    this.renderOnboardingExtensions(mappedExtensions, mappedSerializedLocations, null);
   }
 
   loadOnboardingTriggers = async () => {
@@ -6756,12 +6756,12 @@ export class SfIEvents extends LitElement {
   loadOnboardingInternalControls = async () => {
     this.hideTabContainers();
     (this._SfOnboardingInternalControlsContainer as HTMLDivElement).style.display = 'flex';
-    const internalcontrolsJobs = await this.fetchInternalControlsJobs();
+    // const internalcontrolsJobs = await this.fetchInternalControlsJobs();
     const mappedSerializedLocations = await this.fetchMappedSerializedLocations();
     const mappedInternalControls = await this.fetchMappedInternalControls();
     //console.log('mappedSerializedlocations', mappedSerializedLocations);
     //console.log('mappedinternalcontrols', mappedInternalControls);
-    this.renderOnboardingInternalControls(mappedInternalControls, mappedSerializedLocations, internalcontrolsJobs);
+    this.renderOnboardingInternalControls(mappedInternalControls, mappedSerializedLocations, null);
   }
 
   loadOnboardingSignoff = async () => {
@@ -10802,7 +10802,6 @@ export class SfIEvents extends LitElement {
   }
 
   renderTaggingTable = (divElement: any, sourceArray: any, taggingArray: any, sourceCols: any, uploadFunction: any, refreshFunction: any, colName: any, uniqCols: Array<any>, apiIdDropdown: string, dropdownSearchPhrase: any, mandatoryFields: any, jobs: any, anotherProjection: any, extraFields: Array<string>, _arrFeedbackReference: any, proposedUsersLabel: string, subfilter: string) => {
-
     // source array is the serialized field mappedcompliances
     // tagging array is the tagged array mappedcountries
 
@@ -19311,341 +19310,341 @@ export class SfIEvents extends LitElement {
 
   }
 
-  fetchInternalControlsJobs = async () => {
+  // fetchInternalControlsJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getinternalcontrolsjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getinternalcontrolsjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
 
-  fetchExtensionsJobs = async () => {
+  // fetchExtensionsJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getalertschedulesjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getalertschedulesjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
 
-  fetchAlertSchedulesJobs = async () => {
+  // fetchAlertSchedulesJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getalertschedulesjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getalertschedulesjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
 
-  fetchDueDatesJobs = async () => {
+  // fetchDueDatesJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getduedatesjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getduedatesjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
 
-  fetchApproversJobs = async () => {
+  // fetchApproversJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getapproversjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getapproversjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
 
-  fetchFunctionHeadsJobs = async () => {
+  // fetchFunctionHeadsJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getfunctionheadsjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getfunctionheadsjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
 
-  fetchMakerCheckersJobs = async () => {
+  // fetchMakerCheckersJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getmakercheckersjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getmakercheckersjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
 
-  fetchDocsJobs = async () => {
+  // fetchDocsJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getdocsjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getdocsjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
 
-  fetchAuditorsJobs = async () => {
+  // fetchAuditorsJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getauditorsjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getauditorsjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
 
-  fetchViewersJobs = async () => {
+  // fetchViewersJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getviewersjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getviewersjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
 
-  fetchReportersJobs = async () => {
+  // fetchReportersJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getreportersjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getreportersjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
   
-  fetchTagsJobs = async () => {
+  // fetchTagsJobs = async () => {
 
-    let url = "https://"+this.apiId+"/gettagsjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/gettagsjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
   
-  fetchLocationsJobs = async () => {
+  // fetchLocationsJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getlocationsjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getlocationsjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
   
-  fetchCountriesJobs = async () => {
+  // fetchCountriesJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getcountriesjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getcountriesjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
   
-  fetchEntitiesJobs = async () => {
+  // fetchEntitiesJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getentitiesjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getentitiesjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
   
-  fetchFunctionJobs = async () => {
+  // fetchFunctionJobs = async () => {
 
-    let url = "https://"+this.apiId+"/getfunctionsjobs";
-    const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
-    const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
-    this._SfLoader.innerHTML = '';
-    if(xhr.status == 200) {
+  //   let url = "https://"+this.apiId+"/getfunctionsjobs";
+  //   const authorization = btoa(Util.readCookie('email') + ":" + Util.readCookie('accessToken'));
+  //   const xhr : any = (await this.prepareXhr({"projectid": this.projectId}, url, this._SfLoader, authorization)) as any;
+  //   this._SfLoader.innerHTML = '';
+  //   if(xhr.status == 200) {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      //console.log(jsonRespose);
-      return jsonRespose;
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     //console.log(jsonRespose);
+  //     return jsonRespose;
       
-    } else {
+  //   } else {
 
-      const jsonRespose = JSON.parse(xhr.responseText);
-      this.setError(jsonRespose.error);
+  //     const jsonRespose = JSON.parse(xhr.responseText);
+  //     this.setError(jsonRespose.error);
 
-    }
+  //   }
 
-  }
+  // }
 
   fetchCalendarJobs = async () => {
 
