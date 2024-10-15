@@ -2152,6 +2152,7 @@ export class SfIEvents extends LitElement {
       right: 30px;
       top: 30px;
       margin-left: 5px;
+      z-index: 102
     }
 
     #row-unmapped-graph {
@@ -2460,6 +2461,7 @@ export class SfIEvents extends LitElement {
       background-color: white;
       border: dashed 1px red;
       padding: 20px;
+      z-index: 102;
     }
 
     .div-row-error-message {
