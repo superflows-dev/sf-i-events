@@ -4587,10 +4587,11 @@ export class SfIEvents extends LitElement {
     this.eventsInWindow = [];
 
     var lastDay = iLast;
-
+    
     this.clearGraphData();
     this.clearSelectedGraphParam();
     this.clearSelectedLegend();
+  
     
     html += this.renderCalendarGraphs(showGraph);
     html += this.renderCalendarContainerDivStart(index)
@@ -7868,7 +7869,7 @@ export class SfIEvents extends LitElement {
   }
 
   renderThis = (index: number = 1, showGraph: boolean = true) => {
-
+    
     this.clearGraphData();
     this.clearSelectedGraphParam();
     this.clearSelectedLegend();
@@ -8189,7 +8190,48 @@ export class SfIEvents extends LitElement {
     }
 
 
-    if(showGraph) this.renderCompletenessGraph((this._SfThisContainer as HTMLDivElement));
+    if(showGraph) {
+      switch (this.flowGraph) {
+        case this.FLOW_GRAPH_COMPLETENESS:
+          this.renderCompletenessGraph((this._SfThisContainer as HTMLDivElement));    
+          break;
+        case this.FLOW_GRAPH_TIMELINESS:
+          this.renderTimelinessGraph((this._SfThisContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_COMPLIANCE:
+          this.renderComplianceGraph((this._SfThisContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_RISKAREAS:
+          this.renderRiskGraph((this._SfThisContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_RISKSEVERITY:
+          this.renderRiskSeverityGraph((this._SfThisContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_LOCATION:
+          this.renderLocationGraph((this._SfThisContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_FUNCTION:
+          this.renderFunctionGraph((this._SfThisContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_OBLIGATIONTYPE:
+          this.renderObligationTypeGraph((this._SfThisContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_JURISDICTION:
+          this.renderJurisdictionGraph((this._SfThisContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_FREQUENCY:
+          this.renderFrequencyGraph((this._SfThisContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_SUBCATEGORY:
+          this.renderSubcategoryGraph((this._SfThisContainer as HTMLDivElement));
+          break;
+      
+        default:
+          this.renderCompletenessGraph((this._SfThisContainer as HTMLDivElement));    
+          break;
+      }
+      
+    }
     
   }
 
@@ -8197,10 +8239,11 @@ export class SfIEvents extends LitElement {
     //console.log('flowgraph renderStream', this.flowGraph);
 
     this.streamIndex = index;
-
+    
     this.clearGraphData();
     this.clearSelectedGraphParam();
     this.clearSelectedLegend();
+    
 
     var startDate = new Date(this.calendarStartMM + '/' + this.calendarStartDD + '/' + this.calendarStartYYYY);
 
@@ -8519,7 +8562,48 @@ export class SfIEvents extends LitElement {
 
     }
 
-    if(showGraph) this.renderCompletenessGraph((this._SfStreamContainer as HTMLDivElement));
+    if(showGraph) {
+      
+      switch (this.flowGraph) {
+        case this.FLOW_GRAPH_COMPLETENESS:
+          this.renderCompletenessGraph((this._SfStreamContainer as HTMLDivElement));    
+          break;
+        case this.FLOW_GRAPH_TIMELINESS:
+          this.renderTimelinessGraph((this._SfStreamContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_COMPLIANCE:
+          this.renderComplianceGraph((this._SfStreamContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_RISKAREAS:
+          this.renderRiskGraph((this._SfStreamContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_RISKSEVERITY:
+          this.renderRiskSeverityGraph((this._SfStreamContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_LOCATION:
+          this.renderLocationGraph((this._SfStreamContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_FUNCTION:
+          this.renderFunctionGraph((this._SfStreamContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_OBLIGATIONTYPE:
+          this.renderObligationTypeGraph((this._SfStreamContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_JURISDICTION:
+          this.renderJurisdictionGraph((this._SfStreamContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_FREQUENCY:
+          this.renderFrequencyGraph((this._SfStreamContainer as HTMLDivElement));
+          break;
+        case this.FLOW_GRAPH_SUBCATEGORY:
+          this.renderSubcategoryGraph((this._SfStreamContainer as HTMLDivElement));
+          break;
+      
+        default:
+          this.renderCompletenessGraph((this._SfStreamContainer as HTMLDivElement));    
+          break;
+      }
+    }
 
   }
 
@@ -8588,7 +8672,7 @@ export class SfIEvents extends LitElement {
   }
 
   clearGraphData = () => {
-    //console.log('clearing graph data');
+    console.log('this.chart2 clearing graph data');
     this.chart = null;
     this.chart2 = null;
     this.chart3 = null;
@@ -14743,7 +14827,7 @@ export class SfIEvents extends LitElement {
     });
 
     container.querySelector('#button-download-stats')?.addEventListener('click', async () => {
-      await this.fetchAndYearlyRenderUserCalendar_2(this.sdate, this.edate,"", "no")
+      await this.fetchAndYearlyRenderUserCalendar_2(this.sdate, this.edate,"", "no");
       const radioCsv = (container.querySelector('#radio-csv') as HTMLInputElement);
       const radioImage = (container.querySelector('#radio-image') as HTMLInputElement);
       const radioStats = (container.querySelector('#radio-stats') as HTMLInputElement);
@@ -14767,29 +14851,25 @@ export class SfIEvents extends LitElement {
       }
 
       if(radioImage.checked) {
-        setTimeout(() => {
-          console.log('this.chart', this.chart, (this.chart as Chart).toBase64Image());
-          const a = document.createElement('a')
-          a.setAttribute('href', this.chartBase64)
-          a.setAttribute('download', 'download_'+new Date().getTime()+'.png');
-          a.click()
+        const a = document.createElement('a')
+        a.setAttribute('href', this.chartBase64)
+        a.setAttribute('download', 'download_'+new Date().getTime()+'.png');
+        a.click()
+        console.log('this.chart2', (this.chart2Base64));
+        if(this.chart2Base64 != null) {
+          console.log('this.chart2 download', this.chart2Base64);
+          const a2 = document.createElement('a')
+          a2.setAttribute('href', this.chart2Base64)
+          a2.setAttribute('download', 'download_completeness_'+new Date().getTime()+'.png');
+          a2.click()
+        }
 
-          if(this.chart2 != null) {
-            const a2 = document.createElement('a')
-            a2.setAttribute('href', this.chart2Base64)
-            a2.setAttribute('download', 'download_completeness_'+new Date().getTime()+'.png');
-            a2.click()
-          }
-
-          if(this.chart3 != null) {
-            const a3 = document.createElement('a')
-            a3.setAttribute('href', this.chart3Base64)
-            a3.setAttribute('download', 'download_timeliness_'+new Date().getTime()+'.png');
-            a3.click()
-          }
-        }, 1000)
-        
-
+        if(this.chart3Base64 != null) {
+          const a3 = document.createElement('a')
+          a3.setAttribute('href', this.chart3Base64)
+          a3.setAttribute('download', 'download_timeliness_'+new Date().getTime()+'.png');
+          a3.click()
+        }
       }
 
       if(radioStats.checked) {
@@ -16079,7 +16159,7 @@ export class SfIEvents extends LitElement {
 
     //console.log('canvas parent node', this.chart2.canvas.parentNode);
     this.chart2.canvas.parentNode.style.height = (parseInt(data.labels.length)*90 + 40) + 'px';
-
+    console.log('this.chart2 rendered', (this.chart2 as Chart));
   }
 
   renderChart = (ctx: any, type: any, data: any, title: string) => {
