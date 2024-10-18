@@ -1283,13 +1283,25 @@ export class SfIEvents extends LitElement {
   chart: any = null;
 
   @property()
+  chartBase64: any = null;
+
+  @property()
   chart2: any = null;
+  
+  @property()
+  chart2Base64: any = null;
 
   @property()
   chart3: any = null;
+  
+  @property()
+  chart3Base64: any = null;
 
   @property()
   chart4: any = null;
+  
+  @property()
+  chart4Base64: any = null;
 
   @property()
   calendarStartDD!: string;
@@ -14755,25 +14767,28 @@ export class SfIEvents extends LitElement {
       }
 
       if(radioImage.checked) {
+        setTimeout(() => {
+          console.log('this.chart', this.chart, (this.chart as Chart).toBase64Image());
+          const a = document.createElement('a')
+          a.setAttribute('href', this.chartBase64)
+          a.setAttribute('download', 'download_'+new Date().getTime()+'.png');
+          a.click()
 
-        const a = document.createElement('a')
-        a.setAttribute('href', (this.chart as Chart).toBase64Image())
-        a.setAttribute('download', 'download_'+new Date().getTime()+'.png');
-        a.click()
+          if(this.chart2 != null) {
+            const a2 = document.createElement('a')
+            a2.setAttribute('href', this.chart2Base64)
+            a2.setAttribute('download', 'download_completeness_'+new Date().getTime()+'.png');
+            a2.click()
+          }
 
-        if(this.chart2 != null) {
-          const a2 = document.createElement('a')
-          a2.setAttribute('href', (this.chart2 as Chart).toBase64Image())
-          a2.setAttribute('download', 'download_completeness_'+new Date().getTime()+'.png');
-          a2.click()
-        }
-
-        if(this.chart3 != null) {
-          const a3 = document.createElement('a')
-          a3.setAttribute('href', (this.chart3 as Chart).toBase64Image())
-          a3.setAttribute('download', 'download_timeliness_'+new Date().getTime()+'.png');
-          a3.click()
-        }
+          if(this.chart3 != null) {
+            const a3 = document.createElement('a')
+            a3.setAttribute('href', this.chart3Base64)
+            a3.setAttribute('download', 'download_timeliness_'+new Date().getTime()+'.png');
+            a3.click()
+          }
+        }, 1000)
+        
 
       }
 
@@ -15779,7 +15794,7 @@ export class SfIEvents extends LitElement {
 
               
             }
-
+            this.chart3Base64 = (this.chart3 as Chart).toBase64Image();
           }
         },
         scales: {
@@ -15969,6 +15984,7 @@ export class SfIEvents extends LitElement {
               }
 
             }
+            this.chart2Base64 = (this.chart2 as Chart).toBase64Image();
           }
         },
         scales: {
@@ -16204,7 +16220,8 @@ export class SfIEvents extends LitElement {
               }
 
             }
-
+            this.chartBase64 = (this.chart as Chart).toBase64Image();
+            console.log('this.chart onAnimationComplete', this.chart, (this.chart as Chart).toBase64Image())
           }
         },
         scales: {
@@ -16290,7 +16307,6 @@ export class SfIEvents extends LitElement {
     });
 
     this.chart.canvas.parentNode.style.height = '450px';
-    
   }
 
   copy = (aObject: any) => {
