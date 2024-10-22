@@ -14870,6 +14870,13 @@ export class SfIEvents extends LitElement {
           a3.setAttribute('download', 'download_timeliness_'+new Date().getTime()+'.png');
           a3.click()
         }
+
+        if(this.chart4Base64 != null) {
+          const a4 = document.createElement('a')
+          a4.setAttribute('href', this.chart4Base64)
+          a4.setAttribute('download', 'download_compliance_'+new Date().getTime()+'.png');
+          a4.click()
+        }
       }
 
       if(radioStats.checked) {
@@ -15672,7 +15679,7 @@ export class SfIEvents extends LitElement {
 
               
             }
-
+            this.chart4Base64 = (this.chart4 as Chart).toBase64Image()
           }
         },
         scales: {
